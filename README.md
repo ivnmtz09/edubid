@@ -27,7 +27,7 @@
 
 ## 📝 Descripción
 
-**EduBid** es una solución SaaS innovadora diseñada para instituciones educativas que buscan erradicar la desmotivación escolar. Mediante una **economía interna basada en el mérito**, los docentes premian el esfuerzo académico con monedas virtuales, las cuales los estudiantes utilizan en un **sistema de subastas estratégicas** para obtener beneficios reales.
+**EduBid** es una solución SaaS innovadora diseñada para instituciones educativas que buscan erradicar la desmotivación escolar. Mediante una **economía interna basada en el mérito**, los docentes premian el esfuerzo académico con tokens virtuales, los cuales los estudiantes utilizan en un **sistema de subastas estratégicas** para obtener beneficios reales.
 
 ### 🎯 Objetivo
 
@@ -47,10 +47,10 @@ Transformar el proceso de evaluación en una experiencia **dinámica, competitiv
 
 ### 👨‍🎓 Para Estudiantes
 
-- **💰 Billetera Digital**: Seguimiento transparente del saldo de monedas acumuladas.
+- **💰 Billetera Digital**: Seguimiento transparente del saldo de tokens acumulados.
 - **🏅 Ranking Dinámico**: Visualización clara del progreso y posición competitiva.
 - **🎯 Sistema de Subastas**: Participación activa en pujas para canjear esfuerzo por recompensas valiosas.
-- **📜 Historial Transaccional**: Transparencia completa en cada movimiento de monedas.
+- **📜 Historial Transaccional**: Transparencia completa en cada movimiento de tokens.
 - **🔔 Notificaciones en Tiempo Real**: Alertas sobre cambios, subastas y logros.
 
 ---
@@ -93,8 +93,8 @@ Transformar el proceso de evaluación en una experiencia **dinámica, competitiv
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/juankAnez/educoin.git
-cd educoin
+git clone https://github.com/juankAnez/edubid.git
+cd edubid
 ```
 
 ---
@@ -178,7 +178,7 @@ npm run dev
 | **Grupos**         | `/groups/`                                            | Creación y administración de grupos   |
 | **Actividades**    | `/activities/`                                        | Actividades académicas y asignaciones |
 | **Calificaciones** | `/grades/`                                            | Sistema de notas y evaluaciones       |
-| **Economía**       | `/coins/wallets/`                                     | Gestión de billeteras virtuales       |
+| **Economía**       | `/tokens/wallets/`                                    | Gestión de billeteras virtuales       |
 | **Subastas**       | `/auctions/auctions/`                                 | Creación y participación en subastas  |
 | **Notificaciones** | `/notifications/`                                     | Sistema de notificaciones             |
 | **Reportes**       | `/reports/`                                           | Análisis y reportes académicos        |
@@ -188,13 +188,13 @@ npm run dev
 ## 📁 Estructura del Proyecto
 
 ```
-educoin/
+edubid/
 ├── edubid-backend/           # API REST (Django)
 │   ├── apps/
 │   │   ├── activities/       # Gestión de actividades
 │   │   ├── auctions/         # Sistema de subastas
 │   │   ├── classrooms/       # Gestión de aulas
-│   │   ├── coins/            # Economía virtual
+│   │   ├── tokens/            # Economía virtual
 │   │   ├── common/           # Utilidades compartidas
 │   │   ├── grades/           # Sistema de calificaciones
 │   │   ├── groups/           # Grupos de estudiantes

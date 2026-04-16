@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     'apps.groups',
     'apps.activities',
     'apps.grades',
-    'apps.coins',
+    'apps.tokens',
     'apps.auctions',
     'apps.common',
     'apps.notifications',
