@@ -7,8 +7,16 @@ import { API_ENDPOINTS, USER_ROLES } from "../utils/constants"
 
 const AuthContext = createContext()
 
+// Función para limpiar datos sensibles del objeto usuario
+// Previene que campos como password hash se almacenen en el navegador
+const sanitizeUser = (user) => {
+  if (!user) return null
+  const { password, password_hash, last_login, is_superuser, is_staff, ...safeUser } = user
+  return safeUser
+}
+
 const initialState = {
-  user: JSON.parse(localStorage.getItem("user")) || null,
+  user: sanitizeUser(JSON.parse(localStorage.getItem("user"))) || null,
   isAuthenticated: !!localStorage.getItem("access_token"),
   isLoading: false,
   error: null,
@@ -33,6 +41,18 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
   const navigate = useNavigate()
 
+  // Limpiar datos sensibles que pudieron haberse almacenado previamente
+  useEffect(() => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"))
+      if (storedUser && (storedUser.password || storedUser.password_hash)) {
+        const cleanUser = sanitizeUser(storedUser)
+        localStorage.setItem("user", JSON.stringify(cleanUser))
+        console.warn("Se limpiaron datos sensibles del localStorage")
+      }
+    } catch (e) { /* ignorar errores de parse */ }
+  }, [])
+
   // Cargar perfil si hay token
   useEffect(() => {
     const loadProfile = async () => {
@@ -40,7 +60,8 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await api.get(API_ENDPOINTS.PROFILE)
-          const user = response.data.user || response.data
+          const user = sanitizeUser(response.data.user || response.data)
+          localStorage.setItem("user", JSON.stringify(user))
           dispatch({ type: "SET_USER", payload: user })
         } catch (err) {
           console.error("Error cargando perfil:", err)
@@ -64,7 +85,8 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true })
       const res = await api.post(API_ENDPOINTS.LOGIN, credentials)
-      const { user, tokens } = res.data
+      const { tokens } = res.data
+      const user = sanitizeUser(res.data.user)
 
       localStorage.setItem("access_token", tokens.access)
       localStorage.setItem("refresh_token", tokens.refresh)

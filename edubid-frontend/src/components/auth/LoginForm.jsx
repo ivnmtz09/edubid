@@ -88,7 +88,11 @@ export default function LoginForm({ onSwitchToRegister, googleButtonEvent, compa
   }, [googleButtonEvent, googleOpen])
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6" autoComplete="off">
+      {/* Campos ocultos para anular el autocompletado del navegador */}
+      <input type="text" name="prevent_autofill_email" style={{ display: 'none' }} tabIndex={-1} autoComplete="username" />
+      <input type="password" name="prevent_autofill_pass" style={{ display: 'none' }} tabIndex={-1} autoComplete="current-password" />
+
       <div>
         <h2 className="text-xl sm:text-2xl font-semibold text-orange-600 mb-2">Iniciar sesión</h2>
         <p className="text-gray-600 text-sm sm:text-base">
@@ -132,6 +136,7 @@ export default function LoginForm({ onSwitchToRegister, googleButtonEvent, compa
                 message: "Correo electrónico inválido"
               }
             })}
+            autoComplete="off"
             className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
             placeholder="tu@email.com"
           />
@@ -152,6 +157,7 @@ export default function LoginForm({ onSwitchToRegister, googleButtonEvent, compa
                   message: "Mínimo 6 caracteres"
                 }
               })}
+              autoComplete="new-password"
               className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg pr-10 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
               placeholder="••••••••"
             />
