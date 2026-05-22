@@ -11,6 +11,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email', 'first_name', 'last_name', 'role', 'password', 'password_confirm']
 
+    def validate_role(self, value):
+        """Solo permitir estudiante o docente en el registro público"""
+        allowed_roles = ['estudiante', 'docente']
+        if value not in allowed_roles:
+            raise serializers.ValidationError(
+                f"Rol no válido. Los roles permitidos son: {', '.join(allowed_roles)}"
+            )
+        return value
+
     def validate(self, data):
         if data['password'] != data['password_confirm']:
             raise serializers.ValidationError("Las contraseñas no coinciden")
