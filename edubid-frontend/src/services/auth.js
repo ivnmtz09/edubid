@@ -5,7 +5,10 @@ export const authService = {
   async login(credentials) {
     try {
       const response = await api.post(API_ENDPOINTS.LOGIN, credentials);
-      const { tokens, user } = response.data;
+      const { tokens, user: rawUser } = response.data;
+
+      // Limpiar campos sensibles antes de almacenar en localStorage
+      const { password, password_hash, last_login, is_superuser, is_staff, ...user } = rawUser || {};
 
       localStorage.setItem("access_token", tokens.access);
       localStorage.setItem("refresh_token", tokens.refresh);
@@ -60,14 +63,17 @@ export const authService = {
   async verifyEmail(token) {
     try {
       const response = await api.get(API_ENDPOINTS.VERIFY_EMAIL(token));
-      const { user, tokens } = response.data;
+      const { user: rawUser, tokens } = response.data;
+
+      // Limpiar campos sensibles antes de almacenar
+      const { password, password_hash, last_login, is_superuser, is_staff, ...user } = rawUser || {};
 
       // Guardar tokens
       localStorage.setItem("access_token", tokens.access);
       localStorage.setItem("refresh_token", tokens.refresh);
       localStorage.setItem("user", JSON.stringify(user));
 
-      return response.data;
+      return { ...response.data, user };
     } catch (error) {
       throw new Error(error.response?.data?.detail || "Error al verificar email");
     }

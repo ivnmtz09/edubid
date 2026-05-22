@@ -52,6 +52,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'role', 'avatar', 'date_joined', 'profile']
         read_only_fields = ['id', 'date_joined']
+        # Seguridad: nunca exponer el password hash en respuestas de la API
+        extra_kwargs = {
+            'password': {'write_only': True, 'required': False},
+        }
 
 
 class ChangePasswordSerializer(serializers.Serializer):
