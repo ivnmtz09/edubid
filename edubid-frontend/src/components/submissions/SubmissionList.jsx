@@ -66,9 +66,9 @@ export default function SubmissionList({ submissions, activityId }) {
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-purple-600">
-            {submissions.reduce((sum, s) => sum + (s.educoins || 0), 0)}
+            {submissions.reduce((sum, s) => sum + (s.edubids || 0), 0)}
           </div>
-          <div className="text-xs text-gray-600 mt-1">Educoins Otorgadas</div>
+          <div className="text-xs text-gray-600 mt-1">edubids Otorgadas</div>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ export default function SubmissionList({ submissions, activityId }) {
                             <div className="flex items-center space-x-1">
                               <CurrencyEuroIcon className="h-3 w-3 text-orange-500" />
                               <span className="font-medium text-orange-600">
-                                {submission.educoins || 0} EC
+                                {submission.edubids || 0} EC
                               </span>
                             </div>
                           </>
@@ -202,9 +202,9 @@ export default function SubmissionList({ submissions, activityId }) {
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-orange-700">Educoins:</span>
+                              <span className="text-sm font-medium text-orange-700">edubids:</span>
                               <span className="text-xl font-bold text-orange-700">
-                                {submission.educoins} EC
+                                {submission.edubids} EC
                               </span>
                             </div>
                           </div>

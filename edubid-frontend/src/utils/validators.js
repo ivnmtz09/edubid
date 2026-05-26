@@ -127,7 +127,7 @@ export const validateGroupForm = (data) => {
   }
 
   if (!data.coin_limit || data.coin_limit <= 0) {
-    errors.coin_limit = "El límite de educoins debe ser mayor a 0"
+    errors.coin_limit = "El límite de edubids debe ser mayor a 0"
   }
 
   if (!data.start_date) {

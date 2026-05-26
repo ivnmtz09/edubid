@@ -1,10 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", "*.{js,ts,jsx,tsx,mdx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "*.{js,ts,jsx,tsx,mdx}",
+  ],
   theme: {
     extend: {
       colors: {
-        educoin: {
+        edubid: {
           50: "#fff7ef",
           100: "#feeeda",
           200: "#fdd6b5",
@@ -37,4 +41,4 @@ export default {
     },
   },
   plugins: [],
-}
+};

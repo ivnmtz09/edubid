@@ -41,12 +41,12 @@ export default function StudentDashboard() {
               ¡Bienvenido, {user?.first_name}!
             </h1>
             <p className="text-orange-100 text-sm sm:text-base">
-              Sigue trabajando duro para ganar más Educoins
+              Sigue trabajando duro para ganar más edubids
             </p>
           </div>
           <div className="mt-4 md:mt-0 bg-orange-500/30 backdrop-blur-sm rounded-xl px-4 py-3 border border-orange-400/50 min-w-[140px]">
             <p className="text-lg sm:text-xl font-bold text-white text-center">{totalBalance || 0}</p>
-            <p className="text-orange-100 text-sm text-center">Tus Educoins</p>
+            <p className="text-orange-100 text-sm text-center">Tus edubids</p>
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@ export default function StudentDashboard() {
               <p className="text-lg sm:text-2xl font-bold text-orange-600">
                 {totalBalance || 0}
               </p>
-              <p className="text-xs text-gray-600">Educoins</p>
+              <p className="text-xs text-gray-600">edubids</p>
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@ export default function StudentDashboard() {
                 </div>
                 <div className="flex items-center space-x-2 sm:space-x-3 self-end sm:self-auto">
                   <span className="bg-orange-100 text-orange-700 px-2 sm:px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
-                    {activity.valor_educoins} EC
+                    {activity.valor_edubids} EC
                   </span>
                   <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 group-hover:text-blue-500 transform group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
                 </div>

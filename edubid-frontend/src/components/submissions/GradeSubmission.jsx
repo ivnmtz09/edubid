@@ -16,7 +16,7 @@ export default function GradeSubmission({ submission, onClose }) {
   const [formData, setFormData] = useState({
     calificacion: submission?.calificacion || "",
     retroalimentacion: submission?.retroalimentacion || "",
-    educoins: submission?.educoins || submission?.activity?.valor_educoins || "",
+    edubids: submission?.edubids || submission?.activity?.valor_edubids || "",
   })
 
   const handleChange = (e) => {
@@ -26,8 +26,8 @@ export default function GradeSubmission({ submission, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.calificacion || !formData.educoins) {
-      alert("Por favor completa la calificación y los Educoins")
+    if (!formData.calificacion || !formData.edubids) {
+      alert("Por favor completa la calificación y los edubids")
       return
     }
 
@@ -36,7 +36,7 @@ export default function GradeSubmission({ submission, onClose }) {
         submissionId: submission.id,
         calificacion: parseFloat(formData.calificacion),
         retroalimentacion: formData.retroalimentacion,
-        educoins: parseInt(formData.educoins),
+        edubids: parseInt(formData.edubids),
       })
       onClose()
     } catch (error) {
@@ -45,7 +45,7 @@ export default function GradeSubmission({ submission, onClose }) {
   }
 
   const maxGrade = submission?.activity?.valor_notas || 5
-  const maxEducoins = submission?.activity?.valor_educoins || 100
+  const maxedubids = submission?.activity?.valor_edubids || 100
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,22 +88,22 @@ export default function GradeSubmission({ submission, onClose }) {
         </p>
       </div>
 
-      {/* Educoins */}
+      {/* edubids */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
           <CurrencyEuroIcon className="h-5 w-5 text-orange-500" />
-          Educoins a otorgar
+          edubids a otorgar
         </label>
         <div className="relative">
           <input
             type="number"
             min="0"
-            max={maxEducoins}
-            name="educoins"
-            value={formData.educoins}
+            max={maxedubids}
+            name="edubids"
+            value={formData.edubids}
             onChange={handleChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-            placeholder={`Ej: 50 (máx: ${maxEducoins})`}
+            placeholder={`Ej: 50 (máx: ${maxedubids})`}
             required
           />
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
@@ -111,7 +111,7 @@ export default function GradeSubmission({ submission, onClose }) {
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          Valor máximo disponible: {maxEducoins} Educoins
+          Valor máximo disponible: {maxedubids} edubids
         </p>
       </div>
 
@@ -145,9 +145,9 @@ export default function GradeSubmission({ submission, onClose }) {
             </div>
           </div>
           <div>
-            <span className="text-gray-600">Educoins:</span>
+            <span className="text-gray-600">edubids:</span>
             <div className="font-semibold text-orange-600">
-              {formData.educoins || "0"} EC
+              {formData.edubids || "0"} EC
             </div>
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function GradeSubmission({ submission, onClose }) {
         </button>
         <button
           type="submit"
-          disabled={gradeSubmission.isPending || !formData.calificacion || !formData.educoins}
+          disabled={gradeSubmission.isPending || !formData.calificacion || !formData.edubids}
           className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white px-6 py-3 rounded-xl hover:bg-green-600 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {gradeSubmission.isPending ? (

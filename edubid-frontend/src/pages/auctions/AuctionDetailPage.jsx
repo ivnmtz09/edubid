@@ -327,7 +327,7 @@ const AuctionDetailPage = () => {
                     <div className="space-y-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Cantidad de Educoins
+                          Cantidad de edubids
                         </label>
                         <div className="relative">
                           <input

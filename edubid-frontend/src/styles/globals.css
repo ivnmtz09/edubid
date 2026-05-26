@@ -10,10 +10,10 @@
   --popover: #ffffff;
   --popover-foreground: #111827;
 
-  --primary: #f97316;           /* naranja Educoin */
+  --primary: #f97316;           /* naranja EduBid */
   --primary-foreground: #ffffff;
   
-  --educoin-500: var(--primary);
+  --edubid-500: var(--primary);
   --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 
   --secondary: #f3f4f6;         /* gris claro */
@@ -34,11 +34,11 @@
 
   --radius: 0.625rem;
 
-  /* Educoin colors */
-  --educoin-50: #fff7ed;
-  --educoin-500: #f97316;
-  --educoin-600: #ea580c;
-  --educoin-700: #c2410c;
+  /* EduBid colors */
+  --edubid-50: #fff7ed;
+  --edubid-500: #f97316;
+  --edubid-600: #ea580c;
+  --edubid-700: #c2410c;
 }
 
 .dark {

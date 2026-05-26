@@ -314,7 +314,7 @@ const ActivityList = () => {
                           <span>Recompensa:</span>
                         </div>
                         <span className="font-bold text-orange-600 group-hover:text-orange-700 transition-colors duration-300">
-                          {activity.valor_educoins} EC
+                          {activity.valor_edubids} EC
                         </span>
                       </div>
 

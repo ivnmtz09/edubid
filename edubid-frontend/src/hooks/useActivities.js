@@ -129,7 +129,7 @@ export const useGradeSubmission = () => {
       queryClient.invalidateQueries({ queryKey: ["activities"] })
       queryClient.invalidateQueries({ queryKey: ["wallet"] })
       toast.success(
-        `Calificación guardada. ${response.coins_ganados > 0 ? `+${response.coins_ganados} Educoins` : ""}`
+        `Calificación guardada. ${response.coins_ganados > 0 ? `+${response.coins_ganados} edubids` : ""}`
       )
     },
     onError: (error) => {

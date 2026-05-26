@@ -14,7 +14,7 @@ export default function StudentGradeCard() {
     calificacion: 4.5,
     valorMaximo: 5.0,
     retroalimentacion: "Excelente trabajo. Demostraste un entendimiento sólido de los conceptos. Sigue así!",
-    educoinsGanados: 180,
+    edubidsGanados: 180,
     fechaCalificacion: "2025-11-10T14:30:00",
     fechaEntrega: "2025-11-08T10:00:00",
     isGraded: true,
@@ -126,10 +126,10 @@ export default function StudentGradeCard() {
                 })}</span>
               </div>
               
-              {submission.educoinsGanados > 0 && (
+              {submission.edubidsGanados > 0 && (
                 <div className="flex items-center gap-1.5">
                   <CurrencyEuroIcon className="h-4 w-4" />
-                  <span className="font-semibold">+{submission.educoinsGanados} EC ganados</span>
+                  <span className="font-semibold">+{submission.edubidsGanados} EC ganados</span>
                 </div>
               )}
             </div>

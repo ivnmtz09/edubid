@@ -96,7 +96,7 @@ export default function DeleteAccountModal({ user, onClose }) {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-red-500 font-bold">•</span>
-                    <span>Tu saldo de Educoins</span>
+                    <span>Tu saldo de edubids</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-red-500 font-bold">•</span>

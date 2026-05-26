@@ -74,7 +74,7 @@ export default function EmailSentPage() {
           </h3>
           <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
             <li>Abre tu bandeja de entrada</li>
-            <li>Busca el email de Educoin</li>
+            <li>Busca el email de edubid</li>
             <li>Haz clic en el botón de verificación</li>
             <li>¡Listo! Podrás acceder a tu cuenta</li>
           </ol>
