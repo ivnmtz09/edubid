@@ -58,7 +58,7 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
               <span className="text-xs text-gray-600">EduBid</span>
             </div>
             <p className="text-base sm:text-lg font-bold text-orange-600">
-              {activity.valor_educoins} EC
+              {activity.valor_edubids} EC
             </p>
           </div>
 

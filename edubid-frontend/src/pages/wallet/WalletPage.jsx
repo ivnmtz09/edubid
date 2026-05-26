@@ -98,7 +98,7 @@ export default function WalletPage() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mi Billetera</h1>
             <p className="text-gray-600 mt-1 text-sm sm:text-base">
-              Panel de gestión de Educoins
+              Panel de gestión de edubids
             </p>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function WalletPage() {
             Panel Docente
           </h2>
           <p className="text-blue-700 mb-4">
-            Los docentes no acumulan Educoins. Puedes gestionar las billeteras de tus estudiantes desde el panel de grupos.
+            Los docentes no acumulan edubids. Puedes gestionar las billeteras de tus estudiantes desde el panel de grupos.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
             <div className="bg-white rounded-lg p-4 border border-blue-100">
@@ -119,7 +119,7 @@ export default function WalletPage() {
             </div>
             <div className="bg-white rounded-lg p-4 border border-blue-100">
               <WalletIcon className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-              <h3 className="font-semibold text-blue-900">Depositar Educoins</h3>
+              <h3 className="font-semibold text-blue-900">Depositar edubids</h3>
               <p className="text-sm text-blue-600 mt-1">Asigna recompensas a estudiantes</p>
             </div>
             <div className="bg-white rounded-lg p-4 border border-blue-100">
@@ -140,7 +140,7 @@ export default function WalletPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mi Billetera</h1>
           <p className="text-gray-600 mt-1 text-sm sm:text-base">
-            Gestiona tus Educoins y revisa tus transacciones
+            Gestiona tus edubids y revisa tus transacciones
           </p>
         </div>
         <button

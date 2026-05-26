@@ -60,7 +60,7 @@ export default function AdminDashboard() {
             <p className="text-gray-300 text-sm sm:text-base">Bienvenido, {user?.first_name}</p>
           </div>
           <a          
-            href="https://educoin-production.up.railway.app/admin/"
+            href="http://localhost:8000/admin/"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 md:mt-0 bg-white text-gray-800 px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:bg-gray-50 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 inline-flex items-center space-x-2 text-sm sm:text-base"
@@ -188,7 +188,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
                 <a
-                  href={`https://educoin-production.up.railway.app/admin/users/user/${u.id}/change/`}
+                  href={`http://localhost:8000/admin/users/user/${u.id}/change/`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors duration-200"

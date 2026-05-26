@@ -185,10 +185,10 @@ export default function ActivityDetail() {
             <div className="bg-orange-50 rounded-lg p-3 sm:p-4">
               <div className="flex items-center space-x-2 text-orange-600 mb-1 sm:mb-2">
                 <CurrencyEuroIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">Valor en Educoins</span>
+                <span className="text-xs sm:text-sm">Valor en edubids</span>
               </div>
               <p className="font-semibold text-orange-600 text-base sm:text-lg lg:text-xl">
-                {activity.valor_educoins} EC
+                {activity.valor_edubids} EC
               </p>
             </div>
 
@@ -267,7 +267,7 @@ export default function ActivityDetail() {
                           <div className="flex items-center gap-1.5">
                             <CurrencyEuroIcon className="h-4 w-4" />
                             <span className="font-semibold">
-                              +{Math.floor((userSubmission.calificacion / activity.valor_notas) * activity.valor_educoins)} EC ganados
+                              +{Math.floor((userSubmission.calificacion / activity.valor_notas) * activity.valor_edubids)} EC ganados
                             </span>
                           </div>
                         </div>

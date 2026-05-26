@@ -129,7 +129,7 @@ export default function AuctionsPage() {
                   <p className="text-gray-600 mt-1 text-lg">
                     {isTeacher 
                       ? "Crea subastas motivadoras para tus estudiantes" 
-                      : "Convierte tus Educoins en recompensas exclusivas"
+                      : "Convierte tus edubids en recompensas exclusivas"
                     }
                   </p>
                 </div>
@@ -210,7 +210,7 @@ export default function AuctionsPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{stats.totalCoins}</p>
-                  <p className="text-sm text-gray-600">Educoins en juego</p>
+                  <p className="text-sm text-gray-600">edubids en juego</p>
                 </div>
               </div>
             </div>
@@ -277,7 +277,7 @@ export default function AuctionsPage() {
                   <div className="bg-blue-200 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0">
                     2
                   </div>
-                  <p>Los estudiantes pujan usando sus Educoins ganados en actividades</p>
+                  <p>Los estudiantes pujan usando sus edubids ganados en actividades</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="bg-blue-200 text-blue-800 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-0.5 flex-shrink-0">
@@ -350,7 +350,7 @@ export default function AuctionsPage() {
                       <div className="bg-green-200 text-green-800 rounded-lg p-2 flex-shrink-0">
                         <CurrencyEuroIcon className="h-4 w-4" />
                       </div>
-                      <p>Administra tus Educoins sabiamente - no gastes todo en una subasta</p>
+                      <p>Administra tus edubids sabiamente - no gastes todo en una subasta</p>
                     </div>
                     <div className="flex items-start gap-3">
                       <div className="bg-green-200 text-green-800 rounded-lg p-2 flex-shrink-0">
@@ -371,7 +371,7 @@ export default function AuctionsPage() {
 
             {isStudent && (
               <div className="bg-indigo-500 rounded-2xl p-6 text-white">
-                <h3 className="font-semibold text-lg mb-3">¿Cómo ganar más Educoins?</h3>
+                <h3 className="font-semibold text-lg mb-3">¿Cómo ganar más edubids?</h3>
                 <div className="space-y-2 text-purple-100">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-purple-300 rounded-full"></div>
@@ -392,7 +392,7 @@ export default function AuctionsPage() {
                 </div>
                 <div className="mt-4 pt-4 border-t border-purple-500">
                   <p className="text-sm text-purple-200">
-                    <strong>Tip:</strong> Las Educoins se reinician cada periodo académico
+                    <strong>Tip:</strong> Las edubids se reinician cada periodo académico
                   </p>
                 </div>
               </div>
@@ -404,11 +404,11 @@ export default function AuctionsPage() {
                 <div className="space-y-2 text-indigo-100">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></div>
-                    <span>Las Educoins se bloquean durante la subasta</span>
+                    <span>Las edubids se bloquean durante la subasta</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></div>
-                    <span>Solo el ganador paga las Educoins pujadas</span>
+                    <span>Solo el ganador paga las edubids pujadas</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></div>

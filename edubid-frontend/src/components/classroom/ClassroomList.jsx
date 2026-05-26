@@ -345,7 +345,7 @@ export default function ClassroomList() {
               <li>• Podrás crear grupos dentro de esta clase</li>
               <li>• Los estudiantes se unirán a través de códigos de grupo</li>
               <li>• Podrás asignar actividades a grupos específicos</li>
-              <li>• Gestionarás Educoins y calificaciones por clase</li>
+              <li>• Gestionarás edubids y calificaciones por clase</li>
             </ul>
           </div>
 

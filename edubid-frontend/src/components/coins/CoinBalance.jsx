@@ -7,8 +7,8 @@ const CoinBalance = ({ balance = 0, totalEarned = 0, totalSpent = 0, className =
   return (
     <div className={`rounded-lg p-4 bg-midnight-800 text-white shadow ${className}`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Balance de Educoins</h3>
-        <div className="p-2 bg-educoin-500 rounded-lg">
+        <h3 className="text-lg font-semibold">Balance de EduBid</h3>
+        <div className="p-2 bg-edubid-500 rounded-lg">
           <CurrencyDollarIcon className="h-6 w-6 text-white" />
         </div>
       </div>
@@ -16,7 +16,7 @@ const CoinBalance = ({ balance = 0, totalEarned = 0, totalSpent = 0, className =
       <div className="space-y-4">
         {/* Current Balance */}
         <div className="text-center py-4 bg-midnight-700 rounded-lg">
-          <p className="text-3xl font-bold text-educoin-400">{formatCoins(balance)}</p>
+          <p className="text-3xl font-bold text-edubid-400">{formatCoins(balance)}</p>
           <p className="text-sm text-midnight-300 mt-1">Balance actual</p>
         </div>
 

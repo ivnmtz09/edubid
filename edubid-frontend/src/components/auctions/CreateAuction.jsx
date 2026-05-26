@@ -204,9 +204,9 @@ const CreateAuction = ({ auction, onClose }) => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
         <h4 className="font-medium text-blue-900 text-sm sm:text-base mb-2">Información importante</h4>
         <ul className="text-xs sm:text-sm text-blue-700 space-y-1">
-          <li>• Los estudiantes pujarán con sus Educoins acumulados</li>
-          <li>• Las Educoins se bloquean durante la subasta</li>
-          <li>• Solo el ganador pagará las Educoins pujadas</li>
+          <li>• Los estudiantes pujarán con sus edubids acumulados</li>
+          <li>• Las edubids se bloquean durante la subasta</li>
+          <li>• Solo el ganador pagará las edubids pujadas</li>
           <li>• Puedes cerrar la subasta manualmente en cualquier momento</li>
         </ul>
       </div>

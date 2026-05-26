@@ -19,7 +19,7 @@ const AssignCoins = ({ activityId, students, onClose }) => {
     }
 
     if (!coins || coins <= 0) {
-      setError("Ingresa una cantidad válida de Educoins")
+      setError("Ingresa una cantidad válida de edubids")
       return
     }
 
@@ -71,7 +71,7 @@ const AssignCoins = ({ activityId, students, onClose }) => {
 
       <div>
         <label htmlFor="coins" className="label">
-          Cantidad de Educoins
+          Cantidad de edubids
         </label>
         <input
           type="number"
@@ -92,7 +92,7 @@ const AssignCoins = ({ activityId, students, onClose }) => {
           Cancelar
         </button>
         <button type="submit" disabled={assignCoins.isPending} className="btn-primary flex-1">
-          {assignCoins.isPending ? <LoadingSpinner size="sm" /> : "Asignar Educoins"}
+          {assignCoins.isPending ? <LoadingSpinner size="sm" /> : "Asignar edubids"}
         </button>
       </div>
     </form>

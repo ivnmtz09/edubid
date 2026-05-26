@@ -1,5 +1,5 @@
-import { defineConfig } from "vite"
-import react from "@vitejs/plugin-react-swc"
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig({
   plugins: [react()],
@@ -8,10 +8,10 @@ export default defineConfig({
     host: true,
     proxy: {
       "/api": {
-        target: "https://educoin-production.up.railway.app",
+        target: "http://localhost:8000",
         changeOrigin: true,
         secure: false,
       },
     },
   },
-})
+});

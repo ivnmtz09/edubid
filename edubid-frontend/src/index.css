@@ -1,4 +1,4 @@
-/* Global styles for Educoin Frontend */
+/* Global styles for EduBid Frontend */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 * {
@@ -14,8 +14,9 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-  color: #f97316; /* naranja Educoin */
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+  color: #f97316; /* naranja EduBid */
 }
 
 /* Reset */
@@ -31,7 +32,7 @@ textarea,
 select {
   outline: none;
   background: #ffffff; /* fondo blanco para campos */
-  color: #111827;      /* texto oscuro */
+  color: #111827; /* texto oscuro */
   border: 1px solid #e5e7eb; /* gris claro */
   border-radius: 0.375rem;
   padding: 0.5rem;
@@ -42,7 +43,6 @@ textarea::placeholder {
   color: #9ca3af; /* gris medio */
 }
 
-
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
@@ -50,7 +50,7 @@ html {
 
 /* Focus styles */
 *:focus-visible {
-  outline: 2px solid #f97316; /* Educoin naranja */
+  outline: 2px solid #f97316; /* EduBid naranja */
   outline-offset: 2px;
 }
 

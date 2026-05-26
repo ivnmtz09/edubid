@@ -27,7 +27,7 @@ const AuctionList = () => {
   }
 
   const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de eliminar esta subasta? Se devolverán las Educoins bloqueadas a los estudiantes.")) {
+    if (window.confirm("¿Estás seguro de eliminar esta subasta? Se devolverán las edubids bloqueadas a los estudiantes.")) {
       await deleteAuction.mutateAsync(id)
     }
   }
@@ -84,7 +84,7 @@ const AuctionList = () => {
           <div className="flex-1">
             <h1 className="text-xl sm:text-2xl font-bold">Subastas Académicas</h1>
             <p className="text-green-100 text-sm sm:text-base">
-              {isTeacher ? "Gestiona las subastas de tus grupos" : "Participa en subastas con tus Educoins"}
+              {isTeacher ? "Gestiona las subastas de tus grupos" : "Participa en subastas con tus edubids"}
             </p>
           </div>
           

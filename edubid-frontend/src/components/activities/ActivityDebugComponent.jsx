@@ -6,7 +6,7 @@ export default function ActivityDebugComponent() {
     id: 1,
     nombre: "Tarea de Matemáticas",
     valor_notas: 5.0,
-    valor_educoins: 100,
+    valor_edubids: 100,
     user_submission: {
       id: 10,
       calificacion: 4.5,  // ← ESTE ES EL DATO CLAVE
@@ -24,7 +24,7 @@ export default function ActivityDebugComponent() {
     id: 2,
     nombre: "Proyecto de Ciencias",
     valor_notas: 5.0,
-    valor_educoins: 150,
+    valor_edubids: 150,
     user_submission: {
       id: 11,
       calificacion: null,  // ← Sin calificar
@@ -42,7 +42,7 @@ export default function ActivityDebugComponent() {
     id: 3,
     nombre: "Quiz de Historia",
     valor_notas: 5.0,
-    valor_educoins: 50,
+    valor_edubids: 50,
     user_submission: null  // ← No ha entregado
   }
 

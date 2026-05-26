@@ -44,7 +44,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const adminNavigation = [
     { name: "Dashboard Admin", href: "/dashboard", icon: HomeIcon },
-    { name: "Admin Django", href: "https://educoin-production.up.railway.app/admin/", icon: Cog6ToothIcon },
+    { name: "Admin Django", href: "http://localhost:8000/admin/", icon: Cog6ToothIcon },
   ]
 
   const navigation =
@@ -66,7 +66,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-100 flex items-center justify-center shadow-lg overflow-hidden">
               <img 
                 src="/assets/coins/coin.png" 
-                alt="Educoin" 
+                alt="EduBid" 
                 className="h-8 w-8 object-contain"
               />
             </div>
@@ -75,7 +75,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             </div>
           </div>
           <div>
-            <span className="text-xl font-bold text-orange-600">Educoin</span>
+            <span className="text-xl font-bold text-orange-600">EduBid</span>
           </div>
         </div>
       </div>
