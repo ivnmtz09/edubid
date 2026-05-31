@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
-import { EyeIcon, EyeSlashIcon, ArrowLeftIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline"
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google"
+import { EyeIcon, EyeSlashIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline"
+import { GoogleLogin } from "@react-oauth/google"
 import { useAuthContext } from "../../context/AuthContext"
 import { googleAuthService } from "../../services/googleAuth"
 import { authService } from "../../services/auth"
@@ -31,22 +31,20 @@ export default function LoginForm({ onSwitchToRegister, googleButtonEvent, compa
     
     try {
       await login({ email: data.email, password: data.password })
-      toast.success("¡Bienvenido de nuevo!")
+      toast.success("!Bienvenido de nuevo!")
     } catch (err) {
-      // 🆕 Verificar si el backend sugiere reset
       if (err.suggestReset) {
         setShowResetSuggestion(true)
         setFailedEmail(data.email)
-        toast.error("Credenciales incorrectas. ¿Olvidaste tu contraseña?")
+        toast.error("Credenciales incorrectas. ?Olvidaste tu contrasena?")
       } else if (err.emailNotVerified) {
-        // Email no verificado
-        toast.error("Por favor verifica tu correo electrónico")
+        toast.error("Por favor verifica tu correo electronico")
         navigate("/email-sent", { 
           state: { email: err.email },
           replace: true 
         })
       } else {
-        toast.error(err.message || "Error al iniciar sesión")
+        toast.error(err.message || "Error al iniciar sesion")
       }
       setIsLoading(false)
     }
@@ -58,112 +56,97 @@ export default function LoginForm({ onSwitchToRegister, googleButtonEvent, compa
     })
   }
 
-  // Google login
-  const googleOpen = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setIsLoading(true)
-      try {
-        const id_token =
-          tokenResponse.id_token ||
-          tokenResponse.credential ||
-          tokenResponse.access_token
-        if (!id_token) throw new Error("No se pudo obtener token de Google")
-        await googleAuthService.loginWithGoogle(id_token)
-        toast.success("¡Bienvenido con Google!")
-        window.location.href = "/dashboard"
-      } catch (err) {
-        toast.error("Error al iniciar sesión con Google")
-        setIsLoading(false)
-      }
-    },
-    flow: "implicit",
-    scope: "openid profile email",
-  })
-
-  useEffect(() => {
-    if (!googleButtonEvent) return
-    const handler = () => googleOpen()
-    window.addEventListener(googleButtonEvent, handler)
-    return () => window.removeEventListener(googleButtonEvent, handler)
-  }, [googleButtonEvent, googleOpen])
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setIsLoading(true)
+    try {
+      await googleAuthService.loginWithGoogle(credentialResponse.credential)
+      toast.success("!Bienvenido con Google!")
+      window.location.href = "/dashboard"
+    } catch {
+      toast.error("Error al iniciar sesion con Google")
+      setIsLoading(false)
+    }
+  }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6" autoComplete="off">
-      {/* Campos ocultos para anular el autocompletado del navegador */}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" autoComplete="off">
       <input type="text" name="prevent_autofill_email" style={{ display: 'none' }} tabIndex={-1} autoComplete="username" />
       <input type="password" name="prevent_autofill_pass" style={{ display: 'none' }} tabIndex={-1} autoComplete="current-password" />
 
       <div>
-        <h2 className="text-xl sm:text-2xl font-semibold text-orange-600 mb-2">Iniciar sesión</h2>
-        <p className="text-gray-600 text-sm sm:text-base">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Iniciar sesion</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Accede a tu cuenta para continuar aprendiendo
         </p>
       </div>
 
-      {/* 🆕 Sugerencia de reset */}
       {showResetSuggestion && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 animate-fadeIn">
+        <div className="rounded-xl border border-[#FADBD8] bg-[#FADBD8]/20 p-4 animate-fade-in">
           <div className="flex items-start gap-3">
-            <ExclamationTriangleIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5 text-[#c0392b]" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-amber-900 mb-2">
-                ¿Olvidaste tu contraseña?
+              <p className="text-sm font-medium text-[#c0392b] mb-2">
+                ?Olvidaste tu contrasena?
               </p>
-              <p className="text-xs text-amber-700 mb-3">
-                Has intentado iniciar sesión sin éxito. Puedes restablecer tu contraseña si no la recuerdas.
+              <p className="text-xs text-[#c0392b]/80 mb-3">
+                Has intentado iniciar sesion sin exito. Puedes restablecer tu contrasena si no la recuerdas.
               </p>
               <button
                 type="button"
                 onClick={handlePasswordReset}
-                className="text-sm bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition font-medium"
+                className="rounded-lg bg-[#EA580C] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#C2410C]"
               >
-                Restablecer contraseña
+                Restablecer contrasena
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Correo electronico
+          </label>
           <input
             type="email"
             {...register("email", { 
               required: "El correo es requerido",
               pattern: {
                 value: /^\S+@\S+$/i,
-                message: "Correo electrónico inválido"
+                message: "Correo electronico invalido"
               }
             })}
             autoComplete="off"
-            className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
             placeholder="tu@email.com"
           />
           {errors.email && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.email.message}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Contrasena
+          </label>
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
               {...register("password", { 
-                required: "La contraseña es requerida",
+                required: "La contrasena es requerida",
                 minLength: {
                   value: 6,
-                  message: "Mínimo 6 caracteres"
+                  message: "Minimo 6 caracteres"
                 }
               })}
               autoComplete="new-password"
-              className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg pr-10 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
-              placeholder="••••••••"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-11 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
+              placeholder="********"
             />
             <button
               type="button"
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+              className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               onClick={() => setShowPassword((prev) => !prev)}
             >
               {showPassword ? (
@@ -174,17 +157,16 @@ export default function LoginForm({ onSwitchToRegister, googleButtonEvent, compa
             </button>
           </div>
           {errors.password && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.password.message}</p>
+            <p className="mt-1 text-xs text-red-500">{errors.password.message}</p>
           )}
-          
-          {/* Link olvidaste contraseña */}
+
           <div className="mt-2 text-right">
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
-              className="text-xs sm:text-sm text-orange-600 hover:text-orange-700 font-medium transition"
+              className="text-xs font-medium text-[#EA580C] transition hover:text-[#C2410C] dark:text-[#FBBF24] dark:hover:text-[#FCD34D]"
             >
-              ¿Olvidaste tu contraseña?
+              ?Olvidaste tu contrasena?
             </button>
           </div>
         </div>
@@ -193,59 +175,50 @@ export default function LoginForm({ onSwitchToRegister, googleButtonEvent, compa
       <button
         type="submit"
         disabled={isSubmitting || isLoading}
-        className="w-full bg-orange-500 text-white py-2.5 sm:py-3 rounded-lg hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors font-semibold text-sm sm:text-base flex items-center justify-center gap-2"
+        className="w-full rounded-xl bg-[#EA580C] py-3 text-sm font-semibold text-white shadow-lg shadow-[#EA580C]/20 transition-all hover:bg-[#C2410C] hover:shadow-xl hover:shadow-[#EA580C]/25 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98] flex items-center justify-center gap-2"
       >
         {(isSubmitting || isLoading) ? (
           <>
             <LoadingSpinner size="sm" />
-            Iniciando sesión...
+            Iniciando sesion...
           </>
         ) : (
-          "Iniciar sesión"
+          "Iniciar sesion"
         )}
       </button>
 
       <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
         </div>
-        <div className="relative bg-white px-3 text-sm text-gray-500">o continúa con</div>
+        <div className="relative bg-white px-3 text-sm text-gray-400 dark:bg-[#181412] dark:text-gray-500">
+          o continua con
+        </div>
       </div>
 
       <div className="flex justify-center">
         <GoogleLogin
-          onSuccess={async (res) => {
-            setIsLoading(true)
-            try {
-              const id_token = res.credential || res.id_token || res.access_token
-              await googleAuthService.loginWithGoogle(id_token)
-              toast.success("¡Bienvenido con Google!")
-              window.location.href = "/dashboard"
-            } catch {
-              toast.error("No fue posible iniciar sesión con Google")
-              setIsLoading(false)
-            }
-          }}
+          onSuccess={handleGoogleSuccess}
           onError={() => {
             toast.error("Error al conectar con Google")
             setIsLoading(false)
           }}
-          theme="filled_blue"
-          size="medium"
+          theme="outline"
+          size="large"
           text="signin_with"
           shape="rectangular"
           width="100%"
         />
       </div>
 
-      <p className="text-sm text-gray-600 text-center">
-        ¿No tienes una cuenta?{" "}
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+        ?No tienes una cuenta?{" "}
         <button
           type="button"
           onClick={onSwitchToRegister}
-          className="text-orange-600 font-medium hover:text-orange-700 underline transition-colors"
+          className="font-medium text-[#EA580C] underline transition hover:text-[#C2410C] dark:text-[#FBBF24] dark:hover:text-[#FCD34D]"
         >
-          Regístrate aquí
+          Registrate aqui
         </button>
       </p>
     </form>
