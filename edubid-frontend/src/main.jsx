@@ -6,6 +6,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./styles/globals.css";
 
 const queryClient = new QueryClient({
@@ -23,21 +24,23 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-            <App />
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: "#363636",
-                  color: "#fff",
-                },
-              }}
-            />
-          </GoogleOAuthProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+              <App />
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: "#363636",
+                    color: "#fff",
+                  },
+                }}
+              />
+            </GoogleOAuthProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>,

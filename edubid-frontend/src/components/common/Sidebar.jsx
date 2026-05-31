@@ -58,20 +58,20 @@ const Sidebar = ({ isOpen, onClose }) => {
     location.pathname === href || location.pathname.startsWith(href + "/")
 
   const SidebarContent = () => (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-white to-gray-50/80 border-r border-gray-100">
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-background to-muted/30 border-r border-border">
       {/* Logo */}
-      <div className="flex h-20 shrink-0 items-center px-6 border-b border-gray-100">
+      <div className="flex h-20 shrink-0 items-center px-6 border-b border-border">
         <div className="flex items-center space-x-3">
           <div className="relative">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-100 flex items-center justify-center shadow-lg overflow-hidden">
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-muted to-muted flex items-center justify-center shadow-lg overflow-hidden">
               <img 
                 src="/assets/coins/coin.png" 
                 alt="EduBid" 
                 className="h-8 w-8 object-contain"
               />
             </div>
-            <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center">
-              <BookOpenIcon className="h-3 w-3 text-white" />
+            <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary border-2 border-background flex items-center justify-center">
+              <BookOpenIcon className="h-3 w-3 text-primary-foreground" />
             </div>
           </div>
           <div>
@@ -95,8 +95,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                   rel="noopener noreferrer"
                   className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                     current
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25"
-                      : "text-gray-700 hover:bg-white hover:text-orange-600 hover:shadow-md border border-transparent hover:border-orange-100"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25 dark:from-cyan-500 dark:to-purple-600 dark:shadow-purple-500/25"
+                      : "text-foreground/70 hover:bg-card hover:text-primary hover:shadow-md border border-transparent hover:border-primary/20"
                   }`}
                   onClick={onClose}
                 >
@@ -104,19 +104,19 @@ const Sidebar = ({ isOpen, onClose }) => {
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
                       current
                         ? "text-white"
-                        : "text-gray-400 group-hover:text-orange-500"
+                        : "text-muted-foreground group-hover:text-primary"
                     }`}
                   />
                   {item.name}
-                  <ArrowRightCircleIcon className="ml-auto h-4 w-4 text-gray-400" />
+                  <ArrowRightCircleIcon className="ml-auto h-4 w-4 text-muted-foreground" />
                 </a>
               ) : (
                 <Link
                   to={item.href}
                   className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                     current
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25"
-                      : "text-gray-700 hover:bg-white hover:text-orange-600 hover:shadow-md border border-transparent hover:border-orange-100"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25 dark:from-cyan-500 dark:to-purple-600 dark:shadow-purple-500/25"
+                      : "text-foreground/70 hover:bg-card hover:text-primary hover:shadow-md border border-transparent hover:border-primary/20"
                   }`}
                   onClick={onClose}
                 >
@@ -124,7 +124,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
                       current
                         ? "text-white"
-                        : "text-gray-400 group-hover:text-orange-500"
+                        : "text-muted-foreground group-hover:text-primary"
                     }`}
                   />
                   {item.name}
@@ -136,12 +136,12 @@ const Sidebar = ({ isOpen, onClose }) => {
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t border-gray-100">
+      <div className="px-3 py-4 border-t border-border">
         <button
           onClick={logout}
-          className="group flex items-center justify-center w-full px-3 py-3 text-sm font-medium text-gray-700 hover:text-red-600 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100 transition-all duration-200"
+          className="group flex items-center justify-center w-full px-3 py-3 text-sm font-medium text-foreground/70 hover:text-red-600 hover:bg-red-500/10 rounded-xl border border-transparent hover:border-red-500/20 transition-all duration-200"
         >
-          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2 text-gray-400 group-hover:text-red-500" />
+          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2 text-muted-foreground group-hover:text-red-500" />
           Cerrar sesión
         </button>
       </div>
@@ -179,10 +179,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <SidebarContent />
                 <div className="absolute top-4 right-0 -mr-12 pt-2">
                   <button
-                    className="ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white transition-all duration-200"
+                    className="ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-background/10 backdrop-blur-sm border border-border/20 hover:bg-background/20 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                     onClick={onClose}
                   >
-                    <XMarkIcon className="h-6 w-6 text-white" />
+                    <XMarkIcon className="h-6 w-6 text-foreground" />
                   </button>
                 </div>
               </Dialog.Panel>

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuthContext } from "../../context/AuthContext";
 import { googleAuthService } from "../../services/googleAuth";
 import { authService } from "../../services/auth";
@@ -43,12 +43,10 @@ export default function RegisterForm({
         role: data.role,
       };
 
-      // 🆕 Llamar al servicio de registro (NO al registerUser del contexto)
       const response = await authService.register(payload);
 
-      toast.success("¡Cuenta creada! Revisa tu email");
+      toast.success("!Cuenta creada! Revisa tu email");
 
-      // 🆕 Redirigir a la página de "Email Enviado"
       navigate("/email-sent", {
         state: { email: payload.email },
         replace: true,
@@ -59,49 +57,33 @@ export default function RegisterForm({
     }
   };
 
-  // Google login
-  const googleOpen = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setIsLoading(true);
-      try {
-        const id_token =
-          tokenResponse.id_token ||
-          tokenResponse.credential ||
-          tokenResponse.access_token;
-        await googleAuthService.loginWithGoogle(id_token);
-        toast.success("¡Bienvenido con Google!");
-        window.location.href = "/dashboard";
-      } catch {
-        toast.error("Error al registrar con Google");
-        setIsLoading(false);
-      }
-    },
-    flow: "implicit",
-    scope: "openid profile email",
-  });
-
-  useEffect(() => {
-    if (!googleButtonEvent) return;
-    const handler = () => googleOpen();
-    window.addEventListener(googleButtonEvent, handler);
-    return () => window.removeEventListener(googleButtonEvent, handler);
-  }, [googleButtonEvent, googleOpen]);
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setIsLoading(true);
+    try {
+      await googleAuthService.loginWithGoogle(credentialResponse.credential);
+      toast.success("!Bienvenido con Google!");
+      window.location.href = "/dashboard";
+    } catch {
+      toast.error("Error al registrarse con Google");
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
-        <h2 className="text-xl sm:text-2xl font-semibold text-orange-600 mb-2">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Crear cuenta
         </h2>
-        <p className="text-gray-600 text-sm sm:text-base">
-          Únete a la comunidad y comienza a ganar coins
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Unete a la comunidad y comienza a ganar coins
         </p>
       </div>
 
-      <div className="space-y-3 sm:space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nombre
             </label>
             <input
@@ -110,20 +92,20 @@ export default function RegisterForm({
                 required: "El nombre es requerido",
                 minLength: {
                   value: 2,
-                  message: "Mínimo 2 caracteres",
+                  message: "Minimo 2 caracteres",
                 },
               })}
-              className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
             />
             {errors.first_name && (
-              <p className="text-red-500 text-xs sm:text-sm mt-1">
+              <p className="mt-1 text-xs text-red-500">
                 {errors.first_name.message}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
               Apellido
             </label>
             <input
@@ -132,13 +114,13 @@ export default function RegisterForm({
                 required: "El apellido es requerido",
                 minLength: {
                   value: 2,
-                  message: "Mínimo 2 caracteres",
+                  message: "Minimo 2 caracteres",
                 },
               })}
-              className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
             />
             {errors.last_name && (
-              <p className="text-red-500 text-xs sm:text-sm mt-1">
+              <p className="mt-1 text-xs text-red-500">
                 {errors.last_name.message}
               </p>
             )}
@@ -146,8 +128,8 @@ export default function RegisterForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Correo electrónico
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Correo electronico
           </label>
           <input
             placeholder="tu@email.com"
@@ -156,28 +138,28 @@ export default function RegisterForm({
               required: "El correo es requerido",
               pattern: {
                 value: /^\S+@\S+$/i,
-                message: "Correo electrónico inválido",
+                message: "Correo electronico invalido",
               },
             })}
-            className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
           />
           {errors.email && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
+            <p className="mt-1 text-xs text-red-500">
               {errors.email.message}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            ¿Cuál es tu rol?
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            ?Cual es tu rol?
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label
-              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all text-sm sm:text-base font-medium ${
+              className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
                 watch("role") === "estudiante" || !watch("role")
-                  ? "border-orange-500 bg-orange-50 text-orange-700 shadow-sm"
-                  : "border-gray-300 bg-white text-gray-600 hover:border-gray-400"
+                  ? "border-[#EA580C] bg-[#FFF3EB] text-[#EA580C] shadow-sm dark:border-[#F59E0B] dark:bg-[#EA580C]/20 dark:text-[#FBBF24]"
+                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:bg-[#241E1A] dark:text-gray-400 dark:hover:border-gray-600"
               }`}
             >
               <input
@@ -195,10 +177,10 @@ export default function RegisterForm({
               Estudiante
             </label>
             <label
-              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all text-sm sm:text-base font-medium ${
+              className={`flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all ${
                 watch("role") === "docente"
-                  ? "border-orange-500 bg-orange-50 text-orange-700 shadow-sm"
-                  : "border-gray-300 bg-white text-gray-600 hover:border-gray-400"
+                  ? "border-[#EA580C] bg-[#FFF3EB] text-[#EA580C] shadow-sm dark:border-[#F59E0B] dark:bg-[#EA580C]/20 dark:text-[#FBBF24]"
+                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 dark:border-gray-700 dark:bg-[#241E1A] dark:text-gray-400 dark:hover:border-gray-600"
               }`}
             >
               <input
@@ -216,33 +198,33 @@ export default function RegisterForm({
             </label>
           </div>
           {errors.role && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
+            <p className="mt-1 text-xs text-red-500">
               {errors.role.message}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Contraseña
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Contrasena
           </label>
           <div className="relative">
             <input
-              placeholder="••••••••"
+              placeholder="********"
               type={showPassword ? "text" : "password"}
               {...register("password", {
-                required: "La contraseña es requerida",
+                required: "La contrasena es requerida",
                 minLength: {
                   value: 6,
-                  message: "Mínimo 6 caracteres",
+                  message: "Minimo 6 caracteres",
                 },
               })}
-              className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg pr-10 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-11 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
             />
             <button
               type="button"
               onClick={() => setShowPassword((p) => !p)}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+              className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             >
               {showPassword ? (
                 <EyeSlashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -252,31 +234,31 @@ export default function RegisterForm({
             </button>
           </div>
           {errors.password && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
+            <p className="mt-1 text-xs text-red-500">
               {errors.password.message}
             </p>
           )}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Confirmar contraseña
+          <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Confirmar contrasena
           </label>
           <div className="relative">
             <input
-              placeholder="••••••••"
+              placeholder="********"
               type={showConfirm ? "text" : "password"}
               {...register("password_confirm", {
-                required: "Confirma tu contraseña",
+                required: "Confirma tu contrasena",
                 validate: (v) =>
-                  v === password || "Las contraseñas no coinciden",
+                  v === password || "Las contrasenas no coinciden",
               })}
-              className="w-full px-3 sm:px-4 py-2.5 border border-gray-300 rounded-lg pr-10 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
+              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-11 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
             />
             <button
               type="button"
               onClick={() => setShowConfirm((p) => !p)}
-              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+              className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             >
               {showConfirm ? (
                 <EyeSlashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -286,7 +268,7 @@ export default function RegisterForm({
             </button>
           </div>
           {errors.password_confirm && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">
+            <p className="mt-1 text-xs text-red-500">
               {errors.password_confirm.message}
             </p>
           )}
@@ -296,7 +278,7 @@ export default function RegisterForm({
       <button
         type="submit"
         disabled={isSubmitting || isLoading}
-        className="w-full bg-orange-500 text-white py-2.5 sm:py-3 rounded-lg hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed transition-colors font-semibold text-sm sm:text-base flex items-center justify-center gap-2"
+        className="w-full rounded-xl bg-[#EA580C] py-3 text-sm font-semibold text-white shadow-lg shadow-[#EA580C]/20 transition-all hover:bg-[#C2410C] hover:shadow-xl hover:shadow-[#EA580C]/25 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98] flex items-center justify-center gap-2"
       >
         {isSubmitting || isLoading ? (
           <>
@@ -310,48 +292,36 @@ export default function RegisterForm({
 
       <div className="relative flex items-center justify-center">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300"></div>
+          <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
         </div>
-        <div className="relative bg-white px-3 text-sm text-gray-500">
-          o regístrate con
+        <div className="relative bg-white px-3 text-sm text-gray-400 dark:bg-[#181412] dark:text-gray-500">
+          o registrate con
         </div>
       </div>
 
       <div className="flex justify-center">
         <GoogleLogin
-          onSuccess={async (res) => {
-            setIsLoading(true);
-            try {
-              const id_token =
-                res.credential || res.id_token || res.access_token;
-              await googleAuthService.loginWithGoogle(id_token);
-              toast.success("¡Cuenta creada con Google!");
-              window.location.href = "/dashboard";
-            } catch {
-              toast.error("No fue posible crear la cuenta con Google");
-              setIsLoading(false);
-            }
-          }}
+          onSuccess={handleGoogleSuccess}
           onError={() => {
             toast.error("Error al conectar con Google");
             setIsLoading(false);
           }}
-          theme="filled_blue"
-          size="medium"
+          theme="outline"
+          size="large"
           text="signup_with"
           shape="rectangular"
           width="100%"
         />
       </div>
 
-      <p className="text-sm text-gray-600 text-center">
-        ¿Ya tienes cuenta?{" "}
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+        ?Ya tienes cuenta?{" "}
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-orange-600 font-medium hover:text-orange-700 underline transition-colors"
+          className="font-medium text-[#EA580C] underline transition hover:text-[#C2410C] dark:text-[#FBBF24] dark:hover:text-[#FCD34D]"
         >
-          Inicia sesión aquí
+          Inicia sesion aqui
         </button>
       </p>
     </form>

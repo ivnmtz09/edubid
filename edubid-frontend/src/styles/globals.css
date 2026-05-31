@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 :root {
@@ -42,33 +43,33 @@
 }
 
 .dark {
-  --background: #0a1120; /* navy casi negro */
-  --foreground: #e2e8f0; /* text-slate-200 */
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --popover: #1e293b;
-  --popover-foreground: #f1f5f9;
-  --primary: #3b82f6; /* blue-500 */
-  --primary-foreground: #f9fafb;
-  --secondary: #1e40af; /* blue-900 */
-  --secondary-foreground: #f9fafb;
-  --muted: #334155;
-  --muted-foreground: #cbd5e1;
-  --accent: #2563eb; /* blue-600 */
-  --accent-foreground: #f9fafb;
-  --destructive: #b91c1c;
+  --background: #181412;
+  --foreground: #F3F4F6;
+  --card: #241E1A;
+  --card-foreground: #F3F4F6;
+  --popover: #241E1A;
+  --popover-foreground: #F3F4F6;
+  --primary: #EA580C;
+  --primary-foreground: #ffffff;
+  --secondary: #3A2A24;
+  --secondary-foreground: #F3F4F6;
+  --muted: #2C241E;
+  --muted-foreground: #A89A8C;
+  --accent: #F59E0B;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
   --destructive-foreground: #fee2e2;
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #3b82f6;
-  --sidebar: #1e293b; /* azul oscuro sidebar */
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #2563eb;
-  --sidebar-primary-foreground: #f9fafb;
-  --sidebar-accent: #334155;
-  --sidebar-accent-foreground: #f1f5f9;
-  --sidebar-border: #1e293b;
-  --sidebar-ring: #3b82f6;
+  --border: #3A3028;
+  --input: #3A3028;
+  --ring: #EA580C;
+  --sidebar: #1A1410;
+  --sidebar-foreground: #F3F4F6;
+  --sidebar-primary: #EA580C;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #3A3028;
+  --sidebar-accent-foreground: #F3F4F6;
+  --sidebar-border: #3A3028;
+  --sidebar-ring: #EA580C;
 }
 
 @theme inline {
@@ -108,6 +109,10 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+
+  html {
+    transition: background-color 0.35s ease;
   }
   body {
     @apply bg-background text-foreground;
@@ -285,6 +290,75 @@
 
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
+}
+
+/* Particle floating animation */
+@keyframes particle-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(-10px) translateX(-10px);
+  }
+  75% {
+    transform: translateY(-25px) translateX(5px);
+  }
+}
+
+@keyframes particle-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+/* Stroke-draw animation for SVG paths */
+@keyframes stroke-draw {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.stroke-animate path {
+  stroke-dasharray: 1000;
+  animation: stroke-draw 2.5s ease-out forwards;
+}
+
+/* Glassmorphism base */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Glow animation for CTA */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(234, 88, 12, 0.3), 0 0 40px rgba(234, 88, 12, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(234, 88, 12, 0.5), 0 0 60px rgba(234, 88, 12, 0.2);
+  }
+}
+
+.glow-cta {
+  animation: glow-pulse 3s ease-in-out infinite;
 }
 
 @layer utilities {
