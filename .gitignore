@@ -120,11 +120,6 @@ build/
 *.coverage
 coverage/
 
-# Aider
-.aider*
-.env
-.venv
-
 # MySQL local data
 *.sql
 *.mysql
