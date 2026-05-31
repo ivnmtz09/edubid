@@ -14,14 +14,27 @@ function DashboardMockup() {
         <span className="w-3 h-3 rounded-full bg-red-400" />
         <span className="w-3 h-3 rounded-full bg-amber-400" />
         <span className="w-3 h-3 rounded-full bg-emerald-400" />
-        <span className="ml-3 text-xs text-gray-400 dark:text-gray-500 font-mono">dashboard.edubid.app</span>
+        <span className="ml-3 text-xs text-gray-400 dark:text-gray-500 font-mono">
+          dashboard.edubid.app
+        </span>
       </div>
       <div className="p-4 sm:p-6 bg-white/40 dark:bg-black/20 backdrop-blur-xl">
         <div className="grid grid-cols-3 gap-3 mb-4">
-          {[["Cursos", "12"], ["Monedas", "2,450"], ["Retos", "8"]].map(([label, value]) => (
-            <div key={label} className="rounded-xl bg-white/60 dark:bg-white/5 p-3 border border-gray-200/50 dark:border-white/5">
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500">{label}</p>
-              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{value}</p>
+          {[
+            ["Cursos", "12"],
+            ["Monedas", "2,450"],
+            ["Retos", "8"],
+          ].map(([label, value]) => (
+            <div
+              key={label}
+              className="rounded-xl bg-white/60 dark:bg-white/5 p-3 border border-gray-200/50 dark:border-white/5"
+            >
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                {label}
+              </p>
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                {value}
+              </p>
             </div>
           ))}
         </div>
@@ -32,11 +45,12 @@ function DashboardMockup() {
               className="flex-1 rounded-t-md transition-all duration-500"
               style={{
                 height: `${h}%`,
-                background: i % 3 === 0
-                  ? 'linear-gradient(to top, #EA580C, #F97316)'
-                  : i % 3 === 1
-                    ? 'linear-gradient(to top, #2563EB, #3B82F6)'
-                    : 'linear-gradient(to top, #D97706, #F59E0B)',
+                background:
+                  i % 3 === 0
+                    ? "linear-gradient(to top, #EA580C, #F97316)"
+                    : i % 3 === 1
+                      ? "linear-gradient(to top, #2563EB, #3B82F6)"
+                      : "linear-gradient(to top, #D97706, #F59E0B)",
                 opacity: 0.7,
               }}
             />
@@ -44,29 +58,43 @@ function DashboardMockup() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function IllustrationSvg() {
   return (
-    <svg width="900" height="400" viewBox="0 0 900 400" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="750" cy="80" r="120" fill="#FF6B00" opacity="0.08"/>
-      <circle cx="150" cy="320" r="140" fill="#4285F4" opacity="0.08"/>
-      <rect x="200" y="80" width="500" height="240" rx="20" fill="#F9F9F9" opacity="0.9"/>
-      <rect x="200" y="80" width="500" height="40" rx="20" fill="#FF6B00"/>
-      <circle cx="380" cy="190" r="18" fill="#1A1A1A"/>
-      <rect x="365" y="210" width="30" height="40" rx="6" fill="#FF6B00"/>
-      <circle cx="460" cy="200" r="14" fill="#333"/>
-      <rect x="448" y="215" width="24" height="30" rx="5" fill="#4285F4"/>
-      <circle cx="520" cy="200" r="14" fill="#333"/>
-      <rect x="508" y="215" width="24" height="30" rx="5" fill="#FF6B00"/>
-      <rect x="430" y="140" width="50" height="20" rx="4" fill="#4285F4"/>
-      <rect x="490" y="140" width="50" height="20" rx="4" fill="#FF6B00"/>
-      <rect x="240" y="140" width="100" height="8" rx="4" fill="#DDD"/>
-      <rect x="240" y="160" width="80" height="8" rx="4" fill="#DDD"/>
-      <rect x="240" y="180" width="60" height="8" rx="4" fill="#DDD"/>
+    <svg
+      width="900"
+      height="400"
+      viewBox="0 0 900 400"
+      className="w-full h-auto"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="750" cy="80" r="120" fill="#FF6B00" opacity="0.08" />
+      <circle cx="150" cy="320" r="140" fill="#4285F4" opacity="0.08" />
+      <rect
+        x="200"
+        y="80"
+        width="500"
+        height="240"
+        rx="20"
+        fill="#F9F9F9"
+        opacity="0.9"
+      />
+      <rect x="200" y="80" width="500" height="40" rx="20" fill="#FF6B00" />
+      <circle cx="380" cy="190" r="18" fill="#1A1A1A" />
+      <rect x="365" y="210" width="30" height="40" rx="6" fill="#FF6B00" />
+      <circle cx="460" cy="200" r="14" fill="#333" />
+      <rect x="448" y="215" width="24" height="30" rx="5" fill="#4285F4" />
+      <circle cx="520" cy="200" r="14" fill="#333" />
+      <rect x="508" y="215" width="24" height="30" rx="5" fill="#FF6B00" />
+      <rect x="430" y="140" width="50" height="20" rx="4" fill="#4285F4" />
+      <rect x="490" y="140" width="50" height="20" rx="4" fill="#FF6B00" />
+      <rect x="240" y="140" width="100" height="8" rx="4" fill="#DDD" />
+      <rect x="240" y="160" width="80" height="8" rx="4" fill="#DDD" />
+      <rect x="240" y="180" width="60" height="8" rx="4" fill="#DDD" />
     </svg>
-  )
+  );
 }
 
 export default function AuthLandingComponent() {
@@ -105,14 +133,15 @@ export default function AuthLandingComponent() {
                 Plataforma educativa #1 en Latinoamerica
               </div>
               <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-gray-100 leading-tight">
-                Aprende,{' '}
+                Aprende,{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EA580C] to-[#F97316]">
                   Gana
                 </span>
                 , Crece.
               </h1>
               <p className="mt-3 text-base lg:text-lg text-gray-500 dark:text-gray-400 max-w-md">
-                Convierte tu conocimiento en recompensas. Desafia a otros, sube de nivel y demuestra tu talento en EduBid.
+                Convierte tu conocimiento en recompensas. Desafia a otros, sube
+                de nivel y demuestra tu talento en EduBid.
               </p>
             </motion.div>
 
@@ -170,7 +199,10 @@ export default function AuthLandingComponent() {
                 ))}
               </div>
               <p className="text-gray-400 dark:text-gray-500">
-                <span className="font-semibold text-gray-700 dark:text-gray-300">+10,000</span> estudiantes activos
+                <span className="font-semibold text-gray-700 dark:text-gray-300">
+                  +10,000
+                </span>{" "}
+                estudiantes activos
               </p>
             </motion.div>
 
@@ -214,7 +246,11 @@ export default function AuthLandingComponent() {
             {/* Branding - Above form card */}
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-4">
-                <img src="/assets/coins/coin.png" alt="EduBid Logo" className="w-14 h-14 object-contain" />
+                <img
+                  src="/assets/coins/coin.png"
+                  alt="EduBid Logo"
+                  className="w-14 h-14 object-contain"
+                />
                 <span className="text-5xl font-extrabold text-gray-900 dark:text-white">
                   EduBid
                 </span>
@@ -222,11 +258,13 @@ export default function AuthLandingComponent() {
             </div>
 
             {/* Form card */}
-            <div className="rounded-2xl p-6 sm:p-8
+            <div
+              className="rounded-2xl p-6 sm:p-8
               bg-white dark:bg-[#241E1A]
               backdrop-blur-xl
               border border-gray-200/50 dark:border-white/10
-              shadow-xl">
+              shadow-xl"
+            >
               <AnimatePresence mode="wait">
                 {!activeForm ? (
                   <motion.div
@@ -240,11 +278,17 @@ export default function AuthLandingComponent() {
                       !Bienvenido!
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
-                      Convierte el aprendizaje en una aventura. Gana monedas, sube de nivel y demuestra tu talento.
+                      Convierte el aprendizaje en una aventura. Gana monedas,
+                      sube de nivel y demuestra tu talento.
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {["Aprendizaje", "Recompensas", "Retos", "Colaboracion"].map((tag) => (
+                      {[
+                        "Aprendizaje",
+                        "Recompensas",
+                        "Retos",
+                        "Colaboracion",
+                      ].map((tag) => (
                         <span
                           key={tag}
                           className="rounded-full px-3 py-1 text-xs font-medium
@@ -287,7 +331,13 @@ export default function AuthLandingComponent() {
                             onClick={() => setActiveForm(null)}
                             className="inline-flex items-center gap-2 text-sm font-medium text-[#EA580C] hover:text-[#C2410C] transition-colors dark:text-[#FBBF24] dark:hover:text-[#FCD34D]"
                           >
-                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg
+                              className="h-4 w-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
                               <path d="M19 12H5M12 19l-7-7 7-7" />
                             </svg>
                             Volver al inicio
@@ -317,7 +367,13 @@ export default function AuthLandingComponent() {
                             onClick={() => setActiveForm(null)}
                             className="inline-flex items-center gap-2 text-sm font-medium text-[#EA580C] hover:text-[#C2410C] transition-colors dark:text-[#FBBF24] dark:hover:text-[#FCD34D]"
                           >
-                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg
+                              className="h-4 w-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
                               <path d="M19 12H5M12 19l-7-7 7-7" />
                             </svg>
                             Volver al inicio
