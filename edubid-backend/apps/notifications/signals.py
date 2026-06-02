@@ -3,9 +3,47 @@ from django.dispatch import receiver
 from apps.grades.models import Grade
 from apps.auctions.models import Auction, Bid
 from apps.tokens.models import CoinTransaction
-from apps.activities.models import Submission
+from apps.activities.models import Activity, Submission
 from apps.users.token_models import EmailVerificationToken, LoginFailureTracker
 from .models import Notification
+
+
+# ==========================================
+# 📋 SEÑAL: Nueva Actividad creada
+# ==========================================
+
+@receiver(post_save, sender=Activity)
+def notificar_nueva_actividad(sender, instance, created, **kwargs):
+    """Notificar a todos los estudiantes del grupo cuando el docente crea una actividad"""
+    if not created:
+        return
+    try:
+        estudiantes = instance.group.estudiantes.all()
+        tipo_label = dict(Activity.TIPOS).get(instance.tipo, instance.tipo).capitalize()
+
+        notificaciones = [
+            Notification(
+                usuario=estudiante,
+                tipo='actividad',
+                titulo=f'📋 Nueva {tipo_label} asignada',
+                mensaje=f'Tu docente ha asignado una nueva actividad: "{instance.nombre}". Fecha de entrega: {instance.fecha_entrega.strftime("%d/%m/%Y %H:%M")}',
+                activity_id=instance.id,
+                metadata={
+                    'activity_nombre': instance.nombre,
+                    'activity_tipo': instance.tipo,
+                    'fecha_entrega': instance.fecha_entrega.isoformat(),
+                    'valor_educoins': instance.valor_educoins,
+                    'grupo_nombre': instance.group.nombre,
+                }
+            )
+            for estudiante in estudiantes
+        ]
+
+        if notificaciones:
+            Notification.objects.bulk_create(notificaciones)
+            print(f"✅ Notificaciones de actividad enviadas a {len(notificaciones)} estudiante(s) para: {instance.nombre}")
+    except Exception as e:
+        print(f"❌ Error creando notificaciones de nueva actividad: {e}")
 
 
 @receiver(post_save, sender=Grade)
@@ -55,31 +93,38 @@ def notificar_entrega_estudiante(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Auction)
 def notificar_nueva_subasta(sender, instance, created, **kwargs):
     """Notificar a los estudiantes del grupo cuando hay una nueva subasta"""
-    if created and instance.estado == 'active':
-        try:
-            grupo = instance.grupo
-            estudiantes = grupo.estudiantes.all()
-            
-            notificaciones = [
-                Notification(
-                    usuario=estudiante,
-                    tipo='subasta_nueva',
-                    titulo='Nueva subasta disponible',
-                    mensaje=f'Nueva subasta: "{instance.titulo}" - ¡Participa ahora!',
-                    auction_id=instance.id,
-                    metadata={
-                        'auction_titulo': instance.titulo,
-                        'fecha_fin': instance.fecha_fin.isoformat(),
-                        'precio_inicial': str(instance.precio_inicial)
-                    }
-                )
-                for estudiante in estudiantes
-            ]
-            
-            if notificaciones:
-                Notification.objects.bulk_create(notificaciones)
-        except Exception as e:
-            print(f"Error creando notificaciones de subasta: {e}")
+    if not created:
+        return
+    try:
+        grupo = instance.grupo
+        estudiantes = grupo.estudiantes.all()
+
+        from django.utils import timezone
+        fecha_fin_local = instance.fecha_fin.strftime("%d/%m/%Y %H:%M")
+
+        notificaciones = [
+            Notification(
+                usuario=estudiante,
+                tipo='subasta_nueva',
+                titulo='🏆 Nueva subasta disponible',
+                mensaje=f'¡Nueva subasta en tu grupo! "{instance.titulo}" — Cierra el {fecha_fin_local}. ¡Participa ahora!',
+                auction_id=instance.id,
+                metadata={
+                    'auction_titulo': instance.titulo,
+                    'fecha_fin': instance.fecha_fin.isoformat(),
+                    'valor_minimo': str(instance.valor_minimo),
+                    'grupo_nombre': grupo.nombre,
+                }
+            )
+            for estudiante in estudiantes
+        ]
+
+        if notificaciones:
+            Notification.objects.bulk_create(notificaciones)
+            print(f"✅ Notificaciones de subasta enviadas a {len(notificaciones)} estudiante(s) para: {instance.titulo}")
+    except Exception as e:
+        print(f"❌ Error creando notificaciones de subasta: {e}")
+
 
 
 @receiver(post_save, sender=Bid)

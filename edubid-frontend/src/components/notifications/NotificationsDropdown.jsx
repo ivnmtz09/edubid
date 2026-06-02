@@ -14,7 +14,9 @@ import {
   EyeSlashIcon,
   CheckBadgeIcon,
   ExclamationTriangleIcon,
-  EllipsisHorizontalIcon
+  EllipsisHorizontalIcon,
+  ArrowRightIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline'
 import api from '../../services/api'
 import { formatDateTime, formatRelativeTime } from '../../utils/helpers'
@@ -55,7 +57,7 @@ const NotificationsDropdown = () => {
         return []
       }
     },
-    refetchInterval: 30000, // Refetch cada 30 segundos
+    refetchInterval: 15000, // Refetch cada 15 segundos
     retry: 3,
     staleTime: 10000, // 10 segundos
   })
@@ -85,7 +87,7 @@ const NotificationsDropdown = () => {
       await api.post(`/api/notifications/${id}/marcar-leida/`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['notifications'])
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
     },
     onError: (error) => {
       console.error('Error marking as read:', error)
@@ -98,7 +100,7 @@ const NotificationsDropdown = () => {
       await api.post('/api/notifications/marcar-todas-leidas/')
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['notifications'])
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
       toast.success('Todas las notificaciones marcadas como leídas')
     },
     onError: () => {
@@ -111,7 +113,7 @@ const NotificationsDropdown = () => {
       await api.delete(`/api/notifications/${id}/`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['notifications'])
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
       toast.success('Notificación eliminada')
     },
     onError: () => {
@@ -129,7 +131,7 @@ const NotificationsDropdown = () => {
       )
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['notifications'])
+      queryClient.invalidateQueries({ queryKey: ['notifications'] })
       toast.success('Notificaciones leídas eliminadas')
     },
     onError: () => {
@@ -162,7 +164,7 @@ const NotificationsDropdown = () => {
     
     switch (tipo) {
       case 'actividad':
-        return <AcademicCapIcon className={`${baseClasses} text-blue-600`} />
+        return <ClipboardDocumentListIcon className={`${baseClasses} text-blue-600`} />
       case 'calificacion':
         return <CheckIcon className={`${baseClasses} text-green-600`} />
       case 'monedas':
@@ -473,7 +475,11 @@ const NotificationsDropdown = () => {
                   >
                     <div 
                       onClick={() => handleNotificationClick(notification)}
-                      className="flex items-start gap-3 cursor-pointer touch-manipulation"
+                      className={`flex items-start gap-3 ${
+                        (notification.activity_id || notification.auction_id || notification.grade_id || notification.tipo === 'monedas')
+                          ? 'cursor-pointer touch-manipulation'
+                          : 'cursor-default'
+                      }`}
                     >
                       {/* Icon */}
                       <div className={`p-2 rounded-lg flex-shrink-0 border ${getNotificationColor(notification.tipo)}`}>
@@ -488,9 +494,14 @@ const NotificationsDropdown = () => {
                           }`}>
                             {notification.titulo}
                           </p>
-                          {!notification.leida && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1.5"></div>
-                          )}
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            {!notification.leida && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
+                            )}
+                            {(notification.activity_id || notification.auction_id) && (
+                              <ArrowRightIcon className="h-3.5 w-3.5 text-gray-400 mt-0.5" />
+                            )}
+                          </div>
                         </div>
                         
                         <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed mb-2 break-words">
@@ -508,6 +519,16 @@ const NotificationsDropdown = () => {
                             {notification.metadata.cantidad && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                 +{notification.metadata.cantidad} EC
+                              </span>
+                            )}
+                            {notification.metadata.valor_educoins && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                🎁 {notification.metadata.valor_educoins} EC
+                              </span>
+                            )}
+                            {notification.metadata.valor_minimo && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                Mínimo: {notification.metadata.valor_minimo} EC
                               </span>
                             )}
                           </div>

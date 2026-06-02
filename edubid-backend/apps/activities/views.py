@@ -29,6 +29,11 @@ class ActivityViewSet(viewsets.ModelViewSet):
         else:
             return Activity.objects.none()
         
+        # Filtro opcional por grupo
+        group_id = self.request.query_params.get('group')
+        if group_id:
+            queryset = queryset.filter(group_id=group_id)
+        
         queryset = queryset.prefetch_related('submissions__estudiante')
         return queryset
 

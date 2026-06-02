@@ -44,8 +44,8 @@ const AuctionDetailPage = () => {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['auction', id]);
-      queryClient.invalidateQueries(['wallet']);
+      queryClient.invalidateQueries({ queryKey: ['auction', id] });
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
       setBidAmount('');
       setShowBidForm(false);
     },
@@ -58,8 +58,8 @@ const AuctionDetailPage = () => {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['auction', id]);
-      queryClient.invalidateQueries(['auctions']);
+      queryClient.invalidateQueries({ queryKey: ['auction', id] });
+      queryClient.invalidateQueries({ queryKey: ['auctions'] });
     },
   });
 
