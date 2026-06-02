@@ -8,7 +8,8 @@ export const useActivities = (params = {}) => {
   return useQuery({
     queryKey: ["activities", params],
     queryFn: () => activityService.getActivities(params),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5000, // 5 segundos
+    refetchInterval: 15000, // Refetch cada 15 segundos para dinamismo en tiempo real
   })
 }
 

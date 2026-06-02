@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import {
@@ -11,12 +12,16 @@ import {
   CheckIcon,
   UserIcon,
   EnvelopeIcon,
-  ClockIcon
+  ClockIcon,
+  CurrencyEuroIcon,
+  CheckCircleIcon,
+  XCircleIcon
 } from "@heroicons/react/24/outline"
+import { Link } from "react-router-dom"
 import { useAuthContext } from "../../context/AuthContext"
+import { useActivities } from "../../hooks/useActivities"
 import api from "../../services/api"
 import LoadingSpinner from "../common/LoadingSpinner"
-import { useState } from "react"
 import EditGroupModal from "./EditGroupModal"
 
 const GroupDetailPage = () => {
@@ -42,6 +47,9 @@ const GroupDetailPage = () => {
       }
     },
   })
+
+  // Fetch activities filtered by this group
+  const { data: activities = [], isLoading: loadingActivities } = useActivities({ group: id })
 
   const formatDate = (date) => {
     if (!date) return "N/A"
@@ -346,6 +354,11 @@ const GroupDetailPage = () => {
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
               <ClipboardDocumentListIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
               Actividades del Grupo
+              {activities.length > 0 && (
+                <span className="text-sm text-gray-500 bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-normal">
+                  {activities.length}
+                </span>
+              )}
             </h2>
             {isTeacher && (
               <button
@@ -358,25 +371,108 @@ const GroupDetailPage = () => {
             )}
           </div>
 
-          <div className="text-center py-8 sm:py-12 bg-purple-50 rounded-lg sm:rounded-xl border border-purple-200">
-            <ClipboardDocumentListIcon className="h-12 w-12 sm:h-16 sm:w-16 text-purple-300 mx-auto mb-3 sm:mb-4" />
-            <h3 className="text-base sm:text-lg font-medium text-purple-900 mb-2">
-              No hay actividades asignadas
-            </h3>
-            <p className="text-purple-700 text-sm sm:text-base mb-4 max-w-md mx-auto px-4">
-              Las actividades asignadas a este grupo aparecerán aquí
-            </p>
-            {isTeacher && (
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <button
-                  onClick={() => navigate("/activities")}
-                  className="bg-purple-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-600 transition font-medium text-sm sm:text-base"
-                >
-                  Ver actividades
-                </button>
-              </div>
-            )}
-          </div>
+          {loadingActivities ? (
+            <div className="flex justify-center py-8">
+              <LoadingSpinner size="md" />
+            </div>
+          ) : activities.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {activities.map((activity) => {
+                const isVencida = activity.esta_vencida
+                const hasSubmission = activity.user_submission != null
+                const isCalificada = hasSubmission && activity.user_submission?.calificacion != null
+
+                return (
+                  <Link
+                    key={activity.id}
+                    to={`/activities/${activity.id}`}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] overflow-hidden flex flex-col group"
+                  >
+                    {/* Card Header */}
+                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-white/80 uppercase">
+                          {activity.tipo}
+                        </span>
+                        {isTeacher ? (
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            activity.habilitada ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                          }`}>
+                            {activity.habilitada ? "Activa" : "Inactiva"}
+                          </span>
+                        ) : (
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            isCalificada ? "bg-green-100 text-green-700" :
+                            hasSubmission ? "bg-blue-100 text-blue-700" :
+                            isVencida ? "bg-red-100 text-red-700" :
+                            "bg-yellow-100 text-yellow-700"
+                          }`}>
+                            {isCalificada ? "Calificada" :
+                             hasSubmission ? "Entregada" :
+                             isVencida ? "Vencida" : "Pendiente"}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-bold text-white text-sm line-clamp-2">
+                        {activity.nombre}
+                      </h3>
+                    </div>
+
+                    {/* Card Body */}
+                    <div className="p-4 space-y-2 flex-1">
+                      <p className="text-gray-500 text-xs line-clamp-2">
+                        {activity.descripcion || "Sin descripción"}
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-gray-600 pt-1">
+                        <div className="flex items-center gap-1">
+                          <CalendarIcon className="h-3.5 w-3.5 text-gray-400" />
+                          <span>
+                            {new Date(activity.fecha_entrega).toLocaleDateString("es-ES", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric"
+                            })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-orange-600 font-semibold">
+                          <CurrencyEuroIcon className="h-3.5 w-3.5" />
+                          <span>{activity.valor_edubids} EC</span>
+                        </div>
+                      </div>
+                      {isStudent && isCalificada && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-2 flex items-center justify-between">
+                          <span className="text-xs text-green-700">Tu nota:</span>
+                          <span className="font-bold text-green-700 text-sm">
+                            {activity.user_submission.calificacion}/{activity.valor_notas}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8 sm:py-12 bg-purple-50 rounded-lg sm:rounded-xl border border-purple-200">
+              <ClipboardDocumentListIcon className="h-12 w-12 sm:h-16 sm:w-16 text-purple-300 mx-auto mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-medium text-purple-900 mb-2">
+                No hay actividades asignadas
+              </h3>
+              <p className="text-purple-700 text-sm sm:text-base mb-4 max-w-md mx-auto px-4">
+                Las actividades asignadas a este grupo aparecerán aquí
+              </p>
+              {isTeacher && (
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    onClick={() => navigate("/activities")}
+                    className="bg-purple-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-600 transition font-medium text-sm sm:text-base"
+                  >
+                    Crear actividad
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Información adicional para móviles */}

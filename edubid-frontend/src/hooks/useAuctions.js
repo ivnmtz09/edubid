@@ -16,7 +16,8 @@ export const useAuctions = (params = {}) => {
       }
       return []
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5000, // 5 segundos
+    refetchInterval: 15000, // Refetch cada 15 segundos para dinamismo en tiempo real
   })
 }
 

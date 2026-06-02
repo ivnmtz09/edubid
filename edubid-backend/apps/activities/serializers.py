@@ -10,6 +10,7 @@ class ActivitySerializer(serializers.ModelSerializer):
     puede_entregar = serializers.SerializerMethodField()
     esta_vencida = serializers.SerializerMethodField()
     tiempo_restante = serializers.SerializerMethodField()
+    valor_edubids = serializers.IntegerField(source='valor_educoins', required=False)
 
     class Meta:
         model = Activity

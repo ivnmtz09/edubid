@@ -12,12 +12,12 @@ export function useSubmissions(activityId) {
 
   const createSubmission = useMutation({
     mutationFn: submissionService.createSubmission,
-    onSuccess: () => queryClient.invalidateQueries(["submissions", activityId]),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["submissions", activityId] }),
   })
 
   const updateSubmission = useMutation({
     mutationFn: submissionService.updateSubmission,
-    onSuccess: () => queryClient.invalidateQueries(["submissions", activityId]),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["submissions", activityId] }),
   })
 
   return {

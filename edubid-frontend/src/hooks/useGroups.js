@@ -18,7 +18,7 @@ export const useCreateGroup = () => {
   return useMutation({
     mutationFn: groupsService.createGroup,
     onSuccess: () => {
-      queryClient.invalidateQueries(["groups"])
+      queryClient.invalidateQueries({ queryKey: ["groups"] })
       toast.success("Grupo creado")
     },
   })
@@ -29,7 +29,7 @@ export const useUpdateGroup = () => {
   return useMutation({
     mutationFn: ({ id, data }) => groupsService.updateGroup(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries(["groups"])
+      queryClient.invalidateQueries({ queryKey: ["groups"] })
       toast.success("Grupo actualizado")
     },
   })
@@ -40,7 +40,7 @@ export const useDeleteGroup = () => {
   return useMutation({
     mutationFn: groupsService.deleteGroup,
     onSuccess: () => {
-      queryClient.invalidateQueries(["groups"])
+      queryClient.invalidateQueries({ queryKey: ["groups"] })
       toast.success("Grupo eliminado")
     },
   })
@@ -51,7 +51,7 @@ export const useJoinGroup = () => {
   return useMutation({
     mutationFn: (code) => groupsService.joinGroup(code),
     onSuccess: () => {
-      queryClient.invalidateQueries(["groups"])
+      queryClient.invalidateQueries({ queryKey: ["groups"] })
       toast.success("Te uniste al grupo exitosamente")
     },
     onError: (error) => {
