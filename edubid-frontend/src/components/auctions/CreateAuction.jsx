@@ -14,6 +14,8 @@ const CreateAuction = ({ auction, onClose }) => {
     descripcion: "",
     grupo: "",
     fecha_fin: "",
+    valor_minimo: 1,
+    incremento_minimo: 10,
   })
   const [errors, setErrors] = useState({})
 
@@ -32,6 +34,8 @@ const CreateAuction = ({ auction, onClose }) => {
         descripcion: auction.descripcion || "",
         grupo: auction.grupo?.id || auction.grupo || "",
         fecha_fin: auction.fecha_fin ? new Date(auction.fecha_fin).toISOString().slice(0, 16) : "",
+        valor_minimo: auction.valor_minimo ?? 1,
+        incremento_minimo: auction.incremento_minimo ?? 10,
       })
     }
   }, [auction])
@@ -200,6 +204,41 @@ const CreateAuction = ({ auction, onClose }) => {
         </div>
       </div>
 
+      {/* Configuración de pujas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div>
+          <label htmlFor="valor_minimo" className="block text-sm font-medium text-gray-700 mb-1">
+            Puja inicial mínima
+          </label>
+          <input
+            type="number"
+            id="valor_minimo"
+            name="valor_minimo"
+            value={formData.valor_minimo}
+            onChange={handleChange}
+            min={1}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+          />
+          <p className="mt-1 text-xs text-gray-500">Monto mínimo para la primera puja (en edubids)</p>
+        </div>
+
+        <div>
+          <label htmlFor="incremento_minimo" className="block text-sm font-medium text-gray-700 mb-1">
+            Incremento mínimo
+          </label>
+          <input
+            type="number"
+            id="incremento_minimo"
+            name="incremento_minimo"
+            value={formData.incremento_minimo}
+            onChange={handleChange}
+            min={1}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+          />
+          <p className="mt-1 text-xs text-gray-500">Cada nueva puja debe superar la anterior por al menos este valor</p>
+        </div>
+      </div>
+
       {/* Información adicional */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
         <h4 className="font-medium text-blue-900 text-sm sm:text-base mb-2">Información importante</h4>
@@ -208,6 +247,7 @@ const CreateAuction = ({ auction, onClose }) => {
           <li>• Las edubids se bloquean durante la subasta</li>
           <li>• Solo el ganador pagará las edubids pujadas</li>
           <li>• Puedes cerrar la subasta manualmente en cualquier momento</li>
+          <li>• Define un incremento mínimo para que las pujas sean competitivas</li>
         </ul>
       </div>
 

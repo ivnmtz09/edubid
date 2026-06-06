@@ -160,7 +160,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
             wallet_ganador.save()
 
             # Registrar transacción
-            from apps.coins.models import CoinTransaction
+            from apps.tokens.models import CoinTransaction
             CoinTransaction.objects.create(
                 wallet=wallet_ganador,
                 tipo="spend",
@@ -343,7 +343,7 @@ class BidViewSet(viewsets.ModelViewSet):
             
             # Obtener la puja más alta actual para validar el monto mínimo
             highest_bid = auction.bids.order_by("-cantidad").first()
-            monto_minimo = highest_bid.cantidad + 1 if highest_bid else auction.valor_minimo
+            monto_minimo = (highest_bid.cantidad + auction.incremento_minimo) if highest_bid else auction.valor_minimo
             
             # Validar que la puja sea mayor o igual al monto mínimo requerido
             if cantidad < monto_minimo:
@@ -424,8 +424,10 @@ class BidViewSet(viewsets.ModelViewSet):
         logger.info(f"Intentando eliminar puja {instance.id}: usuario={user.id}, rol={user.role}")
         
         if user.role == 'estudiante':
-            logger.warning(f"Estudiante {user.id} intentó eliminar puja")
-            raise PermissionDenied("Los estudiantes no pueden eliminar pujas.")
+            if instance.estudiante != user:
+                logger.warning(f"Estudiante {user.id} intentó eliminar puja de otro estudiante {instance.estudiante.id}")
+                raise PermissionDenied("Solo puedes retirar tus propias pujas.")
+            # Estudiante retirando su propia puja - permitido
         
         if user.role == 'docente' and instance.auction.grupo.classroom.docente != user:
             logger.warning(f"Docente {user.id} intentó eliminar puja de otro grupo")

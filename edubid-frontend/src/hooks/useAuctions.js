@@ -88,11 +88,11 @@ export const usePlaceBid = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ auctionId, cantidad }) => auctionService.placeBid(auctionId, cantidad),
+    mutationFn: ({ auctionId, cantidad, estudiante }) => auctionService.placeBid(auctionId, cantidad, estudiante),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["auctions"] })
       queryClient.invalidateQueries({ queryKey: ["auction", variables.auctionId] })
-      queryClient.invalidateQueries({ queryKey: ["auction-bids", variables.auctionId] })
+      queryClient.invalidateQueries({ queryKey: ["auction-bids"] })
       queryClient.invalidateQueries({ queryKey: ["wallet"] })
       queryClient.invalidateQueries({ queryKey: ["all-wallets"] })
       toast.success("Puja realizada exitosamente")
@@ -108,12 +108,11 @@ export const usePlaceBid = () => {
   })
 }
 
-// NUEVO: Hook para aumentar puja existente
 export const useIncreaseBid = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ bidId, nuevaCantidad }) => auctionService.increaseBid(bidId, nuevaCantidad),
+    mutationFn: ({ auctionId, cantidad, estudiante }) => auctionService.increaseBid(auctionId, cantidad, estudiante),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["auctions"] })
       queryClient.invalidateQueries({ queryKey: ["auction-bids"] })

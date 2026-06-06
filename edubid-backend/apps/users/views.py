@@ -31,8 +31,15 @@ from .serializers import (
     ChangePasswordSerializer
 )
 from .permissions import IsAdmin
+from apps.notifications.utils import (
+    notificar_registro_exitoso,
+    notificar_email_verificado,
+    notificar_password_changed,
+    notificar_password_reset,
+    notificar_solicitud_password_reset,
+    notificar_login_exitoso,
+)
 
-# Configurar logger
 logger = logging.getLogger(__name__)
 
 User = get_user_model()
@@ -81,7 +88,12 @@ def api_register(request):
         except Exception as e:
             logger.error(f"💥 Error crítico con SendGrid API: {str(e)}")
             # Continuar con el registro aunque falle el email
-        
+
+        try:
+            notificar_registro_exitoso(user, is_google=False)
+        except Exception as e:
+            logger.error("Error creando notificación de registro: %s", e)
+
         return Response({
             'message': 'Usuario registrado. Por favor verifica tu correo electrónico.',
             'email': user.email,
@@ -133,7 +145,12 @@ def verify_email(request, token):
                 logger.error(f"❌ Falló el envío de bienvenida via API a: {user.email}")
         except Exception as e:
             logger.error(f"💥 Error con bienvenida SendGrid API: {str(e)}")
-        
+
+        try:
+            notificar_email_verificado(user)
+        except Exception as e:
+            logger.error("Error creando notificación de email verificado: %s", e)
+
         # Generar tokens JWT
         refresh = RefreshToken.for_user(user)
         
@@ -340,6 +357,11 @@ class GoogleLoginAPIView(APIView):
                 except Exception as e:
                     logger.error(f"💥 Error con bienvenida Google SendGrid API: {str(e)}")
                 
+                try:
+                    notificar_registro_exitoso(user, is_google=True)
+                except Exception as e:
+                    logger.error("Error creando notificación de registro Google: %s", e)
+
                 logger.info(f"👤 Nuevo usuario Google creado: {email}")
             else:
                 logger.info(f"🔑 Usuario Google existente: {email}")
@@ -425,8 +447,13 @@ class ChangePasswordView(APIView):
         # Actualizar la sesión para evitar logout
         update_session_auth_hash(request, user)
 
+        try:
+            notificar_password_changed(user, ip_address=get_client_ip(request))
+        except Exception as e:
+            logger.error("Error creando notificación de cambio de contraseña: %s", e)
+
         logger.info(f"✅ Contraseña cambiada exitosamente para: {user.email}")
-        
+
         return Response({
             "detail": "Contraseña actualizada correctamente"
         }, status=status.HTTP_200_OK)
@@ -468,8 +495,13 @@ class PasswordResetRequestView(APIView):
             except Exception as e:
                 logger.error(f"💥 Error con reset SendGrid API: {str(e)}")
             
+            try:
+                notificar_solicitud_password_reset(user, ip_address=ip_address)
+            except Exception as e:
+                logger.error("Error creando notificación de solicitud reset: %s", e)
+
             logger.info(f"✅ Solicitud de reset procesada para: {email}")
-            
+
         except User.DoesNotExist:
             # Registrar intento fallido
             PasswordResetAttempt.objects.create(
@@ -509,9 +541,14 @@ class PasswordResetConfirmView(APIView):
             
             # Limpiar fallos de login
             LoginFailureTracker.clear_failures(user.email)
-            
+
+            try:
+                notificar_password_reset(user)
+            except Exception as e:
+                logger.error("Error creando notificación de reset de contraseña: %s", e)
+
             logger.info(f"✅ Contraseña restablecida exitosamente para: {user.email}")
-            
+
             return Response({"detail": "Contraseña restablecida correctamente"}, status=200)
         except Exception as e:
             logger.error(f"💥 Error procesando reset de contraseña: {str(e)}")

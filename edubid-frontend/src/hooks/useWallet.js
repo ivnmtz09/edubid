@@ -6,7 +6,7 @@ export const useWallet = () => {
     queryKey: ["wallet"],
     queryFn: async () => {
       try {
-        const res = await api.get("/api/coins/wallets/mi_wallet/")
+        const res = await api.get("/api/tokens/wallets/mi_wallet/")
         console.log("Wallet API Response:", res.data)
         
         // Si es un mensaje (para docentes) o no hay wallet
@@ -32,7 +32,7 @@ export const useAllWallets = () => {
   return useQuery({
     queryKey: ["all-wallets"],
     queryFn: async () => {
-      const res = await api.get("/api/coins/wallets/")
+      const res = await api.get("/api/tokens/wallets/")
       console.log("All Wallets API Response:", res.data)
       
       // Manejar diferentes formatos de respuesta
@@ -51,7 +51,7 @@ export const usePeriods = (enabled = true) => {
   return useQuery({
     queryKey: ["periods"],
     queryFn: async () => {
-      const res = await api.get("/api/coins/periods/mis_periodos/")
+      const res = await api.get("/api/tokens/periods/mis_periodos/")
       console.log("Periods API Response:", res.data)
       return Array.isArray(res.data) ? res.data : []
     },
@@ -65,7 +65,7 @@ export const useTransactions = () => {
   return useQuery({
     queryKey: ["transactions"],
     queryFn: async () => {
-      const res = await api.get("/api/coins/transactions/")
+      const res = await api.get("/api/tokens/transactions/")
       console.log("Transactions API Response:", res.data)
       
       let transactions = []

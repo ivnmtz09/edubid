@@ -35,30 +35,38 @@ class BidCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bid
         fields = ["auction", "estudiante", "cantidad"]
-        # IMPORTANTE: No incluir validadores de unicidad aquí
-        # Los manejaremos manualmente en perform_create
+        extra_kwargs = {
+            'estudiante': {'required': False}
+        }
 
     def validate(self, data):
-        auction = data.get('auction')
-        estudiante = data.get('estudiante')
-        cantidad = data.get('cantidad')
         request = self.context.get('request')
+        auction = data.get('auction')
+        cantidad = data.get('cantidad')
 
-        # Validar que la subasta esté activa
+        if not request or not request.user.is_authenticated:
+            raise serializers.ValidationError("Debes estar autenticado.")
+
+        estudiante = data.get('estudiante')
+        if not estudiante:
+            if request.user.role == 'estudiante':
+                estudiante = request.user
+                data['estudiante'] = estudiante
+            else:
+                raise serializers.ValidationError("Debes especificar el estudiante para la puja.")
+
         if auction.estado != "active":
             raise serializers.ValidationError("Esta subasta ya no está activa.")
 
         if auction.fecha_fin < now():
             raise serializers.ValidationError("Esta subasta ya ha expirado.")
 
-        # Validar que el estudiante pertenezca al grupo de la subasta
         if not auction.grupo.estudiantes.filter(id=estudiante.id).exists():
             raise serializers.ValidationError(
                 f"El estudiante {estudiante.email} no pertenece al grupo de esta subasta."
             )
 
-        # Validar saldo disponible del estudiante
-        from apps.coins.models import Wallet, Period
+        from apps.tokens.models import Wallet, Period
         
         periodo_activo = Period.objects.filter(grupo=auction.grupo, activo=True).first()
         if not periodo_activo:
@@ -71,24 +79,20 @@ class BidCreateSerializer(serializers.ModelSerializer):
                 f"El estudiante {estudiante.email} no tiene una billetera activa en este grupo."
             )
 
-        # Validar si ya existe una puja para este estudiante en esta subasta
         existing_bid = Bid.objects.filter(auction=auction, estudiante=estudiante).first()
         
         if existing_bid:
-            # Validación para AUMENTAR puja existente
             if cantidad <= existing_bid.cantidad:
                 raise serializers.ValidationError(
                     f"La nueva puja debe ser mayor que tu puja actual de {existing_bid.cantidad} EC."
                 )
             
-            # Obtener la puja más alta actual
             highest_bid = auction.bids.order_by("-cantidad").first()
             if highest_bid and cantidad <= highest_bid.cantidad:
                 raise serializers.ValidationError(
                     f"La nueva puja debe ser mayor que la puja actual más alta de {highest_bid.cantidad} EC."
                 )
             
-            # Validar saldo para el aumento
             diferencia = cantidad - existing_bid.cantidad
             saldo_disponible = wallet.saldo - wallet.bloqueado
             
@@ -98,17 +102,14 @@ class BidCreateSerializer(serializers.ModelSerializer):
                     f"Disponible: {saldo_disponible} EC, Necesario: {diferencia} EC"
                 )
         else:
-            # Validación para NUEVA puja
-            # Obtener la puja más alta actual para establecer monto mínimo
             highest_bid = auction.bids.order_by("-cantidad").first()
-            monto_minimo = highest_bid.cantidad + 1 if highest_bid else (getattr(auction, 'valor_minimo', 1) or 1)
+            monto_minimo = (highest_bid.cantidad + auction.incremento_minimo) if highest_bid else auction.valor_minimo
             
             if cantidad < monto_minimo:
                 raise serializers.ValidationError(
                     f"La puja debe ser mayor o igual a {monto_minimo} EC."
                 )
             
-            # Validar saldo total para nueva puja
             saldo_disponible = wallet.saldo - wallet.bloqueado
             if saldo_disponible < cantidad:
                 raise serializers.ValidationError(
@@ -136,6 +137,8 @@ class AuctionSerializer(serializers.ModelSerializer):
             "creador_nombre",
             "grupo",
             "grupo_nombre",
+            "valor_minimo",
+            "incremento_minimo",
             "fecha_fin",
             "estado",
             "total_pujas",
@@ -190,7 +193,7 @@ class AuctionUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Auction
-        fields = ["titulo", "descripcion", "grupo", "fecha_fin"]
+        fields = ["titulo", "descripcion", "grupo", "fecha_fin", "valor_minimo", "incremento_minimo"]
 
     def validate_grupo(self, value):
         """Validar que el docente solo pueda asignar a sus grupos"""

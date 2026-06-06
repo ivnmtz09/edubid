@@ -15,10 +15,18 @@ export const getAuctionStatus = (auction) => {
   return { status: 'active', label: 'Activa', color: 'green' }
 }
 
-export const getMinNextBid = (bids) => {
-  if (!bids || bids.length === 0) return 1
-  const highestBid = bids[0] // Las bids vienen ordenadas por cantidad descendente
-  return highestBid.cantidad + 1
+export const getMinNextBid = (bids, incrementoMinimo = 10) => {
+  if (!bids || bids.length === 0) return incrementoMinimo
+  const highestBid = bids[0]
+  return highestBid.cantidad + incrementoMinimo
+}
+
+export const getMinBidForAuction = (auction) => {
+  const highestBid = auction.bids?.[0] || auction.puja_mas_alta
+  if (highestBid) {
+    return highestBid.cantidad + (auction.incremento_minimo || 10)
+  }
+  return auction.valor_minimo || 1
 }
 
 export const canUserBid = (user, auction, wallet, existingBid) => {
