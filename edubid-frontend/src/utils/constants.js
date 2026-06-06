@@ -54,20 +54,19 @@ export const API_ENDPOINTS = {
   GROUP_REPORT: (groupId) => `/api/grades/grupo/${groupId}/reporte/`,
   GRADE_MULTIPLE: "/api/grades/calificar-multiple/",
 
-  // ==================== COINS/WALLET ====================
-  // CORREGIDOS para coincidir con tu backend Django
-  MY_WALLET: "/api/coins/wallets/mi_wallet/", // Cambiado de mi-wallet a mi_wallet
-  WALLETS: "/api/coins/wallets/",
-  WALLET_DETAIL: (id) => `/api/coins/wallets/${id}/`,
-  WALLET_DEPOSIT: (id) => `/api/coins/wallets/${id}/depositar/`,
+  // ==================== TOKENS/WALLET ====================
+  MY_WALLET: "/api/tokens/wallets/mi_wallet/",
+  WALLETS: "/api/tokens/wallets/",
+  WALLET_DETAIL: (id) => `/api/tokens/wallets/${id}/`,
+  WALLET_DEPOSIT: (id) => `/api/tokens/wallets/${id}/depositar/`,
 
-  TRANSACTIONS: "/api/coins/transactions/",
-  TRANSACTION_DETAIL: (id) => `/api/coins/transactions/${id}/`,
+  TRANSACTIONS: "/api/tokens/transactions/",
+  TRANSACTION_DETAIL: (id) => `/api/tokens/transactions/${id}/`,
 
-  PERIODS: "/api/coins/periods/",
-  PERIOD_DETAIL: (id) => `/api/coins/periods/${id}/`,
-  PERIOD_ACTIVATE: (id) => `/api/coins/periods/${id}/activar/`,
-  MY_PERIODS: "/api/coins/periods/mis_periodos/", // Cambiado de mis-periodos a mis_periodos
+  PERIODS: "/api/tokens/periods/",
+  PERIOD_DETAIL: (id) => `/api/tokens/periods/${id}/`,
+  PERIOD_ACTIVATE: (id) => `/api/tokens/periods/${id}/activar/`,
+  MY_PERIODS: "/api/tokens/periods/mis_periodos/",
 
   // ==================== AUCTIONS ====================
   AUCTIONS: "/api/auctions/auctions/",
