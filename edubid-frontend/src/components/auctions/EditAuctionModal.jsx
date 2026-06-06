@@ -12,6 +12,8 @@ export default function EditAuctionModal({ auction, onClose }) {
     descripcion: "",
     grupo: "",
     fecha_fin: "",
+    valor_minimo: 1,
+    incremento_minimo: 10,
   })
   const [errors, setErrors] = useState({})
 
@@ -30,6 +32,8 @@ export default function EditAuctionModal({ auction, onClose }) {
         descripcion: auction.descripcion || "",
         grupo: auction.grupo?.id || auction.grupo || "",
         fecha_fin: auction.fecha_fin ? new Date(auction.fecha_fin).toISOString().slice(0, 16) : "",
+        valor_minimo: auction.valor_minimo ?? 1,
+        incremento_minimo: auction.incremento_minimo ?? 10,
       })
     }
   }, [auction])
@@ -186,6 +190,37 @@ export default function EditAuctionModal({ auction, onClose }) {
                   min={minDateString}
                 />
                 {errors.fecha_fin && <p className="mt-1 text-sm text-red-600">{errors.fecha_fin}</p>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="valor_minimo" className="block text-sm font-medium text-gray-700 mb-1">
+                  Puja inicial mínima
+                </label>
+                <input
+                  type="number"
+                  id="valor_minimo"
+                  name="valor_minimo"
+                  value={formData.valor_minimo}
+                  onChange={handleChange}
+                  min={1}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="incremento_minimo" className="block text-sm font-medium text-gray-700 mb-1">
+                  Incremento mínimo
+                </label>
+                <input
+                  type="number"
+                  id="incremento_minimo"
+                  name="incremento_minimo"
+                  value={formData.incremento_minimo}
+                  onChange={handleChange}
+                  min={1}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                />
               </div>
             </div>
 

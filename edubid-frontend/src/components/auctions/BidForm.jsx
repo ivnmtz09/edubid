@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { CurrencyDollarIcon, PlusIcon, PencilIcon, TrophyIcon } from "@heroicons/react/24/outline"
-import { usePlaceBid, useIncreaseBid, useDeleteBid } from "../../hooks/useAuctions"
+import { usePlaceBid, useDeleteBid } from "../../hooks/useAuctions"
+import { useAuthContext } from "../../context/AuthContext"
 import { formatEC } from "../../utils/helpers"
 import LoadingSpinner from "../common/LoadingSpinner"
 
 const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
+  const { user } = useAuthContext()
   const placeBid = usePlaceBid()
-  const increaseBid = useIncreaseBid()
   const deleteBid = useDeleteBid()
   
   const [bidAmount, setBidAmount] = useState("")
@@ -14,7 +15,8 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
   const [isIncreasing, setIsIncreasing] = useState(false)
 
   const highestBid = auction.puja_mas_alta || auction.bids?.[0]
-  const minBid = highestBid ? highestBid.cantidad + 1 : 1
+  const incrementoMinimo = auction.incremento_minimo || 10
+  const minBid = highestBid ? highestBid.cantidad + incrementoMinimo : (auction.valor_minimo || 1)
   const isWinning = existingBid?.id === highestBid?.id
 
   // Función para extraer mensajes de error del backend
@@ -52,7 +54,7 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
     return "Error desconocido al realizar la puja"
   }
 
-  const handleCreateBid = async () => {
+  const handlePlaceBid = async () => {
     const amount = parseInt(bidAmount)
 
     if (!amount || amount < minBid) {
@@ -60,41 +62,27 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
       return
     }
 
-    if (amount > userBalance) {
-      setError("No tienes suficiente saldo disponible")
-      return
+    if (existingBid) {
+      if (amount <= existingBid.cantidad) {
+        setError(`La nueva puja debe ser mayor a ${formatEC(existingBid.cantidad)}`)
+        return
+      }
+      if (amount > userBalance + existingBid.cantidad) {
+        setError("No tienes suficiente saldo disponible para este aumento")
+        return
+      }
+    } else {
+      if (amount > userBalance) {
+        setError("No tienes suficiente saldo disponible")
+        return
+      }
     }
 
     try {
       await placeBid.mutateAsync({ 
         auctionId: auction.id, 
-        cantidad: amount 
-      })
-      setBidAmount("")
-      setError("")
-    } catch (error) {
-      const errorMsg = extractErrorMessage(error)
-      setError(errorMsg)
-    }
-  }
-
-  const handleIncreaseBid = async () => {
-    const newAmount = parseInt(bidAmount)
-
-    if (!newAmount || newAmount <= existingBid.cantidad) {
-      setError(`La nueva puja debe ser mayor a ${formatEC(existingBid.cantidad)}`)
-      return
-    }
-
-    if (newAmount > userBalance + existingBid.cantidad) {
-      setError("No tienes suficiente saldo disponible para este aumento")
-      return
-    }
-
-    try {
-      await increaseBid.mutateAsync({ 
-        bidId: existingBid.id, 
-        nuevaCantidad: newAmount 
+        cantidad: amount,
+        estudiante: user?.id
       })
       setBidAmount("")
       setError("")
@@ -106,9 +94,11 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
   }
 
   const handleDeleteBid = async () => {
-    if (!window.confirm("¿Estás seguro de que quieres retirar tu puja?")) {
-      return
-    }
+    const confirmMsg = user?.role === 'estudiante'
+      ? "¿Estás seguro de que quieres retirar tu puja? Las monedas bloqueadas se liberarán."
+      : "¿Estás seguro de que quieres eliminar esta puja? Las monedas bloqueadas se liberarán."
+
+    if (!window.confirm(confirmMsg)) return
 
     try {
       await deleteBid.mutateAsync(existingBid.id)
@@ -226,11 +216,11 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
                 </button>
               )}
               <button
-                onClick={existingBid ? handleIncreaseBid : handleCreateBid}
-                disabled={placeBid.isPending || increaseBid.isPending || !bidAmount}
+                onClick={handlePlaceBid}
+                disabled={placeBid.isPending || !bidAmount}
                 className="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
               >
-                {(placeBid.isPending || increaseBid.isPending) ? (
+                {placeBid.isPending ? (
                   <LoadingSpinner size="sm" />
                 ) : (
                   <>

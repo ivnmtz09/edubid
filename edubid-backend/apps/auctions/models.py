@@ -20,8 +20,12 @@ class Auction(BaseModel):
     estado = models.CharField(max_length=10, choices=ESTADOS, default="active")
     fecha_fin = models.DateTimeField()
     valor_minimo = models.PositiveIntegerField(
-    default=1,
-    help_text="Valor mínimo para pujar en esta subasta"
+        default=1,
+        help_text="Valor mínimo para la primera puja en esta subasta"
+    )
+    incremento_minimo = models.PositiveIntegerField(
+        default=10,
+        help_text="Incremento mínimo requerido entre pujas consecutivas"
     )
 
     class Meta:

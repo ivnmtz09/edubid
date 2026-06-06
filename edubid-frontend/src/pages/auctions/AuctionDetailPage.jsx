@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -10,10 +10,12 @@ import {
   CalendarIcon,
   CheckCircleIcon,
   XCircleIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthContext } from '../../context/AuthContext';
 import { useWallet } from '../../hooks/useWallet';
 import api from '../../services/api';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 const AuctionDetailPage = () => {
   const { id } = useParams();
@@ -24,6 +26,11 @@ const AuctionDetailPage = () => {
 
   const [bidAmount, setBidAmount] = useState('');
   const [showBidForm, setShowBidForm] = useState(false);
+
+  const [teacherBidStudent, setTeacherBidStudent] = useState('');
+  const [teacherBidAmount, setTeacherBidAmount] = useState('');
+  const [teacherBidError, setTeacherBidError] = useState('');
+  const [groupStudents, setGroupStudents] = useState([]);
 
   const isTeacher = user?.role === 'docente';
   const isStudent = user?.role === 'estudiante';
@@ -37,7 +44,15 @@ const AuctionDetailPage = () => {
     },
   });
 
-  // Place bid mutation
+  useEffect(() => {
+    if (isTeacher && auction?.grupo) {
+      const grupoId = auction.grupo?.id || auction.grupo
+      api.get(`/api/groups/${grupoId}/estudiantes/`)
+        .then(res => setGroupStudents(res.data))
+        .catch(() => setGroupStudents([]))
+    }
+  }, [isTeacher, auction?.grupo, auction?.grupo?.id])
+
   const placeBidMutation = useMutation({
     mutationFn: async (data) => {
       const res = await api.post('/api/auctions/bids/', data);
@@ -46,8 +61,17 @@ const AuctionDetailPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['auction', id] });
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
+      queryClient.invalidateQueries({ queryKey: ['all-wallets'] });
       setBidAmount('');
       setShowBidForm(false);
+      setTeacherBidAmount('');
+      setTeacherBidStudent('');
+      setTeacherBidError('');
+    },
+    onError: (error) => {
+      const data = error.response?.data
+      const msg = data?.detail || data?.non_field_errors?.[0] || data?.cantidad?.[0] || 'Error al realizar la puja'
+      setTeacherBidError(msg)
     },
   });
 
@@ -108,7 +132,8 @@ const AuctionDetailPage = () => {
   const isWinning = userBid?.id === highestBid?.id;
 
   const saldoDisponible = walletData ? walletData.saldo - walletData.bloqueado : 0;
-  const minBid = highestBid ? highestBid.cantidad + 1 : 1;
+  const incrementoMinimo = auction?.incremento_minimo || 10;
+  const minBid = highestBid ? highestBid.cantidad + incrementoMinimo : (auction?.valor_minimo || 1);
 
   const handlePlaceBid = () => {
     const amount = parseInt(bidAmount);
@@ -380,6 +405,76 @@ const AuctionDetailPage = () => {
                   <p className="text-gray-600 text-sm sm:text-base">Esta subasta ha finalizado</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Teacher Bid Section */}
+          {isTeacher && isActive && !hasEnded && (
+            <div className="border-t border-gray-200 pt-4 sm:pt-6">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+                Pujar por un Estudiante
+              </h2>
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6 space-y-4">
+                <p className="text-sm text-blue-700">
+                  Si un estudiante no puede acceder a la plataforma, puedes registrar su puja desde aquí.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Estudiante
+                    </label>
+                    <select
+                      value={teacherBidStudent}
+                      onChange={(e) => { setTeacherBidStudent(e.target.value); setTeacherBidError('') }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">Seleccionar estudiante</option>
+                      {groupStudents.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.first_name} {s.last_name} ({s.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cantidad (EC)
+                    </label>
+                    <input
+                      type="number"
+                      value={teacherBidAmount}
+                      onChange={(e) => { setTeacherBidAmount(e.target.value); setTeacherBidError('') }}
+                      min={minBid}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      placeholder={`Mínimo ${minBid} EC`}
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      onClick={() => {
+                        if (!teacherBidStudent) { setTeacherBidError('Selecciona un estudiante'); return }
+                        if (!parseInt(teacherBidAmount) || parseInt(teacherBidAmount) < minBid) {
+                          setTeacherBidError(`La puja mínima es ${minBid} EC`); return
+                        }
+                        placeBidMutation.mutate({
+                          auction: auction.id,
+                          estudiante: parseInt(teacherBidStudent),
+                          cantidad: parseInt(teacherBidAmount),
+                        })
+                      }}
+                      disabled={placeBidMutation.isPending}
+                      className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm font-medium"
+                    >
+                      {placeBidMutation.isPending ? <LoadingSpinner size="sm" /> : <><PlusIcon className="h-4 w-4" /> Pujar</>}
+                    </button>
+                  </div>
+                </div>
+                {teacherBidError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-red-600 text-sm">{teacherBidError}</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

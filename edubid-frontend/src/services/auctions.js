@@ -26,19 +26,17 @@ export const auctionService = {
     return res.data
   },
 
-  placeBid: async (auctionId, cantidad) => {
-    const res = await api.post("/api/auctions/bids/", {
-      auction: auctionId,
-      cantidad: cantidad
-    })
+  placeBid: async (auctionId, cantidad, estudiante = null) => {
+    const data = { auction: auctionId, cantidad }
+    if (estudiante) data.estudiante = estudiante
+    const res = await api.post("/api/auctions/bids/", data)
     return res.data
   },
 
-  // NUEVO: Aumentar puja existente
-  increaseBid: async (bidId, nuevaCantidad) => {
-    const res = await api.post(`/api/auctions/bids/${bidId}/aumentar_puja/`, {
-      nueva_cantidad: nuevaCantidad
-    })
+  increaseBid: async (auctionId, cantidad, estudiante = null) => {
+    const data = { auction: auctionId, cantidad }
+    if (estudiante) data.estudiante = estudiante
+    const res = await api.post("/api/auctions/bids/", data)
     return res.data
   },
 
