@@ -25,7 +25,7 @@ export default function SubmissionList({ submissions, activityId }) {
 
   if (!submissions || submissions.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
+      <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
         <DocumentTextIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-700 mb-2">
           No hay entregas aún
@@ -48,23 +48,23 @@ export default function SubmissionList({ submissions, activityId }) {
     <div className="space-y-4">
       {/* Header de estadísticas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-blue-600">{submissions.length}</div>
           <div className="text-xs text-gray-600 mt-1">Total Entregas</div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-green-600">
             {submissions.filter(s => s.calificacion !== null).length}
           </div>
           <div className="text-xs text-gray-600 mt-1">Calificadas</div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-orange-600">
             {submissions.filter(s => s.calificacion === null).length}
           </div>
           <div className="text-xs text-gray-600 mt-1">Pendientes</div>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-purple-600">
             {submissions.reduce((sum, s) => sum + (s.edubids || 0), 0)}
           </div>
@@ -81,11 +81,11 @@ export default function SubmissionList({ submissions, activityId }) {
           return (
             <div
               key={submission.id}
-              className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden"
             >
               {/* Header de la entrega */}
               <div 
-                className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                className="p-4 cursor-pointer hover:bg-gray-50 dark:bg-gray-900 transition-colors"
                 onClick={() => toggleExpand(submission.id)}
               >
                 <div className="flex items-center justify-between">
@@ -100,7 +100,7 @@ export default function SubmissionList({ submissions, activityId }) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 text-sm truncate">
+                      <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                         {submission.estudiante_nombre || 
                          `${submission.estudiante?.first_name} ${submission.estudiante?.last_name}`}
                       </h4>
@@ -154,15 +154,15 @@ export default function SubmissionList({ submissions, activityId }) {
 
               {/* Contenido expandible */}
               {isExpanded && (
-                <div className="border-t border-gray-200 p-4 bg-gray-50/50">
+                <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900/50">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Contenido de la entrega */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
+                      <h5 className="font-semibold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
                         <DocumentTextIcon className="h-4 w-4 text-blue-600" />
                         Contenido de la Entrega
                       </h5>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                         <p className="text-sm text-gray-700 whitespace-pre-wrap">
                           {submission.contenido || "El estudiante no incluyó una descripción."}
                         </p>
@@ -171,7 +171,7 @@ export default function SubmissionList({ submissions, activityId }) {
                       {/* Archivos adjuntos */}
                       {submission.archivo && (
                         <div className="mt-4">
-                          <h6 className="font-medium text-gray-900 text-sm mb-2">Archivo Adjunto</h6>
+                          <h6 className="font-medium text-gray-900 dark:text-white text-sm mb-2">Archivo Adjunto</h6>
                           <a
                             href={submission.archivo}
                             target="_blank"
@@ -187,7 +187,7 @@ export default function SubmissionList({ submissions, activityId }) {
 
                     {/* Información de calificación */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
+                      <h5 className="font-semibold text-gray-900 dark:text-white text-sm mb-3 flex items-center gap-2">
                         <AcademicCapIcon className="h-4 w-4 text-green-600" />
                         {isGraded ? 'Calificación' : 'Estado'}
                       </h5>
@@ -211,7 +211,7 @@ export default function SubmissionList({ submissions, activityId }) {
                           
                           {submission.retroalimentacion && (
                             <div>
-                              <h6 className="font-medium text-gray-900 text-sm mb-2 flex items-center gap-2">
+                              <h6 className="font-medium text-gray-900 dark:text-white text-sm mb-2 flex items-center gap-2">
                                 <ChatBubbleLeftIcon className="h-4 w-4 text-purple-600" />
                                 Retroalimentación
                               </h6>
@@ -265,3 +265,4 @@ export default function SubmissionList({ submissions, activityId }) {
     </div>
   )
 }
+

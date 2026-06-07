@@ -52,8 +52,8 @@ export default function ActivityDebugComponent() {
     const percentage = isGraded ? (userSubmission.calificacion / activity.valor_notas) * 100 : 0
 
     return (
-      <div className="bg-white border-2 border-gray-200 rounded-xl p-4 sm:p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           {isGraded ? (
             <CheckCircleIcon className="h-6 w-6 text-green-600" />
           ) : userSubmission ? (
@@ -65,7 +65,7 @@ export default function ActivityDebugComponent() {
         </h3>
 
         {/* Estado */}
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div>
               <span className="font-semibold">user_submission:</span>
@@ -84,7 +84,7 @@ export default function ActivityDebugComponent() {
 
         {/* Visualización según estado */}
         {!userSubmission && (
-          <div className="bg-gray-100 rounded-lg p-4 text-center">
+          <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 text-center">
             <p className="text-gray-600">No hay entrega aún</p>
           </div>
         )}
@@ -117,7 +117,7 @@ export default function ActivityDebugComponent() {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-bold text-lg">¡Calificada!</h4>
-                  <div className="px-3 py-1 bg-white/50 rounded-full">
+                  <div className="px-3 py-1 bg-white dark:bg-gray-800/50 rounded-full">
                     <span className="text-sm font-bold">{percentage.toFixed(0)}%</span>
                   </div>
                 </div>
@@ -133,7 +133,7 @@ export default function ActivityDebugComponent() {
                 </div>
 
                 {/* Barra de progreso */}
-                <div className="w-full bg-white/30 rounded-full h-3 mb-3 overflow-hidden">
+                <div className="w-full bg-white dark:bg-gray-800/30 rounded-full h-3 mb-3 overflow-hidden">
                   <div 
                     className="bg-current h-full rounded-full transition-all duration-500"
                     style={{ width: `${percentage}%` }}
@@ -156,7 +156,7 @@ export default function ActivityDebugComponent() {
           <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-700">
             Ver datos raw (JSON)
           </summary>
-          <pre className="text-xs bg-gray-100 p-2 rounded mt-2 overflow-auto">
+          <pre className="text-xs bg-gray-100 dark:bg-gray-900 p-2 rounded mt-2 overflow-auto">
             {JSON.stringify({ user_submission: userSubmission }, null, 2)}
           </pre>
         </details>
@@ -165,7 +165,7 @@ export default function ActivityDebugComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="bg-purple-600 text-white rounded-xl p-6">
           <h1 className="text-2xl font-bold mb-2">
@@ -182,20 +182,20 @@ export default function ActivityDebugComponent() {
           {renderActivityCard(activityNotSubmitted, "3. No Entregada")}
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-6">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
           <h2 className="text-lg font-bold mb-4">📋 Checklist de Implementación</h2>
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
-              <span>Serializer retorna <code className="bg-gray-100 px-1 rounded">user_submission</code> con calificación</span>
+              <span>Serializer retorna <code className="bg-gray-100 dark:bg-gray-900 px-1 rounded">user_submission</code> con calificación</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
-              <span>Frontend usa <code className="bg-gray-100 px-1 rounded">activity.user_submission</code></span>
+              <span>Frontend usa <code className="bg-gray-100 dark:bg-gray-900 px-1 rounded">activity.user_submission</code></span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
-              <span>Validación: <code className="bg-gray-100 px-1 rounded">calificacion !== null</code></span>
+              <span>Validación: <code className="bg-gray-100 dark:bg-gray-900 px-1 rounded">calificacion !== null</code></span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircleIcon className="h-5 w-5 text-green-600" />
@@ -212,7 +212,7 @@ export default function ActivityDebugComponent() {
           <h3 className="font-bold text-blue-900 mb-2">💡 Punto Clave</h3>
           <p className="text-sm text-blue-800">
             El estudiante debe ver su calificación <strong>inmediatamente</strong> después de que el docente 
-            la asigna. No debe recargar la página. El campo <code className="bg-white px-1 rounded">user_submission.calificacion</code> 
+            la asigna. No debe recargar la página. El campo <code className="bg-white dark:bg-gray-800 px-1 rounded">user_submission.calificacion</code> 
             se actualiza automáticamente cuando el serializer responde con los datos actualizados.
           </p>
         </div>
@@ -220,3 +220,4 @@ export default function ActivityDebugComponent() {
     </div>
   )
 }
+

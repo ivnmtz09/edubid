@@ -20,19 +20,19 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
   const isOverdue = daysLeft < 0;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
       {/* Header - Purple theme */}
-      <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 sm:p-5">
+      <div className="bg-orange-600 p-4 sm:p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg">
+            <div className="p-1.5 sm:p-2 bg-white dark:bg-gray-800/20 rounded-lg">
               <ClipboardDocumentListIcon className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-xs font-medium text-purple-100 uppercase bg-white/20 px-2 py-1 rounded">
+              <span className="text-xs font-medium text-orange-100 uppercase bg-white dark:bg-gray-800/20 px-2 py-1 rounded">
                 {activity.tipo}
               </span>
-              <h3 className="font-bold text-white text-base sm:text-lg mt-1 line-clamp-2">
+              <h3 className="font-bold text-white dark:text-white text-base sm:text-lg mt-1 line-clamp-2">
                 {activity.nombre}
               </h3>
             </div>
@@ -46,28 +46,28 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
       {/* Body */}
       <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
         {/* Descripción */}
-        <p className="text-gray-600 text-sm line-clamp-2 min-h-[40px]">
+        <p className="text-gray-300 text-sm line-clamp-2 min-h-[40px]">
           {activity.descripcion || "Sin descripción"}
         </p>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="bg-orange-50 rounded-lg p-2 sm:p-3">
+          <div className="bg-orange-500/10 rounded-lg p-2 sm:p-3">
             <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
               <CurrencyEuroIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
-              <span className="text-xs text-gray-600">EduBid</span>
+              <span className="text-xs text-gray-300">EduBid</span>
             </div>
             <p className="text-base sm:text-lg font-bold text-orange-600">
               {activity.valor_edubids} EC
             </p>
           </div>
 
-          <div className="bg-blue-50 rounded-lg p-2 sm:p-3">
+          <div className="bg-orange-500/10 rounded-lg p-2 sm:p-3">
             <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
-              <ClipboardDocumentListIcon className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-              <span className="text-xs text-gray-600">Valor Nota</span>
+              <ClipboardDocumentListIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600" />
+              <span className="text-xs text-gray-300">Valor Nota</span>
             </div>
-            <p className="text-base sm:text-lg font-bold text-blue-600">
+            <p className="text-base sm:text-lg font-bold text-orange-600">
               {activity.valor_notas}
             </p>
           </div>
@@ -77,10 +77,10 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
         <div
           className={`rounded-lg p-2 sm:p-3 ${
             isOverdue
-              ? "bg-red-50 border border-red-200"
+              ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50"
               : daysLeft <= 3
-                ? "bg-yellow-50 border border-yellow-200"
-                : "bg-gray-50"
+                ? "bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/50"
+                : "bg-gray-50 dark:bg-gray-700/50"
           }`}
         >
           <div className="flex items-center justify-between">
@@ -88,13 +88,13 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
               <CalendarIcon
                 className={`h-3 w-3 sm:h-4 sm:w-4 ${
                   isOverdue
-                    ? "text-red-600"
+                    ? "text-red-600 dark:text-red-400"
                     : daysLeft <= 3
-                      ? "text-yellow-600"
-                      : "text-gray-600"
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-gray-600 dark:text-gray-400"
                 }`}
               />
-              <span className="text-xs sm:text-sm text-gray-700">
+              <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
                 {formatDate(activity.fecha_entrega)}
               </span>
             </div>
@@ -102,19 +102,19 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
               <ClockIcon
                 className={`h-3 w-3 sm:h-4 sm:w-4 ${
                   isOverdue
-                    ? "text-red-600"
+                    ? "text-red-600 dark:text-red-400"
                     : daysLeft <= 3
-                      ? "text-yellow-600"
-                      : "text-gray-600"
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-gray-600 dark:text-gray-400"
                 }`}
               />
               <span
                 className={`text-xs font-medium ${
                   isOverdue
-                    ? "text-red-600"
+                    ? "text-red-600 dark:text-red-400"
                     : daysLeft <= 3
-                      ? "text-yellow-600"
-                      : "text-gray-600"
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-gray-600 dark:text-gray-400"
                 }`}
               >
                 {isOverdue ? "Vencida" : `${daysLeft} días`}
@@ -125,27 +125,27 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
 
         {/* Estado para estudiantes */}
         {!isTeacher && (
-          <div className="pt-2 sm:pt-3 border-t border-gray-100">
+          <div className="pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700">
             {isGraded ? (
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm text-gray-600">
+                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   Calificación:
                 </span>
-                <span className="text-base sm:text-lg font-bold text-green-600">
+                <span className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
                   {userSubmission.calificacion}/5.0
                 </span>
               </div>
             ) : isCompleted ? (
               <div className="flex items-center space-x-1 sm:space-x-2">
-                <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                <span className="text-xs sm:text-sm text-green-700 font-medium">
+                <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+                <span className="text-xs sm:text-sm text-green-700 dark:text-green-400 font-medium">
                   Entregada - Pendiente de calificación
                 </span>
               </div>
             ) : (
               <div className="flex items-center space-x-1 sm:space-x-2">
-                <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
-                <span className="text-xs sm:text-sm text-yellow-700 font-medium">
+                <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600 dark:text-yellow-400" />
+                <span className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-400 font-medium">
                   Pendiente de entrega
                 </span>
               </div>
@@ -155,10 +155,10 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
 
         {/* Info para docentes */}
         {isTeacher && (
-          <div className="pt-2 sm:pt-3 border-t border-gray-100">
+          <div className="pt-2 sm:pt-3 border-t border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between text-xs sm:text-sm">
-              <span className="text-gray-600">Entregas:</span>
-              <span className="font-semibold text-gray-900">
+              <span className="text-gray-600 dark:text-gray-400">Entregas:</span>
+              <span className="font-semibold text-gray-900 dark:text-white">
                 {activity.submissions?.length || 0}
               </span>
             </div>
@@ -170,7 +170,7 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
       <div className="px-4 sm:px-5 pb-4 sm:pb-5">
         <Link
           to={`/activities/${activity.id}`}
-          className="w-full bg-purple-50 text-purple-600 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg hover:bg-purple-100 transition text-center text-xs sm:text-sm font-medium group-hover:bg-purple-500 group-hover:text-white flex items-center justify-center gap-1 sm:gap-2"
+          className="w-full bg-orange-500/10 text-orange-600 dark:text-orange-400 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg hover:bg-orange-500/20 transition text-center text-xs sm:text-sm font-medium group-hover:bg-orange-500 group-hover:text-white flex items-center justify-center gap-1 sm:gap-2"
         >
           {isTeacher ? "Gestionar" : isCompleted ? "Ver Detalles" : "Entregar"}
           <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -179,3 +179,4 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
     </div>
   );
 }
+

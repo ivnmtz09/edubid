@@ -18,12 +18,12 @@ export default function GroupCard({ group, onDelete, isTeacher }) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group h-full flex flex-col">
+    <div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group h-full flex flex-col">
       {/* Header con gradiente */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-5">
+      <div className="bg-gray-800 p-4 sm:p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg">
+            <div className="p-1.5 sm:p-2 bg-white dark:bg-gray-800/20 rounded-lg">
               <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
             </div>
             <div className="min-w-0 flex-1">
@@ -59,18 +59,18 @@ export default function GroupCard({ group, onDelete, isTeacher }) {
       {/* Body */}
       <div className="p-4 sm:p-5 space-y-3 sm:space-y-4 flex-1">
         {/* Descripción */}
-        <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 min-h-[40px]">
+        <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2 min-h-[40px]">
           {group.descripcion || "Sin descripción disponible"}
         </p>
 
         {/* Stats */}
-        <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+        <div className="bg-muted rounded-lg p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1 sm:space-x-2">
-              <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
-              <span className="text-xs sm:text-sm text-gray-600">Estudiantes</span>
+              <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+              <span className="text-xs sm:text-sm text-muted-foreground">Estudiantes</span>
             </div>
-            <span className="text-lg sm:text-xl font-bold text-gray-900">
+            <span className="text-lg sm:text-xl font-bold text-foreground">
               {group.estudiantes_count || group.estudiantes?.length || 0}
             </span>
           </div>
@@ -78,11 +78,11 @@ export default function GroupCard({ group, onDelete, isTeacher }) {
 
         {/* Código del grupo (solo docentes) */}
         {isTeacher && group.codigo && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-2 sm:p-3">
+          <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-2 sm:p-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center space-x-1 sm:space-x-2 min-w-0">
                 <ClipboardIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 flex-shrink-0" />
-                <span className="text-xs sm:text-sm text-gray-700 font-medium">Código:</span>
+                <span className="text-xs sm:text-sm text-muted-foreground font-medium">Código:</span>
                 <span className="font-mono font-bold text-orange-600 text-sm sm:text-lg tracking-wider truncate">
                   {group.codigo}
                 </span>
@@ -98,8 +98,8 @@ export default function GroupCard({ group, onDelete, isTeacher }) {
         )}
 
         {/* Metadata */}
-        <div className="pt-2 sm:pt-3 border-t border-gray-100">
-          <div className="flex items-center text-xs text-gray-500">
+        <div className="pt-2 sm:pt-3 border-t border-border">
+          <div className="flex items-center text-xs text-muted-foreground">
             <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
             <span className="truncate">Creado el {formatDate(group.creado)}</span>
           </div>
@@ -110,7 +110,7 @@ export default function GroupCard({ group, onDelete, isTeacher }) {
       <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex gap-2">
         <Link
           to={`/groups/${group.id}`}
-          className="flex-1 bg-blue-50 text-blue-600 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg hover:bg-blue-100 transition text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 group-hover:bg-blue-500 group-hover:text-white"
+          className="flex-1 bg-blue-500/10 text-blue-600 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg hover:bg-blue-500/20 transition text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 group-hover:bg-blue-500 group-hover:text-white"
         >
           <span>Ver Detalles</span>
           <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -118,7 +118,7 @@ export default function GroupCard({ group, onDelete, isTeacher }) {
         {isTeacher && onDelete && (
           <button
             onClick={() => onDelete(group.id)}
-            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition text-xs sm:text-sm font-medium flex items-center justify-center"
+            className="px-3 sm:px-4 py-2 sm:py-2.5 bg-red-500/10 text-red-600 rounded-lg hover:bg-red-500/20 transition text-xs sm:text-sm font-medium flex items-center justify-center"
             title="Eliminar grupo"
           >
             <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -129,3 +129,4 @@ export default function GroupCard({ group, onDelete, isTeacher }) {
     </div>
   )
 }
+

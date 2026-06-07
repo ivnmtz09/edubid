@@ -60,15 +60,15 @@ const ClassroomDetailPage = () => {
         <div className="flex items-center space-x-3">
           <button
             onClick={() => navigate("/classrooms")}
-            className="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200 text-gray-600 hover:text-gray-900 flex-shrink-0"
+            className="p-2 hover:bg-gray-700 rounded-xl transition-all duration-200 text-gray-400 hover:text-white flex-shrink-0"
           >
             <ArrowLeftIcon className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 line-clamp-2">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white line-clamp-2">
               {classroom.nombre}
             </h1>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">
               Docente: {classroom.docente_nombre || "N/A"}
             </p>
           </div>
@@ -85,9 +85,9 @@ const ClassroomDetailPage = () => {
       </div>
 
       {/* Classroom Hero Card */}
-      <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
+      <div className="bg-yellow-600 rounded-2xl p-4 sm:p-6 text-white shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center gap-4 sm:gap-6">
-          <div className="p-3 sm:p-4 bg-white/20 rounded-xl flex-shrink-0 self-start">
+          <div className="p-3 sm:p-4 bg-white/10 rounded-xl flex-shrink-0 self-start">
             <BookOpenIcon className="h-8 w-8 sm:h-12 sm:w-12 text-white" />
           </div>
           <div className="flex-1 min-w-0">
@@ -120,22 +120,22 @@ const ClassroomDetailPage = () => {
         {/* Descripción */}
         <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Información General */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
               <BookOpenIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
               Información de la Clase
             </h3>
             <div className="prose prose-gray max-w-none">
-              <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+              <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
                 {classroom.descripcion || "Esta clase no tiene una descripción detallada. Puedes editarla para agregar información importante para tus estudiantes."}
               </p>
             </div>
           </div>
 
           {/* Grupos */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-white flex items-center gap-2">
                 <ChartBarIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
                 Grupos de la Clase ({classroom.grupos_clases?.length || 0})
               </h3>
@@ -182,27 +182,27 @@ const ClassroomDetailPage = () => {
         {/* Sidebar - Solo Estadísticas */}
         <div className="space-y-4 sm:space-y-6">
           {/* Estadísticas */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Estadísticas</h3>
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Estadísticas</h3>
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm sm:text-base">Total Estudiantes</span>
+                <span className="text-gray-400 text-sm sm:text-base">Total Estudiantes</span>
                 <span className="font-semibold text-orange-600 text-sm sm:text-base">{students?.length || 0}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm sm:text-base">Grupos Activos</span>
+                <span className="text-gray-400 text-sm sm:text-base">Grupos Activos</span>
                 <span className="font-semibold text-blue-600 text-sm sm:text-base">{classroom.grupos_clases?.length || 0}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm sm:text-base">Fecha de Creación</span>
-                <span className="font-medium text-gray-900 text-xs sm:text-sm text-right">
+                <span className="text-gray-400 text-sm sm:text-base">Fecha de Creación</span>
+                <span className="font-medium text-white text-xs sm:text-sm text-right">
                   {formatDate(classroom.creado)}
                 </span>
               </div>
               {classroom.actualizado && (
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600 text-sm sm:text-base">Última Actualización</span>
-                  <span className="font-medium text-gray-900 text-xs sm:text-sm">
+                  <span className="text-gray-400 text-sm sm:text-base">Última Actualización</span>
+                  <span className="font-medium text-white text-xs sm:text-sm">
                     {formatRelativeTime(classroom.actualizado)}
                   </span>
                 </div>
@@ -213,9 +213,9 @@ const ClassroomDetailPage = () => {
       </div>
 
       {/* Students List */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <h2 className="text-lg sm:text-xl font-semibold text-white flex items-center gap-2">
             <UserGroupIcon className="h-5 w-5 text-orange-600 flex-shrink-0" />
             Estudiantes ({students?.length || 0})
           </h2>

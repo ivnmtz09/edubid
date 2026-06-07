@@ -135,8 +135,8 @@ export default function GradeSubmission({ submission, onClose }) {
       </div>
 
       {/* Resumen */}
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-        <h4 className="font-semibold text-gray-900 text-sm mb-3">Resumen de Calificación</h4>
+      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+        <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-3">Resumen de Calificación</h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-gray-600">Calificación:</span>
@@ -158,7 +158,7 @@ export default function GradeSubmission({ submission, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium"
+          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 dark:bg-gray-900 transition-all font-medium"
         >
           <XCircleIcon className="h-5 w-5" />
           Cancelar
@@ -181,3 +181,4 @@ export default function GradeSubmission({ submission, onClose }) {
     </form>
   )
 }
+

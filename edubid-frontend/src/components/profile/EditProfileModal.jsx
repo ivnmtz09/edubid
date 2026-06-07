@@ -49,20 +49,20 @@ export default function EditProfileModal({ user, onClose }) {
       <div className="flex min-h-full items-center justify-center p-4">
         {/* Modal con efecto brillante naranja */}
         <div
-          className="relative bg-white rounded-xl w-full max-w-lg shadow-lg border border-orange-400 
+          className="relative bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg shadow-lg border border-orange-400 
             shadow-[0_0_20px_4px_rgba(255,140,0,0.4)]
             before:content-[''] before:absolute before:inset-0 before:rounded-xl before:-z-10
-            before:blur-2xl before:bg-gradient-to-r before:from-orange-500 before:to-amber-400 before:opacity-30"
+            before:blur-2xl before:bg-gray-800 before:opacity-30"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Editar Perfil
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100"
+              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100 dark:bg-gray-900"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
@@ -150,7 +150,7 @@ export default function EditProfileModal({ user, onClose }) {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
+                  className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 dark:bg-gray-900 rounded-lg transition font-medium"
                 >
                   Cancelar
                 </button>
@@ -169,3 +169,4 @@ export default function EditProfileModal({ user, onClose }) {
     </div>
   )
 }
+

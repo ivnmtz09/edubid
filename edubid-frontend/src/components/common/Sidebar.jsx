@@ -58,17 +58,17 @@ const Sidebar = ({ isOpen, onClose }) => {
     location.pathname === href || location.pathname.startsWith(href + "/")
 
   const SidebarContent = () => (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-background to-muted/30 border-r border-border">
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background dark:bg-gray-900 border-r border-border">
       {/* Logo */}
       <div className="flex h-20 shrink-0 items-center px-6 border-b border-border">
         <div className="flex items-center space-x-3">
           <div className="relative">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-muted to-muted flex items-center justify-center shadow-lg overflow-hidden">
-              <img 
-                src="/assets/coins/coin.png" 
-                alt="EduBid" 
-                className="h-8 w-8 object-contain"
-              />
+            <div className="h-12 w-12 rounded-2xl bg-gray-800 flex items-center justify-center shadow-lg overflow-hidden">
+                <img 
+                  src="/edubid.png" 
+                  alt="EduBid" 
+                  className="h-8 w-8 object-contain"
+                />
             </div>
             <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary border-2 border-background flex items-center justify-center">
               <BookOpenIcon className="h-3 w-3 text-primary-foreground" />
@@ -95,7 +95,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   rel="noopener noreferrer"
                   className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                     current
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25 dark:from-cyan-500 dark:to-purple-600 dark:shadow-purple-500/25"
+                      ? "bg-orange-600 text-white shadow-lg shadow-orange-600/25"
                       : "text-foreground/70 hover:bg-card hover:text-primary hover:shadow-md border border-transparent hover:border-primary/20"
                   }`}
                   onClick={onClose}
@@ -115,7 +115,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   to={item.href}
                   className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                     current
-                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/25 dark:from-cyan-500 dark:to-purple-600 dark:shadow-purple-500/25"
+                      ? "bg-orange-600 text-white shadow-lg shadow-orange-600/25"
                       : "text-foreground/70 hover:bg-card hover:text-primary hover:shadow-md border border-transparent hover:border-primary/20"
                   }`}
                   onClick={onClose}

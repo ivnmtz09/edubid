@@ -96,7 +96,7 @@ export default function SubmitActivityForm({ activityId, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm sm:text-base"
+            className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition text-sm sm:text-base"
           >
             Cancelar
           </button>
@@ -116,3 +116,4 @@ export default function SubmitActivityForm({ activityId, onClose }) {
     </Modal>
   )
 }
+

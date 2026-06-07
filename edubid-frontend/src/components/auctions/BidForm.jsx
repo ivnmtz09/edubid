@@ -119,7 +119,7 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
 
   if (!isActive || hasEnded) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
         <div className="text-center py-4">
           <p className="text-gray-500">Esta subasta ha finalizado</p>
         </div>
@@ -128,8 +128,8 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Realizar Puja</h3>
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Realizar Puja</h3>
 
       <div className="space-y-4">
         {/* Información de pujas actuales */}
@@ -210,7 +210,7 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
               {(existingBid && isIncreasing) && (
                 <button
                   onClick={handleCancel}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition text-sm font-medium"
                 >
                   Cancelar
                 </button>
@@ -275,3 +275,4 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
 }
 
 export default BidForm
+

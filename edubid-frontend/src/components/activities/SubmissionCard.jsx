@@ -13,14 +13,14 @@ export default function SubmissionCard({ submission, onSave }) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex items-start space-x-3 flex-1">
           <div className="bg-purple-50 p-1.5 rounded-full flex-shrink-0 mt-1">
             <UserCircleIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
               {submission.estudiante_nombre}
             </h3>
             <p className="text-xs sm:text-sm text-gray-600 mt-1">
@@ -34,7 +34,7 @@ export default function SubmissionCard({ submission, onSave }) {
             href={submission.archivo}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors duration-200 w-fit"
+            className="inline-flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 text-gray-800 dark:text-gray-100 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors duration-200 w-fit"
           >
             <DocumentTextIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
             <span className="truncate">Ver archivo</span>
@@ -72,7 +72,7 @@ export default function SubmissionCard({ submission, onSave }) {
             <button
               type="button"
               onClick={() => setEditMode(false)}
-              className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-xs sm:text-sm"
+              className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition text-xs sm:text-sm"
             >
               Cancelar
             </button>
@@ -119,3 +119,4 @@ export default function SubmissionCard({ submission, onSave }) {
     </div>
   )
 }
+

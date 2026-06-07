@@ -54,11 +54,11 @@ export default function DeleteAccountModal({ user, onClose }) {
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative bg-white rounded-xl w-full max-w-md shadow-2xl border-2 border-red-300"
+          className="relative bg-white dark:bg-gray-800 rounded-xl w-full max-w-md shadow-2xl border-2 border-red-300"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-red-50">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 bg-red-50">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                 <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
@@ -69,7 +69,7 @@ export default function DeleteAccountModal({ user, onClose }) {
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-white"
+              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-white dark:bg-gray-800"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
@@ -121,7 +121,7 @@ export default function DeleteAccountModal({ user, onClose }) {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     onClick={onClose}
-                    className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
+                    className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 dark:bg-gray-900 rounded-lg transition font-medium"
                   >
                     Cancelar
                   </button>
@@ -182,7 +182,7 @@ export default function DeleteAccountModal({ user, onClose }) {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     onClick={() => setStep(1)}
-                    className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
+                    className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 dark:bg-gray-900 rounded-lg transition font-medium"
                   >
                     Volver
                   </button>
@@ -209,3 +209,4 @@ export default function DeleteAccountModal({ user, onClose }) {
     </div>
   )
 }
+

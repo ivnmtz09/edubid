@@ -79,7 +79,7 @@ const AuctionList = () => {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header con estadísticas - Verde para detalles */}
-      <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white">
+      <div className="bg-gray-800 rounded-xl p-4 sm:p-6 text-white">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex-1">
             <h1 className="text-xl sm:text-2xl font-bold">Subastas Académicas</h1>
@@ -159,7 +159,7 @@ const AuctionList = () => {
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 sm:py-12 bg-gray-50 rounded-xl">
+        <div className="text-center py-8 sm:py-12 bg-gray-50 dark:bg-gray-900 rounded-xl">
           <ShoppingBagIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
           <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
             {searchTerm || statusFilter ? "No se encontraron subastas" : "No hay subastas disponibles"}
@@ -200,3 +200,4 @@ const AuctionList = () => {
 }
 
 export default AuctionList
+

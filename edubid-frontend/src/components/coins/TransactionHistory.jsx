@@ -53,7 +53,7 @@ const TransactionHistory = ({ transactions = [], className = "" }) => {
   return (
     <div className={`card ${className}`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Historial de Transacciones</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Historial de Transacciones</h3>
         <select value={filter} onChange={(e) => setFilter(e.target.value)} className="input text-sm">
           <option value="all">Todas</option>
           <option value={TRANSACTION_TYPES.EARNED}>Ganadas</option>
@@ -65,11 +65,11 @@ const TransactionHistory = ({ transactions = [], className = "" }) => {
       {filteredTransactions.length > 0 ? (
         <div className="space-y-3 max-h-96 overflow-y-auto">
           {filteredTransactions.map((transaction) => (
-            <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
               <div className="flex items-center space-x-3">
                 {getTransactionIcon(transaction.type)}
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{transaction.description}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{transaction.description}</p>
                   <div className="flex items-center text-xs text-gray-500">
                     <CalendarIcon className="h-3 w-3 mr-1" />
                     <span>{formatDateTime(transaction.created_at)}</span>
@@ -89,7 +89,7 @@ const TransactionHistory = ({ transactions = [], className = "" }) => {
       ) : (
         <div className="text-center py-8">
           <CurrencyDollarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No hay transacciones</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No hay transacciones</h3>
           <p className="text-gray-500">
             {filter === "all" ? "Aún no tienes transacciones" : "No hay transacciones de este tipo"}
           </p>
@@ -100,3 +100,4 @@ const TransactionHistory = ({ transactions = [], className = "" }) => {
 }
 
 export default TransactionHistory
+

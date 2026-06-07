@@ -108,7 +108,7 @@ const AddStudentToGroup = ({ group, onClose }) => {
       </div>
 
       {/* Search Results */}
-      <div className="max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+      <div className="max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
         {isSearching ? (
           <div className="p-4 text-center">
             <LoadingSpinner size="sm" />
@@ -121,14 +121,14 @@ const AddStudentToGroup = ({ group, onClose }) => {
               return (
                 <div
                   key={student.id}
-                  className={`p-3 cursor-pointer hover:bg-gray-50 ${
+                  className={`p-3 cursor-pointer hover:bg-gray-50 dark:bg-gray-900 ${
                     isSelected ? "bg-blue-50 border-l-4 border-blue-500" : ""
                   }`}
                   onClick={() => handleStudentToggle(student)}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {student.first_name} {student.last_name}
                       </p>
                       <p className="text-sm text-gray-500">{student.email}</p>
@@ -202,3 +202,4 @@ const AddStudentToGroup = ({ group, onClose }) => {
 }
 
 export default AddStudentToGroup
+

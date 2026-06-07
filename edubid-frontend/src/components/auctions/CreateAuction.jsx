@@ -164,7 +164,7 @@ const CreateAuction = ({ auction, onClose }) => {
             disabled={groupsLoading}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base ${
               errors.grupo ? "border-red-500" : "border-gray-300"
-            } ${groupsLoading ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+            } ${groupsLoading ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed' : ''}`}
           >
             <option value="">{groupsLoading ? "Cargando grupos..." : "Selecciona un grupo"}</option>
             {groups?.map((group) => (
@@ -256,7 +256,7 @@ const CreateAuction = ({ auction, onClose }) => {
           type="button" 
           onClick={onClose} 
           disabled={isLoading}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 text-sm sm:text-base"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition disabled:opacity-50 text-sm sm:text-base"
         >
           Cancelar
         </button>
@@ -273,3 +273,4 @@ const CreateAuction = ({ auction, onClose }) => {
 }
 
 export default CreateAuction
+

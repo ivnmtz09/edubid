@@ -1,12 +1,22 @@
-import { useTheme } from "../../context/useTheme"
+import { useTheme } from "../../context/useTheme";
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme()
-  const isDark = theme === "dark"
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+
+  const handleToggle = () => {
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.remove("dark");
+    } else {
+      root.classList.add("dark");
+    }
+    toggleTheme();
+  };
 
   return (
     <button
-      onClick={toggleTheme}
+      onClick={handleToggle}
       aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
       className="relative flex items-center w-14 h-7 sm:w-16 sm:h-8 rounded-full transition-all duration-300
         bg-amber-300 dark:bg-[#3A3028]
@@ -14,7 +24,7 @@ export default function ThemeToggle() {
         active:scale-95"
     >
       <span
-        className={`absolute left-0.5 sm:left-1 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white shadow-md transition-all duration-300 ${
+        className={`absolute left-0.5 sm:left-1 flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white dark:bg-gray-800 shadow-md transition-all duration-300 ${
           isDark ? "translate-x-7 sm:translate-x-8" : "translate-x-0"
         }`}
       >
@@ -55,5 +65,5 @@ export default function ThemeToggle() {
         )}
       </span>
     </button>
-  )
+  );
 }

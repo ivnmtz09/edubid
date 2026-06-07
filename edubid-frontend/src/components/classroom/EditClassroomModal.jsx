@@ -61,16 +61,16 @@ export default function EditClassroomModal({ classroom, onClose }) {
 
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative bg-white rounded-xl w-full max-w-lg shadow-lg border border-orange-400 shadow-orange-500/20"
+          className="relative bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg shadow-lg border border-orange-400 shadow-orange-500/20"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-900">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               Editar Clase
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100"
+              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100 dark:bg-gray-900"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
@@ -114,7 +114,7 @@ export default function EditClassroomModal({ classroom, onClose }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition"
               >
                 Cancelar
               </button>
@@ -136,3 +136,4 @@ export default function EditClassroomModal({ classroom, onClose }) {
     </div>
   )
 }
+

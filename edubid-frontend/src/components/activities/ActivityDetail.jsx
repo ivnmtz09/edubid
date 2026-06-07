@@ -60,7 +60,7 @@ export default function ActivityDetail() {
   if (!activity) {
     return (
       <div className="text-center py-8 sm:py-12 px-4">
-        <p className="text-red-600 text-base sm:text-lg mb-4">Actividad no encontrada</p>
+        <p className="text-red-400 text-base sm:text-lg mb-4">Actividad no encontrada</p>
         <button 
           onClick={() => navigate("/activities")} 
           className="bg-purple-500 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg hover:bg-purple-600 transition font-medium text-sm sm:text-base"
@@ -77,7 +77,7 @@ export default function ActivityDetail() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <button
           onClick={() => navigate("/activities")}
-          className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 w-fit touch-manipulation"
+          className="flex items-center space-x-2 text-gray-400 hover:text-white w-fit touch-manipulation"
         >
           <ArrowLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
           <span className="text-sm sm:text-base">Volver</span>
@@ -118,12 +118,12 @@ export default function ActivityDetail() {
       </div>
 
       {/* Activity Card */}
-      <div className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-gray-800 border border-gray-700 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden">
         {/* Header - Purple Theme */}
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4 sm:p-6 text-white">
+        <div className="bg-purple-600 p-4 sm:p-6 text-white">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <span className="text-xs font-medium uppercase bg-white/20 px-2 py-1 rounded inline-block">
+              <span className="text-xs font-medium uppercase bg-white dark:bg-gray-800/10 px-2 py-1 rounded inline-block">
                 {activity.tipo}
               </span>
               <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold mt-2 break-words">
@@ -140,18 +140,18 @@ export default function ActivityDetail() {
         <div className="p-4 sm:p-5 lg:p-6 space-y-4 sm:space-y-5 lg:space-y-6">
           {/* Descripción */}
           <div>
-            <h3 className="font-semibold text-gray-900 text-sm sm:text-base lg:text-lg mb-2">
+            <h3 className="font-semibold text-white text-sm sm:text-base lg:text-lg mb-2">
               Descripción
             </h3>
-            <p className="text-gray-600 whitespace-pre-wrap text-sm sm:text-base break-words">
+            <p className="text-gray-400 whitespace-pre-wrap text-sm sm:text-base break-words">
               {activity.descripcion || "Sin descripción"}
             </p>
           </div>
 
           {/* Archivo Adjunto del Docente */}
           {activity.archivo_adjunto && (
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 sm:p-4">
-              <h3 className="font-semibold text-purple-900 text-sm sm:text-base mb-2 flex items-center gap-2">
+            <div className="bg-purple-900/20 border border-purple-800/50 rounded-lg p-3 sm:p-4">
+              <h3 className="font-semibold text-purple-200 text-sm sm:text-base mb-2 flex items-center gap-2">
                 <DocumentTextIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <span>Material Adjunto</span>
               </h3>
@@ -159,7 +159,7 @@ export default function ActivityDetail() {
                 href={activity.archivo_adjunto}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 hover:underline text-sm sm:text-base break-all touch-manipulation"
+                className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 hover:underline text-sm sm:text-base break-all touch-manipulation"
               >
                 <DocumentArrowUpIcon className="h-4 w-4 flex-shrink-0" />
                 <span>Ver archivo adjunto del docente</span>
@@ -169,32 +169,32 @@ export default function ActivityDetail() {
 
           {/* Info Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-              <div className="flex items-center space-x-2 text-gray-500 mb-1 sm:mb-2">
+            <div className="bg-gray-700/50 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center space-x-2 text-gray-400 mb-1 sm:mb-2">
                 <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <span className="text-xs sm:text-sm">Fecha de Entrega</span>
               </div>
-              <p className="font-semibold text-gray-900 text-sm sm:text-base break-words">
+              <p className="font-semibold text-white text-sm sm:text-base break-words">
                 {formatDate(activity.fecha_entrega)}
               </p>
               {activity.esta_vencida && (
-                <span className="text-xs text-red-600 mt-1 block">Vencida</span>
+                <span className="text-xs text-red-400 mt-1 block">Vencida</span>
               )}
             </div>
 
-            <div className="bg-orange-50 rounded-lg p-3 sm:p-4">
-              <div className="flex items-center space-x-2 text-orange-600 mb-1 sm:mb-2">
+            <div className="bg-orange-900/20 rounded-lg p-3 sm:p-4">
+              <div className="flex items-center space-x-2 text-orange-400 mb-1 sm:mb-2">
                 <CurrencyEuroIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 <span className="text-xs sm:text-sm">Valor en edubids</span>
               </div>
-              <p className="font-semibold text-orange-600 text-base sm:text-lg lg:text-xl">
+              <p className="font-semibold text-orange-400 text-base sm:text-lg lg:text-xl">
                 {activity.valor_edubids} EC
               </p>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
-              <div className="text-xs sm:text-sm text-blue-600 mb-1 sm:mb-2">Valor en Notas</div>
-              <p className="font-semibold text-blue-600 text-base sm:text-lg lg:text-xl">
+            <div className="bg-blue-900/20 rounded-lg p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
+              <div className="text-xs sm:text-sm text-blue-400 mb-1 sm:mb-2">Valor en Notas</div>
+              <p className="font-semibold text-blue-400 text-base sm:text-lg lg:text-xl">
                 {activity.valor_notas}
               </p>
             </div>
@@ -210,10 +210,10 @@ export default function ActivityDetail() {
                   <div className={`border-2 rounded-xl p-4 sm:p-6 ${
                     (() => {
                       const percentage = (userSubmission.calificacion / activity.valor_notas) * 100
-                      if (percentage >= 90) return 'bg-green-50 border-green-300 text-green-700'
-                      if (percentage >= 70) return 'bg-blue-50 border-blue-300 text-blue-700'
-                      if (percentage >= 50) return 'bg-yellow-50 border-yellow-300 text-yellow-700'
-                      return 'bg-red-50 border-red-300 text-red-700'
+                      if (percentage >= 90) return 'bg-green-900/20 border-green-800/50 text-green-300'
+                      if (percentage >= 70) return 'bg-blue-900/20 border-blue-800/50 text-blue-300'
+                      if (percentage >= 50) return 'bg-yellow-900/20 border-yellow-800/50 text-yellow-300'
+                      return 'bg-red-900/20 border-red-800/50 text-red-300'
                     })()
                   }`}>
                     <div className="flex items-start gap-3 sm:gap-4">
@@ -232,7 +232,7 @@ export default function ActivityDetail() {
                             </p>
                           </div>
                           
-                          <div className="flex-shrink-0 px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full">
+                          <div className="flex-shrink-0 px-3 py-1 bg-white dark:bg-gray-800/10 backdrop-blur-sm rounded-full">
                             <span className="text-xs sm:text-sm font-bold">
                               {((userSubmission.calificacion / activity.valor_notas) * 100).toFixed(0)}%
                             </span>
@@ -250,7 +250,7 @@ export default function ActivityDetail() {
                         </div>
 
                         {/* Barra de Progreso */}
-                        <div className="w-full bg-white/30 rounded-full h-2 sm:h-3 mb-4 overflow-hidden">
+                        <div className="w-full bg-white dark:bg-gray-800/10 rounded-full h-2 sm:h-3 mb-4 overflow-hidden">
                           <div 
                             className="bg-current h-full rounded-full transition-all duration-500"
                             style={{ width: `${(userSubmission.calificacion / activity.valor_notas) * 100}%` }}
@@ -277,18 +277,18 @@ export default function ActivityDetail() {
 
                   {/* Card de Retroalimentación */}
                   {userSubmission.retroalimentacion && (
-                    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
+                    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6">
                       <div className="flex items-start gap-3 sm:gap-4">
-                        <div className="flex-shrink-0 p-2 bg-purple-100 rounded-lg">
-                          <DocumentTextIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
+                        <div className="flex-shrink-0 p-2 bg-purple-900/30 rounded-lg">
+                          <DocumentTextIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <h5 className="font-semibold text-gray-900 text-sm sm:text-base mb-2">
+                          <h5 className="font-semibold text-white text-sm sm:text-base mb-2">
                             Retroalimentación del Docente
                           </h5>
-                          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                            <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+                          <div className="bg-gray-700/50 rounded-lg p-3 sm:p-4">
+                            <p className="text-sm sm:text-base text-gray-300 leading-relaxed whitespace-pre-wrap break-words">
                               {userSubmission.retroalimentacion}
                             </p>
                           </div>
@@ -299,8 +299,8 @@ export default function ActivityDetail() {
 
                   {/* Mensaje Motivacional */}
                   {((userSubmission.calificacion / activity.valor_notas) * 100) >= 90 && (
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4">
-                      <div className="flex items-center gap-2 text-green-700">
+                    <div className="bg-green-900/20 border border-green-800/50 rounded-lg p-3 sm:p-4">
+                      <div className="flex items-center gap-2 text-green-300">
                         <CheckCircleIcon className="h-5 w-5 flex-shrink-0" />
                         <p className="text-sm sm:text-base font-medium">
                           ¡Excelente trabajo! Obtuviste una calificación sobresaliente.
@@ -311,17 +311,17 @@ export default function ActivityDetail() {
                 </div>
               ) : (
                 // Vista de Entrega Pendiente
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6">
+                <div className="bg-blue-900/20 border border-blue-800/50 rounded-xl p-4 sm:p-6">
                   <div className="flex items-start gap-3 sm:gap-4">
-                    <CheckCircleIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0 mt-1" />
+                    <CheckCircleIcon className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 flex-shrink-0 mt-1" />
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-blue-900 text-base sm:text-lg mb-2">
+                      <h4 className="font-semibold text-blue-200 text-base sm:text-lg mb-2">
                         Entrega Pendiente de Calificación
                       </h4>
-                      <p className="text-sm sm:text-base text-blue-700 mb-3">
+                      <p className="text-sm sm:text-base text-blue-300 mb-3">
                         Tu docente revisará tu entrega pronto. Te notificaremos cuando tengas tu calificación.
                       </p>
-                      <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-600">
+                      <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-400">
                         <CalendarIcon className="h-4 w-4" />
                         <span>Entregado el {formatDate(userSubmission.creado)}</span>
                       </div>
@@ -334,10 +334,10 @@ export default function ActivityDetail() {
 
           {/* Warning si está vencida */}
           {!isTeacher && !userSubmission && activity.esta_vencida && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
+            <div className="bg-red-900/20 border border-red-800/50 rounded-lg p-3 sm:p-4">
               <div className="flex items-start gap-2">
-                <ExclamationTriangleIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-red-700 text-xs sm:text-sm">
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-300 text-xs sm:text-sm">
                   Esta actividad ha vencido. Ya no es posible realizar entregas.
                 </p>
               </div>
@@ -348,8 +348,8 @@ export default function ActivityDetail() {
 
       {/* Submissions List (Teacher View) */}
       {isTeacher && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 lg:p-6">
-          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-5 lg:p-6">
+          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-white mb-3 sm:mb-4">
             Entregas de Estudiantes ({submissions?.length || 0})
           </h2>
           <SubmissionsList submissions={submissions} activityId={id} />
@@ -378,21 +378,21 @@ export default function ActivityDetail() {
           <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm" onClick={() => setShowCancelConfirm(false)} />
           
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="relative bg-white rounded-xl w-full max-w-md shadow-xl border border-gray-200 p-4 sm:p-6">
+            <div className="relative bg-gray-800 rounded-xl w-full max-w-md shadow-xl border border-gray-700 p-4 sm:p-6">
               <div className="text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
-                  <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-900/30 mb-4">
+                  <ExclamationTriangleIcon className="h-6 w-6 text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-white mb-2">
                   ¿Cancelar entrega?
                 </h3>
-                <p className="text-sm text-gray-600 mb-6">
+                <p className="text-sm text-gray-400 mb-6">
                   Esta acción eliminará tu entrega de esta actividad. Podrás volver a entregarla antes de la fecha límite.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={() => setShowCancelConfirm(false)}
-                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm sm:text-base touch-manipulation"
+                    className="flex-1 px-4 py-2.5 border border-gray-600 rounded-lg hover:bg-gray-700 transition text-sm sm:text-base touch-manipulation"
                   >
                     No, mantener
                   </button>
@@ -419,3 +419,4 @@ export default function ActivityDetail() {
     </div>
   )
 }
+

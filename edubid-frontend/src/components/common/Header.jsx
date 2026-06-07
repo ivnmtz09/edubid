@@ -35,11 +35,11 @@ const Header = ({ onMenuClick }) => {
   ]
 
   return (
-    <div className="sticky top-0 z-30 flex h-16 sm:h-20 items-center justify-between bg-background/80 backdrop-blur-xl border-b border-border/60 px-3 sm:px-4 lg:px-6 xl:px-8">
+    <div className="sticky top-0 z-30 flex h-16 sm:h-20 items-center justify-between bg-white/80 dark:bg-gray-900 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-3 sm:px-4 lg:px-6 xl:px-8">
       {/* Mobile menu button */}
       <button 
         type="button" 
-        className="lg:hidden p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-muted transition-all duration-200 text-muted-foreground hover:text-foreground flex-shrink-0"
+        className="lg:hidden p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex-shrink-0"
         onClick={onMenuClick}
       >
         <Bars3Icon className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -47,16 +47,16 @@ const Header = ({ onMenuClick }) => {
 
       <div className="flex flex-1 items-center justify-end gap-x-2 sm:gap-x-3 lg:gap-x-4">
         {/* Role Badge - Oculto en móviles pequeños, visible desde sm */}
-        <div className="hidden sm:flex items-center gap-x-1.5 sm:gap-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-purple-900/40 rounded-full border border-blue-200 dark:border-blue-800/50">
-          <AcademicCapIcon className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400" />
-          <span className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300 capitalize truncate max-w-[80px] sm:max-w-none">
+        <div className="hidden sm:flex items-center gap-x-1.5 sm:gap-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-orange-600/10 rounded-full border border-orange-600/20">
+          <AcademicCapIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
+          <span className="text-xs sm:text-sm font-medium text-orange-500 capitalize truncate max-w-[80px] sm:max-w-none">
             {user?.role}
           </span>
         </div>
 
         {/* Saldo del estudiante - MOSTRAR SUMA TOTAL */}
         {isStudent && !balanceLoading && (
-          <div className="flex items-center gap-x-1.5 sm:gap-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full shadow-lg shadow-orange-500/25">
+          <div className="flex items-center gap-x-1.5 sm:gap-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-600 rounded-full shadow-lg shadow-orange-600/25">
             <CurrencyEuroIcon className="h-3 w-3 sm:h-4 sm:w-4 xl:h-5 xl:w-5 text-white" />
             <span className="text-xs sm:text-sm xl:text-base font-bold text-white whitespace-nowrap">
               {formatCoins(totalBalance || 0)} EC
@@ -76,26 +76,26 @@ const Header = ({ onMenuClick }) => {
 
         {/* Profile dropdown */}
         <Menu as="div" className="relative flex-shrink-0">
-          <Menu.Button className="flex items-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-muted transition-all duration-200 group">
+          <Menu.Button className="flex items-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group">
             <div className="flex items-center gap-x-2 sm:gap-x-3">
               {/* Avatar - Tamaños responsivos */}
-              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold shadow-md text-sm sm:text-base">
+              <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl bg-blue-600 flex items-center justify-center text-white font-semibold shadow-md text-sm sm:text-base">
                 {user?.first_name?.charAt(0)}
                 {user?.last_name?.charAt(0)}
               </div>
               
               {/* User info - Oculto en móviles, visible desde lg */}
               <div className="hidden lg:block text-left min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate max-w-[120px] xl:max-w-[140px]">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[120px] xl:max-w-[140px]">
                   {user?.first_name} {user?.last_name}
                 </p>
-                <p className="text-xs text-muted-foreground capitalize truncate">
+                <p className="text-xs text-gray-600 dark:text-gray-300 capitalize truncate">
                   {user?.role}
                 </p>
               </div>
 
               {/* Chevron - Siempre visible */}
-              <ChevronDownIcon className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground group-hover:text-foreground transition-colors duration-200 flex-shrink-0" />
+              <ChevronDownIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors duration-200 flex-shrink-0" />
             </div>
           </Menu.Button>
           
@@ -108,19 +108,19 @@ const Header = ({ onMenuClick }) => {
             leaveFrom="opacity-100 scale-100 translate-y-0"
             leaveTo="opacity-0 scale-95 translate-y-2"
           >
-            <Menu.Items className="absolute right-0 mt-2 w-56 sm:w-64 origin-top-right rounded-xl sm:rounded-2xl bg-card/95 backdrop-blur-xl shadow-xl ring-1 ring-border/80 focus:outline-none overflow-hidden z-50">
+            <Menu.Items className="absolute right-0 mt-2 w-56 sm:w-64 origin-top-right rounded-xl sm:rounded-2xl bg-white dark:bg-gray-800 backdrop-blur-xl shadow-xl ring-1 ring-gray-200 dark:ring-gray-700 focus:outline-none overflow-hidden z-50">
               {/* User Info */}
-              <div className="p-3 sm:p-4 border-b border-border bg-gradient-to-r from-muted/50 to-muted/30">
+              <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                 <div className="flex items-center gap-x-3">
-                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm sm:text-base flex-shrink-0">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-semibold text-sm sm:text-base flex-shrink-0">
                     {user?.first_name?.charAt(0)}
                     {user?.last_name?.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                       {user?.first_name} {user?.last_name}
                     </p>
-                    <p className="text-xs text-muted-foreground capitalize truncate">{user?.role}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300 capitalize truncate">{user?.role}</p>
                     {isStudent && !balanceLoading && (
                       <div className="flex items-center gap-x-1 mt-1">
                         <CurrencyEuroIcon className="h-3 w-3 text-orange-500 flex-shrink-0" />
@@ -141,10 +141,10 @@ const Header = ({ onMenuClick }) => {
                     <div className={`flex items-center px-2 sm:px-3 py-2.5 sm:py-3 text-sm font-medium rounded-lg sm:rounded-xl transition-all duration-200 ${
                       item.onClick 
                         ? 'text-red-600 hover:bg-red-500/10 hover:text-red-700' 
-                        : 'text-foreground/80 hover:bg-muted hover:text-primary'
+                        : 'text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-orange-600 dark:hover:text-orange-500'
                     }`}>
                       <item.icon className={`mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${
-                        item.onClick ? 'text-red-500' : 'text-muted-foreground'
+                        item.onClick ? 'text-red-500' : 'text-gray-500 dark:text-gray-300'
                       }`} />
                       <span className="truncate flex-1">{item.name}</span>
                       {isExternal && (

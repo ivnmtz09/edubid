@@ -110,30 +110,30 @@ export default function LoginForm({
       />
 
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Iniciar sesion
         </h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Accede a tu cuenta para continuar aprendiendo
         </p>
       </div>
 
       {showResetSuggestion && (
-        <div className="rounded-xl border border-[#FADBD8] bg-[#FADBD8]/20 p-4 animate-fade-in">
+        <div className="rounded-xl border border-red-800/40 bg-red-900/20 p-4">
           <div className="flex items-start gap-3">
-            <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5 text-[#c0392b]" />
+            <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5 text-red-400" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-[#c0392b] mb-2">
+              <p className="text-sm font-medium text-red-400 mb-2">
                 ¿Olvidaste tu contrasena?
               </p>
-              <p className="text-xs text-[#c0392b]/80 mb-3">
+              <p className="text-xs text-red-400/80 mb-3">
                 Has intentado iniciar sesion sin exito. Puedes restablecer tu
                 contrasena si no la recuerdas.
               </p>
               <button
                 type="button"
                 onClick={handlePasswordReset}
-                className="rounded-lg bg-[#EA580C] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#C2410C]"
+                className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-700"
               >
                 Restablecer contrasena
               </button>
@@ -157,7 +157,7 @@ export default function LoginForm({
               },
             })}
             autoComplete="off"
-            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
+            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-4 py-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-colors focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
             placeholder="tu@email.com"
           />
           {errors.email && (
@@ -180,7 +180,7 @@ export default function LoginForm({
                 },
               })}
               autoComplete="new-password"
-              className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-11 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#EA580C] focus:ring-2 focus:ring-[#EA580C]/20 dark:border-[#3A3028] dark:bg-[#241E1A] dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-[#F59E0B] dark:focus:ring-[#F59E0B]/20"
+              className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-4 py-3 pr-11 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-colors focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
               placeholder="********"
             />
             <button
@@ -205,7 +205,7 @@ export default function LoginForm({
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
-              className="text-xs font-medium text-[#EA580C] transition hover:text-[#C2410C] dark:text-[#FBBF24] dark:hover:text-[#FCD34D]"
+              className="text-xs font-medium text-orange-600 transition hover:text-orange-500"
             >
               ¿Olvidaste tu contrasena?
             </button>
@@ -216,7 +216,7 @@ export default function LoginForm({
       <button
         type="submit"
         disabled={isSubmitting || isLoading}
-        className="w-full rounded-xl bg-[#EA580C] py-3 text-sm font-semibold text-white shadow-lg shadow-[#EA580C]/20 transition-all hover:bg-[#C2410C] hover:shadow-xl hover:shadow-[#EA580C]/25 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98] flex items-center justify-center gap-2"
+        className="w-full rounded-xl bg-orange-600 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-600/20 transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-600/25 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98] flex items-center justify-center gap-2"
       >
         {isSubmitting || isLoading ? (
           <>
@@ -232,7 +232,7 @@ export default function LoginForm({
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
         </div>
-        <div className="relative bg-white px-3 text-sm text-gray-400 dark:bg-[#181412] dark:text-gray-500">
+        <div className="relative bg-white dark:bg-gray-900 px-3 text-sm text-gray-500">
           o continua con
         </div>
       </div>
@@ -252,12 +252,12 @@ export default function LoginForm({
         />
       </div>
 
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-center text-sm text-gray-600 dark:text-gray-500">
         ¿No tienes una cuenta?{" "}
         <button
           type="button"
           onClick={onSwitchToRegister}
-          className="font-medium text-[#EA580C] underline transition hover:text-[#C2410C] dark:text-[#FBBF24] dark:hover:text-[#FCD34D]"
+          className="font-medium text-orange-600 underline transition hover:text-orange-500"
         >
           Registrate aqui
         </button>

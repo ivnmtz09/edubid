@@ -78,17 +78,17 @@ export default function EditGroupModal({ group, onClose }) {
         
         {/* Modal */}
         <div 
-          className="relative bg-white rounded-xl sm:rounded-2xl w-full max-w-md shadow-lg border border-blue-200"
+          className="relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl w-full max-w-md shadow-lg border border-blue-200"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
               Editar Grupo
             </h3>
             <button
               onClick={onClose}
-              className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 dark:bg-gray-900 transition-colors"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -177,7 +177,7 @@ export default function EditGroupModal({ group, onClose }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm sm:text-base"
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition-colors font-medium text-sm sm:text-base"
               >
                 Cancelar
               </button>
@@ -199,3 +199,4 @@ export default function EditGroupModal({ group, onClose }) {
     </div>
   )
 }
+

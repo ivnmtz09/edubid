@@ -9,8 +9,9 @@ export default function LoadingSpinner({ size = "md" }) {
   return (
     <div className="flex items-center justify-center">
       <div
-        className={`${sizeClasses[size]} border-4 border-gray-200 border-t-orange-500 rounded-full animate-spin`}
+        className={`${sizeClasses[size]} border-4 border-gray-200 dark:border-gray-700 border-t-orange-500 rounded-full animate-spin`}
       />
     </div>
   )
 }
+

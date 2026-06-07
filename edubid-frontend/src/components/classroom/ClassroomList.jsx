@@ -89,11 +89,11 @@ export default function ClassroomList() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 sm:p-3 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex-shrink-0">
+            <div className="p-2 sm:p-3 bg-gray-800 rounded-xl flex-shrink-0">
               <AcademicCapIcon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Mis Clases</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Mis Clases</h1>
               <p className="text-gray-600 mt-1 text-base sm:text-lg">
                 {isTeacher 
                   ? "Gestiona tus clases, grupos y estudiantes" 
@@ -117,49 +117,49 @@ export default function ClassroomList() {
       {/* Estadísticas para docentes */}
       {isTeacher && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="bg-white rounded-xl p-4 sm:p-5 border border-yellow-200 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-yellow-200 shadow-sm">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-yellow-100 rounded-lg flex-shrink-0">
                 <AcademicCapIcon className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
                 <p className="text-xs sm:text-sm text-gray-600 truncate">Total Clases</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-5 border border-blue-200 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-blue-200 shadow-sm">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
                 <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalStudents}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.totalStudents}</p>
                 <p className="text-xs sm:text-sm text-gray-600 truncate">Estudiantes</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-5 border border-green-200 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-green-200 shadow-sm">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
                 <ChartBarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalGroups}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.totalGroups}</p>
                 <p className="text-xs sm:text-sm text-gray-600 truncate">Grupos</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-5 border border-orange-200 shadow-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-orange-200 shadow-sm">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-orange-100 rounded-lg flex-shrink-0">
                 <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
               </div>
               <div className="min-w-0">
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.recent}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.recent}</p>
                 <p className="text-xs sm:text-sm text-gray-600 truncate">Recientes</p>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function ClassroomList() {
       )}
 
       {/* Search Bar */}
-      <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 sm:p-4">
         <div className="relative">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
           <input
@@ -187,13 +187,13 @@ export default function ClassroomList() {
           {filteredClassrooms.map((classroom) => (
             <div
               key={classroom.id}
-              className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group h-full flex flex-col"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group h-full flex flex-col"
             >
               {/* Card Header */}
-              <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 p-4 sm:p-5">
+              <div className="bg-gray-800 p-4 sm:p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-white/20 rounded-lg flex-shrink-0">
+                    <div className="p-2 bg-white dark:bg-gray-800/20 rounded-lg flex-shrink-0">
                       <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -242,7 +242,7 @@ export default function ClassroomList() {
                       <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                       <span className="text-xs sm:text-sm">Creada:</span>
                     </div>
-                    <span className="font-medium text-gray-900 text-xs sm:text-sm">
+                    <span className="font-medium text-gray-900 dark:text-white text-xs sm:text-sm">
                       {formatRelativeTime(classroom.creado) || formatDate(classroom.creado)}
                     </span>
                   </div>
@@ -271,7 +271,7 @@ export default function ClassroomList() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 rounded-xl border border-gray-200">
+        <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
           <AcademicCapIcon className="h-16 w-16 sm:h-20 sm:w-20 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
             {searchTerm ? "No se encontraron clases" : "No hay clases disponibles"}
@@ -353,7 +353,7 @@ export default function ClassroomList() {
             <button
               type="button"
               onClick={() => setShowCreateModal(false)}
-              className="flex-1 px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all font-medium text-sm sm:text-base"
+              className="flex-1 px-4 py-2.5 sm:py-3 border border-gray-300 rounded-xl hover:bg-gray-50 dark:bg-gray-900 transition-all font-medium text-sm sm:text-base"
             >
               Cancelar
             </button>
@@ -370,3 +370,4 @@ export default function ClassroomList() {
     </div>
   )
 }
+

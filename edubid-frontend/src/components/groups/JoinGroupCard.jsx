@@ -20,9 +20,9 @@ export default function JoinGroupCard() {
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 lg:p-8 text-white shadow-lg border-2 border-blue-400">
+    <div className="bg-gray-800 rounded-xl p-4 sm:p-6 lg:p-8 text-white shadow-lg border-2 border-gray-700">
       <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6 mb-4 sm:mb-6">
-        <div className="p-2 sm:p-3 bg-white/20 rounded-lg flex-shrink-0">
+        <div className="p-2 sm:p-3 bg-white dark:bg-gray-800/20 rounded-lg flex-shrink-0">
           <UserGroupIcon className="h-6 w-6 sm:h-8 sm:w-8" />
         </div>
         <div className="flex-1 text-center sm:text-left">
@@ -47,7 +47,7 @@ export default function JoinGroupCard() {
         <button
           type="submit"
           disabled={!code.trim() || joinMutation.isPending || code.length !== 6}
-          className="bg-white text-blue-600 px-4 sm:px-8 py-3 sm:py-3.5 rounded-lg font-semibold hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md text-sm sm:text-base"
+          className="bg-white dark:bg-gray-800 text-blue-600 px-4 sm:px-8 py-3 sm:py-3.5 rounded-lg font-semibold hover:bg-blue-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md text-sm sm:text-base"
         >
           {joinMutation.isPending ? (
             <LoadingSpinner size="sm" />
@@ -61,7 +61,7 @@ export default function JoinGroupCard() {
       </form>
 
       {/* Hint adicional */}
-      <div className="mt-3 sm:mt-4 flex items-start space-x-2 bg-white/10 rounded-lg p-3">
+      <div className="mt-3 sm:mt-4 flex items-start space-x-2 bg-white dark:bg-gray-800/10 rounded-lg p-3">
         <svg
           className="h-4 w-4 sm:h-5 sm:w-5 text-blue-200 flex-shrink-0 mt-0.5"
           fill="currentColor"
@@ -80,3 +80,4 @@ export default function JoinGroupCard() {
     </div>
   )
 }
+

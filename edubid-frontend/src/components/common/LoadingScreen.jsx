@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const LoadingScreen = () => {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-orange-100 via-orange-50 to-white overflow-hidden">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-800 overflow-hidden">
       <motion.img
         src={logo}
         alt="EduBid Logo"

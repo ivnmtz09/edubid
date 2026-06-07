@@ -26,7 +26,7 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" })
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Fondo opaco */}
       <div
-        className="fixed inset-0 bg-opacity-40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
@@ -35,20 +35,18 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" })
         {/* Contenido del modal */}
         <div
           className={`
-            relative bg-white rounded-lg w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col
-            border border-orange-400 shadow-[0_0_20px_4px_rgba(255,140,0,0.4)]
-            before:content-[''] before:absolute before:inset-0 before:rounded-lg before:-z-10
-            before:blur-2xl before:bg-gradient-to-r before:from-orange-500 before:to-amber-400 before:opacity-30
+            relative bg-white dark:bg-gray-800 rounded-lg w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col
+            border border-orange-500/50 shadow-[0_0_20px_4px_rgba(255,140,0,0.15)]
             transition-all duration-300
           `}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100"
+              className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>

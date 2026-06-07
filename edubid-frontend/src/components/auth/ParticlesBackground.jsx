@@ -25,9 +25,7 @@ export default function ParticlesBackground() {
             height: `${Math.random() * 200 + 100}px`,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            background: i % 2 === 0
-              ? 'radial-gradient(circle, rgba(234,88,12,0.06) 0%, transparent 70%)'
-              : 'radial-gradient(circle, rgba(59,130,246,0.04) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(234,88,12,0.06) 0%, transparent 70%)',
             animation: `particle-pulse ${Math.random() * 6 + 8}s ease-in-out infinite`,
             animationDelay: `${Math.random() * 5}s`,
           }}

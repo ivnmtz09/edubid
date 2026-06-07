@@ -20,8 +20,8 @@ const CreateClassroom = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg border">
-        <h2 className="text-xl font-bold mb-4 text-gray-900">Crear Nueva Clase</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg border">
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Crear Nueva Clase</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-sm text-gray-600">Nombre</label>
@@ -46,7 +46,7 @@ const CreateClassroom = ({ onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"
+              className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:bg-gray-900 rounded-md"
             >
               Cancelar
             </button>
@@ -65,3 +65,4 @@ const CreateClassroom = ({ onClose }) => {
 }
 
 export default CreateClassroom
+

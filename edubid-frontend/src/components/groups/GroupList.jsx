@@ -77,13 +77,13 @@ export default function GroupList() {
           {groups.map((group) => (
             <div
               key={group.id}
-              className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col h-full"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col h-full"
             >
               {/* Card Header */}
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 sm:p-6 text-white">
+              <div className="bg-gray-800 p-4 sm:p-6 text-white">
                 <div className="flex items-start justify-between mb-3 sm:mb-4">
                   <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                    <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg flex-shrink-0">
+                    <div className="p-1.5 sm:p-2 bg-white dark:bg-gray-800/20 rounded-lg flex-shrink-0">
                       <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -186,7 +186,7 @@ export default function GroupList() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 sm:py-16 bg-gray-50 rounded-xl sm:rounded-2xl border border-gray-200">
+        <div className="text-center py-12 sm:py-16 bg-gray-50 dark:bg-gray-900 rounded-xl sm:rounded-2xl border border-gray-200 dark:border-gray-700">
           <UserGroupIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
           <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
             No hay grupos disponibles
@@ -235,3 +235,4 @@ export default function GroupList() {
     </div>
   )
 }
+

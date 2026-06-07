@@ -93,7 +93,7 @@ export default function StudentGradeCard() {
               </div>
               
               {/* Badge de porcentaje */}
-              <div className="flex-shrink-0 px-3 py-1 bg-white/50 backdrop-blur-sm rounded-full">
+              <div className="flex-shrink-0 px-3 py-1 bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-full">
                 <span className="text-xs sm:text-sm font-bold">{percentage}%</span>
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function StudentGradeCard() {
             </div>
 
             {/* Barra de Progreso */}
-            <div className="w-full bg-white/30 rounded-full h-2 sm:h-3 mb-4 overflow-hidden">
+            <div className="w-full bg-white dark:bg-gray-800/30 rounded-full h-2 sm:h-3 mb-4 overflow-hidden">
               <div 
                 className="bg-current h-full rounded-full transition-all duration-500"
                 style={{ width: `${percentage}%` }}
@@ -139,17 +139,17 @@ export default function StudentGradeCard() {
 
       {/* Card de Retroalimentación */}
       {submission.retroalimentacion && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6">
           <div className="flex items-start gap-3 sm:gap-4">
             <div className="flex-shrink-0 p-2 bg-purple-100 rounded-lg">
               <ChatBubbleLeftRightIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
             </div>
             
             <div className="flex-1 min-w-0">
-              <h5 className="font-semibold text-gray-900 text-sm sm:text-base mb-2">
+              <h5 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base mb-2">
                 Retroalimentación del Docente
               </h5>
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 sm:p-4">
                 <p className="text-sm sm:text-base text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
                   {submission.retroalimentacion}
                 </p>
@@ -161,7 +161,7 @@ export default function StudentGradeCard() {
 
       {/* Mensaje Motivacional */}
       {percentage >= 90 && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 sm:p-4">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 sm:p-4">
           <div className="flex items-center gap-2 text-green-700">
             <SparklesIcon className="h-5 w-5 flex-shrink-0" />
             <p className="text-sm sm:text-base font-medium">
@@ -173,3 +173,4 @@ export default function StudentGradeCard() {
     </div>
   )
 }
+

@@ -95,10 +95,10 @@ const GroupDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] bg-gray-50">
+      <div className="flex items-center justify-center min-h-[400px] bg-gray-700/50">
         <div className="text-center">
           <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600 text-sm">Cargando información del grupo...</p>
+          <p className="mt-4 text-gray-400 text-sm">Cargando información del grupo...</p>
         </div>
       </div>
     )
@@ -106,11 +106,11 @@ const GroupDetailPage = () => {
 
   if (!group) {
     return (
-      <div className="min-h-[400px] bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-[400px] bg-gray-700/50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <UserGroupIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Grupo no encontrado</h2>
-          <p className="text-gray-600 mb-6 text-sm">El grupo que buscas no existe o no tienes acceso.</p>
+          <h2 className="text-xl font-bold text-white mb-2">Grupo no encontrado</h2>
+          <p className="text-gray-400 mb-6 text-sm">El grupo que buscas no existe o no tienes acceso.</p>
           <button
             onClick={() => navigate("/groups")}
             className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition font-medium text-sm"
@@ -126,14 +126,14 @@ const GroupDetailPage = () => {
   const classroom = group.classroom_detail || group.classroom || {}
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+    <div className="min-h-screen bg-gray-700/50 py-4 sm:py-6 lg:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Navigation */}
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <button
             onClick={() => navigate("/groups")}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition px-3 py-2 rounded-lg hover:bg-white text-sm sm:text-base"
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition px-3 py-2 rounded-lg hover:bg-gray-700 text-sm sm:text-base"
           >
             <ArrowLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>Volver a Grupos</span>
@@ -152,10 +152,10 @@ const GroupDetailPage = () => {
         </div>
 
         {/* Header Card */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white shadow-lg mb-6 sm:mb-8">
+        <div className="bg-blue-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white shadow-lg mb-6 sm:mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
             <div className="flex items-center gap-3 sm:gap-4">
-              <div className="p-2 sm:p-3 bg-white/20 rounded-lg sm:rounded-xl flex-shrink-0">
+              <div className="p-2 sm:p-3 bg-white dark:bg-gray-800/10 rounded-lg sm:rounded-xl flex-shrink-0">
                 <UserGroupIcon className="h-6 w-6 sm:h-8 sm:w-8" />
               </div>
               <div className="flex-1 min-w-0">
@@ -169,7 +169,7 @@ const GroupDetailPage = () => {
             </div>
 
             {isTeacher && group.codigo && (
-              <div className="bg-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
+              <div className="bg-white dark:bg-gray-800/10 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs sm:text-sm text-blue-100">Código de Acceso</p>
                   {isCodeExpired() && (
@@ -179,7 +179,7 @@ const GroupDetailPage = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="flex items-center gap-1 sm:gap-2 bg-white/20 px-3 sm:px-4 py-2 rounded-lg flex-1 min-w-0">
+                  <div className="flex items-center gap-1 sm:gap-2 bg-white dark:bg-gray-800/10 px-3 sm:px-4 py-2 rounded-lg flex-1 min-w-0">
                     <DocumentDuplicateIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                     <span className="text-lg sm:text-xl lg:text-2xl font-bold tracking-wider truncate">
                       {group.codigo}
@@ -188,7 +188,7 @@ const GroupDetailPage = () => {
                   <button
                     onClick={handleCopyCode}
                     disabled={isCodeExpired()}
-                    className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                    className="p-2 bg-white dark:bg-gray-800/10 hover:bg-white dark:bg-gray-800/20 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                     title={isCodeExpired() ? "Código expirado" : "Copiar código"}
                   >
                     {copied ? (
@@ -217,44 +217,44 @@ const GroupDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           
           {/* Descripción */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
               <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
               Descripción
             </h2>
-            <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+            <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
               {group.descripcion || "Sin descripción disponible"}
             </p>
           </div>
 
           {/* Estadísticas */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
               <AcademicCapIcon className="h-5 w-5 text-blue-400 flex-shrink-0" />
               Estadísticas
             </h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm">Estudiantes:</span>
+                <span className="text-gray-400 text-sm">Estudiantes:</span>
                 <span className="font-bold text-orange-600 text-lg">
                   {group.estudiantes_count || estudiantes.length}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm">Estado:</span>
+                <span className="text-gray-400 text-sm">Estado:</span>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium ${
                     group.activo
-                      ? "bg-green-100 text-green-700"
-                      : "bg-gray-100 text-gray-700"
+                      ? "bg-green-900/30 text-green-400"
+                      : "bg-gray-700 text-gray-300"
                   }`}
                 >
                   {group.activo ? "Activo" : "Inactivo"}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 text-sm">Creado:</span>
-                <span className="font-medium text-gray-900 text-sm">
+                <span className="text-gray-400 text-sm">Creado:</span>
+                <span className="font-medium text-white text-sm">
                   {formatDate(group.creado)}
                 </span>
               </div>
@@ -262,22 +262,22 @@ const GroupDetailPage = () => {
           </div>
 
           {/* Clase */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+          <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-yellow-600 flex-shrink-0" />
               Información de Clase
             </h2>
             <div className="space-y-3">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Clase asignada:</p>
-                <p className="font-semibold text-gray-900 text-base line-clamp-2">
+                <p className="text-sm text-gray-400 mb-1">Clase asignada:</p>
+                <p className="font-semibold text-white text-base line-clamp-2">
                   {classroom.nombre || "No asignada"}
                 </p>
               </div>
               {classroom.descripcion && (
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Descripción:</p>
-                  <p className="text-sm text-gray-700 line-clamp-2">
+                  <p className="text-sm text-gray-400 mb-1">Descripción:</p>
+                  <p className="text-sm text-gray-300 line-clamp-2">
                     {classroom.descripcion}
                   </p>
                 </div>
@@ -287,14 +287,14 @@ const GroupDetailPage = () => {
         </div>
 
         {/* Estudiantes Section */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm mb-6 sm:mb-8">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm mb-6 sm:mb-8">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               <UserGroupIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600 flex-shrink-0" />
               Estudiantes ({estudiantes.length})
             </h2>
             {estudiantes.length > 0 && (
-              <div className="text-sm text-gray-500 bg-orange-100 text-orange-700 px-3 py-1 rounded-full">
+              <div className="text-sm text-gray-400 bg-orange-900/30 text-orange-400 px-3 py-1 rounded-full">
                 {estudiantes.length} estudiante{estudiantes.length !== 1 ? 's' : ''}
               </div>
             )}
@@ -305,20 +305,20 @@ const GroupDetailPage = () => {
               {estudiantes.map((student) => (
                 <div
                   key={student.id}
-                  className="flex items-center gap-3 p-3 sm:p-4 bg-orange-50 rounded-lg sm:rounded-xl border border-orange-200 hover:shadow-md transition-all duration-200"
+                  className="flex items-center gap-3 p-3 sm:p-4 bg-orange-900/20 rounded-lg sm:rounded-xl border border-orange-800/50 hover:shadow-md transition-all duration-200"
                 >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
                     {(student.first_name?.[0] || 'U') + (student.last_name?.[0] || '')}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-orange-900 text-sm truncate flex items-center gap-1">
-                      <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 flex-shrink-0" />
+                    <p className="font-semibold text-orange-400 text-sm truncate flex items-center gap-1">
+                      <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-400 flex-shrink-0" />
                       <span className="truncate">
                         {student.first_name} {student.last_name}
                       </span>
                     </p>
-                    <p className="text-xs text-orange-700 truncate flex items-center gap-1 mt-1">
-                      <EnvelopeIcon className="h-3 w-3 text-orange-600 flex-shrink-0" />
+                    <p className="text-xs text-orange-400 truncate flex items-center gap-1 mt-1">
+                      <EnvelopeIcon className="h-3 w-3 text-orange-400 flex-shrink-0" />
                       <span className="truncate">{student.email}</span>
                     </p>
                   </div>
@@ -326,21 +326,21 @@ const GroupDetailPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 sm:py-12 bg-orange-50 rounded-lg border border-orange-200">
+            <div className="text-center py-8 sm:py-12 bg-orange-900/20 rounded-lg border border-orange-800/50">
               <UserGroupIcon className="h-12 w-12 sm:h-16 sm:w-16 text-orange-300 mx-auto mb-3 sm:mb-4" />
-              <h3 className="text-base sm:text-lg font-medium text-orange-900 mb-2">
+              <h3 className="text-base sm:text-lg font-medium text-orange-400 mb-2">
                 No hay estudiantes aún
               </h3>
-              <p className="text-orange-700 text-sm sm:text-base max-w-md mx-auto px-4">
+              <p className="text-orange-400 text-sm sm:text-base max-w-md mx-auto px-4">
                 {isTeacher
                   ? "Los estudiantes aparecerán aquí cuando se unan con el código de acceso"
                   : "Espera a que más compañeros se unan al grupo"
                 }
               </p>
               {isTeacher && group.codigo && !isCodeExpired() && (
-                <div className="mt-4 p-3 sm:p-4 bg-orange-100 rounded-lg border border-orange-300 max-w-md mx-auto">
-                  <p className="text-xs sm:text-sm text-orange-800">
-                    Comparte el código <strong className="text-orange-900">{group.codigo}</strong> con tus estudiantes
+                <div className="mt-4 p-3 sm:p-4 bg-orange-900/30 rounded-lg border border-orange-800/50 max-w-md mx-auto">
+                  <p className="text-xs sm:text-sm text-orange-300">
+                    Comparte el código <strong className="text-orange-400">{group.codigo}</strong> con tus estudiantes
                   </p>
                 </div>
               )}
@@ -349,13 +349,13 @@ const GroupDetailPage = () => {
         </div>
 
         {/* Actividades del Grupo */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm">
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
               <ClipboardDocumentListIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 flex-shrink-0" />
               Actividades del Grupo
               {activities.length > 0 && (
-                <span className="text-sm text-gray-500 bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-normal">
+                <span className="text-sm text-gray-400 bg-purple-900/30 text-purple-400 px-3 py-1 rounded-full font-normal">
                   {activities.length}
                 </span>
               )}
@@ -363,7 +363,7 @@ const GroupDetailPage = () => {
             {isTeacher && (
               <button
                 onClick={() => navigate("/activities")}
-                className="text-purple-600 hover:text-purple-700 font-medium text-sm sm:text-base flex items-center gap-1"
+                className="text-purple-400 hover:text-purple-300 font-medium text-sm sm:text-base flex items-center gap-1"
               >
                 <span>Gestionar actividades</span>
                 <ArrowLeftIcon className="h-4 w-4 transform rotate-180" />
@@ -386,26 +386,26 @@ const GroupDetailPage = () => {
                   <Link
                     key={activity.id}
                     to={`/activities/${activity.id}`}
-                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] overflow-hidden flex flex-col group"
+                    className="bg-gray-800 border border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] overflow-hidden flex flex-col group"
                   >
                     {/* Card Header */}
-                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-4">
+                    <div className="bg-purple-600 p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-white/80 uppercase">
                           {activity.tipo}
                         </span>
                         {isTeacher ? (
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            activity.habilitada ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                            activity.habilitada ? "bg-green-900/30 text-green-400" : "bg-gray-700 text-gray-400"
                           }`}>
                             {activity.habilitada ? "Activa" : "Inactiva"}
                           </span>
                         ) : (
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            isCalificada ? "bg-green-100 text-green-700" :
-                            hasSubmission ? "bg-blue-100 text-blue-700" :
-                            isVencida ? "bg-red-100 text-red-700" :
-                            "bg-yellow-100 text-yellow-700"
+                            isCalificada ? "bg-green-900/30 text-green-400" :
+                            hasSubmission ? "bg-blue-900/30 text-blue-400" :
+                            isVencida ? "bg-red-900/30 text-red-400" :
+                            "bg-yellow-900/30 text-yellow-400"
                           }`}>
                             {isCalificada ? "Calificada" :
                              hasSubmission ? "Entregada" :
@@ -420,10 +420,10 @@ const GroupDetailPage = () => {
 
                     {/* Card Body */}
                     <div className="p-4 space-y-2 flex-1">
-                      <p className="text-gray-500 text-xs line-clamp-2">
+                      <p className="text-gray-400 text-xs line-clamp-2">
                         {activity.descripcion || "Sin descripción"}
                       </p>
-                      <div className="flex items-center justify-between text-xs text-gray-600 pt-1">
+                      <div className="flex items-center justify-between text-xs text-gray-400 pt-1">
                         <div className="flex items-center gap-1">
                           <CalendarIcon className="h-3.5 w-3.5 text-gray-400" />
                           <span>
@@ -440,9 +440,9 @@ const GroupDetailPage = () => {
                         </div>
                       </div>
                       {isStudent && isCalificada && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-2 flex items-center justify-between">
-                          <span className="text-xs text-green-700">Tu nota:</span>
-                          <span className="font-bold text-green-700 text-sm">
+                        <div className="bg-green-900/20 border border-green-800/50 rounded-lg p-2 flex items-center justify-between">
+                          <span className="text-xs text-green-400">Tu nota:</span>
+                          <span className="font-bold text-green-400 text-sm">
                             {activity.user_submission.calificacion}/{activity.valor_notas}
                           </span>
                         </div>
@@ -453,12 +453,12 @@ const GroupDetailPage = () => {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 sm:py-12 bg-purple-50 rounded-lg sm:rounded-xl border border-purple-200">
+            <div className="text-center py-8 sm:py-12 bg-purple-900/20 rounded-lg sm:rounded-xl border border-purple-800/50">
               <ClipboardDocumentListIcon className="h-12 w-12 sm:h-16 sm:w-16 text-purple-300 mx-auto mb-3 sm:mb-4" />
-              <h3 className="text-base sm:text-lg font-medium text-purple-900 mb-2">
+              <h3 className="text-base sm:text-lg font-medium text-purple-400 mb-2">
                 No hay actividades asignadas
               </h3>
-              <p className="text-purple-700 text-sm sm:text-base mb-4 max-w-md mx-auto px-4">
+              <p className="text-purple-400 text-sm sm:text-base mb-4 max-w-md mx-auto px-4">
                 Las actividades asignadas a este grupo aparecerán aquí
               </p>
               {isTeacher && (
@@ -476,12 +476,12 @@ const GroupDetailPage = () => {
         </div>
 
         {/* Información adicional para móviles */}
-        <div className="lg:hidden mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-blue-800">
+        <div className="lg:hidden mt-6 bg-blue-900/20 border border-blue-800/50 rounded-xl p-4">
+          <div className="flex items-center gap-2 text-blue-400">
             <ClockIcon className="h-4 w-4 flex-shrink-0" />
             <span className="text-sm font-medium">Información del grupo</span>
           </div>
-          <p className="text-xs text-blue-700 mt-1">
+          <p className="text-xs text-blue-400 mt-1">
             Creado el {formatDateTime(group.creado)} • {estudiantes.length} estudiante{estudiantes.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -500,3 +500,4 @@ const GroupDetailPage = () => {
 }
 
 export default GroupDetailPage
+
