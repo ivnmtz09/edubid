@@ -1,33 +1,37 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { LockClosedIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/outline"
-import { useAuthContext } from "../../context/AuthContext"
-import EditProfileModal from "../../components/profile/EditProfileModal"
-import ChangePasswordModal from "../../components/profile/ChangePasswordModal"
-import DeleteAccountModal from "../../components/profile/DeleteAccountModal"
+import { useState } from "react";
+import {
+  LockClosedIcon,
+  TrashIcon,
+  PencilIcon,
+} from "@heroicons/react/24/outline";
+import { useAuthContext } from "../../context/AuthContext";
+import EditProfileModal from "../../components/profile/EditProfileModal";
+import ChangePasswordModal from "../../components/profile/ChangePasswordModal";
+import DeleteAccountModal from "../../components/profile/DeleteAccountModal";
+
+// Initialize current date on first render (lazy initialization)
+const initializeCurrentDate = () => {
+  const date = new Date();
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
 
 export default function ProfilePage() {
-  const { user } = useAuthContext()
-  const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [isChangingPassword, setIsChangingPassword] = useState(false)
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false)
-  const [currentDate, setCurrentDate] = useState("")
+  const { user } = useAuthContext();
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [currentDate, setCurrentDate] = useState(initializeCurrentDate);
 
-  useEffect(() => {
-    const date = new Date()
-    const formattedDate = date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    })
-    setCurrentDate(formattedDate)
-  }, [])
+  if (!user) return <p>Cargando...</p>;
 
-  if (!user) return <p>Cargando...</p>
-
-  const profile = user.profile || {}
+  const profile = user.profile || {};
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -35,7 +39,9 @@ export default function ProfilePage() {
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Bienvenido, {user.first_name}</h1>
+            <h1 className="text-2xl font-bold">
+              Bienvenido, {user.first_name}
+            </h1>
             <p className="text-blue-100 mt-1">{currentDate}</p>
           </div>
           <button
@@ -54,7 +60,8 @@ export default function ProfilePage() {
         <div className="bg-gradient-to-r from-orange-200 to-blue-200 border-b p-6">
           <div className="flex items-center space-x-4">
             <div className="bg-gradient-to-br from-orange-500 to-orange-600 w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl">
-              {user.first_name?.[0]}{user.last_name?.[0]}
+              {user.first_name?.[0]}
+              {user.last_name?.[0]}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
@@ -75,17 +82,21 @@ export default function ProfilePage() {
                 <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                   Información Personal
                 </h3>
-                
+
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Nombre Completo</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Nombre Completo
+                    </p>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
                       {user.first_name} {user.last_name}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Correo Electrónico</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Correo Electrónico
+                    </p>
                     <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
                       <p className="text-gray-900">{user.email}</p>
                       {user.email_verified && (
@@ -97,7 +108,9 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Teléfono</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Teléfono
+                    </p>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
                       {profile.telefono || "No registrado"}
                     </p>
@@ -113,24 +126,30 @@ export default function ProfilePage() {
                 <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
                   Información de la cuenta
                 </h3>
-                
+
                 <div className="space-y-3">
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Rol</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Rol
+                    </p>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200 capitalize">
                       {user.role}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Institución</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Institución
+                    </p>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
                       {profile.institucion || "No asignada"}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">Idioma</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Idioma
+                    </p>
                     <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
                       Español
                     </p>
@@ -160,7 +179,7 @@ export default function ProfilePage() {
           <LockClosedIcon className="h-5 w-5 text-blue-600" />
           Seguridad
         </h3>
-        
+
         <div className="space-y-3">
           {/* Cambiar contraseña */}
           <button
@@ -171,11 +190,23 @@ export default function ProfilePage() {
               <LockClosedIcon className="h-5 w-5 text-blue-600 group-hover:text-blue-700" />
               <div className="text-left">
                 <p className="font-medium text-gray-900">Cambiar Contraseña</p>
-                <p className="text-sm text-gray-600">Actualiza tu contraseña por seguridad</p>
+                <p className="text-sm text-gray-600">
+                  Actualiza tu contraseña por seguridad
+                </p>
               </div>
             </div>
-            <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-5 h-5 text-gray-400 group-hover:text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
 
@@ -188,11 +219,23 @@ export default function ProfilePage() {
               <TrashIcon className="h-5 w-5 text-red-600 group-hover:text-red-700" />
               <div className="text-left">
                 <p className="font-medium text-gray-900">Eliminar Cuenta</p>
-                <p className="text-sm text-gray-600">Elimina permanentemente tu cuenta y datos</p>
+                <p className="text-sm text-gray-600">
+                  Elimina permanentemente tu cuenta y datos
+                </p>
               </div>
             </div>
-            <svg className="w-5 h-5 text-gray-400 group-hover:text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-5 h-5 text-gray-400 group-hover:text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
@@ -200,7 +243,10 @@ export default function ProfilePage() {
 
       {/* Modals */}
       {isEditingProfile && (
-        <EditProfileModal user={user} onClose={() => setIsEditingProfile(false)} />
+        <EditProfileModal
+          user={user}
+          onClose={() => setIsEditingProfile(false)}
+        />
       )}
 
       {isChangingPassword && (
@@ -208,8 +254,11 @@ export default function ProfilePage() {
       )}
 
       {isDeletingAccount && (
-        <DeleteAccountModal user={user} onClose={() => setIsDeletingAccount(false)} />
+        <DeleteAccountModal
+          user={user}
+          onClose={() => setIsDeletingAccount(false)}
+        />
       )}
     </div>
-  )
+  );
 }

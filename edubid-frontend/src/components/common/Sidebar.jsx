@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { Fragment } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Dialog, Transition } from "@headlessui/react"
+import { Fragment } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Dialog, Transition } from "@headlessui/react";
 import {
   XMarkIcon,
   HomeIcon,
@@ -16,66 +16,71 @@ import {
   UserGroupIcon,
   Cog6ToothIcon,
   AcademicCapIcon,
-} from "@heroicons/react/24/outline"
-import { useAuthContext } from "../../context/AuthContext"
-import { USER_ROLES } from "../../utils/constants"
+} from "@heroicons/react/24/outline";
+import { useAuthContext } from "../../context/AuthContext";
+import { USER_ROLES } from "../../utils/constants";
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { user, logout } = useAuthContext()
-  const location = useLocation()
+  const { user, logout } = useAuthContext();
+  const location = useLocation();
 
   const teacherNavigation = [
     { name: "Panel Docente", href: "/dashboard", icon: HomeIcon },
     { name: "Mis Clases", href: "/classrooms", icon: AcademicCapIcon },
-    { name: "Mis Grupos", href:"/groups", icon: UserGroupIcon},
-    { name: "Mis Actividades", href: "/activities", icon: ClipboardDocumentListIcon },
+    { name: "Mis Grupos", href: "/groups", icon: UserGroupIcon },
+    {
+      name: "Mis Actividades",
+      href: "/activities",
+      icon: ClipboardDocumentListIcon,
+    },
     { name: "Subastas", href: "/auctions", icon: CurrencyEuroIcon },
     { name: "Perfil", href: "/profile", icon: UserIcon },
-  ]
+  ];
 
   const studentNavigation = [
     { name: "Panel Estudiante", href: "/dashboard", icon: HomeIcon },
-    { name: "Grupos", href:"/groups", icon: UserGroupIcon},
-    { name: "Actividades", href: "/activities", icon: ClipboardDocumentListIcon },
+    { name: "Grupos", href: "/groups", icon: UserGroupIcon },
+    {
+      name: "Actividades",
+      href: "/activities",
+      icon: ClipboardDocumentListIcon,
+    },
     { name: "Subastas", href: "/auctions", icon: CurrencyEuroIcon },
     { name: "Billetera", href: "/wallet", icon: WalletIcon },
     { name: "Perfil", href: "/profile", icon: UserIcon },
-  ]
+  ];
 
   const adminNavigation = [
     { name: "Dashboard Admin", href: "/dashboard", icon: HomeIcon },
-    { name: "Admin Django", href: "http://localhost:8000/admin/", icon: Cog6ToothIcon },
-  ]
+    {
+      name: "Admin Django",
+      href: "http://localhost:8000/admin/",
+      icon: Cog6ToothIcon,
+    },
+  ];
 
   const navigation =
     user?.role === USER_ROLES.TEACHER
       ? teacherNavigation
       : user?.role === USER_ROLES.ADMIN
-      ? adminNavigation
-      : studentNavigation
+        ? adminNavigation
+        : studentNavigation;
 
   const isCurrentPath = (href) =>
-    location.pathname === href || location.pathname.startsWith(href + "/")
+    location.pathname === href || location.pathname.startsWith(href + "/");
 
   const SidebarContent = () => (
     <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background dark:bg-gray-900 border-r border-border">
       {/* Logo */}
       <div className="flex h-20 shrink-0 items-center px-6 border-b border-border">
         <div className="flex items-center space-x-3">
-          <div className="relative">
-            <div className="h-12 w-12 rounded-2xl bg-gray-800 flex items-center justify-center shadow-lg overflow-hidden">
-                <img 
-                  src="/edubid.png" 
-                  alt="EduBid" 
-                  className="h-8 w-8 object-contain"
-                />
-            </div>
-            <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-primary border-2 border-background flex items-center justify-center">
-              <BookOpenIcon className="h-3 w-3 text-primary-foreground" />
-            </div>
-          </div>
+          <img
+            src="/edubid.png"
+            alt="EduBid"
+            className="h-16 w-16 object-contain"
+          />
           <div>
-            <span className="text-xl font-bold text-orange-600">EduBid</span>
+            <span className="text-4xl font-bold text-orange-600">EduBid</span>
           </div>
         </div>
       </div>
@@ -83,9 +88,9 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1">
         {navigation.map((item) => {
-          const current = isCurrentPath(item.href)
-          const isExternal = item.href.startsWith('http')
-          
+          const current = isCurrentPath(item.href);
+          const isExternal = item.href.startsWith("http");
+
           return (
             <div key={item.name}>
               {isExternal ? (
@@ -131,7 +136,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </Link>
               )}
             </div>
-          )
+          );
         })}
       </nav>
 
@@ -146,7 +151,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </button>
       </div>
     </div>
-  )
+  );
 
   return (
     <>
@@ -196,7 +201,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <SidebarContent />
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;
