@@ -3,87 +3,81 @@ import {
   AcademicCapIcon, 
   UserGroupIcon, 
   CalendarIcon,
-  BookOpenIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline"
 import { formatDate } from "../../utils/helpers"
 
 export default function ClassroomCard({ classroom, onDelete }) {
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group h-full flex flex-col">
-      {/* Header con gradiente amarillo */}
-      <div className="bg-gray-800 p-4 sm:p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-white dark:bg-gray-800/20 rounded-lg flex-shrink-0">
-              <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-white text-base sm:text-lg line-clamp-2">
-                {classroom.nombre}
-              </h3>
-              <p className="text-orange-100 text-xs sm:text-sm mt-1 line-clamp-1">
-                {classroom.docente_nombre || "Docente"}
-              </p>
-            </div>
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-amber-600 to-amber-500 p-5">
+        <div className="flex items-start gap-3">
+          <div className="p-2.5 bg-white/20 rounded-xl flex-shrink-0">
+            <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-bold text-white text-base sm:text-lg text-wrap-balance">
+              {classroom.nombre}
+            </h3>
+            <p className="text-amber-100 text-xs sm:text-sm mt-1 truncate">
+              {classroom.docente_nombre || "Docente"}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Body */}
-      <div className="p-4 sm:p-5 space-y-3 sm:space-y-4 flex-1 flex flex-col">
-        {/* Descripción */}
-        <p className="text-gray-300 text-sm line-clamp-2 flex-1 min-h-[40px]">
+      <div className="p-5 space-y-4 flex-1 flex flex-col">
+        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 flex-1 min-h-[40px]">
           {classroom.descripcion || "Sin descripción disponible"}
         </p>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="bg-gray-800 rounded-lg p-2 sm:p-3">
-            <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
-              <UserGroupIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300" />
-              <span className="text-xs text-gray-300">Estudiantes</span>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              <UserGroupIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">Estudiantes</span>
             </div>
-            <p className="text-base sm:text-lg font-bold text-foreground">
+            <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tabular-nums">
               {classroom.estudiantes_count || 0}
             </p>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-2 sm:p-3">
-            <div className="flex items-center space-x-1 sm:space-x-2 mb-1">
-              <BookOpenIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-300" />
-              <span className="text-xs text-gray-300">Grupos</span>
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
+            <div className="flex items-center gap-1.5 mb-1">
+              <AcademicCapIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">Grupos</span>
             </div>
-            <p className="text-base sm:text-lg font-bold text-foreground">
+            <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tabular-nums">
               {classroom.grupos_clases?.length || 0}
             </p>
           </div>
         </div>
 
-        {/* Metadata */}
-        <div className="pt-2 sm:pt-3 border-t border-gray-700 mt-auto">
-          <div className="flex items-center text-xs text-gray-300">
-            <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-            <span className="truncate">Creada el {formatDate(classroom.creado)}</span>
+        <div className="pt-3 border-t border-gray-100 dark:border-white/5 mt-auto">
+          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+            <CalendarIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
+            <span className="tabular-nums">Creada el {formatDate(classroom.creado)}</span>
           </div>
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex gap-2">
+      {/* Footer */}
+      <div className="px-5 pb-5 flex gap-2">
         <Link
           to={`/classrooms/${classroom.id}`}
-          className="flex-1 bg-orange-500/10 text-orange-600 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg hover:bg-orange-500/20 transition text-center text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 group-hover:bg-orange-500 group-hover:text-white"
+          className="flex-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 px-4 py-2.5 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors duration-200 text-center text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.96]"
         >
-          <span className="truncate">Ver Detalles</span>
-          <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+          <span>Ver Detalles</span>
+          <ArrowRightIcon className="h-3.5 w-3.5" />
         </Link>
         {onDelete && (
           <button
             onClick={() => onDelete(classroom.id)}
-            className="px-3 py-2 sm:px-4 sm:py-2.5 bg-red-500/10 text-red-600 rounded-lg hover:bg-red-500/20 transition text-sm font-medium flex items-center justify-center min-w-[60px]"
+            className="px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200 text-sm font-medium flex items-center justify-center min-w-[44px] active:scale-[0.96]"
           >
-            <span className="sm:hidden">✕</span>
+            <span className="sm:hidden" aria-hidden="true">✕</span>
             <span className="hidden sm:inline">Eliminar</span>
           </button>
         )}
@@ -91,4 +85,3 @@ export default function ClassroomCard({ classroom, onDelete }) {
     </div>
   )
 }
-

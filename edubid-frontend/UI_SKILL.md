@@ -56,6 +56,16 @@ Core Principles
 16. Minimum Hit Area
     Interactive elements need at least 40×40px hit area. Extend with a pseudo-element if the visible element is smaller. Never let hit areas of two elements overlap.
 
+17. Semantic Module Color Coding
+    EduBid uses a strict wayfinding color system. Brand global actions are Orange. However, specific modules must use their assigned accent colors consistently across all their respective views (lists, details, forms):
+
+- Classes (Clases): Amber/Yellow
+- Groups (Grupos): Blue
+- Activities (Actividades): Purple
+- Auctions (Subastas): Green
+- Wallet (Billetera): Orange
+  Apply these colors elegantly as contextual accents (e.g., icons, subtle top borders, tinted backgrounds `bg-amber-500/10`, or specific banner headers). If a user is inside the "Classes" flow, the primary contextual elements and headers must be Amber, never defaulting back to the global Orange. Do not use overly saturated solid blocks of color that hurt contrast; use them to guide the user visually.
+
 Review Output Format
 Always present changes as a markdown table with Before and After columns. Include every change you made — not just a subset. Never list findings as separate "Before:" / "After:" lines outside of a table. Group changes by principle using a heading above each table, and keep each row focused on a single diff so the reader can scan the whole list quickly.
 
@@ -75,3 +85,4 @@ Review Checklist
 - No transition: all — only specific properties
 - will-change only on transform/opacity/filter, never all
 - Interactive elements have at least 40×40px hit area
+- Module-specific views use their correct Semantic Color Coding (Amber, Blue, Purple, Green).
