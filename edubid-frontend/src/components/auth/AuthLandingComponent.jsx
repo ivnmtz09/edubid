@@ -31,10 +31,15 @@ export default function AuthLandingComponent() {
         />
       </div>
 
-      {/* Theme Toggle */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50">
+      {/* Theme Toggle - minimal icon button */}
+      <motion.div
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50"
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <ThemeToggle />
-      </div>
+      </motion.div>
 
       {/* Split screen */}
       <div className="relative flex min-h-screen flex-col md:flex-row z-0">
@@ -47,11 +52,11 @@ export default function AuthLandingComponent() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4 bg-gray-100/80 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700/50 text-gray-600 dark:text-gray-400 drop-shadow-md">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium mb-4 bg-gray-100/80 dark:bg-gray-800/60 shadow-sm text-gray-600 dark:text-gray-400">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 Plataforma educativa #1 en Colombia
               </div>
-              <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white drop-shadow-lg leading-tight">
+              <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white drop-shadow-lg leading-tight text-wrap-balance">
                 Aprende, <span className="text-orange-600">Gana</span>, Crece.
               </h1>
               <p className="mt-3 text-base lg:text-lg text-gray-900 dark:text-gray-100 drop-shadow-lg max-w-md font-bold">
@@ -68,7 +73,7 @@ export default function AuthLandingComponent() {
               className="flex justify-center"
             >
               <img
-                src="/edubid_s.png"
+                src="/edubid_s.svg"
                 alt="EduBid"
                 className="w-96 sm:w-128 h-auto object-contain"
               />
@@ -84,7 +89,7 @@ export default function AuthLandingComponent() {
                 onClick={() => setActiveForm("register")}
                 className="glow-cta w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-white text-sm
                   bg-orange-600 hover:bg-orange-700 shadow-lg shadow-orange-600/20 hover:shadow-xl hover:shadow-orange-600/25
-                  transition-all duration-300 active:scale-[0.98]"
+                  transition-all duration-300 active:scale-[0.96]"
               >
                 Comienza gratis ahora
               </button>
@@ -118,7 +123,6 @@ export default function AuthLandingComponent() {
             <div
               className="rounded-2xl p-6 sm:p-8
               bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-2xl
-              border border-white/20 dark:border-gray-800/50
               relative z-10"
             >
               <AnimatePresence mode="wait">
@@ -159,14 +163,14 @@ export default function AuthLandingComponent() {
                     <div className="space-y-3">
                       <button
                         onClick={() => setActiveForm("register")}
-                        className="w-full rounded-xl bg-orange-600 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-600/20 transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-600/25 active:scale-[0.98]"
+                        className="w-full rounded-xl bg-orange-600 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-600/20 transition-all hover:bg-orange-700 hover:shadow-xl hover:shadow-orange-600/25 active:scale-[0.96]"
                       >
                         Crear una cuenta
                       </button>
 
                       <button
                         onClick={() => setActiveForm("login")}
-                        className="w-full rounded-xl border border-gray-300 dark:border-gray-600 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-[0.98]"
+                        className="w-full rounded-xl border border-gray-200 dark:border-white/10 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 transition-all hover:bg-gray-50 dark:hover:bg-gray-800 active:scale-[0.96]"
                       >
                         Iniciar sesion
                       </button>
@@ -185,7 +189,7 @@ export default function AuthLandingComponent() {
                         <div className="mb-6">
                           <button
                             onClick={() => setActiveForm(null)}
-                            className="inline-flex items-center gap-2 text-sm font-medium text-orange-600 hover:text-orange-500 transition-colors"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-orange-600 hover:text-orange-500 transition-all active:scale-[0.96]"
                           >
                             <svg
                               className="h-4 w-4"
@@ -221,7 +225,7 @@ export default function AuthLandingComponent() {
                         <div className="mb-6">
                           <button
                             onClick={() => setActiveForm(null)}
-                            className="inline-flex items-center gap-2 text-sm font-medium text-orange-600 hover:text-orange-500 transition-colors"
+                            className="inline-flex items-center gap-2 text-sm font-medium text-orange-600 hover:text-orange-500 transition-all active:scale-[0.96]"
                           >
                             <svg
                               className="h-4 w-4"

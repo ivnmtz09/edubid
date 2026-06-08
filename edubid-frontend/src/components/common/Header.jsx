@@ -35,18 +35,18 @@ const Header = ({ onMenuClick }) => {
   ]
 
   return (
-    <div className="sticky top-0 z-30 flex h-16 sm:h-20 items-center justify-between bg-white/80 dark:bg-gray-900 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 px-3 sm:px-4 lg:px-6 xl:px-8">
+    <div className="sticky top-0 z-30 flex h-16 sm:h-20 items-center justify-between bg-white/80 dark:bg-gray-900 backdrop-blur-xl shadow-sm border-b border-gray-200/50 dark:border-white/5 px-3 sm:px-4 lg:px-6 xl:px-8">
       {/* Mobile menu button */}
       <button 
         type="button" 
-        className="lg:hidden p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex-shrink-0"
+        className="lg:hidden flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex-shrink-0 active:scale-[0.96]"
         onClick={onMenuClick}
       >
         <Bars3Icon className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
 
       <div className="flex flex-1 items-center justify-end gap-x-2 sm:gap-x-3 lg:gap-x-4">
-        {/* Role Badge - Oculto en móviles pequeños, visible desde sm */}
+        {/* Role Badge */}
         <div className="hidden sm:flex items-center gap-x-1.5 sm:gap-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-orange-600/10 rounded-full border border-orange-600/20">
           <AcademicCapIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
           <span className="text-xs sm:text-sm font-medium text-orange-500 capitalize truncate max-w-[80px] sm:max-w-none">
@@ -54,11 +54,11 @@ const Header = ({ onMenuClick }) => {
           </span>
         </div>
 
-        {/* Saldo del estudiante - MOSTRAR SUMA TOTAL */}
+        {/* Student balance */}
         {isStudent && !balanceLoading && (
           <div className="flex items-center gap-x-1.5 sm:gap-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-600 rounded-full shadow-lg shadow-orange-600/25">
             <CurrencyEuroIcon className="h-3 w-3 sm:h-4 sm:w-4 xl:h-5 xl:w-5 text-white" />
-            <span className="text-xs sm:text-sm xl:text-base font-bold text-white whitespace-nowrap">
+            <span className="text-xs sm:text-sm xl:text-base font-bold text-white whitespace-nowrap tabular-nums">
               {formatCoins(totalBalance || 0)} EC
             </span>
           </div>
@@ -76,15 +76,13 @@ const Header = ({ onMenuClick }) => {
 
         {/* Profile dropdown */}
         <Menu as="div" className="relative flex-shrink-0">
-          <Menu.Button className="flex items-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group">
-            <div className="flex items-center gap-x-2 sm:gap-x-3">
-              {/* Avatar - Tamaños responsivos */}
+          <Menu.Button className="flex items-center h-10 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group active:scale-[0.96]">
+            <div className="flex items-center gap-x-2 sm:gap-x-3 px-1.5 sm:px-2">
               <div className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl bg-blue-600 flex items-center justify-center text-white font-semibold shadow-md text-sm sm:text-base">
                 {user?.first_name?.charAt(0)}
                 {user?.last_name?.charAt(0)}
               </div>
               
-              {/* User info - Oculto en móviles, visible desde lg */}
               <div className="hidden lg:block text-left min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white truncate max-w-[120px] xl:max-w-[140px]">
                   {user?.first_name} {user?.last_name}
@@ -94,7 +92,6 @@ const Header = ({ onMenuClick }) => {
                 </p>
               </div>
 
-              {/* Chevron - Siempre visible */}
               <ChevronDownIcon className="h-3 w-3 sm:h-4 sm:w-4 text-gray-400 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors duration-200 flex-shrink-0" />
             </div>
           </Menu.Button>
@@ -108,9 +105,9 @@ const Header = ({ onMenuClick }) => {
             leaveFrom="opacity-100 scale-100 translate-y-0"
             leaveTo="opacity-0 scale-95 translate-y-2"
           >
-            <Menu.Items className="absolute right-0 mt-2 w-56 sm:w-64 origin-top-right rounded-xl sm:rounded-2xl bg-white dark:bg-gray-800 backdrop-blur-xl shadow-xl ring-1 ring-gray-200 dark:ring-gray-700 focus:outline-none overflow-hidden z-50">
+            <Menu.Items className="absolute right-0 mt-2 w-56 sm:w-64 origin-top-right rounded-xl sm:rounded-2xl bg-white dark:bg-gray-800 backdrop-blur-xl shadow-xl ring-1 ring-gray-200/50 dark:ring-white/10 focus:outline-none overflow-hidden z-50">
               {/* User Info */}
-              <div className="p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+              <div className="p-3 sm:p-4 border-b border-gray-200/50 dark:border-white/5 bg-gray-50 dark:bg-gray-800">
                 <div className="flex items-center gap-x-3">
                   <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-semibold text-sm sm:text-base flex-shrink-0">
                     {user?.first_name?.charAt(0)}
@@ -124,7 +121,7 @@ const Header = ({ onMenuClick }) => {
                     {isStudent && !balanceLoading && (
                       <div className="flex items-center gap-x-1 mt-1">
                         <CurrencyEuroIcon className="h-3 w-3 text-orange-500 flex-shrink-0" />
-                        <span className="text-xs font-medium text-orange-600 truncate">
+                        <span className="text-xs font-medium text-orange-600 truncate tabular-nums">
                           {formatCoins(totalBalance || 0)} EC
                         </span>
                       </div>
@@ -138,7 +135,7 @@ const Header = ({ onMenuClick }) => {
                 {userNavigation.map((item) => {
                   const isExternal = item.external || item.href.startsWith('http')
                   const content = (
-                    <div className={`flex items-center px-2 sm:px-3 py-2.5 sm:py-3 text-sm font-medium rounded-lg sm:rounded-xl transition-all duration-200 ${
+                    <div className={`flex items-center px-2 sm:px-3 py-2.5 sm:py-3 text-sm font-medium rounded-lg sm:rounded-xl transition-all duration-200 active:scale-[0.96] ${
                       item.onClick 
                         ? 'text-red-600 hover:bg-red-500/10 hover:text-red-700' 
                         : 'text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-orange-600 dark:hover:text-orange-500'

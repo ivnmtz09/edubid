@@ -70,9 +70,9 @@ const Sidebar = ({ isOpen, onClose }) => {
     location.pathname === href || location.pathname.startsWith(href + "/");
 
   const SidebarContent = () => (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-background dark:bg-gray-900 border-r border-border">
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white dark:bg-gray-900 shadow-sm border-r border-gray-200/50 dark:border-white/5">
       {/* Logo */}
-      <div className="flex h-20 shrink-0 items-center px-6 border-b border-border">
+      <div className="flex h-20 shrink-0 items-center px-6 border-b border-gray-200/50 dark:border-white/5">
         <div className="flex items-center space-x-3">
           <img
             src="/edubid.png"
@@ -91,6 +91,12 @@ const Sidebar = ({ isOpen, onClose }) => {
           const current = isCurrentPath(item.href);
           const isExternal = item.href.startsWith("http");
 
+          const classes = `group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 active:scale-[0.96] ${
+            current
+              ? "bg-orange-600 text-white shadow-lg shadow-orange-600/25"
+              : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+          }`;
+
           return (
             <div key={item.name}>
               {isExternal ? (
@@ -98,38 +104,30 @@ const Sidebar = ({ isOpen, onClose }) => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    current
-                      ? "bg-orange-600 text-white shadow-lg shadow-orange-600/25"
-                      : "text-foreground/70 hover:bg-card hover:text-primary hover:shadow-md border border-transparent hover:border-primary/20"
-                  }`}
+                  className={classes}
                   onClick={onClose}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
                       current
                         ? "text-white"
-                        : "text-muted-foreground group-hover:text-primary"
+                        : "text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white"
                     }`}
                   />
                   {item.name}
-                  <ArrowRightCircleIcon className="ml-auto h-4 w-4 text-muted-foreground" />
+                  <ArrowRightCircleIcon className="ml-auto h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300" />
                 </a>
               ) : (
                 <Link
                   to={item.href}
-                  className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                    current
-                      ? "bg-orange-600 text-white shadow-lg shadow-orange-600/25"
-                      : "text-foreground/70 hover:bg-card hover:text-primary hover:shadow-md border border-transparent hover:border-primary/20"
-                  }`}
+                  className={classes}
                   onClick={onClose}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 flex-shrink-0 ${
                       current
                         ? "text-white"
-                        : "text-muted-foreground group-hover:text-primary"
+                        : "text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white"
                     }`}
                   />
                   {item.name}
@@ -141,12 +139,12 @@ const Sidebar = ({ isOpen, onClose }) => {
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t border-border">
+      <div className="px-3 py-4 border-t border-gray-200/50 dark:border-white/5">
         <button
           onClick={logout}
-          className="group flex items-center justify-center w-full px-3 py-3 text-sm font-medium text-foreground/70 hover:text-red-600 hover:bg-red-500/10 rounded-xl border border-transparent hover:border-red-500/20 transition-all duration-200"
+          className="group flex items-center justify-center w-full px-3 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-500/10 dark:hover:bg-red-500/10 rounded-xl transition-all duration-200 active:scale-[0.96]"
         >
-          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2 text-muted-foreground group-hover:text-red-500" />
+          <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2 text-gray-400 dark:text-gray-500 group-hover:text-red-500 dark:group-hover:text-red-400" />
           Cerrar sesión
         </button>
       </div>
@@ -184,10 +182,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <SidebarContent />
                 <div className="absolute top-4 right-0 -mr-12 pt-2">
                   <button
-                    className="ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-background/10 backdrop-blur-sm border border-border/20 hover:bg-background/20 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+                    className="ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 dark:bg-gray-800/10 backdrop-blur-sm border border-gray-200/50 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-all duration-200 active:scale-[0.96]"
                     onClick={onClose}
                   >
-                    <XMarkIcon className="h-6 w-6 text-foreground" />
+                    <XMarkIcon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
                   </button>
                 </div>
               </Dialog.Panel>
