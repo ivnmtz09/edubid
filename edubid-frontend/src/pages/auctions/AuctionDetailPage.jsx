@@ -35,7 +35,6 @@ const AuctionDetailPage = () => {
   const isTeacher = user?.role === 'docente';
   const isStudent = user?.role === 'estudiante';
 
-  // Fetch auction
   const { data: auction, isLoading } = useQuery({
     queryKey: ['auction', id],
     queryFn: async () => {
@@ -75,7 +74,6 @@ const AuctionDetailPage = () => {
     },
   });
 
-  // Close auction mutation
   const closeAuctionMutation = useMutation({
     mutationFn: async () => {
       const res = await api.post(`/api/auctions/auctions/${id}/close/`);
@@ -112,7 +110,7 @@ const AuctionDetailPage = () => {
         <p className="text-red-600">Subasta no encontrada</p>
         <button
           onClick={() => navigate('/auctions')}
-          className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+          className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all active:scale-[0.96]"
         >
           Volver a Subastas
         </button>
@@ -168,12 +166,12 @@ const AuctionDetailPage = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
+    <div className="w-full h-full bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Header */}
-      <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-3 sm:gap-4">
+      <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
         <button
           onClick={() => navigate('/auctions')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition self-start"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-all self-start active:scale-[0.96]"
         >
           <ArrowLeftIcon className="h-5 w-5" />
           <span className="text-sm sm:text-base">Volver</span>
@@ -183,7 +181,7 @@ const AuctionDetailPage = () => {
           <button
             onClick={() => closeAuctionMutation.mutate()}
             disabled={closeAuctionMutation.isPending}
-            className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-50 text-sm sm:text-base whitespace-nowrap"
+            className="bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-red-600 transition-all disabled:opacity-50 text-sm sm:text-base whitespace-nowrap active:scale-[0.96]"
           >
             {closeAuctionMutation.isPending ? 'Cerrando...' : 'Cerrar Subasta'}
           </button>
@@ -191,10 +189,10 @@ const AuctionDetailPage = () => {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        {/* Header - Verde para detalles */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden">
+        {/* Header */}
         <div className={`p-4 sm:p-6 lg:p-8 text-white ${
-          isActive ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-gray-500 to-gray-600'
+          isActive ? 'bg-green-600' : 'bg-gray-600'
         }`}>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start gap-3 sm:gap-4">
@@ -216,7 +214,7 @@ const AuctionDetailPage = () => {
               {isActive && (
                 <div className="text-right sm:text-right">
                   <p className="text-xs sm:text-sm text-green-100">Tiempo restante</p>
-                  <p className="text-base sm:text-lg lg:text-xl font-bold whitespace-nowrap">{getTimeRemainingText()}</p>
+                  <p className="text-base sm:text-lg lg:text-xl font-bold tabular-nums whitespace-nowrap">{getTimeRemainingText()}</p>
                 </div>
               )}
             </div>
@@ -227,36 +225,36 @@ const AuctionDetailPage = () => {
         <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {/* Description */}
           <div>
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Descripción</h2>
-            <p className="text-gray-600 whitespace-pre-wrap text-sm sm:text-base">{auction.descripcion}</p>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Descripción</h2>
+            <p className="text-gray-600 dark:text-gray-400 whitespace-pre-wrap text-sm sm:text-base">{auction.descripcion}</p>
           </div>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-green-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200">
+            <div className="bg-green-50 dark:bg-green-900/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200 dark:border-green-900/20">
               <div className="flex items-center gap-2 mb-1 sm:mb-2">
-                <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                <span className="text-xs sm:text-sm text-gray-600">Participantes</span>
+                <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Participantes</span>
               </div>
-              <p className="text-xl sm:text-2xl font-bold text-green-600">{auction.total_pujas || 0}</p>
+              <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 tabular-nums">{auction.total_pujas || 0}</p>
             </div>
 
-            <div className="bg-orange-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-orange-200">
+            <div className="bg-green-50 dark:bg-green-900/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200 dark:border-green-900/20">
               <div className="flex items-center gap-2 mb-1 sm:mb-2">
-                <CurrencyEuroIcon className="h-4 w-4 sm:h-5 sm:w-5 text-orange-600" />
-                <span className="text-xs sm:text-sm text-gray-600">Puja más alta</span>
+                <CurrencyEuroIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Puja más alta</span>
               </div>
-              <p className="text-xl sm:text-2xl font-bold text-orange-600">
+              <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 tabular-nums">
                 {highestBid?.cantidad || 0} EC
               </p>
             </div>
 
-            <div className="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-blue-200 xs:col-span-2 lg:col-span-1">
+            <div className="bg-green-50 dark:bg-green-900/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200 dark:border-green-900/20 xs:col-span-2 lg:col-span-1">
               <div className="flex items-center gap-2 mb-1 sm:mb-2">
-                <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                <span className="text-xs sm:text-sm text-gray-600">Finaliza</span>
+                <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
+                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Finaliza</span>
               </div>
-              <p className="text-xs sm:text-sm font-medium text-blue-600 break-words">
+              <p className="text-xs sm:text-sm font-medium text-green-600 dark:text-green-400 break-words tabular-nums">
                 {formatDateTime(auction.fecha_fin)}
               </p>
             </div>
@@ -264,34 +262,34 @@ const AuctionDetailPage = () => {
 
           {/* Student Bid Section */}
           {isStudent && (
-            <div className="border-t border-gray-200 pt-4 sm:pt-6">
+            <div className="border-t border-gray-200 dark:border-white/10 pt-4 sm:pt-6">
               {isClosed && auction.puja_ganadora ? (
                 <div className={`rounded-lg sm:rounded-xl p-4 sm:p-6 ${
                   auction.puja_ganadora.estudiante_id === user.id
-                    ? 'bg-green-50 border-2 border-green-500'
-                    : 'bg-gray-50 border border-gray-200'
+                    ? 'bg-green-50 dark:bg-green-900/10 border-2 border-green-500'
+                    : 'bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-white/10'
                 }`}>
                   {auction.puja_ganadora.estudiante_id === user.id ? (
                     <>
                       <div className="flex items-center gap-2 mb-2">
-                        <TrophyIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
-                        <h3 className="text-base sm:text-lg font-bold text-green-900">¡Felicidades! Ganaste la subasta</h3>
+                        <TrophyIcon className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
+                        <h3 className="text-base sm:text-lg font-bold text-green-900 dark:text-green-300">Felicidades! Ganaste la subasta</h3>
                       </div>
-                      <p className="text-green-700 text-sm sm:text-base">
-                        Puja ganadora: <span className="font-bold">{auction.puja_ganadora.cantidad} EC</span>
+                      <p className="text-green-700 dark:text-green-300 text-sm sm:text-base">
+                        Puja ganadora: <span className="font-bold tabular-nums">{auction.puja_ganadora.cantidad} EC</span>
                       </p>
-                      <p className="text-xs sm:text-sm text-green-600 mt-2">
+                      <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 mt-2">
                         Contacta a tu profesor para reclamar tu recompensa
                       </p>
                     </>
                   ) : (
                     <>
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Subasta Finalizada</h3>
-                      <p className="text-gray-600 text-sm sm:text-base">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Subasta Finalizada</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
                         Ganador: <span className="font-medium">{auction.puja_ganadora.estudiante_nombre}</span>
                       </p>
-                      <p className="text-gray-600 text-sm sm:text-base">
-                        Puja ganadora: <span className="font-medium">{auction.puja_ganadora.cantidad} EC</span>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
+                        Puja ganadora: <span className="font-medium tabular-nums">{auction.puja_ganadora.cantidad} EC</span>
                       </p>
                     </>
                   )}
@@ -302,21 +300,21 @@ const AuctionDetailPage = () => {
                   {userBid && (
                     <div className={`rounded-lg sm:rounded-xl p-3 sm:p-4 border-2 ${
                       isWinning
-                        ? 'bg-green-50 border-green-500'
-                        : 'bg-orange-50 border-orange-500'
+                        ? 'bg-green-50 dark:bg-green-900/10 border-green-500'
+                        : 'bg-red-50 dark:bg-red-900/10 border-red-500'
                     }`}>
                       <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
                         <div>
-                          <p className="text-xs sm:text-sm font-medium text-gray-700">Tu puja actual</p>
-                          <p className="text-xl sm:text-2xl font-bold text-gray-900">{userBid.cantidad} EC</p>
+                          <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Tu puja actual</p>
+                          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{userBid.cantidad} EC</p>
                         </div>
                         {isWinning ? (
-                          <div className="flex items-center gap-2 text-green-600">
+                          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
                             <CheckCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                             <span className="font-medium text-sm sm:text-base">Vas ganando</span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2 text-red-600">
+                          <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
                             <XCircleIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                             <span className="font-medium text-sm sm:text-base">Superado</span>
                           </div>
@@ -325,16 +323,16 @@ const AuctionDetailPage = () => {
                     </div>
                   )}
 
-                  {/* Wallet Info - Naranja para coins/wallet */}
-                  <div className="bg-orange-50 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-orange-200">
+                  {/* Wallet Info */}
+                  <div className="bg-green-50 dark:bg-green-900/10 rounded-lg sm:rounded-xl p-3 sm:p-4 border border-green-200 dark:border-green-900/20">
                     <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
                       <div>
-                        <p className="text-xs sm:text-sm text-gray-600">Saldo disponible</p>
-                        <p className="text-lg sm:text-xl font-bold text-orange-600">{saldoDisponible} EC</p>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Saldo disponible</p>
+                        <p className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400 tabular-nums">{saldoDisponible} EC</p>
                       </div>
                       <div className="text-left xs:text-right">
-                        <p className="text-xs sm:text-sm text-gray-600">Puja mínima</p>
-                        <p className="text-base sm:text-lg font-semibold text-orange-900">{minBid} EC</p>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Puja mínima</p>
+                        <p className="text-base sm:text-lg font-semibold text-green-700 dark:text-green-300 tabular-nums">{minBid} EC</p>
                       </div>
                     </div>
                   </div>
@@ -344,14 +342,14 @@ const AuctionDetailPage = () => {
                     <button
                       onClick={() => setShowBidForm(true)}
                       disabled={saldoDisponible < minBid}
-                      className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                      className="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base active:scale-[0.96]"
                     >
                       {userBid ? 'Aumentar Puja' : 'Realizar Puja'}
                     </button>
                   ) : (
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Cantidad de edubids
                         </label>
                         <div className="relative">
@@ -361,7 +359,7 @@ const AuctionDetailPage = () => {
                             onChange={(e) => setBidAmount(e.target.value)}
                             min={minBid}
                             max={saldoDisponible}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
+                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
                             placeholder={`Mínimo ${minBid} EC`}
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm sm:text-base">
@@ -376,14 +374,14 @@ const AuctionDetailPage = () => {
                             setShowBidForm(false);
                             setBidAmount('');
                           }}
-                          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
+                          className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-medium text-sm sm:text-base active:scale-[0.96]"
                         >
                           Cancelar
                         </button>
                         <button
                           onClick={handlePlaceBid}
                           disabled={placeBidMutation.isPending || !bidAmount}
-                          className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition disabled:opacity-50 text-sm sm:text-base"
+                          className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-all disabled:opacity-50 text-sm sm:text-base active:scale-[0.96]"
                         >
                           {placeBidMutation.isPending ? 'Pujando...' : 'Confirmar Puja'}
                         </button>
@@ -392,17 +390,17 @@ const AuctionDetailPage = () => {
                   )}
 
                   {saldoDisponible < minBid && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
-                      <p className="text-red-700 text-xs sm:text-sm">
+                    <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg p-3 sm:p-4">
+                      <p className="text-red-700 dark:text-red-300 text-xs sm:text-sm">
                         No tienes suficiente saldo para pujar. Necesitas al menos {minBid} EC disponibles.
                       </p>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-4 sm:p-6 text-center">
+                <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-lg sm:rounded-xl p-4 sm:p-6 text-center">
                   <ClockIcon className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-2 sm:mb-4" />
-                  <p className="text-gray-600 text-sm sm:text-base">Esta subasta ha finalizado</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">Esta subasta ha finalizado</p>
                 </div>
               )}
             </div>
@@ -410,23 +408,23 @@ const AuctionDetailPage = () => {
 
           {/* Teacher Bid Section */}
           {isTeacher && isActive && !hasEnded && (
-            <div className="border-t border-gray-200 pt-4 sm:pt-6">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+            <div className="border-t border-gray-200 dark:border-white/10 pt-4 sm:pt-6">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
                 Pujar por un Estudiante
               </h2>
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6 space-y-4">
-                <p className="text-sm text-blue-700">
-                  Si un estudiante no puede acceder a la plataforma, puedes registrar su puja desde aquí.
+              <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/20 rounded-xl p-4 sm:p-6 space-y-4">
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Si un estudiante no puede acceder a la plataforma, puedes registrar su puja desde aqui.
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Estudiante
                     </label>
                     <select
                       value={teacherBidStudent}
                       onChange={(e) => { setTeacherBidStudent(e.target.value); setTeacherBidError('') }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                     >
                       <option value="">Seleccionar estudiante</option>
                       {groupStudents.map((s) => (
@@ -437,7 +435,7 @@ const AuctionDetailPage = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Cantidad (EC)
                     </label>
                     <input
@@ -445,8 +443,8 @@ const AuctionDetailPage = () => {
                       value={teacherBidAmount}
                       onChange={(e) => { setTeacherBidAmount(e.target.value); setTeacherBidError('') }}
                       min={minBid}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      placeholder={`Mínimo ${minBid} EC`}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
+                      placeholder={`Minimo ${minBid} EC`}
                     />
                   </div>
                   <div className="flex items-end">
@@ -454,7 +452,7 @@ const AuctionDetailPage = () => {
                       onClick={() => {
                         if (!teacherBidStudent) { setTeacherBidError('Selecciona un estudiante'); return }
                         if (!parseInt(teacherBidAmount) || parseInt(teacherBidAmount) < minBid) {
-                          setTeacherBidError(`La puja mínima es ${minBid} EC`); return
+                          setTeacherBidError(`La puja minima es ${minBid} EC`); return
                         }
                         placeBidMutation.mutate({
                           auction: auction.id,
@@ -463,15 +461,15 @@ const AuctionDetailPage = () => {
                         })
                       }}
                       disabled={placeBidMutation.isPending}
-                      className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm font-medium"
+                      className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm font-medium active:scale-[0.96]"
                     >
                       {placeBidMutation.isPending ? <LoadingSpinner size="sm" /> : <><PlusIcon className="h-4 w-4" /> Pujar</>}
                     </button>
                   </div>
                 </div>
                 {teacherBidError && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-red-600 text-sm">{teacherBidError}</p>
+                  <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg p-3">
+                    <p className="text-red-600 dark:text-red-400 text-sm">{teacherBidError}</p>
                   </div>
                 )}
               </div>
@@ -480,8 +478,8 @@ const AuctionDetailPage = () => {
 
           {/* Bids List (Teacher View) */}
           {isTeacher && auction.bids && auction.bids.length > 0 && (
-            <div className="border-t border-gray-200 pt-4 sm:pt-6">
-              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+            <div className="border-t border-gray-200 dark:border-white/10 pt-4 sm:pt-6">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
                 Todas las Pujas ({auction.bids.length})
               </h2>
               <div className="space-y-2 sm:space-y-3">
@@ -490,30 +488,30 @@ const AuctionDetailPage = () => {
                     key={bid.id}
                     className={`flex flex-col xs:flex-row xs:items-center xs:justify-between p-3 sm:p-4 rounded-lg ${
                       index === 0
-                        ? 'bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-500'
-                        : 'bg-gray-50 border border-gray-200'
+                        ? 'bg-green-50 dark:bg-green-900/10 border-2 border-green-500'
+                        : 'bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-white/10'
                     }`}
                   >
                     <div className="flex items-start xs:items-center gap-2 sm:gap-3 mb-2 xs:mb-0">
                       {index === 0 && (
-                        <TrophyIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 flex-shrink-0 mt-1 xs:mt-0" />
+                        <TrophyIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-1 xs:mt-0" />
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-gray-900 text-sm sm:text-base break-words">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base break-words">
                           {bid.estudiante_nombre || `${bid.estudiante?.first_name} ${bid.estudiante?.last_name}`}
                         </p>
-                        <p className="text-xs sm:text-sm text-gray-500 break-all">
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 break-all">
                           {bid.estudiante_email || bid.estudiante?.email}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 dark:text-gray-500 tabular-nums">
                           {formatDateTime(bid.creado)}
                         </p>
                       </div>
                     </div>
                     <div className="text-left xs:text-right">
-                      <p className="text-lg sm:text-xl font-bold text-orange-600">{bid.cantidad} EC</p>
+                      <p className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400 tabular-nums">{bid.cantidad} EC</p>
                       {index === 0 && (
-                        <p className="text-xs text-green-600 font-medium">Puja más alta</p>
+                        <p className="text-xs text-green-600 dark:text-green-400 font-medium">Puja mas alta</p>
                       )}
                     </div>
                   </div>

@@ -56,10 +56,10 @@ const CreateAuction = ({ auction, onClose }) => {
     e.preventDefault()
 
     const newErrors = {}
-    if (!formData.titulo.trim()) newErrors.titulo = "El título es requerido"
-    if (!formData.descripcion.trim()) newErrors.descripcion = "La descripción es requerida"
+    if (!formData.titulo.trim()) newErrors.titulo = "El titulo es requerido"
+    if (!formData.descripcion.trim()) newErrors.descripcion = "La descripcion es requerida"
     if (!formData.grupo) newErrors.grupo = "Debes seleccionar un grupo"
-    if (!formData.fecha_fin) newErrors.fecha_fin = "La fecha de finalización es requerida"
+    if (!formData.fecha_fin) newErrors.fecha_fin = "La fecha de finalizacion es requerida"
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -90,7 +90,7 @@ const CreateAuction = ({ auction, onClose }) => {
           }))
         })
       } else {
-        setErrors({ general: "Error de conexión. Intenta nuevamente." })
+        setErrors({ general: "Error de conexion. Intenta nuevamente." })
       }
     }
   }
@@ -98,24 +98,24 @@ const CreateAuction = ({ auction, onClose }) => {
   const isLoading = createAuction.isPending || updateAuction.isPending
 
   const minDate = new Date()
-  minDate.setHours(minDate.getHours() + 1) // Mínimo 1 hora en el futuro
+  minDate.setHours(minDate.getHours() + 1)
   const minDateString = minDate.toISOString().slice(0, 16)
 
   const maxDate = new Date()
-  maxDate.setDate(maxDate.getDate() + 30) // Máximo 30 días en el futuro
+  maxDate.setDate(maxDate.getDate() + 30)
   const maxDateString = maxDate.toISOString().slice(0, 16)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
       {errors.general && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
-          <p className="text-red-600 text-sm">{errors.general}</p>
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg p-3 sm:p-4">
+          <p className="text-red-600 dark:text-red-400 text-sm">{errors.general}</p>
         </div>
       )}
 
       <div>
-        <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 mb-1">
-          Título de la Subasta *
+        <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Titulo de la Subasta *
         </label>
         <input
           type="text"
@@ -123,19 +123,19 @@ const CreateAuction = ({ auction, onClose }) => {
           name="titulo"
           value={formData.titulo}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base ${
-            errors.titulo ? "border-red-500" : "border-gray-300"
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+            errors.titulo ? "border-red-500" : "border-gray-300 dark:border-gray-600"
           }`}
-          placeholder="Ej: Puntos extra en el próximo examen"
+          placeholder="Ej: Puntos extra en el proximo examen"
           maxLength={255}
         />
-        {errors.titulo && <p className="mt-1 text-sm text-red-600">{errors.titulo}</p>}
-        <p className="mt-1 text-xs text-gray-500">{formData.titulo.length}/255 caracteres</p>
+        {errors.titulo && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.titulo}</p>}
+        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{formData.titulo.length}/255 caracteres</p>
       </div>
 
       <div>
-        <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
-          Descripción de la Recompensa *
+        <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Descripcion de la Recompensa *
         </label>
         <textarea
           id="descripcion"
@@ -143,17 +143,17 @@ const CreateAuction = ({ auction, onClose }) => {
           rows={4}
           value={formData.descripcion}
           onChange={handleChange}
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base ${
-            errors.descripcion ? "border-red-500" : "border-gray-300"
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+            errors.descripcion ? "border-red-500" : "border-gray-300 dark:border-gray-600"
           }`}
-          placeholder="Describe detalladamente la recompensa que obtendrá el ganador..."
+          placeholder="Describe detalladamente la recompensa que obtendra el ganador..."
         />
-        {errors.descripcion && <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>}
+        {errors.descripcion && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.descripcion}</p>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label htmlFor="grupo" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="grupo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Grupo Destinatario *
           </label>
           <select
@@ -162,9 +162,9 @@ const CreateAuction = ({ auction, onClose }) => {
             value={formData.grupo}
             onChange={handleChange}
             disabled={groupsLoading}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base ${
-              errors.grupo ? "border-red-500" : "border-gray-300"
-            } ${groupsLoading ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed' : ''}`}
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+              errors.grupo ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+            } ${groupsLoading ? 'bg-gray-100 dark:bg-gray-800 cursor-not-allowed' : ''}`}
           >
             <option value="">{groupsLoading ? "Cargando grupos..." : "Selecciona un grupo"}</option>
             {groups?.map((group) => (
@@ -173,17 +173,17 @@ const CreateAuction = ({ auction, onClose }) => {
               </option>
             ))}
           </select>
-          {errors.grupo && <p className="mt-1 text-sm text-red-600">{errors.grupo}</p>}
+          {errors.grupo && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.grupo}</p>}
           {groups?.length === 0 && !groupsLoading && (
-            <p className="mt-1 text-sm text-orange-600">
+            <p className="mt-1 text-sm text-green-700 dark:text-green-300">
               No tienes grupos disponibles. Primero crea un grupo en una clase.
             </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="fecha_fin" className="block text-sm font-medium text-gray-700 mb-1">
-            Fecha de Finalización *
+          <label htmlFor="fecha_fin" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Fecha de Finalizacion *
           </label>
           <input
             type="datetime-local"
@@ -191,24 +191,23 @@ const CreateAuction = ({ auction, onClose }) => {
             name="fecha_fin"
             value={formData.fecha_fin}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base ${
-              errors.fecha_fin ? "border-red-500" : "border-gray-300"
+            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+              errors.fecha_fin ? "border-red-500" : "border-gray-300 dark:border-gray-600"
             }`}
             min={minDateString}
             max={maxDateString}
           />
-          {errors.fecha_fin && <p className="mt-1 text-sm text-red-600">{errors.fecha_fin}</p>}
-          <p className="mt-1 text-xs text-gray-500">
-            La subasta debe durar entre 1 hora y 30 días
+          {errors.fecha_fin && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fecha_fin}</p>}
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            La subasta debe durar entre 1 hora y 30 dias
           </p>
         </div>
       </div>
 
-      {/* Configuración de pujas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label htmlFor="valor_minimo" className="block text-sm font-medium text-gray-700 mb-1">
-            Puja inicial mínima
+          <label htmlFor="valor_minimo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Puja inicial minima
           </label>
           <input
             type="number"
@@ -217,14 +216,14 @@ const CreateAuction = ({ auction, onClose }) => {
             value={formData.valor_minimo}
             onChange={handleChange}
             min={1}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
           />
-          <p className="mt-1 text-xs text-gray-500">Monto mínimo para la primera puja (en edubids)</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Monto minimo para la primera puja (en edubids)</p>
         </div>
 
         <div>
-          <label htmlFor="incremento_minimo" className="block text-sm font-medium text-gray-700 mb-1">
-            Incremento mínimo
+          <label htmlFor="incremento_minimo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Incremento minimo
           </label>
           <input
             type="number"
@@ -233,21 +232,20 @@ const CreateAuction = ({ auction, onClose }) => {
             value={formData.incremento_minimo}
             onChange={handleChange}
             min={1}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
           />
-          <p className="mt-1 text-xs text-gray-500">Cada nueva puja debe superar la anterior por al menos este valor</p>
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Cada nueva puja debe superar la anterior por al menos este valor</p>
         </div>
       </div>
 
-      {/* Información adicional */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-        <h4 className="font-medium text-blue-900 text-sm sm:text-base mb-2">Información importante</h4>
-        <ul className="text-xs sm:text-sm text-blue-700 space-y-1">
-          <li>• Los estudiantes pujarán con sus edubids acumulados</li>
-          <li>• Las edubids se bloquean durante la subasta</li>
-          <li>• Solo el ganador pagará las edubids pujadas</li>
-          <li>• Puedes cerrar la subasta manualmente en cualquier momento</li>
-          <li>• Define un incremento mínimo para que las pujas sean competitivas</li>
+      <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/20 rounded-lg p-3 sm:p-4">
+        <h4 className="font-medium text-green-800 dark:text-green-300 text-sm sm:text-base mb-2">Informacion importante</h4>
+        <ul className="text-xs sm:text-sm text-green-700 dark:text-green-400 space-y-1">
+          <li>Los estudiantes pujaran con sus edubids acumulados</li>
+          <li>Las edubids se bloquean durante la subasta</li>
+          <li>Solo el ganador pagara las edubids pujadas</li>
+          <li>Puedes cerrar la subasta manualmente en cualquier momento</li>
+          <li>Define un incremento minimo para que las pujas sean competitivas</li>
         </ul>
       </div>
 
@@ -256,14 +254,14 @@ const CreateAuction = ({ auction, onClose }) => {
           type="button" 
           onClick={onClose} 
           disabled={isLoading}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition disabled:opacity-50 text-sm sm:text-base"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50 text-sm sm:text-base bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 active:scale-[0.96]"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isLoading || groupsLoading || groups?.length === 0}
-          className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition disabled:opacity-50 flex items-center justify-center text-sm sm:text-base"
+          className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all disabled:opacity-50 flex items-center justify-center text-sm sm:text-base active:scale-[0.96]"
         >
           {isLoading ? <LoadingSpinner size="sm" /> : isEditing ? "Actualizar Subasta" : "Crear Subasta"}
         </button>
@@ -273,4 +271,3 @@ const CreateAuction = ({ auction, onClose }) => {
 }
 
 export default CreateAuction
-

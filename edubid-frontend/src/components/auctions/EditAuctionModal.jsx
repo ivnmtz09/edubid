@@ -54,10 +54,10 @@ export default function EditAuctionModal({ auction, onClose }) {
     e.preventDefault()
 
     const newErrors = {}
-    if (!formData.titulo) newErrors.titulo = "El título es requerido"
-    if (!formData.descripcion) newErrors.descripcion = "La descripción es requerida"
+    if (!formData.titulo) newErrors.titulo = "El titulo es requerido"
+    if (!formData.descripcion) newErrors.descripcion = "La descripcion es requerida"
     if (!formData.grupo) newErrors.grupo = "Debes seleccionar un grupo"
-    if (!formData.fecha_fin) newErrors.fecha_fin = "La fecha de finalización es requerida"
+    if (!formData.fecha_fin) newErrors.fecha_fin = "La fecha de finalizacion es requerida"
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
@@ -94,22 +94,22 @@ export default function EditAuctionModal({ auction, onClose }) {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div
-        className="fixed inset-0 bg-opacity-40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg shadow-lg border border-purple-400 shadow-purple-500/20"
+          className="relative bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg shadow-lg border border-gray-200 dark:border-white/10"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-white/10">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Editar Subasta
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100 dark:bg-gray-900"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.96]"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
@@ -117,8 +117,8 @@ export default function EditAuctionModal({ auction, onClose }) {
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             <div>
-              <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 mb-1">
-                Título de la Subasta
+              <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Titulo de la Subasta
               </label>
               <input
                 type="text"
@@ -126,16 +126,16 @@ export default function EditAuctionModal({ auction, onClose }) {
                 name="titulo"
                 value={formData.titulo}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  errors.titulo ? "border-red-500" : "border-gray-300"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+                  errors.titulo ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                 }`}
               />
-              {errors.titulo && <p className="mt-1 text-sm text-red-600">{errors.titulo}</p>}
+              {errors.titulo && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.titulo}</p>}
             </div>
 
             <div>
-              <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
-                Descripción
+              <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Descripcion
               </label>
               <textarea
                 id="descripcion"
@@ -143,16 +143,16 @@ export default function EditAuctionModal({ auction, onClose }) {
                 rows={4}
                 value={formData.descripcion}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                  errors.descripcion ? "border-red-500" : "border-gray-300"
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+                  errors.descripcion ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                 }`}
               />
-              {errors.descripcion && <p className="mt-1 text-sm text-red-600">{errors.descripcion}</p>}
+              {errors.descripcion && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.descripcion}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="grupo" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="grupo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Grupo
                 </label>
                 <select
@@ -160,8 +160,8 @@ export default function EditAuctionModal({ auction, onClose }) {
                   name="grupo"
                   value={formData.grupo}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                    errors.grupo ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+                    errors.grupo ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                   }`}
                 >
                   <option value="">Selecciona un grupo</option>
@@ -171,12 +171,12 @@ export default function EditAuctionModal({ auction, onClose }) {
                     </option>
                   ))}
                 </select>
-                {errors.grupo && <p className="mt-1 text-sm text-red-600">{errors.grupo}</p>}
+                {errors.grupo && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.grupo}</p>}
               </div>
 
               <div>
-                <label htmlFor="fecha_fin" className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha de Finalización
+                <label htmlFor="fecha_fin" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Fecha de Finalizacion
                 </label>
                 <input
                   type="datetime-local"
@@ -184,19 +184,19 @@ export default function EditAuctionModal({ auction, onClose }) {
                   name="fecha_fin"
                   value={formData.fecha_fin}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-                    errors.fecha_fin ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 ${
+                    errors.fecha_fin ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                   }`}
                   min={minDateString}
                 />
-                {errors.fecha_fin && <p className="mt-1 text-sm text-red-600">{errors.fecha_fin}</p>}
+                {errors.fecha_fin && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fecha_fin}</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="valor_minimo" className="block text-sm font-medium text-gray-700 mb-1">
-                  Puja inicial mínima
+                <label htmlFor="valor_minimo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Puja inicial minima
                 </label>
                 <input
                   type="number"
@@ -205,12 +205,12 @@ export default function EditAuctionModal({ auction, onClose }) {
                   value={formData.valor_minimo}
                   onChange={handleChange}
                   min={1}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
                 />
               </div>
               <div>
-                <label htmlFor="incremento_minimo" className="block text-sm font-medium text-gray-700 mb-1">
-                  Incremento mínimo
+                <label htmlFor="incremento_minimo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Incremento minimo
                 </label>
                 <input
                   type="number"
@@ -219,7 +219,7 @@ export default function EditAuctionModal({ auction, onClose }) {
                   value={formData.incremento_minimo}
                   onChange={handleChange}
                   min={1}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
                 />
               </div>
             </div>
@@ -228,14 +228,14 @@ export default function EditAuctionModal({ auction, onClose }) {
               <button 
                 type="button" 
                 onClick={onClose} 
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition"
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 active:scale-[0.96]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="flex-1 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all disabled:opacity-50 flex items-center justify-center active:scale-[0.96]"
               >
                 {updateMutation.isPending ? <LoadingSpinner size="sm" /> : "Guardar Cambios"}
               </button>
@@ -246,4 +246,3 @@ export default function EditAuctionModal({ auction, onClose }) {
     </div>
   )
 }
-
