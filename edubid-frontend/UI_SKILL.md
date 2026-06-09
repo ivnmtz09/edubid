@@ -59,7 +59,7 @@ Core Principles
 17. Semantic Module Color Coding
     EduBid uses a strict wayfinding color system. Brand global actions are Orange. However, specific modules must use their assigned accent colors consistently across all their respective views (lists, details, forms):
 
-- Classes (Clases): Amber/Yellow
+- Classes (Clases): Yellow
 - Groups (Grupos): Blue
 - Activities (Actividades): Purple
 - Auctions (Subastas): Green

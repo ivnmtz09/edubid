@@ -6,8 +6,6 @@ import {
   UserGroupIcon,
   CalendarIcon,
   MagnifyingGlassIcon,
-  TrashIcon,
-  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import {
   useClassrooms,
@@ -17,7 +15,7 @@ import {
 import { useAuthContext } from "../../context/AuthContext";
 import LoadingSpinner from "../common/LoadingSpinner";
 import Modal from "../common/Modal";
-import { formatDate, formatRelativeTime } from "../../utils/helpers";
+import ClassroomCard from "./ClassroomCard";
 
 export default function ClassroomList() {
   const { user } = useAuthContext();
@@ -87,22 +85,22 @@ export default function ClassroomList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] bg-gray-50 dark:bg-gray-950">
+      <div className="flex items-center justify-center min-h-[400px] bg-transparent">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
+    <div className="space-y-6 bg-transparent text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-amber-50 dark:bg-amber-500/10 rounded-lg flex-shrink-0">
-            <AcademicCapIcon className="h-6 w-6 sm:h-7 sm:w-7 text-amber-600 dark:text-amber-400" />
+          <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl flex-shrink-0">
+            <AcademicCapIcon className="h-6 w-6 sm:h-7 sm:w-7 text-yellow-600 dark:text-yellow-400" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white text-wrap-balance">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 text-wrap-balance">
               Mis Clases
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm sm:text-base">
@@ -116,7 +114,7 @@ export default function ClassroomList() {
         {isTeacher && (
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center justify-center gap-2 bg-amber-600 text-white px-5 py-3 rounded-xl hover:bg-amber-700 shadow-sm transition-all duration-200 font-medium w-full lg:w-auto active:scale-[0.96]"
+            className="flex items-center justify-center gap-2 bg-yellow-600 text-white px-5 py-3 rounded-xl hover:bg-yellow-700 shadow-sm transition-all duration-200 font-medium w-full lg:w-auto active:scale-[0.96]"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Crear nueva clase</span>
@@ -132,7 +130,7 @@ export default function ClassroomList() {
               label: "Total Clases",
               count: stats.total,
               icon: AcademicCapIcon,
-              color: "amber",
+              color: "yellow",
             },
             {
               label: "Estudiantes",
@@ -155,14 +153,14 @@ export default function ClassroomList() {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-white/5 rounded-xl p-4 shadow-sm"
+              className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/5 rounded-xl p-4 shadow-sm"
             >
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
-                  <stat.icon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <div className={`p-3 rounded-lg ${stat.color === 'yellow' ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                  <stat.icon className={`h-5 w-5 ${stat.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400'}`} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">
                     {stat.count}
                   </p>
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
@@ -176,7 +174,7 @@ export default function ClassroomList() {
       )}
 
       {/* Search Bar */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-md dark:shadow-gray-900/50">
+      <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-white/5">
         <div className="relative">
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
@@ -184,7 +182,7 @@ export default function ClassroomList() {
             placeholder="Buscar clases por nombre o descripción..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all duration-200 text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400"
           />
         </div>
       </div>
@@ -193,102 +191,15 @@ export default function ClassroomList() {
       {filteredClassrooms.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredClassrooms.map((classroom) => (
-            <div
-              key={classroom.id}
-              className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col"
-            >
-              {/* Card Header */}
-              <div className="bg-amber-600 p-5">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-white/20 rounded-xl flex-shrink-0">
-                    <AcademicCapIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-white text-base sm:text-lg text-wrap-balance">
-                      {classroom.nombre}
-                    </h3>
-                    {classroom.docente_nombre && (
-                      <p className="text-amber-100 text-xs sm:text-sm mt-1 truncate">
-                        {classroom.docente_nombre}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="p-5 space-y-4 flex-1 flex flex-col">
-                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 flex-1 min-h-[60px]">
-                  {classroom.descripcion || "Sin descripción disponible"}
-                </p>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <UserGroupIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Estudiantes
-                      </span>
-                    </div>
-                    <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tabular-nums">
-                      {classroom.estudiantes_count || 0}
-                    </p>
-                  </div>
-
-                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <AcademicCapIcon className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400" />
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Grupos
-                      </span>
-                    </div>
-                    <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tabular-nums">
-                      {classroom.grupos_clases?.length || 0}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-gray-100 dark:border-white/5 mt-auto">
-                  <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                    <CalendarIcon className="h-3.5 w-3.5 mr-1.5 flex-shrink-0" />
-                    <span className="tabular-nums">
-                      Creada el {formatDate(classroom.creado)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="px-5 pb-5 flex gap-2">
-                <Link
-                  to={`/classrooms/${classroom.id}`}
-                  className="flex-1 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 px-4 py-2.5 rounded-xl hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors duration-200 text-center text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.96]"
-                >
-                  <span>Ver Detalles</span>
-                  <ArrowRightIcon className="h-3.5 w-3.5" />
-                </Link>
-                {isTeacher && (
-                  <button
-                    onClick={() => handleDelete(classroom.id)}
-                    className="px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200 text-sm font-medium flex items-center justify-center min-w-[44px] active:scale-[0.96]"
-                    title="Eliminar clase"
-                  >
-                    <span className="sm:hidden" aria-hidden="true">
-                      ✕
-                    </span>
-                    <span className="hidden sm:inline">Eliminar</span>
-                  </button>
-                )}
-              </div>
-            </div>
+            <ClassroomCard key={classroom.id} classroom={classroom} onDelete={isTeacher ? handleDelete : null} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-16 bg-white dark:bg-gray-900 rounded-2xl shadow-sm">
+        <div className="text-center py-16 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-white/5">
           <div className="bg-gray-100 dark:bg-gray-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <AcademicCapIcon className="h-10 w-10 text-gray-400 dark:text-gray-500" />
           </div>
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             {searchTerm
               ? "No se encontraron clases"
               : "No hay clases disponibles"}
@@ -303,7 +214,7 @@ export default function ClassroomList() {
           {isTeacher && !searchTerm && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="bg-amber-600 text-white px-6 py-3 rounded-xl hover:bg-amber-700 transition-all duration-200 font-medium shadow-sm active:scale-[0.96]"
+              className="bg-yellow-600 text-white px-6 py-3 rounded-xl hover:bg-yellow-700 transition-all duration-200 font-medium shadow-sm active:scale-[0.96]"
             >
               Crear primera clase
             </button>
@@ -330,7 +241,7 @@ export default function ClassroomList() {
               onChange={(e) =>
                 setFormData({ ...formData, nombre: e.target.value })
               }
-              className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 transition-colors duration-200 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all duration-200 text-sm bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 placeholder-gray-400"
               placeholder="Ej: Matemáticas 10°A - 2024"
               maxLength={100}
             />
@@ -349,7 +260,7 @@ export default function ClassroomList() {
                 setFormData({ ...formData, descripcion: e.target.value })
               }
               rows={3}
-              className="w-full px-4 py-3 border border-gray-200 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-amber-500 transition-colors duration-200 resize-none text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+              className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 focus:outline-none transition-all duration-200 resize-none text-sm bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 placeholder-gray-400"
               placeholder="Describe brevemente el contenido, objetivos o información importante de la clase..."
               maxLength={500}
             />
@@ -358,11 +269,11 @@ export default function ClassroomList() {
             </p>
           </div>
 
-          <div className="bg-amber-50 dark:bg-amber-500/10 rounded-xl p-4">
-            <h4 className="font-medium text-amber-800 dark:text-amber-400 text-sm mb-2">
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 border border-yellow-100 dark:border-yellow-900/30">
+            <h4 className="font-medium text-yellow-800 dark:text-yellow-400 text-sm mb-2">
               Información importante
             </h4>
-            <ul className="text-sm text-amber-700 dark:text-amber-500 space-y-1">
+            <ul className="text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
               <li>• Podrás crear grupos dentro de esta clase</li>
               <li>• Los estudiantes se unirán a través de códigos de grupo</li>
               <li>• Podrás asignar actividades a grupos específicos</li>
@@ -374,14 +285,14 @@ export default function ClassroomList() {
             <button
               type="button"
               onClick={() => setShowCreateModal(false)}
-              className="flex-1 px-4 py-3 border border-gray-200 dark:border-white/10 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 font-medium text-sm active:scale-[0.96]"
+              className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 font-medium text-sm active:scale-[0.96]"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={createMutation.isPending || !formData.nombre.trim()}
-              className="flex-1 bg-amber-600 text-white px-4 py-3 rounded-xl hover:bg-amber-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm active:scale-[0.96]"
+              className="flex-1 bg-yellow-600 text-white px-4 py-3 rounded-xl hover:bg-yellow-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm active:scale-[0.96]"
             >
               {createMutation.isPending ? "Creando..." : "Crear Clase"}
             </button>

@@ -162,7 +162,7 @@ export default function GroupList() {
                   <>
                     <button
                       onClick={() => handleEdit(group)}
-                      className="p-2 sm:p-2.5 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl hover:bg-indigo-500/20 transition-colors duration-200 flex items-center justify-center active:scale-[0.96]"
+                      className="p-2 sm:p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors duration-200 flex items-center justify-center active:scale-[0.96]"
                       title="Editar grupo"
                     >
                       <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -183,7 +183,7 @@ export default function GroupList() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 sm:py-16 bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/5 rounded-2xl p-4 shadow-sm">
+        <div className="text-center py-12 sm:py-16 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl p-4 shadow-sm">
           <UserGroupIcon className="h-12 w-12 sm:h-16 sm:w-16 text-blue-500 dark:text-blue-400 mx-auto mb-4" />
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
             {isTeacher ? "No hay grupos creados" : "Aún no estás en ningún grupo"}

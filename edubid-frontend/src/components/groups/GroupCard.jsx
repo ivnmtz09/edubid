@@ -3,8 +3,6 @@ import {
   UserGroupIcon,
   CalendarIcon,
   ClipboardIcon,
-  CheckCircleIcon,
-  XCircleIcon,
   ArrowRightIcon,
   TrashIcon,
   PencilIcon,
@@ -12,123 +10,122 @@ import {
 import { formatDate } from "../../utils/helpers";
 import toast from "react-hot-toast";
 
+// Módulo: GRUPOS — Paleta semántica Blue
+// Shell unificado: mismo en todos los módulos (ClassroomCard / GroupCard / ActivityCard)
 export default function GroupCard({ group, onDelete, onEdit, role }) {
+  const isTeacher = role === "docente";
+
   const copyCode = (code) => {
     navigator.clipboard.writeText(code);
     toast.success("Código copiado al portapapeles");
   };
 
-  const isTeacher = role === "docente";
-
   return (
-    <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-white/5 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group h-full flex flex-col w-full">
-      {/* Header */}
-      <div className="bg-blue-600 p-4 sm:p-5">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="p-1.5 sm:p-2 bg-blue-50 dark:bg-blue-500/10 rounded-lg">
-              <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-white text-base sm:text-lg truncate text-wrap-balance">
-                {group.nombre}
-              </h3>
-              <p className="text-blue-100 text-xs sm:text-sm mt-1 truncate">
-                {group.classroom?.nombre ||
-                  group.classroom_nombre ||
-                  "Sin clase asignada"}
-              </p>
-            </div>
-          </div>
-          {/* Status badge */}
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${group.activo ? "bg-white/20 text-white" : "bg-white/10 text-white/60"}`}
-          >
-            {group.activo ? "Activo" : "Inactivo"}
-          </span>
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col">
+
+      {/* ── Header ─────────────────────────────────────────── */}
+      <div className="flex items-start gap-3 mb-5">
+        <div className="p-2.5 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/50 rounded-xl flex-shrink-0">
+          <UserGroupIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
         </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-gray-900 dark:text-white text-base leading-snug [text-wrap:balance]">
+            {group.nombre}
+          </h3>
+          <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5 truncate">
+            {group.classroom?.nombre || group.classroom_nombre || "Sin clase asignada"}
+          </p>
+        </div>
+        {/* Badge activo/inactivo */}
+        <span
+          className={`flex-shrink-0 px-2 py-1 rounded-full text-xs font-medium ${
+            group.activo
+              ? "bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/50"
+              : "bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-white/10"
+          }`}
+        >
+          {group.activo ? "Activo" : "Inactivo"}
+        </span>
       </div>
 
-      {/* Body */}
-      <div className="p-4 sm:p-5 space-y-3 sm:space-y-4 flex-1">
-        <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm line-clamp-2 min-h-[40px]">
+      {/* ── Body — flex-1 asegura que el footer siempre quede abajo ── */}
+      <div className="flex-1 flex flex-col gap-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 [text-wrap:pretty]">
           {group.descripcion || "Sin descripción disponible"}
         </p>
 
-        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-white/5 rounded-xl p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <UserGroupIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 dark:text-gray-400" />
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                Estudiantes
-              </span>
-            </div>
-            <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white tabular-nums">
-              {group.estudiantes_count || group.estudiantes?.length || 0}
-            </span>
+        {/* Stat: Estudiantes */}
+        <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/50 rounded-xl p-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserGroupIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <span className="text-sm text-gray-500 dark:text-gray-400">Estudiantes</span>
           </div>
+          <span className="text-lg font-bold text-gray-900 dark:text-white tabular-nums">
+            {group.estudiantes_count || group.estudiantes?.length || 0}
+          </span>
         </div>
 
+        {/* Código de acceso (solo docente) */}
         {isTeacher && group.codigo && (
-          <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-2 sm:p-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center space-x-1 sm:space-x-2 min-w-0">
-                <ClipboardIcon className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
-                  Código:
-                </span>
-                <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-sm sm:text-lg tracking-wider truncate">
-                  {group.codigo}
-                </span>
-              </div>
-              <button
-                onClick={() => copyCode(group.codigo)}
-                className="px-2 sm:px-3 py-1 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 text-xs font-medium flex-shrink-0 w-full sm:w-auto text-center active:scale-[0.96]"
-              >
-                Copiar
-              </button>
+          <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/50 rounded-xl p-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <ClipboardIcon className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Código:</span>
+              <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-sm tracking-wider truncate">
+                {group.codigo}
+              </span>
             </div>
+            <button
+              onClick={() => copyCode(group.codigo)}
+              className="flex-shrink-0 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-medium active:scale-[0.96] transition-all"
+            >
+              Copiar
+            </button>
           </div>
         )}
 
-        <div className="pt-2 sm:pt-3 border-t border-gray-100 dark:border-white/5">
-          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-            <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-            <span className="truncate tabular-nums">
-              Creado el {formatDate(group.creado)}
-            </span>
-          </div>
+        {/* Fecha (empuja el footer hacia abajo) */}
+        <div className="mt-auto flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+          <CalendarIcon className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="tabular-nums">Creado el {formatDate(group.creado)}</span>
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="px-4 sm:px-5 pb-4 sm:pb-5 flex gap-2 mt-auto">
+      {/* ── Footer — padding y gap idénticos en ambos roles ─── */}
+      {/*  Docente:    [Ver Detalles flex-1] [Editar px-4] [Eliminar px-4]  */}
+      {/*  Estudiante: [Ver Detalles w-full]                                 */}
+      <div className="flex gap-2 mt-5 pt-5 border-t border-gray-100 dark:border-white/5">
         <Link
           to={`/groups/${group.id}`}
-          className="flex-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors duration-200 text-center text-xs sm:text-sm font-medium flex items-center justify-center gap-1 sm:gap-2 active:scale-[0.96]"
+          className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl py-2.5 font-medium text-sm flex items-center justify-center gap-2 hover:bg-gray-700 dark:hover:bg-gray-100 active:scale-[0.96] transition-all"
         >
-          <span>Ver Detalles</span>
-          <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+          Ver Detalles
+          <ArrowRightIcon className="h-3.5 w-3.5" />
         </Link>
-        {isTeacher && (
+
+        {/* Solo docente */}
+        {isTeacher ? (
           <>
             <button
               onClick={() => onEdit(group.id)}
-              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors duration-200 text-xs sm:text-sm font-medium flex items-center justify-center active:scale-[0.96]"
               title="Editar grupo"
+              className="px-4 py-2.5 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-all active:scale-[0.96] flex items-center justify-center gap-1.5"
             >
-              <PencilIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="sr-only sm:not-sr-only sm:ml-1">Editar</span>
+              <PencilIcon className="h-4 w-4" />
+              <span className="hidden sm:inline text-sm font-medium">Editar</span>
             </button>
             <button
               onClick={() => onDelete(group.id)}
-              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors duration-200 text-xs sm:text-sm font-medium flex items-center justify-center active:scale-[0.96]"
               title="Eliminar grupo"
+              className="px-4 py-2.5 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-all active:scale-[0.96] flex items-center justify-center gap-1.5"
             >
-              <TrashIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="sr-only sm:not-sr-only sm:ml-1">Eliminar</span>
+              <TrashIcon className="h-4 w-4" />
+              <span className="hidden sm:inline text-sm font-medium">Eliminar</span>
             </button>
           </>
+        ) : (
+          /* Placeholder invisible — la tarjeta del estudiante tiene la misma altura */
+          <div className="w-0 overflow-hidden" aria-hidden="true" />
         )}
       </div>
     </div>

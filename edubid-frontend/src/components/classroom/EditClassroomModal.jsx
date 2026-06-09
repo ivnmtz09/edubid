@@ -55,22 +55,22 @@ export default function EditClassroomModal({ classroom, onClose }) {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div
-        className="fixed inset-0 bg-opacity-40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg shadow-lg border border-orange-400 shadow-orange-500/20"
+          className="relative bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg shadow-sm border border-gray-200 dark:border-white/5"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Editar Clase
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100 dark:bg-gray-900"
+              className="text-gray-400 hover:text-gray-600 transition-all duration-200 p-1 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
@@ -78,7 +78,7 @@ export default function EditClassroomModal({ classroom, onClose }) {
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Nombre de la Clase
               </label>
               <input
@@ -86,18 +86,18 @@ export default function EditClassroomModal({ classroom, onClose }) {
                 name="nombre"
                 value={formData.nombre}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                  errors.nombre ? "border-red-500" : "border-gray-300"
+                className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all duration-200 ${
+                  errors.nombre ? "border-red-500" : "border-gray-200 dark:border-gray-800"
                 }`}
                 placeholder="Ej: Matemáticas 10A"
               />
               {errors.nombre && (
-                <p className="mt-1 text-sm text-red-600">{errors.nombre}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.nombre}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Descripción
               </label>
               <textarea
@@ -105,7 +105,7 @@ export default function EditClassroomModal({ classroom, onClose }) {
                 value={formData.descripcion}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 resize-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-all duration-200"
                 placeholder="Describe el contenido de la clase..."
               />
             </div>
@@ -114,14 +114,14 @@ export default function EditClassroomModal({ classroom, onClose }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition"
+                className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-800 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 active:scale-[0.96]"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="flex-1 bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 bg-yellow-600 text-white px-4 py-3 rounded-xl hover:bg-yellow-700 transition-all duration-200 disabled:opacity-50 flex items-center justify-center active:scale-[0.96]"
               >
                 {updateMutation.isPending ? (
                   <LoadingSpinner size="sm" />
@@ -136,4 +136,3 @@ export default function EditClassroomModal({ classroom, onClose }) {
     </div>
   )
 }
-

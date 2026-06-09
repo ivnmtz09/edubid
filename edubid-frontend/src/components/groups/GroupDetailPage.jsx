@@ -94,8 +94,7 @@ const GroupDetailPage = () => {
 
   if (isLoading) {
     return (
-      // FIX: era dark:bg-gray-700/50 — demasiado claro y no consistente con el resto
-      <div className="flex items-center justify-center min-h-[400px] bg-white dark:bg-gray-900">
+      <div className="flex items-center justify-center min-h-[400px] bg-transparent">
         <div className="text-center">
           <LoadingSpinner size="lg" />
           <p className="mt-4 text-gray-500 dark:text-gray-400 text-sm">
@@ -108,8 +107,7 @@ const GroupDetailPage = () => {
 
   if (!group) {
     return (
-      // FIX: era dark:bg-gray-700/50
-      <div className="min-h-[400px] bg-white dark:bg-gray-900 flex items-center justify-center px-4">
+      <div className="min-h-[400px] bg-transparent flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <UserGroupIcon className="h-16 w-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
@@ -120,7 +118,7 @@ const GroupDetailPage = () => {
           </p>
           <button
             onClick={() => navigate("/groups")}
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition font-medium text-sm"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-medium text-sm active:scale-[0.96]"
           >
             Volver a Grupos
           </button>
@@ -133,14 +131,12 @@ const GroupDetailPage = () => {
   const classroom = group.classroom_detail || group.classroom || {};
 
   return (
-    // FIX: era dark:bg-gray-700/50 — valor inconsistente con el sistema de colores
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-4 sm:py-6 lg:py-8">
+    <div className="min-h-screen bg-transparent py-4 sm:py-6 lg:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Navigation */}
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <button
             onClick={() => navigate("/groups")}
-            // FIX: dark:hover:bg-gray-700 era correcto pero faltaba dark:bg-gray-800/50 para el estado base
             className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white transition px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm sm:text-base"
           >
             <ArrowLeftIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -150,7 +146,7 @@ const GroupDetailPage = () => {
           {isTeacher && (
             <button
               onClick={handleEdit}
-              className="flex items-center gap-2 bg-blue-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-600 transition text-sm"
+              className="flex items-center gap-2 bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm active:scale-[0.96]"
             >
               <PencilIcon className="h-4 w-4" />
               <span className="hidden sm:inline">Editar Grupo</span>
@@ -159,11 +155,10 @@ const GroupDetailPage = () => {
           )}
         </div>
 
-        {/* Header Card — azul sólido, sin problema de dark mode */}
+        {/* Header Card — azul sólido */}
         <div className="bg-blue-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 text-white shadow-lg mb-6 sm:mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
             <div className="flex items-center gap-3 sm:gap-4">
-              {/* FIX: era dark:bg-gray-800/10 que sobre azul sólido no tiene sentido; usar bg-white/20 */}
               <div className="p-2 sm:p-3 bg-white/20 rounded-lg sm:rounded-xl flex-shrink-0">
                 <UserGroupIcon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
@@ -178,7 +173,6 @@ const GroupDetailPage = () => {
             </div>
 
             {isTeacher && group.codigo && (
-              // FIX: era dark:bg-gray-800/10 sobre fondo azul — sin sentido. Usar bg-white/15
               <div className="bg-white/15 rounded-lg sm:rounded-xl p-3 sm:p-4 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs sm:text-sm text-blue-100">
@@ -191,21 +185,17 @@ const GroupDetailPage = () => {
                   )}
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
-                  {/* FIX: era dark:bg-gray-800/10 — usar bg-white/20 consistente con el header azul */}
                   <div className="flex items-center gap-1 sm:gap-2 bg-white/20 px-3 sm:px-4 py-2 rounded-lg flex-1 min-w-0">
                     <DocumentDuplicateIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 text-white" />
                     <span className="text-lg sm:text-xl lg:text-2xl font-bold tracking-wider truncate text-white">
                       {group.codigo}
                     </span>
                   </div>
-                  {/* FIX: mismo problema, bg-white/20 es lo correcto sobre azul */}
                   <button
                     onClick={handleCopyCode}
                     disabled={isCodeExpired()}
                     className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                    title={
-                      isCodeExpired() ? "Código expirado" : "Copiar código"
-                    }
+                    title={isCodeExpired() ? "Código expirado" : "Copiar código"}
                   >
                     {copied ? (
                       <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-300" />
@@ -232,19 +222,18 @@ const GroupDetailPage = () => {
         {/* Info Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           {/* Descripción */}
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
               <ClipboardDocumentListIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               Descripción
             </h2>
-            {/* FIX: era dark:text-gray-400 — correcto, pero faltaba en el original */}
             <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base leading-relaxed">
               {group.descripcion || "Sin descripción disponible"}
             </p>
           </div>
 
           {/* Estadísticas */}
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
               <AcademicCapIcon className="h-5 w-5 text-blue-400 flex-shrink-0" />
               Estadísticas
@@ -254,7 +243,7 @@ const GroupDetailPage = () => {
                 <span className="text-gray-500 dark:text-gray-400 text-sm">
                   Estudiantes:
                 </span>
-                <span className="font-bold text-orange-600 dark:text-orange-400 text-lg">
+                <span className="font-bold text-blue-600 dark:text-blue-400 text-lg tabular-nums">
                   {group.estudiantes_count || estudiantes.length}
                 </span>
               </div>
@@ -276,7 +265,7 @@ const GroupDetailPage = () => {
                 <span className="text-gray-500 dark:text-gray-400 text-sm">
                   Creado:
                 </span>
-                <span className="font-medium text-gray-900 dark:text-white text-sm">
+                <span className="font-medium text-gray-900 dark:text-white text-sm tabular-nums">
                   {formatDate(group.creado)}
                 </span>
               </div>
@@ -284,7 +273,7 @@ const GroupDetailPage = () => {
           </div>
 
           {/* Clase */}
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
               Información de Clase
@@ -303,7 +292,7 @@ const GroupDetailPage = () => {
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
                     Descripción:
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
                     {classroom.descripcion}
                   </p>
                 </div>
@@ -313,15 +302,14 @@ const GroupDetailPage = () => {
         </div>
 
         {/* Estudiantes Section */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm mb-6 sm:mb-8">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 shadow-sm mb-6 sm:mb-8">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <UserGroupIcon className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600 dark:text-orange-400 flex-shrink-0" />
-              Estudiantes ({estudiantes.length})
+              <UserGroupIcon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              Estudiantes <span className="tabular-nums">({estudiantes.length})</span>
             </h2>
             {estudiantes.length > 0 && (
-              // FIX: faltaba dark variant en el badge del contador
-              <div className="text-sm bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-3 py-1 rounded-full">
+              <div className="text-sm bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-semibold">
                 {estudiantes.length} estudiante
                 {estudiantes.length !== 1 ? "s" : ""}
               </div>
@@ -333,20 +321,20 @@ const GroupDetailPage = () => {
               {estudiantes.map((student) => (
                 <div
                   key={student.id}
-                  className="flex items-center gap-3 p-3 sm:p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800/50 hover:shadow-md transition-all duration-200"
+                  className="flex items-center gap-3 p-3 sm:p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200/50 dark:border-blue-500/20 hover:shadow-md transition-all duration-200"
                 >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-600 dark:bg-orange-700 flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-600 dark:bg-blue-700 flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
                     {(student.first_name?.[0] || "U") +
                       (student.last_name?.[0] || "")}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-orange-700 dark:text-orange-400 text-sm truncate flex items-center gap-1">
+                    <p className="font-semibold text-blue-700 dark:text-blue-300 text-sm truncate flex items-center gap-1">
                       <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                       <span className="truncate">
                         {student.first_name} {student.last_name}
                       </span>
                     </p>
-                    <p className="text-xs text-orange-600 dark:text-orange-400 truncate flex items-center gap-1 mt-1">
+                    <p className="text-xs text-blue-600 dark:text-blue-400 truncate flex items-center gap-1 mt-1">
                       <EnvelopeIcon className="h-3 w-3 flex-shrink-0" />
                       <span className="truncate">{student.email}</span>
                     </p>
@@ -355,21 +343,21 @@ const GroupDetailPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 sm:py-12 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800/50">
-              <UserGroupIcon className="h-12 w-12 sm:h-16 sm:w-16 text-orange-400 dark:text-orange-500 mx-auto mb-3 sm:mb-4" />
-              <h3 className="text-base sm:text-lg font-medium text-orange-700 dark:text-orange-400 mb-2">
+            <div className="text-center py-8 sm:py-12 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200/50 dark:border-blue-500/20">
+              <UserGroupIcon className="h-12 w-12 sm:h-16 sm:w-16 text-blue-400 dark:text-blue-500 mx-auto mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-medium text-blue-700 dark:text-blue-300 mb-2">
                 No hay estudiantes aún
               </h3>
-              <p className="text-orange-600 dark:text-orange-400 text-sm sm:text-base max-w-md mx-auto px-4">
+              <p className="text-blue-600 dark:text-blue-400 text-sm sm:text-base max-w-md mx-auto px-4">
                 {isTeacher
                   ? "Los estudiantes aparecerán aquí cuando se unan con el código de acceso"
                   : "Espera a que más compañeros se unan al grupo"}
               </p>
               {isTeacher && group.codigo && !isCodeExpired() && (
-                <div className="mt-4 p-3 sm:p-4 bg-orange-100 dark:bg-orange-900/30 rounded-xl border border-orange-200 dark:border-orange-800/50 max-w-md mx-auto">
-                  <p className="text-xs sm:text-sm text-orange-700 dark:text-orange-300">
+                <div className="mt-4 p-3 sm:p-4 bg-blue-50 dark:bg-blue-500/10 rounded-xl border border-blue-200/50 dark:border-blue-500/20 max-w-md mx-auto">
+                  <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
                     Comparte el código{" "}
-                    <strong className="text-orange-800 dark:text-orange-400">
+                    <strong className="text-blue-800 dark:text-blue-400 font-mono">
                       {group.codigo}
                     </strong>{" "}
                     con tus estudiantes
@@ -380,24 +368,22 @@ const GroupDetailPage = () => {
           )}
         </div>
 
-        {/* Actividades del Grupo */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 shadow-sm">
+        {/* Actividades del Grupo — Purple (Módulo Actividades) */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl p-4 sm:p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <ClipboardDocumentListIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600 dark:text-purple-400 flex-shrink-0" />
               Actividades del Grupo
               {activities.length > 0 && (
-                // FIX: faltaba light mode — era solo dark styles
-                <span className="text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-3 py-1 rounded-full font-normal">
+                <span className="text-sm bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full font-semibold tabular-nums">
                   {activities.length}
                 </span>
               )}
             </h2>
             {isTeacher && (
-              // FIX: solo tenía colores dark, faltaban los light
               <button
                 onClick={() => navigate("/activities")}
-                className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium text-sm sm:text-base flex items-center gap-1"
+                className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold text-sm sm:text-base flex items-center gap-1"
               >
                 <span>Gestionar actividades</span>
                 <ArrowLeftIcon className="h-4 w-4 transform rotate-180" />
@@ -422,17 +408,15 @@ const GroupDetailPage = () => {
                   <Link
                     key={activity.id}
                     to={`/activities/${activity.id}`}
-                    // FIX: el fondo de la card era dark:bg-gray-800 pero sin bg-white explícito en light
-                    className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] overflow-hidden flex flex-col group"
+                    className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] overflow-hidden flex flex-col group"
                   >
-                    {/* Card Header — purple sólido, sin problema de dark */}
+                    {/* Card Header — purple sólido */}
                     <div className="bg-purple-600 p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-white/80 uppercase">
                           {activity.tipo}
                         </span>
                         {isTeacher ? (
-                          // FIX: badges solo tenían dark styles
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${
                               activity.habilitada
@@ -487,7 +471,8 @@ const GroupDetailPage = () => {
                             })}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400 font-semibold">
+                        {/* EduBids: purple, no naranja */}
+                        <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-semibold">
                           <CurrencyEuroIcon className="h-3.5 w-3.5" />
                           <span>{activity.valor_edubids} EC</span>
                         </div>
@@ -509,7 +494,7 @@ const GroupDetailPage = () => {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 sm:py-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800/50">
+            <div className="text-center py-8 sm:py-12 bg-purple-50 dark:bg-purple-500/10 rounded-xl border border-purple-200 dark:border-purple-500/20">
               <ClipboardDocumentListIcon className="h-12 w-12 sm:h-16 sm:w-16 text-purple-400 dark:text-purple-500 mx-auto mb-3 sm:mb-4" />
               <h3 className="text-base sm:text-lg font-medium text-purple-700 dark:text-purple-400 mb-2">
                 No hay actividades asignadas
@@ -521,7 +506,7 @@ const GroupDetailPage = () => {
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <button
                     onClick={() => navigate("/activities")}
-                    className="bg-purple-500 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-600 transition font-medium text-sm sm:text-base"
+                    className="bg-purple-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-purple-700 transition font-medium text-sm sm:text-base active:scale-[0.96]"
                   >
                     Crear actividad
                   </button>
@@ -532,12 +517,12 @@ const GroupDetailPage = () => {
         </div>
 
         {/* Info bar móvil */}
-        <div className="lg:hidden mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+        <div className="lg:hidden mt-6 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl p-4">
+          <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-semibold">
             <ClockIcon className="h-4 w-4 flex-shrink-0" />
-            <span className="text-sm font-medium">Información del grupo</span>
+            <span className="text-sm font-semibold">Información del grupo</span>
           </div>
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 tabular-nums">
             Creado el {formatDateTime(group.creado)} • {estudiantes.length}{" "}
             estudiante{estudiantes.length !== 1 ? "s" : ""}
           </p>

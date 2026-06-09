@@ -50,7 +50,7 @@ const CreateGroup = ({ onClose }) => {
         />
 
         <div
-          className="relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl w-full max-w-md shadow-lg border border-blue-200 dark:border-gray-700"
+          className="relative bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl w-full max-w-md shadow-lg border border-gray-200 dark:border-white/5"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -148,7 +148,7 @@ const CreateGroup = ({ onClose }) => {
               <button
                 type="submit"
                 disabled={isPending || !form.nombre.trim() || !form.classroom}
-                className="flex-1 bg-blue-500 text-white px-4 py-2.5 rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base flex items-center justify-center gap-2"
+                className="flex-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base flex items-center justify-center gap-2 active:scale-[0.96]"
               >
                 {isPending ? (
                   <>

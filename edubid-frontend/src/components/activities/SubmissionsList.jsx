@@ -38,9 +38,9 @@ export default function SubmissionsList({ submissions, activityId }) {
 
   if (!submissions || submissions.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
-        <DocumentTextIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-        <p className="text-sm sm:text-base">No hay entregas aún</p>
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
+        <DocumentTextIcon className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+        <p className="text-sm sm:text-base font-medium">No hay entregas aún</p>
       </div>
     )
   }
@@ -97,18 +97,18 @@ export default function SubmissionsList({ submissions, activityId }) {
         return (
           <div
             key={submission.id}
-            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 md:p-5 hover:shadow-md transition-all duration-200"
+            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-lg p-4 md:p-5 hover:shadow-md transition-all duration-200"
           >
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
               <div className="flex items-start space-x-3 md:space-x-4 flex-1">
-                <div className="bg-purple-50 p-1.5 md:p-2 rounded-full flex-shrink-0">
-                  <UserCircleIcon className="h-6 w-6 md:h-8 md:w-8 text-purple-600" />
+                <div className="bg-purple-50 dark:bg-purple-500/10 p-1.5 md:p-2 rounded-full flex-shrink-0">
+                  <UserCircleIcon className="h-6 w-6 md:h-8 md:w-8 text-purple-700 dark:text-purple-300" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-semibold text-gray-900 dark:text-white text-base md:text-lg truncate">
                     {studentName}
                   </h4>
-                  <p className="text-xs md:text-sm text-gray-600 mt-1">
+                  <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
                     {studentEmail && (
                       <span className="block sm:inline">
                         {studentEmail}
@@ -116,12 +116,12 @@ export default function SubmissionsList({ submissions, activityId }) {
                       </span>
                     )}
                     <span className="block sm:inline">
-                      Entregado el <span className="font-medium text-gray-700">{formatDate(submission.creado)}</span>
+                      Entregado el <span className="font-medium text-gray-750 dark:text-gray-300 tabular-nums">{formatDate(submission.creado)}</span>
                     </span>
                   </p>
                   
                   {submission.contenido && (
-                    <p className="text-sm text-gray-700 mt-2 md:mt-3 bg-purple-50 border border-purple-100 p-2 md:p-3 rounded-lg break-words">
+                    <p className="text-sm text-purple-850 dark:text-purple-300 mt-2 md:mt-3 bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 p-2 md:p-3 rounded-lg break-words">
                       {submission.contenido}
                     </p>
                   )}
@@ -131,7 +131,7 @@ export default function SubmissionsList({ submissions, activityId }) {
                       href={submission.archivo}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1 md:space-x-2 text-xs md:text-sm bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 text-gray-800 dark:text-gray-100 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors duration-200 mt-2 md:mt-3 w-fit"
+                      className="inline-flex items-center space-x-1 md:space-x-2 text-xs md:text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-colors duration-200 mt-2 md:mt-3 w-fit border border-gray-205 dark:border-white/5 active:scale-[0.96]"
                     >
                       <DocumentTextIcon className="h-3 w-3 md:h-4 md:w-4 flex-shrink-0" />
                       <span className="truncate">Ver archivo adjunto</span>
@@ -143,11 +143,11 @@ export default function SubmissionsList({ submissions, activityId }) {
               <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 lg:gap-2 lg:ml-4 lg:text-right">
                 {submission.calificacion !== null && submission.calificacion !== undefined ? (
                   <div className="space-y-1 md:space-y-2">
-                    <div className="text-xl md:text-2xl font-bold text-green-600 bg-green-50 px-2 md:px-3 py-1 md:py-2 rounded-lg w-fit lg:w-auto">
+                    <div className="text-xl md:text-2xl font-bold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 px-2 md:px-3 py-1 md:py-2 rounded-lg w-fit lg:w-auto tabular-nums">
                       {submission.calificacion}/5.0
                     </div>
                     {submission.retroalimentacion && (
-                      <p className="text-xs md:text-sm text-gray-600 max-w-xs bg-gray-50 dark:bg-gray-900 p-2 rounded border border-gray-100 break-words">
+                      <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 max-w-xs bg-gray-50 dark:bg-gray-950 p-2 rounded border border-gray-105 dark:border-white/5 break-words">
                         {submission.retroalimentacion}
                       </p>
                     )}
@@ -161,7 +161,7 @@ export default function SubmissionsList({ submissions, activityId }) {
                         retroalimentacion: submission.retroalimentacion || ""
                       })
                     }}
-                    className="bg-gray-800 hover:bg-gray-700 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg transition-all duration-200 font-medium text-sm md:text-base shadow-sm w-full sm:w-auto lg:w-full text-center"
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 md:px-5 py-1.5 md:py-2.5 rounded-lg transition-all duration-200 font-medium text-sm md:text-base shadow-sm w-full sm:w-auto lg:w-full text-center active:scale-[0.96]"
                   >
                     Calificar
                   </button>
@@ -170,10 +170,10 @@ export default function SubmissionsList({ submissions, activityId }) {
             </div>
 
             {selectedSubmission === submission.id && (
-              <div className="mt-4 md:mt-5 pt-4 md:pt-5 border-t border-gray-200 dark:border-gray-700 space-y-3 md:space-y-4">
+              <div className="mt-4 md:mt-5 pt-4 md:pt-5 border-t border-gray-205 dark:border-gray-800 space-y-3 md:space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1 md:mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 md:mb-2">
                       Nota:
                     </label>
                     <input
@@ -184,20 +184,20 @@ export default function SubmissionsList({ submissions, activityId }) {
                       required
                       value={gradeData.nota}
                       onChange={(e) => setGradeData({...gradeData, nota: e.target.value})}
-                      className="w-full px-3 md:px-4 py-2 md:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 text-sm md:text-base"
+                      className="w-full px-3 md:px-4 py-2 md:py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors duration-200 text-sm md:text-base"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1 md:mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1 md:mb-2">
                     Retroalimentación
                   </label>
                   <textarea
                     value={gradeData.retroalimentacion}
                     onChange={(e) => setGradeData({...gradeData, retroalimentacion: e.target.value})}
                     rows={3}
-                    className="w-full px-3 md:px-4 py-2 md:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 text-sm md:text-base"
+                    className="w-full px-3 md:px-4 py-2 md:py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors duration-200 text-sm md:text-base"
                     placeholder="Comentarios para el estudiante..."
                   />
                 </div>
@@ -205,14 +205,14 @@ export default function SubmissionsList({ submissions, activityId }) {
                 <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
                   <button
                     onClick={() => setSelectedSubmission(null)}
-                    className="px-4 md:px-5 py-2 md:py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 dark:bg-gray-900 transition-colors duration-200 font-medium text-sm md:text-base order-2 sm:order-1"
+                    className="px-4 md:px-5 py-2 md:py-2.5 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 font-medium text-sm md:text-base order-2 sm:order-1 active:scale-[0.96]"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={() => handleGrade(submission.id)}
                     disabled={!gradeData.nota || gradeMutation.isPending}
-                    className="px-4 md:px-5 py-2 md:py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base order-1 sm:order-2"
+                    className="px-4 md:px-5 py-2 md:py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm md:text-base order-1 sm:order-2 active:scale-[0.96]"
                   >
                     {gradeMutation.isPending ? (
                       <>

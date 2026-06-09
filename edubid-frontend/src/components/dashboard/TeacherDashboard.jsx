@@ -50,21 +50,50 @@ export default function TeacherDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
-          { label: "Clases", count: classrooms?.length || 0, icon: AcademicCapIcon, color: "yellow" },
-          { label: "Grupos", count: groups?.length || 0, icon: UserGroupIcon, color: "blue" },
-          { label: "Actividades", count: activities?.length || 0, icon: ClipboardDocumentListIcon, color: "purple" },
-          { label: "Estudiantes", count: totalStudents, icon: UsersIcon, color: "green" },
+          {
+            label: "Clases",
+            count: classrooms?.length || 0,
+            icon: AcademicCapIcon,
+            color: "yellow",
+          },
+          {
+            label: "Grupos",
+            count: groups?.length || 0,
+            icon: UserGroupIcon,
+            color: "blue",
+          },
+          {
+            label: "Actividades",
+            count: activities?.length || 0,
+            icon: ClipboardDocumentListIcon,
+            color: "purple",
+          },
+          {
+            label: "Estudiantes",
+            count: totalStudents,
+            icon: UsersIcon,
+            color: "orange",
+          },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-5 shadow-md dark:shadow-gray-900/50">
+          <div
+            key={stat.label}
+            className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-5 shadow-md dark:shadow-gray-900/50"
+          >
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className={`p-1.5 sm:p-2 bg-${stat.color}-100 dark:bg-${stat.color}-900/30 rounded-lg`}>
-                <stat.icon className={`h-4 w-4 sm:h-5 sm:w-5 text-${stat.color}-600 dark:text-${stat.color}-400`} />
+              <div
+                className={`p-1.5 sm:p-2 bg-${stat.color}-100 dark:bg-${stat.color}-900/30 rounded-lg`}
+              >
+                <stat.icon
+                  className={`h-4 w-4 sm:h-5 sm:w-5 text-${stat.color}-600 dark:text-${stat.color}-400`}
+                />
               </div>
               <div>
                 <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tabular-nums">
                   {stat.count}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400">{stat.label}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  {stat.label}
+                </p>
               </div>
             </div>
           </div>
@@ -74,9 +103,27 @@ export default function TeacherDashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         {[
-          { to: "/classrooms", color: "yellow", title: "Nueva Clase", desc: "Crea una nueva clase", icon: PlusIcon },
-          { to: "/groups", color: "blue", title: "Nuevo Grupo", desc: "Organiza a tus estudiantes", icon: PlusIcon },
-          { to: "/activities", color: "purple", title: "Nueva Actividad", desc: "Asigna tareas y exámenes", icon: PlusIcon },
+          {
+            to: "/classrooms",
+            color: "yellow",
+            title: "Nueva Clase",
+            desc: "Crea una nueva clase",
+            icon: PlusIcon,
+          },
+          {
+            to: "/groups",
+            color: "blue",
+            title: "Nuevo Grupo",
+            desc: "Organiza a tus estudiantes",
+            icon: PlusIcon,
+          },
+          {
+            to: "/activities",
+            color: "purple",
+            title: "Nueva Actividad",
+            desc: "Asigna tareas y exámenes",
+            icon: PlusIcon,
+          },
         ].map((action) => (
           <Link
             key={action.to}
@@ -84,7 +131,9 @@ export default function TeacherDashboard() {
             className="group bg-white dark:bg-gray-900 rounded-xl p-5 sm:p-6 shadow-md dark:shadow-gray-900/50 border-2 border-transparent hover:border-dashed hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 active:scale-[0.96]"
           >
             <div className="flex flex-col items-center text-center space-y-3">
-              <div className={`p-3 bg-${action.color}-600 rounded-xl text-white group-hover:scale-105 transition-transform duration-200`}>
+              <div
+                className={`p-3 bg-${action.color}-600 rounded-xl text-white group-hover:scale-105 transition-transform duration-200`}
+              >
                 <action.icon className="h-6 w-6" />
               </div>
               <div>
@@ -103,15 +152,35 @@ export default function TeacherDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Recent Classes & Activities */}
         {[
-          { title: "Mis Clases", to: "/classrooms", data: classrooms, icon: AcademicCapIcon, color: "yellow", empty: "No tienes clases creadas aún" },
-          { title: "Actividades Recientes", to: "/activities", data: activities, icon: ClipboardDocumentListIcon, color: "purple", empty: "No has creado actividades aún" },
+          {
+            title: "Mis Clases",
+            to: "/classrooms",
+            data: classrooms,
+            icon: AcademicCapIcon,
+            color: "yellow",
+            empty: "No tienes clases creadas aún",
+          },
+          {
+            title: "Actividades Recientes",
+            to: "/activities",
+            data: activities,
+            icon: ClipboardDocumentListIcon,
+            color: "purple",
+            empty: "No has creado actividades aún",
+          },
         ].map((section) => (
-          <div key={section.title} className="bg-white dark:bg-gray-900 rounded-xl p-5 sm:p-6 shadow-md dark:shadow-gray-900/50">
+          <div
+            key={section.title}
+            className="bg-white dark:bg-gray-900 rounded-xl p-5 sm:p-6 shadow-md dark:shadow-gray-900/50"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white text-wrap-balance">
                 {section.title}
               </h2>
-              <Link to={section.to} className={`text-${section.color}-600 hover:text-${section.color}-700 text-sm font-medium flex items-center space-x-1`}>
+              <Link
+                to={section.to}
+                className={`text-${section.color}-600 hover:text-${section.color}-700 text-sm font-medium flex items-center space-x-1`}
+              >
                 <span>Ver todas</span>
                 <ArrowRightIcon className="h-4 w-4" />
               </Link>
@@ -133,7 +202,10 @@ export default function TeacherDashboard() {
                           {item.nombre}
                         </h4>
                         <p className="text-xs text-gray-500 dark:text-gray-400 tabular-nums">
-                          {item.estudiantes_count || item.submissions?.length || 0} items
+                          {item.estudiantes_count ||
+                            item.submissions?.length ||
+                            0}{" "}
+                          items
                         </p>
                       </div>
                     </div>
@@ -146,7 +218,9 @@ export default function TeacherDashboard() {
                 <div className="bg-gray-100 dark:bg-gray-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <section.icon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                 </div>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">{section.empty}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  {section.empty}
+                </p>
               </div>
             )}
           </div>
