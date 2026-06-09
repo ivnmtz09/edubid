@@ -11,233 +11,202 @@ import EditProfileModal from "../../components/profile/EditProfileModal";
 import ChangePasswordModal from "../../components/profile/ChangePasswordModal";
 import DeleteAccountModal from "../../components/profile/DeleteAccountModal";
 
-// Initialize current date on first render (lazy initialization)
-const initializeCurrentDate = () => {
-  const date = new Date();
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-};
-
 export default function ProfilePage() {
   const { user } = useAuthContext();
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const [currentDate, setCurrentDate] = useState(initializeCurrentDate);
 
-  if (!user) return <p>Cargando...</p>;
+  if (!user) return <p className="p-4 text-gray-500 dark:text-gray-400">Cargando...</p>;
 
   const profile = user.profile || {};
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">
-              Bienvenido, {user.first_name}
-            </h1>
-            <p className="text-blue-100 mt-1">{currentDate}</p>
+    <div className="w-full h-full bg-transparent text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      {/* Hero Banner */}
+      <div className="h-48 w-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl relative mb-16">
+        {/* Edit Profile Button */}
+        <button
+          onClick={() => setIsEditingProfile(true)}
+          className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl transition-all backdrop-blur-sm flex items-center gap-2 text-sm font-medium active:scale-[0.96]"
+        >
+          <PencilIcon className="h-4 w-4" />
+          Editar Perfil
+        </button>
+
+        {/* Avatar */}
+        <div className="absolute bottom-0 left-8 translate-y-1/2">
+          <div className="h-24 w-24 rounded-full border-4 border-white dark:border-gray-950 bg-orange-600 flex items-center justify-center text-white font-bold text-3xl shadow-lg">
+            {user.first_name?.[0]}{user.last_name?.[0]}
           </div>
-          <button
-            onClick={() => setIsEditingProfile(true)}
-            className="mt-4 sm:mt-0 bg-white text-blue-600 px-6 py-2.5 rounded-xl hover:bg-blue-50 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-2"
-          >
-            <PencilIcon className="h-5 w-5" />
-            Editar Perfil
-          </button>
         </div>
       </div>
 
-      {/* Profile Card */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-        {/* Profile Header */}
-        <div className="bg-gradient-to-r from-orange-200 to-blue-200 border-b p-6">
-          <div className="flex items-center space-x-4">
-            <div className="bg-gradient-to-br from-orange-500 to-orange-600 w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl">
-              {user.first_name?.[0]}
-              {user.last_name?.[0]}
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                {user.first_name} {user.last_name}
-              </h2>
-              <p className="text-gray-800">{user.email}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Details Grid */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {/* Personal Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                  Información Personal
-                </h3>
-
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      Nombre Completo
-                    </p>
-                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      {user.first_name} {user.last_name}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      Correo Electrónico
-                    </p>
-                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      <p className="text-gray-900">{user.email}</p>
-                      {user.email_verified && (
-                        <span className="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                          ✓ Verificado
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      Teléfono
-                    </p>
-                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      {profile.telefono || "No registrado"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Account Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-                  Información de la cuenta
-                </h3>
-
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      Rol
-                    </p>
-                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200 capitalize">
-                      {user.role}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      Institución
-                    </p>
-                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      {profile.institucion || "No asignada"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">
-                      Idioma
-                    </p>
-                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      Español
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Biography - Full Width */}
-          <div className="mt-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
-              Biografía
+      {/* Profile Info Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Personal Info */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
+              Informacion Personal
             </h3>
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <p className="text-gray-900 leading-relaxed">
-                {profile.bio || "Sin descripción"}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Nombre Completo
+                </p>
+                <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10">
+                  {user.first_name} {user.last_name}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Correo Electronico
+                </p>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10">
+                  <p className="text-gray-900 dark:text-white">{user.email}</p>
+                  {user.email_verified && (
+                    <span className="inline-block mt-1 text-xs bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-300 px-2 py-1 rounded">
+                      Verificado
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Telefono
+                </p>
+                <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10">
+                  {profile.telefono || "No registrado"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Fecha de Ingreso
+                </p>
+                <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10 tabular-nums">
+                  {user.date_joined
+                    ? new Date(user.date_joined).toLocaleDateString("es-ES", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Biography */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
+              Biografia
+            </h3>
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-white/10">
+              <p className="text-gray-900 dark:text-white leading-relaxed">
+                {profile.bio || "Sin descripcion"}
               </p>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Security Section */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <LockClosedIcon className="h-5 w-5 text-blue-600" />
-          Seguridad
-        </h3>
+        {/* Right Column - Account Info */}
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-white/10 pb-2 mb-4">
+              Informacion de la cuenta
+            </h3>
 
-        <div className="space-y-3">
-          {/* Cambiar contraseña */}
-          <button
-            onClick={() => setIsChangingPassword(true)}
-            className="w-full flex items-center justify-between p-4 border-2 border-blue-200 rounded-lg hover:bg-blue-50 transition group"
-          >
-            <div className="flex items-center gap-3">
-              <LockClosedIcon className="h-5 w-5 text-blue-600 group-hover:text-blue-700" />
-              <div className="text-left">
-                <p className="font-medium text-gray-900">Cambiar Contraseña</p>
-                <p className="text-sm text-gray-600">
-                  Actualiza tu contraseña por seguridad
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Rol
+                </p>
+                <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10 capitalize">
+                  {user.role}
                 </p>
               </div>
-            </div>
-            <svg
-              className="w-5 h-5 text-gray-400 group-hover:text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
 
-          {/* Eliminar cuenta */}
-          <button
-            onClick={() => setIsDeletingAccount(true)}
-            className="w-full flex items-center justify-between p-4 border-2 border-red-200 rounded-lg hover:bg-red-50 transition group"
-          >
-            <div className="flex items-center gap-3">
-              <TrashIcon className="h-5 w-5 text-red-600 group-hover:text-red-700" />
-              <div className="text-left">
-                <p className="font-medium text-gray-900">Eliminar Cuenta</p>
-                <p className="text-sm text-gray-600">
-                  Elimina permanentemente tu cuenta y datos
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Institucion
+                </p>
+                <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10">
+                  {profile.institucion || "No asignada"}
                 </p>
               </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                  Idioma
+                </p>
+                <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10">
+                  Espanol
+                </p>
+              </div>
+
+              {user.role === "estudiante" && user.student_id && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    ID Estudiante
+                  </p>
+                  <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10 tabular-nums">
+                    {user.student_id}
+                  </p>
+                </div>
+              )}
             </div>
-            <svg
-              className="w-5 h-5 text-gray-400 group-hover:text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
+          </div>
+
+          {/* Security Section */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <LockClosedIcon className="h-5 w-5 text-orange-500" />
+              Seguridad
+            </h3>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => setIsChangingPassword(true)}
+                className="w-full flex items-center justify-between p-4 border-2 border-orange-200 dark:border-orange-900/20 rounded-xl hover:bg-orange-50 dark:hover:bg-orange-500/5 transition-all group active:scale-[0.96]"
+              >
+                <div className="flex items-center gap-3">
+                  <LockClosedIcon className="h-5 w-5 text-orange-500 group-hover:text-orange-600 flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900 dark:text-white">Cambiar Contrasena</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Actualiza tu contrasena por seguridad
+                    </p>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => setIsDeletingAccount(true)}
+                className="w-full flex items-center justify-between p-4 border-2 border-red-200 dark:border-red-900/20 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/5 transition-all group active:scale-[0.96]"
+              >
+                <div className="flex items-center gap-3">
+                  <TrashIcon className="h-5 w-5 text-red-500 group-hover:text-red-600 flex-shrink-0" />
+                  <div className="text-left">
+                    <p className="font-medium text-gray-900 dark:text-white">Eliminar Cuenta</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Elimina permanentemente tu cuenta y datos
+                    </p>
+                  </div>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

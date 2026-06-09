@@ -20,7 +20,7 @@ export default function EditProfileModal({ user, onClose }) {
     onSuccess: () => {
       toast.success("Perfil actualizado correctamente")
       onClose()
-      window.location.reload() // 🔁 Actualiza el perfil actual
+      window.location.reload()
     },
     onError: (err) => {
       toast.error(err.message || "Error al actualizar perfil")
@@ -39,41 +39,33 @@ export default function EditProfileModal({ user, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Fondo difuminado */}
       <div
         className="fixed inset-0 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
-      {/* Contenedor centrado */}
       <div className="flex min-h-full items-center justify-center p-4">
-        {/* Modal con efecto brillante naranja */}
         <div
-          className="relative bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg shadow-lg border border-orange-400 
-            shadow-[0_0_20px_4px_rgba(255,140,0,0.4)]
-            before:content-[''] before:absolute before:inset-0 before:rounded-xl before:-z-10
-            before:blur-2xl before:bg-gray-800 before:opacity-30"
+          className="relative bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg shadow-lg border border-gray-200 dark:border-white/10"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-white/10">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Editar Perfil
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100 dark:bg-gray-900"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.96]"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
 
-          {/* Form Body */}
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Nombre *
                   </label>
                   <input
@@ -82,13 +74,13 @@ export default function EditProfileModal({ user, onClose }) {
                     value={formData.first_name}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     placeholder="Ej: Juan"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Apellido *
                   </label>
                   <input
@@ -97,67 +89,66 @@ export default function EditProfileModal({ user, onClose }) {
                     value={formData.last_name}
                     onChange={handleChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
-                    placeholder="Ej: Pérez"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                    placeholder="Ej: Perez"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Biografía
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Biografia
                 </label>
                 <textarea
                   name="bio"
                   value={formData.bio}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none transition"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none transition bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Telefono
                   </label>
                   <input
                     type="tel"
                     name="telefono"
                     value={formData.telefono}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     placeholder="3001234567"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Institución
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Institucion
                   </label>
                   <input
                     type="text"
                     name="institucion"
                     value={formData.institucion}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
 
-              {/* Buttons */}
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 dark:bg-gray-900 rounded-lg transition font-medium"
+                  className="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all font-medium active:scale-[0.96]"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={mutation.isPending}
-                  className="px-5 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 active:scale-[0.96]"
                 >
                   {mutation.isPending ? "Guardando..." : "Guardar Cambios"}
                 </button>
@@ -169,4 +160,3 @@ export default function EditProfileModal({ user, onClose }) {
     </div>
   )
 }
-
