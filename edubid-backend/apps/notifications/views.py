@@ -9,17 +9,15 @@ from .serializers import NotificationSerializer, NotificationCreateSerializer
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para gestionar notificaciones.
-    - Los usuarios solo ven sus propias notificaciones.
-    - Los docentes pueden enviar notificaciones a sus estudiantes.
-    """
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        return Notification.objects.filter(usuario=user).select_related('usuario')
+        return Notification.objects.filter(
+            usuario=user,
+            institucion=user.institucion,
+        ).select_related('usuario')
 
     def get_serializer_class(self):
         """

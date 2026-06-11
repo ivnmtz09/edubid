@@ -19,13 +19,13 @@ class Auction(BaseModel):
     
     estado = models.CharField(max_length=10, choices=ESTADOS, default="active")
     fecha_fin = models.DateTimeField()
-    valor_minimo = models.PositiveIntegerField(
+    valor_minimo_educoins = models.PositiveIntegerField(
         default=1,
-        help_text="Valor mínimo para la primera puja en esta subasta"
+        help_text="Valor mínimo en EduCoins para la primera puja en esta subasta"
     )
-    incremento_minimo = models.PositiveIntegerField(
+    incremento_minimo_educoins = models.PositiveIntegerField(
         default=10,
-        help_text="Incremento mínimo requerido entre pujas consecutivas"
+        help_text="Incremento mínimo en EduCoins requerido entre pujas consecutivas"
     )
 
     class Meta:
@@ -38,7 +38,7 @@ class Auction(BaseModel):
 class Bid(BaseModel):
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="bids")
     estudiante = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
-    cantidad = models.PositiveIntegerField()
+    cantidad_educoins = models.PositiveIntegerField()
     
     # Campo para saber quién registró la puja
     registrado_por = models.ForeignKey(
@@ -53,7 +53,7 @@ class Bid(BaseModel):
     class Meta:
         # REMOVER unique_together para permitir aumentar pujas
         # unique_together = ('auction', 'estudiante')
-        ordering = ['-cantidad']
+        ordering = ['-cantidad_educoins']
 
     def __str__(self):
-        return f"{self.estudiante.email} -> {self.cantidad} en {self.auction.titulo}"
+        return f"{self.estudiante.email} -> {self.cantidad_educoins} en {self.auction.titulo}"

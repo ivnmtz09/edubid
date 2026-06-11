@@ -107,7 +107,7 @@ class GradeViewSet(viewsets.ModelViewSet):
                 periodo__activo=True
             ).first()
             
-            saldo = wallet.saldo if wallet else 0
+            saldo = wallet.saldo_educoins if wallet else 0
 
             detalles = [
                 {

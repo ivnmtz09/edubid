@@ -18,7 +18,7 @@ class CoinTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CoinTransaction
         fields = [
-            "id", "wallet", "tipo", "cantidad", "descripcion", "creado"
+            "id", "wallet", "tipo", "cantidad_educoins", "descripcion", "creado"
         ]
         read_only_fields = ["wallet", "tipo", "creado"]
 
@@ -34,10 +34,10 @@ class WalletSerializer(serializers.ModelSerializer):
         model = Wallet
         fields = [
             "id", "usuario", "usuario_email", "grupo", "grupo_nombre",
-            "periodo", "periodo_nombre", "saldo", "bloqueado", 
+            "periodo", "periodo_nombre", "saldo_educoins", "bloqueado_educoins", 
             "saldo_disponible", "transacciones"
         ]
         read_only_fields = ["usuario"]
 
     def get_saldo_disponible(self, obj):
-        return obj.saldo - obj.bloqueado
+        return obj.saldo_educoins - obj.bloqueado_educoins

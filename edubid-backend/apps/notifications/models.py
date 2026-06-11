@@ -19,6 +19,10 @@ class Notification(BaseModel):
         ('password_reset', 'Contraseña Restablecida'),
         ('login_failed', 'Intento de Login Fallido'),
         ('account_security', 'Alerta de Seguridad'),
+        ('alerta_rector', 'Alerta para Rector'),
+        ('novedad_academica', 'Novedad Académica'),
+        ('finanzas_educoins', 'Finanzas de EduCoins'),
+        ('subasta_abierta', 'Subasta Abierta'),
     ]
 
     usuario = models.ForeignKey(
@@ -26,7 +30,15 @@ class Notification(BaseModel):
         on_delete=models.CASCADE,
         related_name='notificaciones'
     )
-    tipo = models.CharField(max_length=20, choices=TIPO_CHOICES)
+    institucion = models.ForeignKey(
+        'institutions.Institution',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='notificaciones',
+        verbose_name='Institución'
+    )
+    tipo = models.CharField(max_length=30, choices=TIPO_CHOICES)
     titulo = models.CharField(max_length=255)
     mensaje = models.TextField()
     leida = models.BooleanField(default=False)

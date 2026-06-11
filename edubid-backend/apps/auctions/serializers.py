@@ -19,7 +19,7 @@ class BidSerializer(serializers.ModelSerializer):
             "estudiante",
             "estudiante_email",
             "estudiante_nombre",
-            "cantidad",
+            "cantidad_educoins",
             "registrado_por",
             "registrado_por_email",
             "creado",
@@ -34,7 +34,7 @@ class BidCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Bid
-        fields = ["auction", "estudiante", "cantidad"]
+        fields = ["auction", "estudiante", "cantidad_educoins"]
         extra_kwargs = {
             'estudiante': {'required': False}
         }
@@ -82,19 +82,19 @@ class BidCreateSerializer(serializers.ModelSerializer):
         existing_bid = Bid.objects.filter(auction=auction, estudiante=estudiante).first()
         
         if existing_bid:
-            if cantidad <= existing_bid.cantidad:
+            if cantidad <= existing_bid.cantidad_educoins:
                 raise serializers.ValidationError(
-                    f"La nueva puja debe ser mayor que tu puja actual de {existing_bid.cantidad} EC."
+                    f"La nueva puja debe ser mayor que tu puja actual de {existing_bid.cantidad_educoins} EC."
                 )
             
-            highest_bid = auction.bids.order_by("-cantidad").first()
-            if highest_bid and cantidad <= highest_bid.cantidad:
+            highest_bid = auction.bids.order_by("-cantidad_educoins").first()
+            if highest_bid and cantidad <= highest_bid.cantidad_educoins:
                 raise serializers.ValidationError(
-                    f"La nueva puja debe ser mayor que la puja actual más alta de {highest_bid.cantidad} EC."
+                    f"La nueva puja debe ser mayor que la puja actual más alta de {highest_bid.cantidad_educoins} EC."
                 )
             
-            diferencia = cantidad - existing_bid.cantidad
-            saldo_disponible = wallet.saldo - wallet.bloqueado
+            diferencia = cantidad - existing_bid.cantidad_educoins
+            saldo_disponible = wallet.saldo_educoins - wallet.bloqueado_educoins
             
             if diferencia > saldo_disponible:
                 raise serializers.ValidationError(
@@ -102,15 +102,15 @@ class BidCreateSerializer(serializers.ModelSerializer):
                     f"Disponible: {saldo_disponible} EC, Necesario: {diferencia} EC"
                 )
         else:
-            highest_bid = auction.bids.order_by("-cantidad").first()
-            monto_minimo = (highest_bid.cantidad + auction.incremento_minimo) if highest_bid else auction.valor_minimo
+            highest_bid = auction.bids.order_by("-cantidad_educoins").first()
+            monto_minimo = (highest_bid.cantidad_educoins + auction.incremento_minimo_educoins) if highest_bid else auction.valor_minimo_educoins
             
             if cantidad < monto_minimo:
                 raise serializers.ValidationError(
                     f"La puja debe ser mayor o igual a {monto_minimo} EC."
                 )
             
-            saldo_disponible = wallet.saldo - wallet.bloqueado
+            saldo_disponible = wallet.saldo_educoins - wallet.bloqueado_educoins
             if saldo_disponible < cantidad:
                 raise serializers.ValidationError(
                     f"Saldo insuficiente. Disponible: {saldo_disponible} EC, Solicitado: {cantidad} EC"
@@ -137,8 +137,8 @@ class AuctionSerializer(serializers.ModelSerializer):
             "creador_nombre",
             "grupo",
             "grupo_nombre",
-            "valor_minimo",
-            "incremento_minimo",
+            "valor_minimo_educoins",
+            "incremento_minimo_educoins",
             "fecha_fin",
             "estado",
             "total_pujas",
@@ -157,10 +157,10 @@ class AuctionSerializer(serializers.ModelSerializer):
 
     def get_puja_mas_alta(self, obj):
         """Retorna la puja más alta actual"""
-        highest_bid = obj.bids.order_by("-cantidad").first()
+        highest_bid = obj.bids.order_by("-cantidad_educoins").first()
         if highest_bid:
             return {
-                "cantidad": highest_bid.cantidad,
+                "cantidad_educoins": highest_bid.cantidad_educoins,
                 "estudiante_nombre": f"{highest_bid.estudiante.first_name} {highest_bid.estudiante.last_name}".strip()
             }
         return None
@@ -168,12 +168,12 @@ class AuctionSerializer(serializers.ModelSerializer):
     def get_puja_ganadora(self, obj):
         """Retorna la puja más alta si la subasta está cerrada"""
         if obj.estado == "closed":
-            highest_bid = obj.bids.order_by("-cantidad").first()
+            highest_bid = obj.bids.order_by("-cantidad_educoins").first()
             if highest_bid:
                 return {
                     "estudiante_id": highest_bid.estudiante.id,
                     "estudiante_nombre": f"{highest_bid.estudiante.first_name} {highest_bid.estudiante.last_name}".strip(),
-                    "cantidad": highest_bid.cantidad
+                    "cantidad_educoins": highest_bid.cantidad_educoins
                 }
         return None
 
@@ -193,7 +193,7 @@ class AuctionUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Auction
-        fields = ["titulo", "descripcion", "grupo", "fecha_fin", "valor_minimo", "incremento_minimo"]
+        fields = ["titulo", "descripcion", "grupo", "fecha_fin", "valor_minimo_educoins", "incremento_minimo_educoins"]
 
     def validate_grupo(self, value):
         """Validar que el docente solo pueda asignar a sus grupos"""

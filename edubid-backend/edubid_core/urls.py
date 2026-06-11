@@ -14,6 +14,7 @@ urlpatterns = [
     path('api/tokens/', include('apps.tokens.urls')), 
     path('api/auctions/', include('apps.auctions.urls')), 
     path('api/notifications/', include('apps.notifications.urls')),
+    path('api/', include('apps.institutions.urls')),
 ]
 
 if settings.DEBUG:

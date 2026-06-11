@@ -98,7 +98,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
                         grupo=instance.grupo, 
                         periodo=periodo_activo
                     )
-                    wallet.bloqueado -= bid.cantidad
+                    wallet.bloqueado_educoins -= bid.cantidad_educoins
                     wallet.save()
             except Wallet.DoesNotExist:
                 pass
@@ -130,7 +130,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
         auction.save()
 
         # Obtener la puja más alta
-        highest_bid = auction.bids.order_by("-cantidad").first()
+        highest_bid = auction.bids.order_by("-cantidad_educoins").first()
 
         if not highest_bid:
             return Response({
@@ -138,7 +138,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_200_OK)
 
         ganador = highest_bid.estudiante
-        monto = highest_bid.cantidad
+        monto = highest_bid.cantidad_educoins
 
         # Obtener periodo activo
         periodo_activo = Period.objects.filter(grupo=auction.grupo, activo=True).first()
@@ -155,8 +155,8 @@ class AuctionViewSet(viewsets.ModelViewSet):
                 grupo=auction.grupo, 
                 periodo=periodo_activo
             )
-            wallet_ganador.bloqueado -= monto
-            wallet_ganador.saldo -= monto
+            wallet_ganador.bloqueado_educoins -= monto
+            wallet_ganador.saldo_educoins -= monto
             wallet_ganador.save()
 
             # Registrar transacción
@@ -164,7 +164,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
             CoinTransaction.objects.create(
                 wallet=wallet_ganador,
                 tipo="spend",
-                cantidad=monto,
+                cantidad_educoins=monto,
                 descripcion=f"Pago por ganar subasta: {auction.titulo}"
             )
         except Wallet.DoesNotExist:
@@ -181,7 +181,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
                     grupo=auction.grupo, 
                     periodo=periodo_activo
                 )
-                wallet.bloqueado -= bid.cantidad
+                wallet.bloqueado_educoins -= bid.cantidad_educoins
                 wallet.save()
             except Wallet.DoesNotExist:
                 pass
@@ -290,7 +290,7 @@ class BidViewSet(viewsets.ModelViewSet):
                 grupo=auction.grupo, 
                 periodo=periodo_activo
             )
-            logger.info(f"Wallet encontrada: saldo={wallet.saldo}, bloqueado={wallet.bloqueado}")
+            logger.info(f"Wallet encontrada: saldo={wallet.saldo_educoins}, bloqueado={wallet.bloqueado_educoins}")
         except Wallet.DoesNotExist:
             logger.error(f"No se encontró wallet para estudiante {estudiante.id} en grupo {auction.grupo.id}")
             raise ValidationError("El estudiante no tiene una billetera activa en este grupo.")
@@ -300,22 +300,22 @@ class BidViewSet(viewsets.ModelViewSet):
         
         if existing_bid:
             # AUMENTAR PUJA EXISTENTE
-            logger.info(f"Puja existente encontrada: {existing_bid.cantidad}")
+            logger.info(f"Puja existente encontrada: {existing_bid.cantidad_educoins}")
             
             # Obtener la puja más alta actual (puede ser de otro estudiante)
-            highest_bid = auction.bids.order_by("-cantidad").first()
+            highest_bid = auction.bids.order_by("-cantidad_educoins").first()
             
             # Validar que la nueva cantidad sea mayor que la puja más alta actual
-            if cantidad <= highest_bid.cantidad:
-                error_msg = f"La nueva puja ({cantidad}) debe ser mayor que la puja actual más alta ({highest_bid.cantidad})."
+            if cantidad <= highest_bid.cantidad_educoins:
+                error_msg = f"La nueva puja ({cantidad}) debe ser mayor que la puja actual más alta ({highest_bid.cantidad_educoins})."
                 logger.warning(error_msg)
                 raise ValidationError(error_msg)
             
             # Calcular la diferencia a bloquear (respecto a la puja anterior del mismo estudiante)
-            diferencia = cantidad - existing_bid.cantidad
+            diferencia = cantidad - existing_bid.cantidad_educoins
             
             # Validar saldo disponible para el aumento
-            saldo_disponible = wallet.saldo - wallet.bloqueado
+            saldo_disponible = wallet.saldo_educoins - wallet.bloqueado_educoins
             logger.info(f"Saldo disponible para aumento: {saldo_disponible}, diferencia necesaria: {diferencia}")
             
             if diferencia > saldo_disponible:
@@ -324,15 +324,15 @@ class BidViewSet(viewsets.ModelViewSet):
                 raise ValidationError(error_msg)
             
             # Actualizar la puja existente
-            existing_bid.cantidad = cantidad
+            existing_bid.cantidad_educoins = cantidad
             existing_bid.registrado_por = user
             existing_bid.save()
             
             # Bloquear monedas adicionales
-            wallet.bloqueado += diferencia
+            wallet.bloqueado_educoins += diferencia
             wallet.save()
             
-            logger.info(f"Puja aumentada exitosamente: {existing_bid.cantidad}, bloqueado adicional: {diferencia}")
+            logger.info(f"Puja aumentada exitosamente: {existing_bid.cantidad_educoins}, bloqueado adicional: {diferencia}")
             
             # IMPORTANTE: Asignar la instancia existente al serializer
             serializer.instance = existing_bid
@@ -342,8 +342,8 @@ class BidViewSet(viewsets.ModelViewSet):
             logger.info("Creando nueva puja")
             
             # Obtener la puja más alta actual para validar el monto mínimo
-            highest_bid = auction.bids.order_by("-cantidad").first()
-            monto_minimo = (highest_bid.cantidad + auction.incremento_minimo) if highest_bid else auction.valor_minimo
+            highest_bid = auction.bids.order_by("-cantidad_educoins").first()
+            monto_minimo = (highest_bid.cantidad_educoins + auction.incremento_minimo_educoins) if highest_bid else auction.valor_minimo_educoins
             
             # Validar que la puja sea mayor o igual al monto mínimo requerido
             if cantidad < monto_minimo:
@@ -352,7 +352,7 @@ class BidViewSet(viewsets.ModelViewSet):
                 raise ValidationError(error_msg)
             
             # Validar saldo suficiente (saldo libre)
-            saldo_disponible = wallet.saldo - wallet.bloqueado
+            saldo_disponible = wallet.saldo_educoins - wallet.bloqueado_educoins
             logger.info(f"Saldo disponible para nueva puja: {saldo_disponible}, cantidad solicitada: {cantidad}")
             
             if saldo_disponible < cantidad:
@@ -364,10 +364,10 @@ class BidViewSet(viewsets.ModelViewSet):
             bid = serializer.save(registrado_por=user)
 
             # Bloquear monedas en la wallet
-            wallet.bloqueado += cantidad
+            wallet.bloqueado_educoins += cantidad
             wallet.save()
             
-            logger.info(f"Nueva puja creada exitosamente: {bid.cantidad}, total bloqueado: {wallet.bloqueado}")
+            logger.info(f"Nueva puja creada exitosamente: {bid.cantidad_educoins}, total bloqueado: {wallet.bloqueado_educoins}")
 
     # ... (el resto de los métodos permanecen igual)
     def perform_update(self, serializer):
@@ -390,7 +390,7 @@ class BidViewSet(viewsets.ModelViewSet):
             raise ValidationError("No se pueden modificar pujas de subastas cerradas.")
         
         # Ajustar saldo bloqueado si cambia la cantidad
-        old_cantidad = bid.cantidad
+        old_cantidad = bid.cantidad_educoins
         new_cantidad = serializer.validated_data.get('cantidad', old_cantidad)
         
         if old_cantidad != new_cantidad:
@@ -403,16 +403,16 @@ class BidViewSet(viewsets.ModelViewSet):
             )
             
             diferencia = new_cantidad - old_cantidad
-            saldo_disponible = wallet.saldo - wallet.bloqueado
+            saldo_disponible = wallet.saldo_educoins - wallet.bloqueado_educoins
             
             if diferencia > saldo_disponible:
                 error_msg = f"Saldo insuficiente para aumentar la puja. Disponible: {saldo_disponible}"
                 logger.warning(error_msg)
                 raise ValidationError(error_msg)
             
-            wallet.bloqueado += diferencia
+            wallet.bloqueado_educoins += diferencia
             wallet.save()
-            logger.info(f"Puja actualizada: diferencia bloqueada={diferencia}, nuevo bloqueado={wallet.bloqueado}")
+            logger.info(f"Puja actualizada: diferencia bloqueada={diferencia}, nuevo bloqueado={wallet.bloqueado_educoins}")
         
         serializer.save()
         logger.info(f"Puja {bid.id} actualizada exitosamente")
@@ -446,9 +446,9 @@ class BidViewSet(viewsets.ModelViewSet):
                     grupo=instance.auction.grupo,
                     periodo=periodo_activo
                 )
-                wallet.bloqueado -= instance.cantidad
+                wallet.bloqueado_educoins -= instance.cantidad_educoins
                 wallet.save()
-                logger.info(f"Monedas desbloqueadas: {instance.cantidad}, nuevo bloqueado={wallet.bloqueado}")
+                logger.info(f"Monedas desbloqueadas: {instance.cantidad_educoins}, nuevo bloqueado={wallet.bloqueado_educoins}")
         except Wallet.DoesNotExist:
             logger.error(f"No se encontró wallet al eliminar puja {instance.id}")
             pass
@@ -479,7 +479,7 @@ class BidViewSet(viewsets.ModelViewSet):
             if auction.grupo.classroom.docente != user:
                 logger.warning(f"Docente {user.id} intentó acceder a subasta de otro grupo")
                 raise PermissionDenied("No tienes acceso a esta subasta.")
-            bids = auction.bids.all().order_by('-cantidad')
+            bids = auction.bids.all().order_by('-cantidad_educoins')
             logger.info(f"Docente {user.id} viendo {bids.count()} pujas de subasta {auction_id}")
         
         elif user.role == 'estudiante':

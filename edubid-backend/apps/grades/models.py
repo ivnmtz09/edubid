@@ -33,7 +33,7 @@ class Grade(BaseModel):
     def calcular_coins_ganados(self):
         """Calcular coins basado en la nota y valor_educoins de la actividad"""
         # Obtener el valor máximo de notas de la actividad
-        valor_maximo_notas = Decimal(self.activity.valor_notas)
+        valor_maximo_notas = Decimal(self.activity.puntos_experiencia)
         valor_educoins = Decimal(self.activity.valor_educoins)
         
         # Calcular porcentaje basado en la nota obtenida vs valor máximo
@@ -71,9 +71,9 @@ class Grade(BaseModel):
             
             coins = self.calcular_coins_ganados()
             if coins > 0:
-                wallet.depositar(coins, f"Recompensa por '{self.activity.nombre}' (nota {self.nota}/{self.activity.valor_notas})")
+                wallet.depositar(coins, f"Recompensa por '{self.activity.nombre}' (nota {self.nota}/{self.activity.puntos_experiencia})")
                 print(f"{coins} Educoins asignados a {self.student.email} en wallet existente")
-                print(f"Detalle: Nota {self.nota}/{self.activity.valor_notas} = {coins}/{self.activity.valor_educoins} Educoins")
+                print(f"Detalle: Nota {self.nota}/{self.activity.puntos_experiencia} = {coins}/{self.activity.valor_educoins} Educoins")
                 return coins
             else:
                 print(f"Nota {self.nota} no genera Educoins para {self.student.email}")

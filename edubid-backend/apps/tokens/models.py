@@ -56,8 +56,8 @@ class Wallet(BaseModel):
     grupo = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name="wallets")
     periodo = models.ForeignKey(Period, on_delete=models.CASCADE, related_name="wallets")
 
-    saldo = models.PositiveIntegerField(default=0)
-    bloqueado = models.PositiveIntegerField(default=0)
+    saldo_educoins = models.PositiveIntegerField(default=0)
+    bloqueado_educoins = models.PositiveIntegerField(default=0)
 
     class Meta:
         unique_together = ('usuario', 'grupo', 'periodo')
@@ -66,23 +66,23 @@ class Wallet(BaseModel):
         return f"{self.usuario.email} ({self.grupo.nombre} - {self.periodo.nombre})"
 
     def depositar(self, cantidad, descripcion=""):
-        self.saldo += cantidad
+        self.saldo_educoins += cantidad
         self.save()
-        CoinTransaction.objects.create(wallet=self, tipo="earn", cantidad=cantidad, descripcion=descripcion)
+        CoinTransaction.objects.create(wallet=self, tipo="earn", cantidad_educoins=cantidad, descripcion=descripcion)
 
     def gastar(self, cantidad, descripcion=""):
-        if cantidad > self.saldo:
+        if cantidad > self.saldo_educoins:
             raise ValueError("Fondos insuficientes.")
-        self.saldo -= cantidad
+        self.saldo_educoins -= cantidad
         self.save()
-        CoinTransaction.objects.create(wallet=self, tipo="spend", cantidad=cantidad, descripcion=descripcion)
+        CoinTransaction.objects.create(wallet=self, tipo="spend", cantidad_educoins=cantidad, descripcion=descripcion)
 
     def resetear(self, descripcion="Reinicio de periodo"):
-        total = self.saldo
-        self.saldo = 0
-        self.bloqueado = 0
+        total = self.saldo_educoins
+        self.saldo_educoins = 0
+        self.bloqueado_educoins = 0
         self.save()
-        CoinTransaction.objects.create(wallet=self, tipo="reset", cantidad=total, descripcion=descripcion)
+        CoinTransaction.objects.create(wallet=self, tipo="reset", cantidad_educoins=total, descripcion=descripcion)
 
 
 class CoinTransaction(BaseModel):
@@ -94,8 +94,8 @@ class CoinTransaction(BaseModel):
 
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="transacciones")
     tipo = models.CharField(max_length=10, choices=TIPOS)
-    cantidad = models.PositiveIntegerField()
+    cantidad_educoins = models.PositiveIntegerField()
     descripcion = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.tipo} {self.cantidad} -> {self.wallet.usuario.email}"
+        return f"{self.tipo} {self.cantidad_educoins} -> {self.wallet.usuario.email}"

@@ -157,7 +157,7 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                     grupo=submission.activity.group,
                     periodo=periodo_activo
                 )
-                wallet_saldo = wallet.saldo
+                wallet_saldo = wallet.saldo_educoins
             except Wallet.DoesNotExist:
                 print(f"ERROR: No se encontro wallet para {submission.estudiante.email}")
 

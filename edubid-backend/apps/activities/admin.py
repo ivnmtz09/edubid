@@ -3,7 +3,7 @@ from .models import Activity, Submission
 
 @admin.register(Activity)
 class ActivityAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'tipo', 'valor_educoins', 'valor_notas', 'fecha_entrega', 'habilitada', 'creado')
+    list_display = ('id', 'nombre', 'tipo', 'valor_educoins', 'puntos_experiencia', 'fecha_entrega', 'habilitada', 'creado')
     search_fields = ('nombre', 'descripcion')
     list_filter = ('tipo', 'habilitada', 'creado')
 

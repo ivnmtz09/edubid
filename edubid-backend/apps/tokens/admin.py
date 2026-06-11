@@ -8,10 +8,10 @@ class PeriodAdmin(admin.ModelAdmin):
 
 @admin.register(Wallet)
 class WalletAdmin(admin.ModelAdmin):
-    list_display = ("usuario", "grupo", "periodo", "saldo", "bloqueado")
+    list_display = ("usuario", "grupo", "periodo", "saldo_educoins", "bloqueado_educoins")
 
 
 @admin.register(CoinTransaction)
 class CoinTransactionAdmin(admin.ModelAdmin):
-    list_display = ("wallet", "tipo", "cantidad", "descripcion", "creado")
+    list_display = ("wallet", "tipo", "cantidad_educoins", "descripcion", "creado")
     list_filter = ("tipo",)

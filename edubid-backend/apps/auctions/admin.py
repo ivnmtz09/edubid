@@ -13,5 +13,5 @@ class AuctionAdmin(admin.ModelAdmin):
 
 @admin.register(Bid)
 class BidAdmin(admin.ModelAdmin):
-    list_display = ('id', 'auction', 'estudiante', 'cantidad', 'creado')
+    list_display = ('id', 'auction', 'estudiante', 'cantidad_educoins', 'creado')
     list_filter = (('creado', DateFieldListFilter),)

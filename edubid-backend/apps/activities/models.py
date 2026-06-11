@@ -4,11 +4,10 @@ from apps.common.models import BaseModel
 
 class Activity(BaseModel):
     TIPOS = [
-        ('tarea', 'Tarea'),
-        ('examen', 'Examen'),
+        ('reto', 'Reto'),
+        ('mision', 'Misión'),
         ('proyecto', 'Proyecto'),
-        ('quiz', 'Quiz'),
-        ('exposicion', 'Exposición'),
+        ('evaluacion', 'Evaluación'),
     ]
 
     group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name='activities')
@@ -16,7 +15,7 @@ class Activity(BaseModel):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True)
     valor_educoins = models.PositiveIntegerField(default=100)
-    valor_notas = models.PositiveIntegerField(default=10)  # Cambiado a 10 por defecto
+    puntos_experiencia = models.PositiveIntegerField(default=10)
     fecha_entrega = models.DateTimeField()
     habilitada = models.BooleanField(default=True)
     
