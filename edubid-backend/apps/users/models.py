@@ -1,11 +1,15 @@
 from django.db import models
+from django.db.models import Q, UniqueConstraint
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from apps.common.models import BaseModel
 
+
 class User(AbstractUser, BaseModel):
     ROLE_CHOICES = [
-        ('admin', 'Administrador'),
+        ('admin', 'Administrador Global'),
+        ('rector', 'Rector'),
+        ('coordinador', 'Coordinador'),
         ('docente', 'Docente'),
         ('estudiante', 'Estudiante'),
     ]
@@ -14,9 +18,27 @@ class User(AbstractUser, BaseModel):
     role = models.CharField(max_length=12, choices=ROLE_CHOICES, default='estudiante')
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     email_verified = models.BooleanField(default=False)
+    institucion = models.ForeignKey(
+        'institutions.Institution',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='usuarios',
+        verbose_name='Institución educativa'
+    )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']  
+    REQUIRED_FIELDS = ['username']
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['institucion'],
+                condition=Q(role='rector'),
+                name='unique_rector_per_institution',
+                violation_error_message='Esta institución ya tiene un rector asignado.'
+            ),
+        ]
 
     def __str__(self):
         return f'{self.email} ({self.get_role_display()})'

@@ -45,6 +45,43 @@ class AdminOrReadOnly(BasePermission):
             return True
         return request.user.is_authenticated and request.user.role == 'admin'
 
-class IsAdmin(BasePermission):
+
+class IsRector(BasePermission):
+    """Permite acceso solo a usuarios con rol 'rector' de una institución activa."""
+
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'admin'
+        return (
+            request.user.is_authenticated
+            and request.user.role == 'rector'
+            and request.user.institucion is not None
+            and request.user.institucion.activo
+        )
+
+
+class IsCoordinador(BasePermission):
+    """Permite acceso solo a usuarios con rol 'coordinador' de una institución activa."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role == 'coordinador'
+            and request.user.institucion is not None
+            and request.user.institucion.activo
+        )
+
+
+class IsInstitutionStaff(BasePermission):
+    """Permite acceso a admin global, rector o coordinador de una institución activa."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role in ('admin', 'rector', 'coordinador')
+            and (
+                request.user.role == 'admin'
+                or (
+                    request.user.institucion is not None
+                    and request.user.institucion.activo
+                )
+            )
+        )

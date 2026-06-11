@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'apps.grades',
     'apps.tokens',
     'apps.auctions',
+    'apps.institutions',
     'apps.common',
     'apps.notifications',
 ]
