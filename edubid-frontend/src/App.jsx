@@ -13,6 +13,7 @@ import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import EmailSentPage from "./pages/auth/EmailSentPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import CompleteProfilePage from "./pages/auth/CompleteProfilePage";
 
 // Pantallas principales
 import DashboardPage from "./pages/dashboard/DashboardPage";
@@ -100,6 +101,8 @@ function App() {
           RUTAS PRIVADAS (requieren autenticación)
       ======================================== */}
       {isAuthenticated && (
+        <>
+        <Route path="/completar-perfil" element={<CompleteProfilePage />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
 
@@ -127,6 +130,7 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="wallet" element={<WalletPage />} />
         </Route>
+        </>
       )}
 
       {/* ========================================

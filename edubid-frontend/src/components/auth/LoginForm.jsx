@@ -11,6 +11,7 @@ import {
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useAuthContext } from "../../context/AuthContext";
+import { injectBrandColors } from "../../context/ThemeContext";
 import { authService } from "../../services/auth";
 import { toast } from "react-hot-toast";
 import LoadingSpinner from "../common/LoadingSpinner";
@@ -77,6 +78,16 @@ export default function LoginForm({
       localStorage.setItem("access_token", tokens.access);
       localStorage.setItem("refresh_token", tokens.refresh);
       localStorage.setItem("user", JSON.stringify(user));
+
+      const institution = user.institution || user.profile?.institucion || null;
+      injectBrandColors(institution);
+
+      if (!institution) {
+        toast.success("!Bienvenido! Completa tu perfil");
+        window.location.href = "/completar-perfil";
+        return;
+      }
+
       toast.success("!Bienvenido con Google!");
       window.location.href = "/dashboard";
     } catch (error) {

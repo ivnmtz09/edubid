@@ -400,15 +400,35 @@ def api_profile(request):
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])
 def api_update_profile(request):
+    from apps.institutions.models import Institution
+
     user = request.user
     logger.info(f"✏️ Actualizando perfil para: {user.email}")
 
-    # actualizar nombre, apellido, etc.
     user.first_name = request.data.get("first_name", user.first_name)
     user.last_name = request.data.get("last_name", user.last_name)
+
+    # ── Institución (solo escritura única) ──
+    institucion_id = request.data.get('institucion_id') or request.data.get('institucion')
+    if institucion_id is not None:
+        if user.institucion_id is not None:
+            return Response({
+                "detail": "Ya tienes una institución asignada. No puedes cambiarla.",
+                "errors": {"institucion_id": ["Escritura única: la institución ya fue asignada."]}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            institucion_id = int(institucion_id)
+            if not Institution.objects.filter(id=institucion_id, activo=True).exists():
+                raise Institution.DoesNotExist
+            user.institucion_id = institucion_id
+        except (ValueError, TypeError, Institution.DoesNotExist):
+            return Response({
+                "detail": "La institución seleccionada no existe o no está activa.",
+                "errors": {"institucion_id": ["Institución inválida o inactiva."]}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
     user.save()
 
-    # actualizar perfil
     profile_serializer = ProfileSerializer(user.profile, data=request.data, partial=True)
     if profile_serializer.is_valid():
         profile_serializer.save()
@@ -417,9 +437,9 @@ def api_update_profile(request):
             "message": "Perfil actualizado exitosamente",
             "user": UserProfileSerializer(user).data
         })
-    
+
     logger.warning(f"❌ Error actualizando perfil para: {user.email}")
-    return Response(profile_serializer.errors, status=400)
+    return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # --------------------------

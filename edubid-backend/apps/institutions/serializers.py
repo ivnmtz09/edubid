@@ -19,3 +19,10 @@ class RectorInstitutionSerializer(serializers.ModelSerializer):
             'creado', 'actualizado',
         ]
         read_only_fields = ['id', 'creado', 'actualizado']
+
+
+class PublicInstitutionSerializer(serializers.ModelSerializer):
+    """Serializer público — solo id y nombre de instituciones activas."""
+    class Meta:
+        model = Institution
+        fields = ['id', 'nombre']

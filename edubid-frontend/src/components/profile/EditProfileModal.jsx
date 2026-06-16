@@ -1,18 +1,22 @@
 "use client"
 
 import { useState } from "react"
-import { XMarkIcon } from "@heroicons/react/24/outline"
+import { XMarkIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline"
 import { useMutation } from "@tanstack/react-query"
 import toast from "react-hot-toast"
 import { authService } from "../../services/auth"
 
 export default function EditProfileModal({ user, onClose }) {
+  const institutionName =
+    user.profile?.institucion?.nombre ??
+    user.institution?.nombre ??
+    "Sin institución asignada"
+
   const [formData, setFormData] = useState({
     first_name: user.first_name || "",
     last_name: user.last_name || "",
     bio: user.profile?.bio || "",
     telefono: user.profile?.telefono || "",
-    institucion: user.profile?.institucion || "",
   })
 
   const mutation = useMutation({
@@ -127,13 +131,18 @@ export default function EditProfileModal({ user, onClose }) {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Institucion
                   </label>
-                  <input
-                    type="text"
-                    name="institucion"
-                    value={formData.institucion}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={institutionName}
+                      disabled
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                    />
+                    <BuildingOfficeIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-400">
+                    La institucion no puede cambiarse. Contacta al administrador.
+                  </p>
                 </div>
               </div>
 

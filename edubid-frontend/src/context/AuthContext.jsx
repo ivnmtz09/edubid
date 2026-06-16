@@ -4,6 +4,7 @@ import { createContext, useContext, useReducer, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import api from "../services/api"
 import { API_ENDPOINTS, USER_ROLES } from "../utils/constants"
+import { injectBrandColors } from "./ThemeContext"
 
 const AuthContext = createContext()
 
@@ -99,6 +100,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("refresh_token", tokens.refresh)
       localStorage.setItem("user", JSON.stringify(user))
       dispatch({ type: "SET_USER", payload: user })
+
+      const institution = user.institution || user.profile?.institucion || null
+      injectBrandColors(institution)
 
       const normalizedRole = normalizeRole(user.role)
       if (normalizedRole === USER_ROLES.ADMIN) navigate("/dashboard/admin")

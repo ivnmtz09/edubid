@@ -19,7 +19,7 @@ function hexToRgb(hex) {
     : null
 }
 
-function darkenHex(hex, amount = 0.15) {
+export function darkenHex(hex, amount = 0.15) {
   const rgb = hexToRgb(hex)
   if (!rgb) return hex
   const r = Math.max(0, Math.round(rgb.r * (1 - amount)))
@@ -37,7 +37,7 @@ function lightenHex(hex, amount = 0.15) {
   return `#${[r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")}`
 }
 
-function injectBrandColors(institution) {
+export function injectBrandColors(institution) {
   const root = document.documentElement
   if (!institution?.color_primario && !institution?.color_secundario) {
     root.style.removeProperty("--brand-primary")

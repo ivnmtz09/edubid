@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { useAuthContext } from "../../context/AuthContext";
+import { injectBrandColors } from "../../context/ThemeContext";
 import { authService } from "../../services/auth";
+import { getPublicInstitutions } from "../../services/institutions";
 import { toast } from "react-hot-toast";
 import LoadingSpinner from "../common/LoadingSpinner";
+import InstitutionSelect from "../common/InstitutionSelect";
 import Modal from "../common/Modal";
 
 const TERMS_CONTENT = `
@@ -70,13 +73,31 @@ export default function RegisterForm({
   const [isLoading, setIsLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const [institutions, setInstitutions] = useState([]);
+  const [loadingInstitutions, setLoadingInstitutions] = useState(true);
 
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm();
+
+  useEffect(() => {
+    register("institucion_id", { required: "Selecciona tu institucion" });
+    const fetchInstitutions = async () => {
+      try {
+        const data = await getPublicInstitutions();
+        setInstitutions(Array.isArray(data) ? data : data.results ?? []);
+      } catch {
+        console.error("Error al cargar instituciones");
+      } finally {
+        setLoadingInstitutions(false);
+      }
+    };
+    fetchInstitutions();
+  }, [register]);
 
   const password = watch("password");
 
@@ -90,6 +111,7 @@ export default function RegisterForm({
         password: data.password,
         password_confirm: data.password_confirm,
         role: data.role,
+        institucion_id: data.institucion_id,
       };
 
       const response = await authService.register(payload);
@@ -119,6 +141,16 @@ export default function RegisterForm({
       localStorage.setItem("access_token", tokens.access);
       localStorage.setItem("refresh_token", tokens.refresh);
       localStorage.setItem("user", JSON.stringify(user));
+
+      const institution = user.institution || user.profile?.institucion || null;
+      injectBrandColors(institution);
+
+      if (!institution) {
+        toast.success("!Bienvenido! Completa tu perfil");
+        window.location.href = "/completar-perfil";
+        return;
+      }
+
       toast.success("!Bienvenido con Google!");
       window.location.href = "/dashboard";
     } catch (error) {
@@ -208,6 +240,20 @@ export default function RegisterForm({
             {errors.email && (
               <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
             )}
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Institucion educativa
+            </label>
+            <InstitutionSelect
+              value={watch("institucion_id")}
+              onChange={(id) => setValue("institucion_id", id, { shouldValidate: true })}
+              institutions={institutions}
+              loading={loadingInstitutions}
+              error={errors.institucion_id}
+              placeholder="Busca tu colegio..."
+            />
           </div>
 
           <div>

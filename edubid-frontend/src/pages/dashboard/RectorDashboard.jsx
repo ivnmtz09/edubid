@@ -30,18 +30,30 @@ export default function RectorDashboard() {
     }
 
     setSaving(true)
-    const formData = new FormData()
-    formData.append("color_primario", colorPrimario)
-    formData.append("color_secundario", colorSecundario)
-    if (logoFile) formData.append("logo", logoFile)
+
+    let payload
+    if (logoFile) {
+      const fd = new FormData()
+      fd.append("color_primario", colorPrimario)
+      fd.append("color_secundario", colorSecundario)
+      fd.append("logo", logoFile)
+      payload = fd
+    } else {
+      payload = {
+        color_primario: colorPrimario,
+        color_secundario: colorSecundario,
+      }
+    }
 
     try {
-      const updated = await institutionsService.updateInstitution(institution.id, formData)
-      setUser({
+      const updated = await institutionsService.updateInstitution(institution.id, payload)
+      const mergedUser = {
         ...user,
         institution: updated,
         profile: { ...user.profile, institucion: updated },
-      })
+      }
+      setUser(mergedUser)
+      localStorage.setItem("user", JSON.stringify(mergedUser))
       toast.success("Imagen institucional actualizada. Los cambios se ven reflejados al instante.")
     } catch (err) {
       const msg = err.response?.data?.detail

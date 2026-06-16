@@ -22,6 +22,9 @@ export const API_ENDPOINTS = {
   // Cuenta
   DELETE_ACCOUNT: "/api/users/delete-account/",
 
+  // ==================== INSTITUTIONS ====================
+  INSTITUTIONS: "/api/institutions/",
+
   // Admin
   USER_LIST: "/api/users/list/",
   USER_UPDATE: (id) => `/api/users/${id}/update/`,
