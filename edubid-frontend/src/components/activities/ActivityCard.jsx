@@ -68,24 +68,24 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
           {activity.descripcion || "Sin descripción"}
         </p>
 
-        {/* Stats: EduBids + Nota */}
+        {/* Stats: EduCoins + Puntos Experiencia */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-900/50 rounded-xl p-3">
             <div className="flex items-center gap-1.5 mb-1">
               <CurrencyEuroIcon className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-              <span className="text-xs text-gray-500 dark:text-gray-400">EduBids</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">EduCoins</span>
             </div>
             <p className="text-lg font-bold text-purple-600 dark:text-purple-400 tabular-nums">
-              {activity.valor_edubids} <span className="text-sm font-medium">EC</span>
+              {activity.valor_educoins} <span className="text-sm font-medium">EDC</span>
             </p>
           </div>
           <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-900/50 rounded-xl p-3">
             <div className="flex items-center gap-1.5 mb-1">
               <AcademicCapIcon className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
-              <span className="text-xs text-gray-500 dark:text-gray-400">Nota</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">Pts Experiencia</span>
             </div>
             <p className="text-lg font-bold text-purple-600 dark:text-purple-400 tabular-nums">
-              {activity.valor_notas} <span className="text-sm font-medium">pts</span>
+              {activity.puntos_experiencia} <span className="text-sm font-medium">pts</span>
             </p>
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function ActivityCard({ activity, isTeacher, userSubmission }) {
               <span className="text-xs text-gray-500 dark:text-gray-400">Tu calificación:</span>
               <span className="text-base font-bold text-purple-600 dark:text-purple-400 tabular-nums">
                 {userSubmission.calificacion}
-                <span className="text-xs font-medium text-gray-400">/{activity.valor_notas}</span>
+                <span className="text-xs font-medium text-gray-400">/{activity.puntos_experiencia}</span>
               </span>
             </div>
           ) : isCompleted ? (

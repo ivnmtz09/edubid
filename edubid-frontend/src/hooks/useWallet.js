@@ -6,18 +6,12 @@ export const useWallet = () => {
     queryKey: ["wallet"],
     queryFn: async () => {
       try {
-        const res = await api.get("/api/tokens/wallets/mi_wallet/")
-        console.log("Wallet API Response:", res.data)
-        
-        // Si es un mensaje (para docentes) o no hay wallet
+        const res = await api.get("/api/tokens/wallets/")
         if (res.data.detail || !res.data.id) {
-          console.log("No hay wallet activa:", res.data.detail)
           return null
         }
-        
         return res.data
       } catch (error) {
-        console.error("Wallet API Error:", error)
         if (error.response?.status === 404) {
           return null
         }
@@ -33,9 +27,6 @@ export const useAllWallets = () => {
     queryKey: ["all-wallets"],
     queryFn: async () => {
       const res = await api.get("/api/tokens/wallets/")
-      console.log("All Wallets API Response:", res.data)
-      
-      // Manejar diferentes formatos de respuesta
       if (Array.isArray(res.data)) {
         return res.data
       } else if (res.data.results) {
@@ -52,7 +43,6 @@ export const usePeriods = (enabled = true) => {
     queryKey: ["periods"],
     queryFn: async () => {
       const res = await api.get("/api/tokens/periods/mis_periodos/")
-      console.log("Periods API Response:", res.data)
       return Array.isArray(res.data) ? res.data : []
     },
     enabled,
@@ -66,20 +56,18 @@ export const useTransactions = () => {
     queryKey: ["transactions"],
     queryFn: async () => {
       const res = await api.get("/api/tokens/transactions/")
-      console.log("Transactions API Response:", res.data)
-      
+
       let transactions = []
       if (Array.isArray(res.data)) {
         transactions = res.data
       } else if (res.data.results) {
         transactions = res.data.results
       }
-      
-      // Mapear campos del backend al frontend
+
       return transactions.map(transaction => ({
         id: transaction.id,
         tipo: transaction.tipo,
-        monto: transaction.cantidad, // Backend usa 'cantidad', frontend usa 'monto'
+        monto: transaction.cantidad_educoins,
         descripcion: transaction.descripcion,
         fecha: transaction.creado,
         wallet: transaction.wallet
@@ -91,9 +79,9 @@ export const useTransactions = () => {
 
 export const useTotalBalance = () => {
   const { data: allWallets, isLoading, error } = useAllWallets()
-  
-  const totalBalance = allWallets?.reduce((sum, wallet) => sum + (wallet.saldo || 0), 0) || 0
-  
+
+  const totalBalance = allWallets?.reduce((sum, wallet) => sum + (wallet.saldo_educoins || 0), 0) || 0
+
   return {
     data: totalBalance,
     isLoading,

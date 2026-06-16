@@ -55,7 +55,7 @@ export const API_ENDPOINTS = {
   GRADE_MULTIPLE: "/api/grades/calificar-multiple/",
 
   // ==================== TOKENS/WALLET ====================
-  MY_WALLET: "/api/tokens/wallets/mi_wallet/",
+  MY_WALLET: "/api/tokens/wallets/",
   WALLETS: "/api/tokens/wallets/",
   WALLET_DETAIL: (id) => `/api/tokens/wallets/${id}/`,
   WALLET_DEPOSIT: (id) => `/api/tokens/wallets/${id}/depositar/`,
@@ -91,6 +91,8 @@ export const API_ENDPOINTS = {
 // ==================== USER ROLES ====================
 export const USER_ROLES = {
   ADMIN: "admin",
+  RECTOR: "rector",
+  COORDINATOR: "coordinador",
   TEACHER: "docente",
   STUDENT: "estudiante",
 };

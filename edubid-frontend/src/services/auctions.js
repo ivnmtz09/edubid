@@ -26,15 +26,15 @@ export const auctionService = {
     return res.data
   },
 
-  placeBid: async (auctionId, cantidad, estudiante = null) => {
-    const data = { auction: auctionId, cantidad }
+  placeBid: async (auctionId, cantidad_educoins, estudiante = null) => {
+    const data = { auction: auctionId, cantidad_educoins }
     if (estudiante) data.estudiante = estudiante
     const res = await api.post("/api/auctions/bids/", data)
     return res.data
   },
 
-  increaseBid: async (auctionId, cantidad, estudiante = null) => {
-    const data = { auction: auctionId, cantidad }
+  increaseBid: async (auctionId, cantidad_educoins, estudiante = null) => {
+    const data = { auction: auctionId, cantidad_educoins }
     if (estudiante) data.estudiante = estudiante
     const res = await api.post("/api/auctions/bids/", data)
     return res.data
@@ -55,15 +55,4 @@ export const auctionService = {
     const res = await api.post(`/api/auctions/auctions/${id}/close/`)
     return res.data
   },
-
-  // NUEVO: Obtener estadísticas (puedes implementar este endpoint en tu backend)
-  getAuctionStats: async () => {
-    try {
-      const res = await api.get("/api/auctions/stats/")
-      return res.data
-    } catch (error) {
-      // Si el endpoint no existe, lanzar error para que se calcule localmente
-      throw new Error("Stats endpoint not available")
-    }
-  }
 }

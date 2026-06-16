@@ -7,6 +7,9 @@ import Header from "./Header"
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
+  const toggleCollapsed = () => setSidebarCollapsed((prev) => !prev)
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
@@ -16,10 +19,19 @@ const Layout = () => {
       )}
 
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={toggleCollapsed}
+      />
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div
+        className={`transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
+        }`}
+      >
         {/* Header */}
         <Header onMenuClick={() => setSidebarOpen(true)} />
 

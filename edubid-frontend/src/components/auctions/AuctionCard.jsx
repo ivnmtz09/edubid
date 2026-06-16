@@ -115,7 +115,7 @@ const AuctionCard = ({ auction, onEdit, onDelete, onClose }) => {
                 <TrophyIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span>Puja mas alta:</span>
               </div>
-              <span className="font-bold text-green-600 dark:text-green-400 tabular-nums">{formatEC(highestBid.cantidad)}</span>
+              <span className="font-bold text-green-600 dark:text-green-400 tabular-nums">{formatEC(highestBid.cantidad_educoins)}</span>
             </div>
           )}
 
@@ -139,7 +139,7 @@ const AuctionCard = ({ auction, onEdit, onDelete, onClose }) => {
               <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-green-600 dark:text-green-400">Puja ganadora:</span>
                 <span className="text-green-600 dark:text-green-400 font-bold tabular-nums">
-                  {formatEC(winnerInfo.cantidad)}
+                  {formatEC(winnerInfo.cantidad_educoins)}
                 </span>
               </div>
             </div>

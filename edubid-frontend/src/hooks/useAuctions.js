@@ -88,7 +88,7 @@ export const usePlaceBid = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ auctionId, cantidad, estudiante }) => auctionService.placeBid(auctionId, cantidad, estudiante),
+    mutationFn: ({ auctionId, cantidad_educoins, estudiante }) => auctionService.placeBid(auctionId, cantidad_educoins, estudiante),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["auctions"] })
       queryClient.invalidateQueries({ queryKey: ["auction", variables.auctionId] })
@@ -112,7 +112,7 @@ export const useIncreaseBid = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ auctionId, cantidad, estudiante }) => auctionService.increaseBid(auctionId, cantidad, estudiante),
+    mutationFn: ({ auctionId, cantidad_educoins, estudiante }) => auctionService.increaseBid(auctionId, cantidad_educoins, estudiante),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["auctions"] })
       queryClient.invalidateQueries({ queryKey: ["auction-bids"] })
@@ -178,41 +178,3 @@ export const useCloseAuction = () => {
   })
 }
 
-// NUEVO: Hook para estadísticas de subastas
-export const useAuctionStats = () => {
-  return useQuery({
-    queryKey: ["auction-stats"],
-    queryFn: async () => {
-      try {
-        return await auctionService.getAuctionStats()
-      } catch (error) {
-        // Si el endpoint no existe, calcular localmente
-        console.log("Stats endpoint not available, calculating locally")
-        const auctions = await auctionService.getAuctions()
-        return calculateLocalStats(auctions)
-      }
-    },
-  })
-}
-
-// Función auxiliar para calcular stats localmente
-const calculateLocalStats = (auctions) => {
-  const activeAuctions = auctions.filter(a => a.estado === 'active').length
-  const closedAuctions = auctions.filter(a => a.estado === 'closed').length
-  const totalBids = auctions.reduce((sum, auction) => sum + (auction.total_pujas || 0), 0)
-  
-  // Calcular total de coins en pujas (necesitaríamos más datos)
-  const totalCoinsInBids = auctions.reduce((sum, auction) => {
-    // Esto es una aproximación - necesitaríamos los datos de bids
-    return sum + (auction.puja_mas_alta || 0)
-  }, 0)
-
-  return {
-    active_auctions: activeAuctions,
-    closed_auctions: closedAuctions,
-    total_auctions: auctions.length,
-    total_bids: totalBids,
-    total_coins_in_bids: totalCoinsInBids,
-    avg_bids_per_auction: auctions.length > 0 ? (totalBids / auctions.length).toFixed(1) : 0
-  }
-}

@@ -27,7 +27,7 @@ const AssignCoins = ({ activityId, students, onClose }) => {
       await assignCoins.mutateAsync({
         activityId,
         studentId: selectedStudent,
-        coins: Number.parseInt(coins),
+        educoins: Number.parseInt(coins),
       })
       onClose()
     } catch (error) {

@@ -1,9 +1,9 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { PlusIcon, ShoppingBagIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 import AuctionCard from "./AuctionCard"
 import CreateAuction from "./CreateAuction"
 import { useAuthContext } from "../../context/AuthContext"
-import { useAuctions, useDeleteAuction, useCloseAuction, useAuctionStats } from "../../hooks/useAuctions"
+import { useAuctions, useDeleteAuction, useCloseAuction } from "../../hooks/useAuctions"
 import LoadingSpinner from "../common/LoadingSpinner"
 import Modal from "../common/Modal"
 
@@ -17,9 +17,17 @@ const AuctionList = () => {
   const [editingAuction, setEditingAuction] = useState(null)
 
   const { data: auctions, isLoading, error, refetch } = useAuctions()
-  const { data: stats } = useAuctionStats()
   const deleteAuction = useDeleteAuction()
   const closeAuction = useCloseAuction()
+
+  const auctionsArray = Array.isArray(auctions) ? auctions : []
+
+  const stats = useMemo(() => ({
+    total_auctions: auctionsArray.length,
+    active_auctions: auctionsArray.filter((a) => a.estado === "active").length,
+    closed_auctions: auctionsArray.filter((a) => a.estado === "closed").length,
+    total_bids: auctionsArray.reduce((sum, a) => sum + (a.total_pujas || 0), 0),
+  }), [auctionsArray])
 
   const handleEdit = (auction) => {
     setEditingAuction(auction)
@@ -43,8 +51,6 @@ const AuctionList = () => {
     setEditingAuction(null)
     refetch()
   }
-
-  const auctionsArray = Array.isArray(auctions) ? auctions : []
 
   const filteredAuctions = auctionsArray.filter((auction) => {
     const matchesSearch = auction.titulo?.toLowerCase().includes(searchTerm.toLowerCase()) ||

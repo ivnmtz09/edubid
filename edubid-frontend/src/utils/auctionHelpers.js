@@ -18,15 +18,15 @@ export const getAuctionStatus = (auction) => {
 export const getMinNextBid = (bids, incrementoMinimo = 10) => {
   if (!bids || bids.length === 0) return incrementoMinimo
   const highestBid = bids[0]
-  return highestBid.cantidad + incrementoMinimo
+  return highestBid.cantidad_educoins + incrementoMinimo
 }
 
 export const getMinBidForAuction = (auction) => {
-  const highestBid = auction.bids?.[0] || auction.puja_mas_alta
+  const highestBid = auction.bids?.[0] || auction.puja_mas_alta_educoins
   if (highestBid) {
-    return highestBid.cantidad + (auction.incremento_minimo || 10)
+    return highestBid.cantidad_educoins + (auction.incremento_minimo_educoins || 10)
   }
-  return auction.valor_minimo || 1
+  return auction.valor_minimo_educoins || 1
 }
 
 export const canUserBid = (user, auction, wallet, existingBid) => {
@@ -45,7 +45,7 @@ export const canUserBid = (user, auction, wallet, existingBid) => {
   // Para nueva puja, verificar saldo disponible
   if (!wallet) return false
   
-  const availableBalance = wallet.saldo - wallet.bloqueado
+  const availableBalance = (wallet.saldo_educoins ?? wallet.saldo) - (wallet.bloqueado_educoins ?? wallet.bloqueado)
   return availableBalance > 0
 }
 

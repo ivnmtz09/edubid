@@ -1,12 +1,19 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from .models import Institution
-from .serializers import InstitutionSerializer
+from .serializers import InstitutionSerializer, RectorInstitutionSerializer
 
 
 class InstitutionViewSet(viewsets.ModelViewSet):
-    serializer_class = InstitutionSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if self.action in ('update', 'partial_update') and user.role == 'rector':
+            return RectorInstitutionSerializer
+        if self.action in ('create',) and user.role != 'admin':
+            return RectorInstitutionSerializer
+        return InstitutionSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -26,6 +33,11 @@ class InstitutionViewSet(viewsets.ModelViewSet):
         if user.role == 'rector':
             if serializer.instance.id != user.institucion_id:
                 raise PermissionDenied('No puedes modificar una institución que no te pertenece.')
+            # El rector no puede cambiar campos administrativos
+            protected = {'activo', 'codigo_dane'}
+            for field in protected:
+                if field in serializer.validated_data:
+                    del serializer.validated_data[field]
             serializer.save()
         elif user.role == 'admin':
             serializer.save()

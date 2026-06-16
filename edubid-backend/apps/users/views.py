@@ -252,8 +252,8 @@ def api_login(request):
     if serializer.is_valid():
         user = serializer.validated_data['user']
         
-        # Verificar si el email está verificado
-        if not user.email_verified:
+        # Verificar si el email está verificado (excepto roles internos)
+        if not user.email_verified and user.role not in ('admin', 'rector', 'coordinador'):
             logger.warning(f"⚠️ Intento de login con email no verificado: {user.email}")
             return Response({
                 'message': 'Por favor verifica tu correo electrónico antes de iniciar sesión.',
@@ -278,7 +278,7 @@ def api_login(request):
         }, status=status.HTTP_200_OK)
     
     # Login fallido - registrar intento
-    email = request.data.get('email')
+    email = request.data.get('email') if isinstance(request.data, dict) else None
     if email:
         ip_address = get_client_ip(request)
         LoginFailureTracker.objects.create(

@@ -33,27 +33,27 @@ export const formatDateTime = (dateString) => {
 }
 
 export const formatCoins = (amount) => {
-  if (amount == null || isNaN(amount)) return "0 edubids"
-  return `${amount.toLocaleString("es-CO")} edubids`
+  if (amount == null || isNaN(amount)) return "0 educoins"
+  return `${amount.toLocaleString("es-CO")} educoins`
 }
 
-// Específico para EC (edubids) - Formato corto para la wallet
+// Específico para EDC (educoins) - Formato corto para la wallet
 export const formatEC = (amount) => {
-  if (amount == null || isNaN(amount)) return "0 EC"
-  return `${amount.toLocaleString("es-CO")} EC`
+  if (amount == null || isNaN(amount)) return "0 EDC"
+  return `${amount.toLocaleString("es-CO")} EDC`
 }
 
 // Formato compacto para números grandes
 export const formatCompactEC = (amount) => {
-  if (amount == null || isNaN(amount)) return "0 EC"
+  if (amount == null || isNaN(amount)) return "0 EDC"
   
   if (amount >= 1000000) {
-    return `${(amount / 1000000).toFixed(1)}M EC`
+    return `${(amount / 1000000).toFixed(1)}M EDC`
   } else if (amount >= 1000) {
-    return `${(amount / 1000).toFixed(1)}K EC`
+    return `${(amount / 1000).toFixed(1)}K EDC`
   }
   
-  return `${amount.toLocaleString("es-CO")} EC`
+  return `${amount.toLocaleString("es-CO")} EDC`
 }
 
 export const truncateText = (text, maxLength = 100) => {
@@ -313,8 +313,8 @@ export const validateActivityForm = (data) => {
     errors.description = "La descripción es requerida"
   }
 
-  if (!data.reward_coins || data.reward_coins <= 0) {
-    errors.reward_coins = "La recompensa debe ser mayor a 0"
+  if (!data.educoins || data.educoins <= 0) {
+    errors.educoins = "La recompensa debe ser mayor a 0"
   }
 
   if (!data.group) {
@@ -363,8 +363,8 @@ export const validateGroupForm = (data) => {
     errors.max_students = "El máximo de estudiantes debe ser mayor a 0"
   }
 
-  if (!data.coin_limit || data.coin_limit <= 0) {
-    errors.coin_limit = "El límite de edubids debe ser mayor a 0"
+  if (!data.educoin_limit || data.educoin_limit <= 0) {
+    errors.educoin_limit = "El límite de educoins debe ser mayor a 0"
   }
 
   if (!data.start_date) {

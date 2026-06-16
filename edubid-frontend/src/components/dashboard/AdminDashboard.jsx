@@ -36,6 +36,10 @@ export default function AdminDashboard() {
   const roleColors = {
     admin:
       "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    rector:
+      "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400",
+    coordinador:
+      "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
     docente:
       "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
     estudiante:
@@ -44,6 +48,8 @@ export default function AdminDashboard() {
 
   const roleLabels = {
     admin: "Administrador",
+    rector: "Rector",
+    coordinador: "Coordinador",
     docente: "Docente",
     estudiante: "Estudiante",
   };
@@ -72,11 +78,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         {[
           { label: "Total Usuarios", count: mockUsers?.length || 0, icon: UsersIcon, color: "purple" },
           { label: "Estudiantes", count: mockUsers?.filter((u) => u.role === "estudiante").length || 0, icon: UsersIcon, color: "green" },
           { label: "Docentes", count: mockUsers?.filter((u) => u.role === "docente").length || 0, icon: AcademicCapIcon, color: "blue" },
+          { label: "Coordinadores", count: mockUsers?.filter((u) => u.role === "coordinador").length || 0, icon: UsersIcon, color: "purple" },
+          { label: "Rectores", count: mockUsers?.filter((u) => u.role === "rector").length || 0, icon: UsersIcon, color: "indigo" },
           { label: "Admins", count: mockUsers?.filter((u) => u.role === "admin").length || 0, icon: UsersIcon, color: "red" },
         ].map((stat) => (
           <div key={stat.label} className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-5 shadow-md dark:shadow-gray-900/50">
@@ -122,6 +130,8 @@ export default function AdminDashboard() {
               <option value="all">Todos los roles</option>
               <option value="estudiante">Estudiantes</option>
               <option value="docente">Docentes</option>
+              <option value="coordinador">Coordinadores</option>
+              <option value="rector">Rectores</option>
               <option value="admin">Administradores</option>
             </select>
           </div>

@@ -14,7 +14,7 @@ export default {
           200: "#fdd6b5",
           300: "#fcb07f",
           400: "#fb8a51",
-          500: "#f9732a", // naranja principal
+          500: "#f9732a",
           600: "#dd5b20",
           700: "#b8491b",
           800: "#8f3916",
@@ -29,8 +29,14 @@ export default {
           500: "#334377",
           600: "#27335d",
           700: "#1b2443",
-          800: "#10152a", // midnight blue base
+          800: "#10152a",
           900: "#080a14",
+        },
+        brand: {
+          primary: "var(--brand-primary)",
+          "primary-hover": "var(--brand-primary-hover)",
+          accent: "var(--brand-accent)",
+          "accent-hover": "var(--brand-accent-hover)",
         },
       },
       borderRadius: {

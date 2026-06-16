@@ -14,6 +14,28 @@ class Institution(BaseModel):
     )
     activo = models.BooleanField(default=True, verbose_name='Institución activa')
 
+    # ─────────────────────────────────────────────
+    # White-Label / Personalización
+    # ─────────────────────────────────────────────
+    color_primario = models.CharField(
+        max_length=7,
+        default='#f97316',
+        verbose_name='Color primario',
+        help_text='Color corporativo principal en formato hexadecimal (ej. #f97316)'
+    )
+    color_secundario = models.CharField(
+        max_length=7,
+        default='#3b82f6',
+        verbose_name='Color secundario',
+        help_text='Color corporativo secundario en formato hexadecimal (ej. #3b82f6)'
+    )
+    logo = models.ImageField(
+        upload_to='instituciones/logos/',
+        null=True,
+        blank=True,
+        verbose_name='Logo institucional'
+    )
+
     class Meta:
         verbose_name = 'Institución'
         verbose_name_plural = 'Instituciones'

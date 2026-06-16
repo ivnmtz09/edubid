@@ -24,8 +24,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <ThemeProvider>
             <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
               <App />
               <Toaster
@@ -39,8 +39,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
                 }}
               />
             </GoogleOAuthProvider>
-          </AuthProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>,

@@ -47,18 +47,18 @@ const Header = ({ onMenuClick }) => {
 
       <div className="flex flex-1 items-center justify-end gap-x-2 sm:gap-x-3 lg:gap-x-4">
         {/* Role Badge */}
-        <div className="hidden sm:flex items-center gap-x-1.5 sm:gap-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-orange-600/10 rounded-full border border-orange-600/20">
-          <AcademicCapIcon className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
-          <span className="text-xs sm:text-sm font-medium text-orange-500 capitalize truncate max-w-[80px] sm:max-w-none">
+        <div className="hidden sm:flex items-center gap-x-1.5 sm:gap-x-2 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-primary/10 rounded-full border border-primary/20">
+          <AcademicCapIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+          <span className="text-xs sm:text-sm font-medium text-primary capitalize truncate max-w-[80px] sm:max-w-none">
             {user?.role}
           </span>
         </div>
 
         {/* Student balance */}
         {isStudent && !balanceLoading && (
-          <div className="flex items-center gap-x-1.5 sm:gap-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-orange-600 rounded-full shadow-lg shadow-orange-600/25">
-            <CurrencyEuroIcon className="h-3 w-3 sm:h-4 sm:w-4 xl:h-5 xl:w-5 text-white" />
-            <span className="text-xs sm:text-sm xl:text-base font-bold text-white whitespace-nowrap tabular-nums">
+          <div className="flex items-center gap-x-1.5 sm:gap-x-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-primary rounded-full shadow-lg shadow-primary/25">
+            <CurrencyEuroIcon className="h-3 w-3 sm:h-4 sm:w-4 xl:h-5 xl:w-5 text-primary-foreground" />
+            <span className="text-xs sm:text-sm xl:text-base font-bold text-primary-foreground whitespace-nowrap tabular-nums">
               {formatCoins(totalBalance || 0)} EC
             </span>
           </div>
@@ -120,8 +120,8 @@ const Header = ({ onMenuClick }) => {
                     <p className="text-xs text-gray-600 dark:text-gray-300 capitalize truncate">{user?.role}</p>
                     {isStudent && !balanceLoading && (
                       <div className="flex items-center gap-x-1 mt-1">
-                        <CurrencyEuroIcon className="h-3 w-3 text-orange-500 flex-shrink-0" />
-                        <span className="text-xs font-medium text-orange-600 truncate tabular-nums">
+                        <CurrencyEuroIcon className="h-3 w-3 text-primary flex-shrink-0" />
+                        <span className="text-xs font-medium text-primary truncate tabular-nums">
                           {formatCoins(totalBalance || 0)} EC
                         </span>
                       </div>
@@ -138,7 +138,7 @@ const Header = ({ onMenuClick }) => {
                     <div className={`flex items-center px-2 sm:px-3 py-2.5 sm:py-3 text-sm font-medium rounded-lg sm:rounded-xl transition-all duration-200 active:scale-[0.96] ${
                       item.onClick 
                         ? 'text-red-600 hover:bg-red-500/10 hover:text-red-700' 
-                        : 'text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-orange-600 dark:hover:text-orange-500'
+                        : 'text-gray-700 dark:text-white/80 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-primary dark:hover:text-primary'
                     }`}>
                       <item.icon className={`mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 ${
                         item.onClick ? 'text-red-500' : 'text-gray-500 dark:text-gray-300'

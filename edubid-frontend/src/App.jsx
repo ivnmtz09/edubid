@@ -16,6 +16,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 
 // Pantallas principales
 import DashboardPage from "./pages/dashboard/DashboardPage";
+import RectorDashboard from "./pages/dashboard/RectorDashboard";
 import ClassroomsPage from "./pages/classrooms/ClassroomsPage";
 import ClassroomDetailPage from "./pages/classrooms/ClassroomDetailPage";
 import GroupsPage from "./pages/groups/GroupsPage";
@@ -104,6 +105,7 @@ function App() {
 
           {/* Dashboard */}
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="rector-dashboard" element={<RectorDashboard />} />
 
           {/* Classrooms */}
           <Route path="classrooms" element={<ClassroomsPage />} />

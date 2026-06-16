@@ -73,12 +73,9 @@ class GroupViewSet(viewsets.ModelViewSet):
                     usuario=user,
                     grupo=group,
                     periodo=periodo_activo,
-                    defaults={'saldo': 0, 'bloqueado': 0}
+                    defaults={'saldo_educoins': 0, 'bloqueado_educoins': 0}
                 )
                 wallet_creada = created
-                print(f"Wallet creada: {wallet_creada} para {user.email} en grupo {group.nombre}")
-            else:
-                print(f"No hay periodo activo para el grupo {group.nombre}")
             
             group.estudiantes.add(user)
         
@@ -118,7 +115,7 @@ class GroupViewSet(viewsets.ModelViewSet):
                     usuario=user,
                     grupo=group,
                     periodo=periodo_activo,
-                    defaults={'saldo': 0, 'bloqueado': 0}
+                    defaults={'saldo_educoins': 0, 'bloqueado_educoins': 0}
                 )
                 wallet_creada = created
                 print(f"Wallet creada: {wallet_creada} para {user.email} en grupo {group.nombre}")

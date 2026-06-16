@@ -5,33 +5,25 @@ import toast from "react-hot-toast"
 // Hook para obtener usuarios (solo para admin)
 export const useUsers = () => {
   return useQuery({
-    queryKey: ["users"],
+    queryKey: ["all-users"],
     queryFn: async () => {
-      // Cambiado de /api/users/ a /api/users/profile/ para obtener lista de usuarios
-      // O usa el endpoint correcto según tu backend
-      // Si necesitas lista de todos los usuarios, debes crear ese endpoint en Django
-      try {
-        const res = await api.get("/api/users/profile/")
-        // Si solo devuelve el usuario actual, retornamos como array
-        return [res.data.user || res.data]
-      } catch (error) {
-        console.error("Error obteniendo usuarios:", error)
-        throw error
-      }
+      const res = await api.get("/api/users/list/")
+      const data = Array.isArray(res.data) ? res.data : res.data.results || []
+      return data
     },
     staleTime: 5 * 60 * 1000,
-    // Solo ejecutar si el usuario es admin
-    enabled: false, // Deshabilitar por defecto, habilitar solo para admins
+    enabled: false,
   })
 }
 
-// Hook mejorado para uso en AdminDashboard
+// Hook para uso en AdminDashboard
 export const useAllUsers = () => {
   return useQuery({
     queryKey: ["all-users"],
     queryFn: async () => {
       const res = await api.get("/api/users/list/")
-      return res.data
+      const data = Array.isArray(res.data) ? res.data : res.data.results || []
+      return data
     },
     staleTime: 5 * 60 * 1000,
   })

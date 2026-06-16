@@ -141,7 +141,7 @@ export default function StudentDashboard() {
                 </div>
                 <div className="flex items-center space-x-3 flex-shrink-0">
                   <span className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-3 py-1 rounded-full text-xs font-medium tabular-nums">
-                    {activity.valor_edubids} EC
+                    {activity.valor_educoins} EDC
                   </span>
                   <ArrowRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>

@@ -4,6 +4,7 @@ import { useAuthContext } from "../../context/AuthContext"
 import StudentDashboard from "../../components/dashboard/StudentDashboard"
 import TeacherDashboard from "../../components/dashboard/TeacherDashboard"
 import AdminDashboard from "../../components/dashboard/AdminDashboard"
+import RectorDashboard from "./RectorDashboard"
 import { USER_ROLES } from "../../utils/constants"
 
 export default function DashboardPage() {
@@ -16,7 +17,10 @@ export default function DashboardPage() {
       return <StudentDashboard />
     case USER_ROLES.TEACHER:
       return <TeacherDashboard />
+    case USER_ROLES.RECTOR:
+      return <RectorDashboard />
     case USER_ROLES.ADMIN:
+    case USER_ROLES.COORDINATOR:
       return <AdminDashboard />
     default:
       return <p>No tienes un dashboard asignado.</p>

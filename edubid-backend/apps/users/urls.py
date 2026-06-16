@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 
 urlpatterns = [
@@ -7,6 +8,9 @@ urlpatterns = [
     path('login/', views.api_login, name='login'),
     path('google/', views.GoogleLoginAPIView.as_view(), name='google-login'),
     
+    # JWT Refresh
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
     # Verificación de email
     path('verify-email/<str:token>/', views.verify_email, name='verify-email'),
     path('resend-verification/', views.resend_verification_email, name='resend-verification'),

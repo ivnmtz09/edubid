@@ -3,6 +3,16 @@ from django.contrib.auth import authenticate
 from .models import User, Profile
 from django.contrib.auth.password_validation import validate_password
 
+
+class InstitutionMiniSerializer(serializers.Serializer):
+    """Resumen de institución para anidar en el perfil del usuario."""
+    id = serializers.IntegerField(read_only=True)
+    nombre = serializers.CharField(read_only=True)
+    color_primario = serializers.CharField(read_only=True)
+    color_secundario = serializers.CharField(read_only=True)
+    logo = serializers.ImageField(read_only=True)
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
     password_confirm = serializers.CharField(write_only=True)
@@ -49,9 +59,18 @@ class UserLoginSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    institucion = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
         fields = ['bio', 'telefono', 'direccion', 'fecha_nacimiento', 'institucion']
+
+    def get_institucion(self, obj):
+        """Retorna los datos de la institución desde la FK del User."""
+        user = obj.user
+        if user and user.institucion_id:
+            return InstitutionMiniSerializer(user.institucion).data
+        return None
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -61,7 +80,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'role', 'avatar', 'date_joined', 'profile']
         read_only_fields = ['id', 'date_joined']
-        # Seguridad: nunca exponer el password hash en respuestas de la API
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
         }

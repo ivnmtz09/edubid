@@ -7,7 +7,7 @@ const CoinBalance = ({ balance = 0, totalEarned = 0, totalSpent = 0, className =
   return (
     <div className={`rounded-lg p-4 bg-midnight-800 text-white shadow ${className}`}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Balance de EduBid</h3>
+        <h3 className="text-lg font-semibold">Balance de EduCoins</h3>
         <div className="p-2 bg-edubid-500 rounded-lg">
           <CurrencyDollarIcon className="h-6 w-6 text-white" />
         </div>

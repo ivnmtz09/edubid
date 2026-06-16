@@ -64,6 +64,17 @@ class AuctionViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """Estadísticas básicas de subastas"""
+        user = request.user
+        queryset = self.get_queryset()
+        return Response({
+            "total_activas": queryset.filter(estado="active").count(),
+            "total_cerradas": queryset.filter(estado="closed").count(),
+            "total_generales": queryset.count(),
+        })
+
     def perform_create(self, serializer):
         """Al crear, asignar el docente como creador"""
         serializer.save(creador=self.request.user)

@@ -69,7 +69,7 @@ const AuctionDetailPage = () => {
     },
     onError: (error) => {
       const data = error.response?.data
-      const msg = data?.detail || data?.non_field_errors?.[0] || data?.cantidad?.[0] || 'Error al realizar la puja'
+      const msg = data?.detail || data?.non_field_errors?.[0] || data?.cantidad_educoins?.[0] || 'Error al realizar la puja'
       setTeacherBidError(msg)
     },
   });
@@ -129,15 +129,15 @@ const AuctionDetailPage = () => {
   const highestBid = auction.bids?.[0];
   const isWinning = userBid?.id === highestBid?.id;
 
-  const saldoDisponible = walletData ? walletData.saldo - walletData.bloqueado : 0;
-  const incrementoMinimo = auction?.incremento_minimo || 10;
-  const minBid = highestBid ? highestBid.cantidad + incrementoMinimo : (auction?.valor_minimo || 1);
+  const saldoDisponible = walletData ? (walletData.saldo_educoins ?? walletData.saldo) - (walletData.bloqueado_educoins ?? walletData.bloqueado) : 0;
+  const incrementoMinimo = auction?.incremento_minimo_educoins || auction?.incremento_minimo || 10;
+  const minBid = highestBid ? highestBid.cantidad_educoins + incrementoMinimo : (auction?.valor_minimo_educoins || auction?.valor_minimo || 1);
 
   const handlePlaceBid = () => {
     const amount = parseInt(bidAmount);
     
     if (!amount || amount < minBid) {
-      alert(`La puja mínima es ${minBid} EC`);
+      alert(`La puja mínima es ${minBid}EDC`);
       return;
     }
 
@@ -149,7 +149,7 @@ const AuctionDetailPage = () => {
     placeBidMutation.mutate({
       auction: auction.id,
       estudiante: user.id,
-      cantidad: amount,
+      cantidad_educoins: amount,
     });
   };
 
@@ -245,7 +245,7 @@ const AuctionDetailPage = () => {
                 <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Puja más alta</span>
               </div>
               <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 tabular-nums">
-                {highestBid?.cantidad || 0} EC
+                {highestBid?.cantidad_educoins || 0}EDC
               </p>
             </div>
 
@@ -276,7 +276,7 @@ const AuctionDetailPage = () => {
                         <h3 className="text-base sm:text-lg font-bold text-green-900 dark:text-green-300">Felicidades! Ganaste la subasta</h3>
                       </div>
                       <p className="text-green-700 dark:text-green-300 text-sm sm:text-base">
-                        Puja ganadora: <span className="font-bold tabular-nums">{auction.puja_ganadora.cantidad} EC</span>
+                        Puja ganadora: <span className="font-bold tabular-nums">{auction.puja_ganadora.cantidad_educoins}EDC</span>
                       </p>
                       <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 mt-2">
                         Contacta a tu profesor para reclamar tu recompensa
@@ -289,7 +289,7 @@ const AuctionDetailPage = () => {
                         Ganador: <span className="font-medium">{auction.puja_ganadora.estudiante_nombre}</span>
                       </p>
                       <p className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">
-                        Puja ganadora: <span className="font-medium tabular-nums">{auction.puja_ganadora.cantidad} EC</span>
+                        Puja ganadora: <span className="font-medium tabular-nums">{auction.puja_ganadora.cantidad_educoins}EDC</span>
                       </p>
                     </>
                   )}
@@ -306,7 +306,7 @@ const AuctionDetailPage = () => {
                       <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
                         <div>
                           <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Tu puja actual</p>
-                          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{userBid.cantidad} EC</p>
+                          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 tabular-nums">{userBid.cantidad_educoins}EDC</p>
                         </div>
                         {isWinning ? (
                           <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
@@ -328,11 +328,11 @@ const AuctionDetailPage = () => {
                     <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2">
                       <div>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Saldo disponible</p>
-                        <p className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400 tabular-nums">{saldoDisponible} EC</p>
+                        <p className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400 tabular-nums">{saldoDisponible}EDC</p>
                       </div>
                       <div className="text-left xs:text-right">
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Puja mínima</p>
-                        <p className="text-base sm:text-lg font-semibold text-green-700 dark:text-green-300 tabular-nums">{minBid} EC</p>
+                        <p className="text-base sm:text-lg font-semibold text-green-700 dark:text-green-300 tabular-nums">{minBid}EDC</p>
                       </div>
                     </div>
                   </div>
@@ -350,7 +350,7 @@ const AuctionDetailPage = () => {
                     <div className="space-y-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          Cantidad de edubids
+                          Cantidad de educoins
                         </label>
                         <div className="relative">
                           <input
@@ -360,10 +360,10 @@ const AuctionDetailPage = () => {
                             min={minBid}
                             max={saldoDisponible}
                             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
-                            placeholder={`Mínimo ${minBid} EC`}
+                            placeholder={`Mínimo ${minBid}EDC`}
                           />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium text-sm sm:text-base">
-                            EC
+                           EDC
                           </span>
                         </div>
                       </div>
@@ -392,7 +392,7 @@ const AuctionDetailPage = () => {
                   {saldoDisponible < minBid && (
                     <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg p-3 sm:p-4">
                       <p className="text-red-700 dark:text-red-300 text-xs sm:text-sm">
-                        No tienes suficiente saldo para pujar. Necesitas al menos {minBid} EC disponibles.
+                        No tienes suficiente saldo para pujar. Necesitas al menos {minBid} EDC disponibles.
                       </p>
                     </div>
                   )}
@@ -436,7 +436,7 @@ const AuctionDetailPage = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Cantidad (EC)
+                      Cantidad (EDC)
                     </label>
                     <input
                       type="number"
@@ -444,7 +444,7 @@ const AuctionDetailPage = () => {
                       onChange={(e) => { setTeacherBidAmount(e.target.value); setTeacherBidError('') }}
                       min={minBid}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
-                      placeholder={`Minimo ${minBid} EC`}
+                      placeholder={`Minimo ${minBid}EDC`}
                     />
                   </div>
                   <div className="flex items-end">
@@ -452,12 +452,12 @@ const AuctionDetailPage = () => {
                       onClick={() => {
                         if (!teacherBidStudent) { setTeacherBidError('Selecciona un estudiante'); return }
                         if (!parseInt(teacherBidAmount) || parseInt(teacherBidAmount) < minBid) {
-                          setTeacherBidError(`La puja minima es ${minBid} EC`); return
+                          setTeacherBidError(`La puja minima es ${minBid}EDC`); return
                         }
                         placeBidMutation.mutate({
                           auction: auction.id,
                           estudiante: parseInt(teacherBidStudent),
-                          cantidad: parseInt(teacherBidAmount),
+                          cantidad_educoins: parseInt(teacherBidAmount),
                         })
                       }}
                       disabled={placeBidMutation.isPending}
@@ -509,7 +509,7 @@ const AuctionDetailPage = () => {
                       </div>
                     </div>
                     <div className="text-left xs:text-right">
-                      <p className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400 tabular-nums">{bid.cantidad} EC</p>
+                      <p className="text-lg sm:text-xl font-bold text-green-600 dark:text-green-400 tabular-nums">{bid.cantidad_educoins}EDC</p>
                       {index === 0 && (
                         <p className="text-xs text-green-600 dark:text-green-400 font-medium">Puja mas alta</p>
                       )}

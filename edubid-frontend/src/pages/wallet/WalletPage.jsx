@@ -87,7 +87,7 @@ export default function WalletPage() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Mi Billetera</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
-              Panel de gestion de edubids
+              Panel de gestion de educoins
             </p>
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function WalletPage() {
             Panel Docente
           </h2>
           <p className="text-yellow-600 dark:text-yellow-400 mb-6 text-center">
-            Los docentes no acumulan edubids. Puedes gestionar las billeteras de tus estudiantes desde el panel de grupos.
+            Los docentes no acumulan educoins. Puedes gestionar las billeteras de tus estudiantes desde el panel de grupos.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-yellow-50 dark:bg-yellow-900/10 rounded-xl p-4 border border-yellow-200 dark:border-yellow-900/20 text-center">
@@ -108,7 +108,7 @@ export default function WalletPage() {
             </div>
             <div className="bg-yellow-50 dark:bg-yellow-900/10 rounded-xl p-4 border border-yellow-200 dark:border-yellow-900/20 text-center">
               <WalletIcon className="h-8 w-8 text-yellow-600 dark:text-yellow-400 mx-auto mb-2" />
-              <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">Depositar edubids</h3>
+              <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">Depositar educoins</h3>
               <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-1">Asigna recompensas a estudiantes</p>
             </div>
             <div className="bg-yellow-50 dark:bg-yellow-900/10 rounded-xl p-4 border border-yellow-200 dark:border-yellow-900/20 text-center">
@@ -129,7 +129,7 @@ export default function WalletPage() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Mi Billetera</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base">
-            Gestiona tus edubids y revisa tus transacciones
+            Gestiona tus educoins y revisa tus transacciones
           </p>
         </div>
         <button
@@ -206,12 +206,12 @@ export default function WalletPage() {
           </div>
         </div>
 
-        {showBalance && mainWallet?.bloqueado > 0 && (
+        {showBalance && (mainWallet?.bloqueado_educoins ?? mainWallet?.bloqueado) > 0 && (
           <div className="flex justify-center mt-4 pt-4 border-t border-yellow-500/30 relative z-10">
             <div className="text-center bg-white/10 rounded-lg p-3 sm:p-4 min-w-[120px]">
               <p className="text-xs text-yellow-200 mb-1">Bloqueado</p>
               <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white tabular-nums">
-                {formatCompactEC(mainWallet?.bloqueado || 0)}
+                {formatCompactEC(mainWallet?.bloqueado_educoins ?? mainWallet?.bloqueado ?? 0)}
               </p>
             </div>
           </div>
@@ -268,15 +268,15 @@ export default function WalletPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-xs sm:text-sm text-yellow-600 dark:text-yellow-400">Saldo:</span>
                       <span className="text-lg sm:text-xl font-bold text-yellow-800 dark:text-yellow-300 tabular-nums">
-                        {showBalance ? formatEC(wallet.saldo || 0) : "****"}
+                        {showBalance ? formatEC(wallet.saldo_educoins || 0) : "****"}
                       </span>
                     </div>
 
-                    {wallet.bloqueado > 0 && (
+                    {wallet.bloqueado_educoins > 0 && (
                       <div className="flex items-center justify-between text-xs sm:text-sm">
                         <span className="text-yellow-600 dark:text-yellow-400">Bloqueado:</span>
                         <span className="font-medium text-red-500 tabular-nums">
-                          {showBalance ? formatEC(wallet.bloqueado) : "****"}
+                          {showBalance ? formatEC(wallet.bloqueado_educoins) : "****"}
                         </span>
                       </div>
                     )}
@@ -450,7 +450,7 @@ export default function WalletPage() {
           <div className="text-center">
             <span className="text-yellow-600 dark:text-yellow-400 text-sm">Bloqueado: </span>
             <span className="font-medium text-yellow-800 dark:text-yellow-300 text-sm tabular-nums">
-              {showBalance ? formatCompactEC(mainWallet?.bloqueado || 0) : "****"}
+              {showBalance ? formatCompactEC(mainWallet?.bloqueado_educoins ?? mainWallet?.bloqueado ?? 0) : "****"}
             </span>
           </div>
         </div>

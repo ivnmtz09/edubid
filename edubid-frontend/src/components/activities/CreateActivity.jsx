@@ -21,8 +21,8 @@ export default function CreateActivity({ onClose }) {
     descripcion: "",
     tipo: "tarea",
     group: "",
-    valor_edubids: 100,
-    valor_notas: 10,
+    valor_educoins: 100,
+    puntos_experiencia: 10,
     fecha_entrega: "",
     habilitada: true,
   });
@@ -172,10 +172,10 @@ export default function CreateActivity({ onClose }) {
           <label className={labelBase}>EduBids</label>
           <input
             type="number"
-            name="valor_edubids"
+            name="valor_educoins"
             required
             min="0"
-            value={formData.valor_edubids}
+            value={formData.valor_educoins}
             onChange={handleChange}
             className={`${inputBase} border-gray-300 dark:border-gray-600`}
           />
@@ -185,10 +185,10 @@ export default function CreateActivity({ onClose }) {
           <label className={labelBase}>Valor Nota</label>
           <input
             type="number"
-            name="valor_notas"
+            name="puntos_experiencia"
             required
             min="0"
-            value={formData.valor_notas}
+            value={formData.puntos_experiencia}
             onChange={handleChange}
             className={`${inputBase} border-gray-300 dark:border-gray-600`}
           />

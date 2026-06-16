@@ -123,14 +123,15 @@ export const useCancelSubmission = () => {
 export const useGradeSubmission = () => {
   const queryClient = useQueryClient()
 
-  return useMutation({
+  return   useMutation({
     mutationFn: ({ id, data }) => submissionService.gradeSubmission(id, data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["submissions"] })
       queryClient.invalidateQueries({ queryKey: ["activities"] })
       queryClient.invalidateQueries({ queryKey: ["wallet"] })
+      const ganados = response.educoins_ganados || response.coins_ganados || 0
       toast.success(
-        `Calificación guardada. ${response.coins_ganados > 0 ? `+${response.coins_ganados} edubids` : ""}`
+        `Calificación guardada. ${ganados > 0 ? `+${ganados} educoins` : ""}`
       )
     },
     onError: (error) => {

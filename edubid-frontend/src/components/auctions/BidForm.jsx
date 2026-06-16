@@ -14,9 +14,9 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
   const [error, setError] = useState("")
   const [isIncreasing, setIsIncreasing] = useState(false)
 
-  const highestBid = auction.puja_mas_alta || auction.bids?.[0]
-  const incrementoMinimo = auction.incremento_minimo || 10
-  const minBid = highestBid ? highestBid.cantidad + incrementoMinimo : (auction.valor_minimo || 1)
+  const highestBid = auction.puja_mas_alta_educoins || auction.bids?.[0]
+  const incrementoMinimo = auction.incremento_minimo_educoins || 10
+  const minBid = highestBid ? highestBid.cantidad_educoins_educoins + incrementoMinimo : (auction.valor_minimo_educoins || 1)
   const isWinning = existingBid?.id === highestBid?.id
 
   const extractErrorMessage = (error) => {
@@ -34,8 +34,8 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
       return data.detail
     }
     
-    if (data.cantidad && Array.isArray(data.cantidad)) {
-      return data.cantidad[0]
+    if (data.cantidad_educoins && Array.isArray(data.cantidad_educoins)) {
+      return data.cantidad_educoins[0]
     }
     
     if (data.non_field_errors && Array.isArray(data.non_field_errors)) {
@@ -60,11 +60,11 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
     }
 
     if (existingBid) {
-      if (amount <= existingBid.cantidad) {
-        setError(`La nueva puja debe ser mayor a ${formatEC(existingBid.cantidad)}`)
+      if (amount <= existingBid.cantidad_educoins_educoins) {
+        setError(`La nueva puja debe ser mayor a ${formatEC(existingBid.cantidad_educoins_educoins)}`)
         return
       }
-      if (amount > userBalance + existingBid.cantidad) {
+      if (amount > userBalance + existingBid.cantidad_educoins_educoins) {
         setError("No tienes suficiente saldo disponible para este aumento")
         return
       }
@@ -78,7 +78,7 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
     try {
       await placeBid.mutateAsync({ 
         auctionId: auction.id, 
-        cantidad: amount,
+        cantidad_educoins: amount,
         estudiante: user?.id
       })
       setBidAmount("")
@@ -133,7 +133,7 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
           {highestBid && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-400">Puja mas alta:</span>
-              <span className="font-medium text-green-600 dark:text-green-400 tabular-nums">{formatEC(highestBid.cantidad)}</span>
+              <span className="font-medium text-green-600 dark:text-green-400 tabular-nums">{formatEC(highestBid.cantidad_educoins)}</span>
             </div>
           )}
 
@@ -155,7 +155,7 @@ const BidForm = ({ auction, userBalance = 0, existingBid = null }) => {
                 <span className="text-gray-600 dark:text-gray-400">Tu puja actual:</span>
                 {isWinning && <TrophyIcon className="h-4 w-4 text-green-600 dark:text-green-400" />}
               </div>
-              <span className="font-bold text-green-700 dark:text-green-300 tabular-nums">{formatEC(existingBid.cantidad)}</span>
+              <span className="font-bold text-green-700 dark:text-green-300 tabular-nums">{formatEC(existingBid.cantidad_educoins)}</span>
             </div>
           )}
         </div>

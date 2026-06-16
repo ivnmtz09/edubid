@@ -76,8 +76,8 @@ export const validateActivityForm = (data) => {
     errors.description = "La descripción es requerida"
   }
 
-  if (!data.reward_coins || data.reward_coins <= 0) {
-    errors.reward_coins = "La recompensa debe ser mayor a 0"
+  if (!data.educoins || data.educoins <= 0) {
+    errors.educoins = "La recompensa debe ser mayor a 0"
   }
 
   if (!data.group) {
@@ -126,8 +126,8 @@ export const validateGroupForm = (data) => {
     errors.max_students = "El máximo de estudiantes debe ser mayor a 0"
   }
 
-  if (!data.coin_limit || data.coin_limit <= 0) {
-    errors.coin_limit = "El límite de edubids debe ser mayor a 0"
+  if (!data.educoin_limit || data.educoin_limit <= 0) {
+    errors.educoin_limit = "El límite de educoins debe ser mayor a 0"
   }
 
   if (!data.start_date) {

@@ -14,8 +14,8 @@ const CreateAuction = ({ auction, onClose }) => {
     descripcion: "",
     grupo: "",
     fecha_fin: "",
-    valor_minimo: 1,
-    incremento_minimo: 10,
+    valor_minimo_educoins: 1,
+    incremento_minimo_educoins: 10,
   })
   const [errors, setErrors] = useState({})
 
@@ -34,8 +34,8 @@ const CreateAuction = ({ auction, onClose }) => {
         descripcion: auction.descripcion || "",
         grupo: auction.grupo?.id || auction.grupo || "",
         fecha_fin: auction.fecha_fin ? new Date(auction.fecha_fin).toISOString().slice(0, 16) : "",
-        valor_minimo: auction.valor_minimo ?? 1,
-        incremento_minimo: auction.incremento_minimo ?? 10,
+        valor_minimo_educoins: auction.valor_minimo_educoins ?? auction.valor_minimo ?? 1,
+        incremento_minimo_educoins: auction.incremento_minimo_educoins ?? auction.incremento_minimo ?? 10,
       })
     }
   }, [auction])
@@ -206,14 +206,14 @@ const CreateAuction = ({ auction, onClose }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div>
-          <label htmlFor="valor_minimo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="valor_minimo_educoins" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Puja inicial minima
           </label>
           <input
             type="number"
-            id="valor_minimo"
-            name="valor_minimo"
-            value={formData.valor_minimo}
+            id="valor_minimo_educoins"
+            name="valor_minimo_educoins"
+            value={formData.valor_minimo_educoins}
             onChange={handleChange}
             min={1}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"
@@ -222,14 +222,14 @@ const CreateAuction = ({ auction, onClose }) => {
         </div>
 
         <div>
-          <label htmlFor="incremento_minimo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="incremento_minimo_educoins" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Incremento minimo
           </label>
           <input
             type="number"
-            id="incremento_minimo"
-            name="incremento_minimo"
-            value={formData.incremento_minimo}
+            id="incremento_minimo_educoins"
+            name="incremento_minimo_educoins"
+            value={formData.incremento_minimo_educoins}
             onChange={handleChange}
             min={1}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 tabular-nums"

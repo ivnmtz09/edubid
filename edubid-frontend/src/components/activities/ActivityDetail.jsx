@@ -185,17 +185,17 @@ export default function ActivityDetail() {
             <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-white/10 rounded-xl p-3 sm:p-4">
               <div className="flex items-center space-x-2 text-purple-700 dark:text-purple-300 mb-1 sm:mb-2">
                 <CurrencyEuroIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                <span className="text-xs sm:text-sm">Valor en edubids</span>
+                <span className="text-xs sm:text-sm">Valor en educoins</span>
               </div>
               <p className="font-semibold text-purple-700 dark:text-purple-300 text-base sm:text-lg lg:text-xl tabular-nums">
-                {activity.valor_edubids} EC
+                {activity.valor_educoins} EDC
               </p>
             </div>
 
             <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-white/10 rounded-xl p-3 sm:p-4 sm:col-span-2 lg:col-span-1">
-              <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 mb-1 sm:mb-2">Valor en Notas</div>
+              <div className="text-xs sm:text-sm text-purple-700 dark:text-purple-300 mb-1 sm:mb-2">Puntos Experiencia</div>
               <p className="font-semibold text-purple-700 dark:text-purple-300 text-base sm:text-lg lg:text-xl tabular-nums">
-                {activity.valor_notas}
+                {activity.puntos_experiencia}
               </p>
             </div>
           </div>
@@ -209,7 +209,7 @@ export default function ActivityDetail() {
                   {/* Card Principal de Calificación */}
                   <div className={`border rounded-xl p-4 sm:p-6 ${
                     (() => {
-                      const percentage = (userSubmission.calificacion / activity.valor_notas) * 100
+                      const percentage = (userSubmission.calificacion / activity.puntos_experiencia) * 100
                       if (percentage >= 90) return 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800/50'
                       if (percentage >= 70) return 'bg-purple-50/60 dark:bg-purple-500/5 text-purple-650 dark:text-purple-400 border-purple-100 dark:border-purple-900/50'
                       if (percentage >= 50) return 'bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-800/50'
@@ -234,7 +234,7 @@ export default function ActivityDetail() {
                           
                           <div className="flex-shrink-0 px-3 py-1 bg-white/80 dark:bg-white/10 backdrop-blur-sm rounded-full">
                             <span className="text-xs sm:text-sm font-bold tabular-nums">
-                              {((userSubmission.calificacion / activity.valor_notas) * 100).toFixed(0)}%
+                              {((userSubmission.calificacion / activity.puntos_experiencia) * 100).toFixed(0)}%
                             </span>
                           </div>
                         </div>
@@ -245,7 +245,7 @@ export default function ActivityDetail() {
                             {userSubmission.calificacion}
                           </span>
                           <span className="text-xl sm:text-2xl lg:text-3xl font-semibold opacity-70 pb-1">
-                            / {activity.valor_notas}
+                            / {activity.puntos_experiencia}
                           </span>
                         </div>
 
@@ -253,7 +253,7 @@ export default function ActivityDetail() {
                         <div className="w-full bg-white/50 dark:bg-gray-805/10 rounded-full h-2 sm:h-3 mb-4 overflow-hidden">
                           <div 
                             className="bg-current h-full rounded-full transition-all duration-500"
-                            style={{ width: `${(userSubmission.calificacion / activity.valor_notas) * 100}%` }}
+                            style={{ width: `${(userSubmission.calificacion / activity.puntos_experiencia) * 100}%` }}
                           />
                         </div>
 
@@ -267,7 +267,7 @@ export default function ActivityDetail() {
                           <div className="flex items-center gap-1.5">
                             <CurrencyEuroIcon className="h-4 w-4" />
                             <span className="font-semibold tabular-nums">
-                              +{Math.floor((userSubmission.calificacion / activity.valor_notas) * activity.valor_edubids)} EC ganados
+                              +{Math.floor((userSubmission.calificacion / activity.puntos_experiencia) * activity.valor_educoins)} EDC ganados
                             </span>
                           </div>
                         </div>
@@ -298,7 +298,7 @@ export default function ActivityDetail() {
                   )}
 
                   {/* Mensaje Motivacional */}
-                  {((userSubmission.calificacion / activity.valor_notas) * 100) >= 90 && (
+                  {((userSubmission.calificacion / activity.puntos_experiencia) * 100) >= 90 && (
                     <div className="bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 rounded-lg p-3 sm:p-4">
                       <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
                         <CheckCircleIcon className="h-5 w-5 flex-shrink-0" />

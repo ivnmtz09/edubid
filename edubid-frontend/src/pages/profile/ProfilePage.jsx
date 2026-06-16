@@ -136,7 +136,7 @@ export default function ProfilePage() {
                   Institucion
                 </p>
                 <p className="text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-white/10">
-                  {profile.institucion || "No asignada"}
+                  {profile.institucion?.nombre || "Sin institución asignada"}
                 </p>
               </div>
 
