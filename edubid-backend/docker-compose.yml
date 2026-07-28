@@ -4,10 +4,10 @@ services:
     container_name: edubid_mysql
     restart: always
     environment:
-      MYSQL_DATABASE: edubid_db
-      MYSQL_USER: edubid_admin
-      MYSQL_PASSWORD: ivnmtz09
-      MYSQL_ROOT_PASSWORD: root_password_segura
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
