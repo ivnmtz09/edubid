@@ -101,9 +101,14 @@ cd edubid
 
 ## ⚙️ Configuración Detallada
 
-### Backend
+Antes de comenzar, asegúrate de tener instalados **Python 3.10+**, **Node.js 18+**, **Docker** y **Git**.
 
-#### Paso 1: Preparar entorno
+### Paso 1: Variables de entorno
+
+Copia o coloca los archivos de configuración en sus ubicaciones correspondientes:
+
+- **Backend**: mueve el archivo `.env` a la raíz de `edubid-backend/`
+- **Frontend**: mueve el archivo `.env.local` a la raíz de `edubid-fron
 
 ```bash
 cd edubid-backend
@@ -123,14 +128,36 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### Paso 3: Configurar base de datos
+#### Paso 3: Configurar variables de entorno
+
+Crear o colocar el archivo `.env` en la raíz de la carpeta `edubid-backend`:
+
+```env
+# Edita los valores según tu configuración local
+DEBUG=True
+SECRET_KEY=<tu_secret_key>
+DATABASE_URL=mysql://user:password@localhost:3306/edubid
+```
+
+#### Paso 4: Levantar base de datos con Docker
+
+El proyecto incluye un archivo `docker-compose.yml` que levanta MySQL 8.0 automáticamente. Asegúrate de tener **Docker Desktop** (Windows/Mac) o el **motor de Docker** (Linux) instalado y ejecuta:
+
+```bash
+docker compose up -d
+# MySQL disponible en localhost:3306
+```
+
+#### Paso 5: Aplicar migraciones
+
+Con el contenedor de MySQL activo y tu entorno virtual local, aplica las migraciones:
 
 ```bash
 python manage.py migrate
 python manage.py createsuperuser  # Crear cuenta de administrador
 ```
 
-#### Paso 4: Ejecutar servidor
+#### Paso 6: Ejecutar servidor
 
 ```bash
 python manage.py runserver
