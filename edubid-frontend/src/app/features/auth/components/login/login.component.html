@@ -1,0 +1,80 @@
+<div class="min-h-screen flex">
+  <!-- Lado izquierdo: Showcase / Branding -->
+  <div class="hidden lg:flex lg:w-1/2 bg-primary items-center justify-center">
+    <div class="text-center text-white p-12">
+      <h1 class="text-5xl font-bold mb-4">EduBid</h1>
+      <p class="text-xl opacity-90">Gamificación educativa con EduCoins</p>
+    </div>
+  </div>
+
+  <!-- Lado derecho: Formulario -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
+    <div class="w-full max-w-md">
+      <h2 class="text-3xl font-bold mb-6">Iniciar Sesión</h2>
+
+      <!-- Error general -->
+      @if (errorMessage()) {
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Email no verificado -->
+      @if (emailNotVerified()) {
+        <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded mb-4">
+          <p>Por favor verifica tu correo electrónico antes de iniciar sesión.</p>
+          <button class="underline text-sm mt-1">Reenviar verificación</button>
+        </div>
+      }
+
+      <!-- Sugerencia reset password -->
+      @if (showPasswordResetSuggestion()) {
+        <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4">
+          <p>¿Olvidaste tu contraseña?</p>
+          <a routerLink="/forgot-password" class="underline text-sm">Restablecer contraseña</a>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium mb-1">Correo electrónico</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary"
+            placeholder="tu&#64;email.com"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium mb-1">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            class="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="loginForm.invalid || isLoading()"
+          class="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+        >
+          @if (isLoading()) {
+            <span>Cargando...</span>
+          } @else {
+            Iniciar Sesión
+          }
+        </button>
+      </form>
+
+      <p class="mt-6 text-center text-sm text-muted">
+        ¿No tienes cuenta?
+        <a routerLink="/register" class="text-primary hover:underline">Regístrate</a>
+      </p>
+    </div>
+  </div>
+</div>
