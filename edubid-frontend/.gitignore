@@ -48,3 +48,8 @@ Thumbs.db
 .env.*
 *.env
 !.env.example
+
+# Environment files dynamically generated from .env (NEVER COMMIT CREDENTIALS)
+/src/environments/environment.ts
+/src/environments/environment.prod.ts
+!/src/environments/environment.example.ts

@@ -69,8 +69,11 @@ coverage.xml
 local_settings.py
 
 # ==========================================================
-# FRONTEND (Vite / React)
+# FRONTEND (Angular / Tailwind)
 # ==========================================================
+.angular/
+.postcssrc.json.cache
+
 # Dependencias
 # ==========================================================
 node_modules/
@@ -109,6 +112,9 @@ build/
 .env
 */.env
 **/.env
+edubid-frontend/src/environments/environment.ts
+edubid-frontend/src/environments/environment.prod.ts
+!edubid-frontend/src/environments/environment.example.ts
 
 # ==========================================================
 # OTHERS

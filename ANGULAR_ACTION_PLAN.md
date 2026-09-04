@@ -1,9 +1,9 @@
 # ANGULAR_ACTION_PLAN.md — Plan de Acción: Frontend Angular 19
 
 > **Proyecto:** EduBid — Plataforma educativa gamificada
-> **Stack objetivo:** Angular 19+ (Standalone, Signals, TypeScript estricto) + Tailwind CSS 4.x
+> **Stack objetivo:** Angular 19+ (Standalone, Signals, TypeScript estricto) + Tailwind CSS 4.x + Flowbite
 > **Backend:** Django REST Framework + SimpleJWT
-> **Fecha:** Agosto 2026
+> **Estado:** 🚀 **En ejecución activa** — Scaffolding completado, UI Core integrado, ThemeService (SaaS White-Label), AuthService SSR-safe, routing principal y environments configurados (Commit `695baa2`).
 
 ---
 

@@ -608,7 +608,7 @@ Institution
 | **Base URL** | `https://<dominio-railway>/api/` |
 | **Content-Type** | `application/json` (excepto archivos: `multipart/form-data`) |
 | **Auth Header** | `Authorization: Bearer <access_token>` |
-| **CORS** | Permitido en `localhost:5173` y `*.netlify.app` |
+| **CORS** | Permitido en `localhost:4200` (Angular), `localhost:5173` y `*.netlify.app` |
 | **File Uploads** | Actividades (archivo_adjunto), Submissions (archivo), Perfil (avatar), Instituciones (logo) |
 | **Roles disponibles** | `admin`, `rector`, `coordinador`, `docente`, `estudiante` |
 | **Moneda virtual** | EduCoins — gestionadas por Wallet por grupo + periodo |
