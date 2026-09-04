@@ -223,7 +223,6 @@ export class HomeComponent implements OnInit {
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -232,6 +231,11 @@ export class HomeComponent implements OnInit {
         if (body?.email_not_verified) {
           this.emailNotVerified.set(true);
           this.notVerifiedEmail.set(body.email);
+          return;
+        }
+
+        if (err.status === 0) {
+          this.errorMessage.set('No se pudo establecer conexión con el servidor. Verifica que el backend esté en ejecución.');
           return;
         }
 
@@ -263,17 +267,25 @@ export class HomeComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.isLoading.set(false);
+          this.loginForm.patchValue({ email: val.email });
           if (res.verification_required) {
             this.successMessage.set(
               '¡Registro exitoso! Por favor verifica tu correo electrónico antes de iniciar sesión.'
             );
             this.switchTab('login');
           } else {
-            this.router.navigate(['/dashboard']);
+            this.successMessage.set(
+              '¡Registro exitoso! Ya puedes iniciar sesión con tu cuenta.'
+            );
+            this.switchTab('login');
           }
         },
         error: (err) => {
           this.isLoading.set(false);
+          if (err.status === 0) {
+            this.errorMessage.set('No se pudo establecer conexión con el servidor. Verifica que el backend esté en ejecución.');
+            return;
+          }
           const body = err.error;
           let msg = body?.message || 'Error al procesar el registro.';
           if (body?.errors) {
