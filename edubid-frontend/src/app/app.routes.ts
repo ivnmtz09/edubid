@@ -6,16 +6,19 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    title: 'EduBid',
     loadComponent: () =>
       import('./features/home/home.component').then(m => m.HomeComponent),
   },
   {
     path: 'login',
+    title: 'Iniciar Sesión | EduBid',
     loadComponent: () =>
       import('./features/auth/components/login/login.component').then(m => m.LoginComponent),
   },
   {
     path: 'register',
+    title: 'Registro | EduBid',
     loadComponent: () =>
       import('./features/auth/components/register/register.component').then(m => m.RegisterComponent),
   },
@@ -32,11 +35,13 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        title: 'Panel Principal | EduBid',
         loadComponent: () =>
           import('./features/dashboard/components/dashboard.component').then(m => m.DashboardComponent),
       },
       {
         path: 'rector',
+        title: 'Panel de Rectoría | EduBid',
         canActivate: [roleGuard(['rector'])],
         loadComponent: () =>
           import('./features/dashboard/components/rector-dashboard/rector-dashboard.component').then(m => m.RectorDashboardComponent),
@@ -51,11 +56,13 @@ export const routes: Routes = [
     children: [
       {
         path: '',
+        title: 'Aulas Virtuales | EduBid',
         loadComponent: () =>
           import('./features/classrooms/components/classrooms.component').then(m => m.ClassroomsComponent),
       },
       {
         path: ':id',
+        title: 'Detalle de Aula | EduBid',
         loadComponent: () =>
           import('./features/classrooms/components/classroom-detail.component').then(m => m.ClassroomDetailComponent),
       },
@@ -63,6 +70,7 @@ export const routes: Routes = [
   },
   {
     path: 'sobre-nosotros',
+    title: 'Sobre Nosotros | EduBid',
     loadComponent: () =>
       import('./features/about/about.component').then(m => m.AboutComponent),
   },
@@ -72,6 +80,7 @@ export const routes: Routes = [
   },
   {
     path: 'terminos-y-condiciones',
+    title: 'Términos y Condiciones | EduBid',
     loadComponent: () =>
       import('./features/terms/terms.component').then(m => m.TermsComponent),
   },
@@ -81,11 +90,13 @@ export const routes: Routes = [
   },
   {
     path: '404',
+    title: 'Página no encontrada | EduBid',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(m => m.NotFoundComponent),
   },
   {
     path: '**',
+    title: 'Página no encontrada | EduBid',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(m => m.NotFoundComponent),
   },
