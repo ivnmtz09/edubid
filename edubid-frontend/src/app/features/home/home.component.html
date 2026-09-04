@@ -1,10 +1,25 @@
-<div class="min-h-screen flex flex-col justify-between bg-bg text-text transition-colors duration-200">
+<div class="min-h-screen flex flex-col justify-between bg-bg text-text transition-colors duration-200 relative">
+  <!-- Interactive Dots Canvas Background -->
+  <app-interactive-dots />
+
   <!-- Minimalist Header: Meramente Logo sutil y Botón Desplegable de Tema -->
   <header class="h-16 border-b border-border bg-surface/85 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between sticky top-0 z-40">
-    <!-- Brand Logo Minimal -->
-    <a routerLink="/" class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
-      EduBid
-      <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-600 shrink-0"></span>
+    <!-- Brand Logo Minimal con Nuevo Icono Libre -->
+    <a routerLink="/" class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2 group">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-110">
+        <circle cx="32" cy="32" r="23" fill="none" class="stroke-slate-400 dark:stroke-slate-500" stroke-width="1.8" stroke-dasharray="3 2"/>
+        <polygon points="32,15 17,22 32,29 47,22" class="fill-slate-900 dark:fill-white"/>
+        <path d="M 23 25.5 L 23 29 Q 32 34 41 29 L 41 25.5" fill="none" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="1.6"/>
+        <circle cx="45" cy="28" r="2.5" fill="#ea580c"/>
+        <line x1="20" y1="48" x2="44" y2="48" class="stroke-slate-400 dark:stroke-slate-600" stroke-width="2" stroke-linecap="round"/>
+        <rect x="23" y="33" width="18" height="6" rx="2" class="fill-slate-900 dark:fill-white"/>
+        <rect x="30.5" y="33" width="3" height="6" fill="#ea580c"/>
+        <line x1="32" y1="39" x2="32" y2="45" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span class="flex items-center gap-1">
+        EduBid
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-600 shrink-0"></span>
+      </span>
     </a>
 
     <!-- Theme Switcher: Botón Desplegable con 3 Opciones (Flowbite style) -->
@@ -106,33 +121,212 @@
   </header>
 
   <!-- Main Body: Split View (Izquierda: Info + Espacio de Imagen / Derecha: Acceder o Formularios) -->
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 flex items-center">
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 flex items-center relative z-10">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 w-full items-center">
       
-      <!-- Lado Izquierdo: Título en grande EduBid, breve descripción y espacio para imagen/SVG/PNG -->
-      <div class="lg:col-span-6 space-y-6 sm:space-y-8">
+      <!-- Lado Izquierdo: Título en grande EduBid, breve descripción e ilustración SVG interactiva (Proporción Áurea ~62%) -->
+      <div class="lg:col-span-7 space-y-6 sm:space-y-8">
         <div class="space-y-3">
           <span class="inline-flex items-center text-xs font-semibold tracking-wider uppercase text-text-muted">
             Plataforma Educativa Gamificada
           </span>
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+          <h1 class="text-4xl sm:text-5xl lg:text-[4.236rem] font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2 leading-[1.12]">
             EduBid
             <span class="inline-block w-2.5 h-2.5 rounded-full bg-orange-600 shrink-0"></span>
           </h1>
-          <p class="text-base sm:text-lg text-text-muted leading-relaxed max-w-lg">
+          <p class="text-base sm:text-lg text-text-muted leading-[1.618] max-w-lg">
             Recompensa la participación en clase con <span class="font-medium text-slate-900 dark:text-white">EduCoins</span> y subastas dinámicas en tiempo real. Motiva el aprendizaje constante de tus estudiantes.
           </p>
         </div>
 
-        <!-- Espacio reservado para imagen o ilustración (PNG o SVG) que irá después -->
-        <div class="relative w-full aspect-16/10 rounded-2xl border border-dashed border-border bg-surface/60 overflow-hidden flex flex-col items-center justify-center p-6 text-center transition-all hover:border-slate-400 dark:hover:border-slate-600 group">
-          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-bg border border-border flex items-center justify-center text-text-muted mb-3 group-hover:scale-105 transition-transform duration-200 shrink-0">
-            <svg class="w-8 h-8 sm:w-10 sm:h-10 shrink-0 opacity-70" width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <span class="text-xs font-semibold text-text-muted">Espacio para Ilustración / Imagen</span>
-          <span class="text-[11px] text-text-muted/70 mt-0.5">Soporta formato PNG o SVG</span>
+        <!-- Ilustración Minimalista EduBid Subastas & EduCoins Libre sin marco -->
+        <div class="relative w-full aspect-16/10 flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 540 300"
+            width="100%"
+            height="100%"
+            class="w-full h-full select-none"
+          >
+            <defs>
+              <filter id="neutralShadow" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" class="svg-shadow" />
+              </filter>
+              <style>
+                .svg-shadow { flood-opacity: 0.08; }
+                .svg-grid-dots { fill: #94a3b8; opacity: 0.45; }
+                .svg-guide-line { stroke: #cbd5e1; }
+                .svg-card-main { fill: #ffffff; stroke: #e2e8f0; }
+                .svg-card-side { fill: #f8fafc; stroke: #e2e8f0; }
+                .svg-text-primary { fill: #0f172a; }
+                .svg-text-muted { fill: #64748b; }
+                .svg-text-subtle { fill: #94a3b8; }
+                .svg-pedestal-base { fill: #e2e8f0; }
+                .svg-pedestal-top { fill: #cbd5e1; }
+                .svg-gavel-head { fill: #0f172a; }
+                .svg-gavel-handle { stroke: #64748b; }
+                .svg-bar-track { fill: #f1f5f9; }
+                .svg-check-bg { fill: #e2e8f0; }
+                .svg-check-icon { stroke: #0f172a; }
+                .svg-reward-pill { fill: #ffedd5; }
+                .svg-divider { stroke: #e2e8f0; }
+
+                :host-context(.dark) .svg-shadow,
+                .dark .svg-shadow { flood-opacity: 0.5; }
+                :host-context(.dark) .svg-grid-dots,
+                .dark .svg-grid-dots { fill: #1e293b; opacity: 0.7; }
+                :host-context(.dark) .svg-guide-line,
+                .dark .svg-guide-line { stroke: #1e293b; }
+                :host-context(.dark) .svg-card-main,
+                .dark .svg-card-main { fill: #0f172a; stroke: #1e293b; }
+                :host-context(.dark) .svg-card-side,
+                .dark .svg-card-side { fill: #0b1120; stroke: #1e293b; }
+                :host-context(.dark) .svg-text-primary,
+                .dark .svg-text-primary { fill: #f8fafc; }
+                :host-context(.dark) .svg-text-muted,
+                .dark .svg-text-muted { fill: #64748b; }
+                :host-context(.dark) .svg-text-subtle,
+                .dark .svg-text-subtle { fill: #94a3b8; }
+                :host-context(.dark) .svg-pedestal-base,
+                .dark .svg-pedestal-base { fill: #1e293b; }
+                :host-context(.dark) .svg-pedestal-top,
+                .dark .svg-pedestal-top { fill: #334155; }
+                :host-context(.dark) .svg-gavel-head,
+                .dark .svg-gavel-head { fill: #f8fafc; }
+                :host-context(.dark) .svg-gavel-handle,
+                .dark .svg-gavel-handle { stroke: #94a3b8; }
+                :host-context(.dark) .svg-bar-track,
+                .dark .svg-bar-track { fill: #1e293b; }
+                :host-context(.dark) .svg-check-bg,
+                .dark .svg-check-bg { fill: #1e293b; }
+                :host-context(.dark) .svg-check-icon,
+                .dark .svg-check-icon { stroke: #f8fafc; }
+                :host-context(.dark) .svg-reward-pill,
+                .dark .svg-reward-pill { fill: #1e293b; }
+                :host-context(.dark) .svg-divider,
+                .dark .svg-divider { stroke: #1e293b; }
+
+                @keyframes floatLeft {
+                  0%, 100% { transform: translate(25px, 65px); }
+                  50% { transform: translate(25px, 58px); }
+                }
+                @keyframes floatRight {
+                  0%, 100% { transform: translate(385px, 140px); }
+                  50% { transform: translate(385px, 147px); }
+                }
+                @keyframes pulseSubasta {
+                  0%, 100% { opacity: 1; transform: scale(1); }
+                  50% { opacity: 0.45; transform: scale(1.25); }
+                }
+                .card-float-left {
+                  animation: floatLeft 6s ease-in-out infinite;
+                }
+                .card-float-right {
+                  animation: floatRight 7s ease-in-out infinite;
+                }
+                .pulse-subasta {
+                  transform-origin: 4px 4px;
+                  animation: pulseSubasta 2s ease-in-out infinite;
+                }
+              </style>
+            </defs>
+
+            <!-- Puntos de cuadrícula neutros de fondo -->
+            <g class="svg-grid-dots">
+              <circle cx="50" cy="50" r="1.5"/><circle cx="90" cy="50" r="1.5"/><circle cx="130" cy="50" r="1.5"/>
+              <circle cx="410" cy="250" r="1.5"/><circle cx="450" cy="250" r="1.5"/><circle cx="490" cy="250" r="1.5"/>
+            </g>
+
+            <!-- Líneas guía de interconexión técnica -->
+            <path d="M 120 100 L 270 140 L 420 100" fill="none" class="svg-guide-line" stroke-width="1" stroke-dasharray="4 4"/>
+
+            <!-- ================= TARJETA CENTRAL: SUBASTA ACTIVA ================= -->
+            <g transform="translate(170, 35)" filter="url(#neutralShadow)">
+              <!-- Contenedor base neutro -->
+              <rect width="200" height="230" rx="10" class="svg-card-main" stroke-width="1.2"/>
+
+              <!-- Cabecera / Estado -->
+              <g transform="translate(16, 18)">
+                <circle cx="4" cy="4" r="3" fill="#ea580c" class="pulse-subasta"/>
+                <text x="14" y="7" font-family="system-ui, sans-serif" font-size="9" font-weight="600" class="svg-text-subtle" letter-spacing="0.5">SUBASTA ACTIVA</text>
+              </g>
+
+              <!-- Visualización Minimalista del Mazo -->
+              <g transform="translate(100, 80)">
+                <!-- Onda concéntrica muy sutil -->
+                <ellipse cx="0" cy="24" rx="28" ry="7" fill="none" stroke="#ea580c" stroke-width="1" opacity="0.3"/>
+
+                <!-- Bloque de resonancia / Pedestal -->
+                <ellipse cx="0" cy="24" rx="18" ry="5" class="svg-pedestal-base"/>
+                <ellipse cx="0" cy="23" rx="14" ry="3.5" class="svg-pedestal-top"/>
+
+                <!-- Mazo lineal en ángulo de reposo -->
+                <g transform="translate(0, 5) rotate(-28)">
+                  <!-- Mango -->
+                  <line x1="0" y1="5" x2="0" y2="34" class="svg-gavel-handle" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="0" cy="35" r="1.8" fill="#ea580c"/>
+                  <!-- Cabeza del mazo -->
+                  <rect x="-14" y="-7" width="28" height="11" rx="2" class="svg-gavel-head"/>
+                  <!-- Acento de marca -->
+                  <rect x="-3" y="-7" width="6" height="11" fill="#ea580c"/>
+                </g>
+              </g>
+
+              <!-- Información de la Puja -->
+              <text x="16" y="142" font-family="system-ui, sans-serif" font-size="11" font-weight="600" class="svg-text-primary">Exoneración de Taller</text>
+              <text x="16" y="157" font-family="system-ui, sans-serif" font-size="8.5" class="svg-text-muted">Mayor oferta actual</text>
+
+              <!-- Cantidad en EduCoins -->
+              <text x="16" y="180" font-family="system-ui, sans-serif" font-size="18" font-weight="800" class="svg-text-primary">350</text>
+              <text x="56" y="180" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#ea580c">EduCoins</text>
+
+              <!-- Barra de progreso mínima -->
+              <rect x="16" y="194" width="168" height="3" rx="1.5" class="svg-bar-track"/>
+              <rect x="16" y="194" width="110" height="3" rx="1.5" fill="#ea580c"/>
+
+              <!-- Pie / Temporizador neutro -->
+              <text x="16" y="212" font-family="system-ui, sans-serif" font-size="8" class="svg-text-muted">Cierra en 15m 30s</text>
+            </g>
+
+            <!-- ================= TARJETA FLOTANTE IZQ: BILLETERA ================= -->
+            <g class="card-float-left" filter="url(#neutralShadow)">
+              <rect width="130" height="85" rx="8" class="svg-card-side" stroke-width="1"/>
+              
+              <!-- Título y Moneda -->
+              <g transform="translate(14, 18)">
+                <circle cx="5" cy="5" r="5" fill="none" stroke="#ea580c" stroke-width="1.2"/>
+                <text x="3.5" y="7.5" font-family="sans-serif" font-size="6" font-weight="800" fill="#ea580c">E</text>
+                <text x="16" y="8" font-family="system-ui, sans-serif" font-size="8.5" font-weight="600" class="svg-text-subtle">Billetera</text>
+              </g>
+
+              <text x="14" y="44" font-family="system-ui, sans-serif" font-size="14" font-weight="700" class="svg-text-primary">620 EC</text>
+              <line x1="14" y1="52" x2="116" y2="52" class="svg-divider" stroke-width="1"/>
+
+              <!-- Desglose técnico de saldos -->
+              <text x="14" y="64" font-family="system-ui, sans-serif" font-size="7.5" class="svg-text-muted">Disp: <tspan class="svg-text-primary" font-weight="600">420 EC</tspan></text>
+              <text x="14" y="75" font-family="system-ui, sans-serif" font-size="7.5" class="svg-text-muted">Bloq: <tspan fill="#ea580c" font-weight="600">200 EC</tspan></text>
+            </g>
+
+            <!-- ================= TARJETA FLOTANTE DER: TAREA CALIFICADA ================= -->
+            <g class="card-float-right" filter="url(#neutralShadow)">
+              <rect width="130" height="85" rx="8" class="svg-card-side" stroke-width="1"/>
+
+              <!-- Icono estado -->
+              <g transform="translate(14, 18)">
+                <circle cx="5" cy="5" r="5" class="svg-check-bg"/>
+                <path d="M 3 5 L 4.5 6.5 L 7.5 3.5" fill="none" class="svg-check-icon" stroke-width="1" stroke-linecap="round"/>
+                <text x="16" y="8" font-family="system-ui, sans-serif" font-size="8.5" font-weight="600" class="svg-text-subtle">Evaluación</text>
+              </g>
+
+              <!-- Calificación académica -->
+              <text x="14" y="43" font-family="system-ui, sans-serif" font-size="8" class="svg-text-muted">Calificación:</text>
+              <text x="64" y="43" font-family="system-ui, sans-serif" font-size="9" font-weight="700" class="svg-text-primary">5.0 / 5.0</text>
+
+              <!-- Asignación de monedas -->
+              <rect x="14" y="52" width="102" height="20" rx="4" class="svg-reward-pill"/>
+              <text x="22" y="65" font-family="system-ui, sans-serif" font-size="8.5" font-weight="700" fill="#ea580c">+80 EduCoins</text>
+            </g>
+          </svg>
         </div>
 
         <div>
@@ -146,8 +340,8 @@
         </div>
       </div>
 
-      <!-- Lado Derecho: Botón Inicial "Acceder" o Formularios (Login/Register) -->
-      <div class="lg:col-span-6 w-full max-w-md mx-auto lg:max-w-none">
+      <!-- Lado Derecho: Botón Inicial "Acceder" o Formularios (Login/Register) (Proporción Áurea ~38%) -->
+      <div class="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
         
         <!-- ESTADO INICIAL: Botón "Acceder a EduBid" -->
         @if (!showAuthForms()) {
@@ -432,125 +626,58 @@
                       {{ currentRole }}
                     </span>
                   </div>
-                  <div class="grid grid-cols-2 gap-2.5" role="radiogroup" aria-label="Rol educativo">
-                    <!-- Opción Estudiante -->
-                    <button
-                      type="button"
-                      role="radio"
-                      [attr.aria-checked]="currentRole === 'estudiante'"
-                      (click)="setRole('estudiante')"
+                  <div class="grid grid-cols-2 gap-2.5">
+                    <!-- Flowbite Radio Estudiante -->
+                    <div
+                      class="flex items-center ps-3 pe-2 py-0.5 border rounded-xl transition-colors cursor-pointer"
                       [class.border-slate-900]="currentRole === 'estudiante'"
-                      [class.bg-slate-100]="currentRole === 'estudiante'"
-                      [class.text-slate-900]="currentRole === 'estudiante'"
-                      [class.ring-2]="currentRole === 'estudiante'"
-                      [class.ring-slate-900]="currentRole === 'estudiante'"
-                      [class.shadow-xs]="currentRole === 'estudiante'"
                       [class.dark:border-white]="currentRole === 'estudiante'"
-                      [class.dark:bg-slate-800]="currentRole === 'estudiante'"
-                      [class.dark:text-white]="currentRole === 'estudiante'"
-                      [class.dark:ring-white]="currentRole === 'estudiante'"
                       [class.border-border]="currentRole !== 'estudiante'"
-                      [class.bg-bg/60]="currentRole !== 'estudiante'"
-                      [class.text-text-muted]="currentRole !== 'estudiante'"
-                      [class.dark:bg-slate-900/40]="currentRole !== 'estudiante'"
-                      [class.dark:border-slate-800]="currentRole !== 'estudiante'"
-                      [class.dark:text-slate-400]="currentRole !== 'estudiante'"
-                      class="relative flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer text-left focus:outline-hidden"
+                      [class.bg-slate-50]="currentRole === 'estudiante'"
+                      [class.dark:bg-slate-800/60]="currentRole === 'estudiante'"
+                      [class.bg-surface]="currentRole !== 'estudiante'"
                     >
                       <input
+                        id="home-role-estudiante"
                         type="radio"
-                        formControlName="role"
                         value="estudiante"
-                        class="sr-only"
+                        formControlName="role"
+                        (change)="setRole('estudiante')"
+                        class="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
                       />
-                      <div class="flex items-center gap-2 min-w-0">
-                        <div
-                          [class.text-slate-900]="currentRole === 'estudiante'"
-                          [class.dark:text-white]="currentRole === 'estudiante'"
-                          [class.text-slate-400]="currentRole !== 'estudiante'"
-                          [class.dark:text-slate-500]="currentRole !== 'estudiante'"
-                          class="shrink-0 transition-colors"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                          </svg>
-                        </div>
-                        <span class="text-xs font-semibold truncate">Estudiante</span>
-                      </div>
-
-                      <!-- Indicador Visual Radio / Dot -->
-                      <div
-                        [class.border-slate-900]="currentRole === 'estudiante'"
-                        [class.dark:border-white]="currentRole === 'estudiante'"
-                        [class.border-slate-300]="currentRole !== 'estudiante'"
-                        [class.dark:border-slate-700]="currentRole !== 'estudiante'"
-                        class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ml-1.5 transition-colors"
+                      <label
+                        for="home-role-estudiante"
+                        class="w-full py-2.5 ms-2 text-xs font-medium text-slate-900 dark:text-slate-200 cursor-pointer select-none"
                       >
-                        @if (currentRole === 'estudiante') {
-                          <div class="w-2 h-2 rounded-full bg-slate-900 dark:bg-white animate-in zoom-in duration-150"></div>
-                        }
-                      </div>
-                    </button>
+                        Estudiante
+                      </label>
+                    </div>
 
-                    <!-- Opción Docente -->
-                    <button
-                      type="button"
-                      role="radio"
-                      [attr.aria-checked]="currentRole === 'docente'"
-                      (click)="setRole('docente')"
+                    <!-- Flowbite Radio Docente -->
+                    <div
+                      class="flex items-center ps-3 pe-2 py-0.5 border rounded-xl transition-colors cursor-pointer"
                       [class.border-slate-900]="currentRole === 'docente'"
-                      [class.bg-slate-100]="currentRole === 'docente'"
-                      [class.text-slate-900]="currentRole === 'docente'"
-                      [class.ring-2]="currentRole === 'docente'"
-                      [class.ring-slate-900]="currentRole === 'docente'"
-                      [class.shadow-xs]="currentRole === 'docente'"
                       [class.dark:border-white]="currentRole === 'docente'"
-                      [class.dark:bg-slate-800]="currentRole === 'docente'"
-                      [class.dark:text-white]="currentRole === 'docente'"
-                      [class.dark:ring-white]="currentRole === 'docente'"
                       [class.border-border]="currentRole !== 'docente'"
-                      [class.bg-bg/60]="currentRole !== 'docente'"
-                      [class.text-text-muted]="currentRole !== 'docente'"
-                      [class.dark:bg-slate-900/40]="currentRole !== 'docente'"
-                      [class.dark:border-slate-800]="currentRole !== 'docente'"
-                      [class.dark:text-slate-400]="currentRole !== 'docente'"
-                      class="relative flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer text-left focus:outline-hidden"
+                      [class.bg-slate-50]="currentRole === 'docente'"
+                      [class.dark:bg-slate-800/60]="currentRole === 'docente'"
+                      [class.bg-surface]="currentRole !== 'docente'"
                     >
                       <input
+                        id="home-role-docente"
                         type="radio"
-                        formControlName="role"
                         value="docente"
-                        class="sr-only"
+                        formControlName="role"
+                        (change)="setRole('docente')"
+                        class="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
                       />
-                      <div class="flex items-center gap-2 min-w-0">
-                        <div
-                          [class.text-slate-900]="currentRole === 'docente'"
-                          [class.dark:text-white]="currentRole === 'docente'"
-                          [class.text-slate-400]="currentRole !== 'docente'"
-                          [class.dark:text-slate-500]="currentRole !== 'docente'"
-                          class="shrink-0 transition-colors"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                          </svg>
-                        </div>
-                        <span class="text-xs font-semibold truncate">Docente</span>
-                      </div>
-
-                      <!-- Indicador Visual Radio / Dot -->
-                      <div
-                        [class.border-slate-900]="currentRole === 'docente'"
-                        [class.dark:border-white]="currentRole === 'docente'"
-                        [class.border-slate-300]="currentRole !== 'docente'"
-                        [class.dark:border-slate-700]="currentRole !== 'docente'"
-                        class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ml-1.5 transition-colors"
+                      <label
+                        for="home-role-docente"
+                        class="w-full py-2.5 ms-2 text-xs font-medium text-slate-900 dark:text-slate-200 cursor-pointer select-none"
                       >
-                        @if (currentRole === 'docente') {
-                          <div class="w-2 h-2 rounded-full bg-slate-900 dark:bg-white animate-in zoom-in duration-150"></div>
-                        }
-                      </div>
-                    </button>
+                        Docente
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -753,7 +880,7 @@
   }
 
   <!-- Footer con enlace a Sobre Nosotros y Términos -->
-  <footer class="border-t border-border bg-surface py-6 sm:py-8 text-xs text-text-muted transition-colors duration-200">
+  <footer class="border-t border-border bg-surface py-6 sm:py-8 text-xs text-text-muted transition-colors duration-200 relative z-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <div class="flex items-center gap-2">
         <span class="font-bold text-slate-900 dark:text-white">EduBid</span>
@@ -764,6 +891,21 @@
         <a routerLink="/sobre-nosotros" class="hover:text-text font-medium transition-colors">Sobre Nosotros</a>
         <span>•</span>
         <a routerLink="/terminos-y-condiciones" class="hover:text-text font-medium transition-colors">Términos y Condiciones</a>
+        <span>•</span>
+        <button
+          type="button"
+          (click)="shareSite()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text text-xs font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
+          title="Compartir EduBid"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+          <span>Compartir</span>
+          @if (shareCopied()) {
+            <span class="text-[10px] text-green-600 font-bold animate-in fade-in">¡Copiado!</span>
+          }
+        </button>
         <span>•</span>
         <span>© 2026 EduBid</span>
       </div>

@@ -13,11 +13,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { PublicInstitution, UserRole } from '../../core/models/user.model';
 import { AUTH_ENDPOINTS } from '../../core/constants/api.constants';
+import { InteractiveDotsComponent } from '../../shared/components/ui/interactive-dots.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, InteractiveDotsComponent],
   templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit {
@@ -56,6 +57,32 @@ export class HomeComponent implements OnInit {
 
   // Datos
   institutions = signal<PublicInstitution[]>([]);
+
+  // Estado para botón de compartir
+  shareCopied = signal(false);
+
+  async shareSite(): Promise<void> {
+    const shareData = {
+      title: 'EduBid',
+      text: 'EduBid — Plataforma educativa gamificada con EduCoins y subastas dinámicas',
+      url: typeof window !== 'undefined' ? window.location.origin : 'https://edubid.app',
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // Fallback al portapapeles si el usuario cancela o hay restricción
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(shareData.url);
+      this.shareCopied.set(true);
+      setTimeout(() => this.shareCopied.set(false), 2500);
+    }
+  }
 
   constructor() {
     this.loginForm = this.fb.group({

@@ -1,7 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-terms',
@@ -10,9 +9,28 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
   templateUrl: './terms.component.html',
 })
 export class TermsComponent {
-  readonly themeService = inject(ThemeService);
+  shareCopied = signal(false);
 
-  setTheme(mode: ThemeMode): void {
-    this.themeService.setTheme(mode);
+  async shareSite(): Promise<void> {
+    const shareData = {
+      title: 'EduBid - Términos y Condiciones',
+      text: 'Conoce los términos y condiciones de uso de la plataforma educativa EduBid',
+      url: typeof window !== 'undefined' ? window.location.origin : 'https://edubid.app',
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch {
+        // Fallback al portapapeles
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(shareData.url);
+      this.shareCopied.set(true);
+      setTimeout(() => this.shareCopied.set(false), 2500);
+    }
   }
 }
