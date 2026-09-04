@@ -28,6 +28,7 @@
 
 /* === Brand colors via Tailwind === */
 @theme {
+  --font-sans: 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --color-primary: var(--brand-primary);
   --color-primary-hover: var(--brand-primary-hover);
   --color-accent: var(--brand-accent);
@@ -40,7 +41,20 @@
 }
 
 body {
-  @apply bg-bg text-text font-sans antialiased min-h-screen transition-colors duration-200;
+  font-family: var(--font-sans);
+  @apply bg-bg text-text antialiased min-h-screen transition-colors duration-300;
+}
+
+/* Transiciones suaves globales */
+a, button, input, select, textarea {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 250ms;
+}
+
+/* Tipografía áurea para lectura */
+p {
+  line-height: 1.618;
 }
 
 /* Regla defensiva para SVGs en caso de carga asíncrona o fallback */
