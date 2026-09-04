@@ -5,6 +5,22 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/home/home.component').then(m => m.HomeComponent),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/components/login/login.component').then(m => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./features/auth/components/register/register.component').then(m => m.RegisterComponent),
+  },
+  {
+    path: 'auth',
     loadChildren: () =>
       import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES),
   },
@@ -46,7 +62,31 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'sobre-nosotros',
+    loadComponent: () =>
+      import('./features/about/about.component').then(m => m.AboutComponent),
+  },
+  {
+    path: 'about',
+    redirectTo: 'sobre-nosotros',
+  },
+  {
+    path: 'terminos-y-condiciones',
+    loadComponent: () =>
+      import('./features/terms/terms.component').then(m => m.TermsComponent),
+  },
+  {
+    path: 'terminos',
+    redirectTo: 'terminos-y-condiciones',
+  },
+  {
+    path: '404',
+    loadComponent: () =>
+      import('./features/not-found/not-found.component').then(m => m.NotFoundComponent),
+  },
+  {
     path: '**',
-    redirectTo: '',
+    loadComponent: () =>
+      import('./features/not-found/not-found.component').then(m => m.NotFoundComponent),
   },
 ];

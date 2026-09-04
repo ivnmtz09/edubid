@@ -1,0 +1,242 @@
+<div class="min-h-screen bg-bg text-text transition-colors duration-200">
+  <!-- Minimalist Header -->
+  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-border">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Back to Home + Logo -->
+      <div class="flex items-center gap-4">
+        <a routerLink="/" class="text-xs font-semibold text-text-muted hover:text-text flex items-center gap-1.5 transition-colors">
+          <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Inicio</span>
+        </a>
+        <span class="text-border">|</span>
+        <a routerLink="/" class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
+          EduBid
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-600 shrink-0"></span>
+        </a>
+      </div>
+
+      <!-- Segmented Theme Switcher -->
+      <div class="flex items-center bg-bg border border-border rounded-xl p-1 text-xs font-medium">
+        <button
+          type="button"
+          (click)="setTheme('light')"
+          [class.bg-surface]="themeService.mode() === 'light'"
+          [class.text-text]="themeService.mode() === 'light'"
+          [class.shadow-xs]="themeService.mode() === 'light'"
+          class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1.5"
+          title="Modo claro"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span class="hidden sm:inline">Claro</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTheme('dark')"
+          [class.bg-surface]="themeService.mode() === 'dark'"
+          [class.text-text]="themeService.mode() === 'dark'"
+          [class.shadow-xs]="themeService.mode() === 'dark'"
+          class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1.5"
+          title="Modo oscuro"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          <span class="hidden sm:inline">Oscuro</span>
+        </button>
+
+        <button
+          type="button"
+          (click)="setTheme('system')"
+          [class.bg-surface]="themeService.mode() === 'system'"
+          [class.text-text]="themeService.mode() === 'system'"
+          [class.shadow-xs]="themeService.mode() === 'system'"
+          class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1.5"
+          title="Tema del sistema"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="hidden sm:inline">Sistema</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-20">
+    <!-- Introduction -->
+    <section class="text-center max-w-3xl mx-auto">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">
+        Sobre EduBid
+      </h1>
+      <p class="text-base sm:text-lg text-text-muted leading-relaxed">
+        EduBid nace para convertir el aula en un ecosistema activo y participativo. Mediante dinámicas de gamificación sustentadas en méritos y recompensas justas, ayudamos a instituciones educativas a fomentar la motivación, el trabajo continuo y la excelencia formativa.
+      </p>
+    </section>
+
+    <!-- 1. Características -->
+    <section class="space-y-6">
+      <div class="border-b border-border pb-3">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+          Características Principales
+        </h2>
+        <p class="text-xs sm:text-sm text-text-muted mt-1">Herramientas creadas específicamente para el entorno formativo.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div class="p-6 rounded-2xl border border-border bg-surface space-y-2">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Aulas y Actividades Dinámicas</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Publicación estructurada de talleres, tareas y proyectos con fechas límite, rúbricas claras y retroalimentación directa entre profesores y alumnos.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-border bg-surface space-y-2">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Billetera de EduCoins</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Registro contable inmutable para cada estudiante donde se auditan los ingresos por méritos (asistencia, tareas, retos) y las salidas en subastas.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-border bg-surface space-y-2">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Subastas en Tiempo Real</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Módulo de pujas en vivo con temporizadores precisos donde los estudiantes compiten sanamente por incentivos académicos autorizados por su docente.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-border bg-surface space-y-2">
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Arquitectura Multi-Tenant</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Capacidad para adaptar el logo y los colores corporativos de cada colegio, instituto o universidad de manera autónoma.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Cómo Funciona -->
+    <section class="space-y-6">
+      <div class="border-b border-border pb-3">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+          Cómo Funciona
+        </h2>
+        <p class="text-xs sm:text-sm text-text-muted mt-1">El ciclo virtuoso de participación y reconocimiento en el aula.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-5 rounded-2xl border border-border bg-surface">
+          <span class="text-xs font-mono font-bold text-text-muted block mb-2">Paso 01</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Configuración</h4>
+          <p class="text-xs text-text-muted leading-relaxed">El docente crea el aula e invita al grupo de clase mediante código o matrícula.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl border border-border bg-surface">
+          <span class="text-xs font-mono font-bold text-text-muted block mb-2">Paso 02</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Cumplimiento</h4>
+          <p class="text-xs text-text-muted leading-relaxed">Los estudiantes entregan actividades, demuestran constancia y resuelven desafíos.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl border border-border bg-surface">
+          <span class="text-xs font-mono font-bold text-text-muted block mb-2">Paso 03</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Recompensa</h4>
+          <p class="text-xs text-text-muted leading-relaxed">El sistema acredita automáticamente o con aval docente los EduCoins ganados.</p>
+        </div>
+
+        <div class="p-5 rounded-2xl border border-border bg-surface">
+          <span class="text-xs font-mono font-bold text-text-muted block mb-2">Paso 04</span>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm mb-1">Canje en Subasta</h4>
+          <p class="text-xs text-text-muted leading-relaxed">Los puntos se convierten en beneficios reales mediante eventos de subasta programados.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. EduCoins & Subastas -->
+    <section class="space-y-6">
+      <div class="border-b border-border pb-3">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+          EduCoins & Subastas
+        </h2>
+        <p class="text-xs sm:text-sm text-text-muted mt-1">El motor de economía conductual dentro del aprendizaje.</p>
+      </div>
+
+      <div class="rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4">
+        <p class="text-sm text-text-muted leading-relaxed">
+          Los <strong class="text-slate-900 dark:text-white">EduCoins</strong> no son una moneda especulativa ni tienen valor financiero externo: representan unidades de esfuerzo, puntualidad y mérito académico.
+        </p>
+        <p class="text-sm text-text-muted leading-relaxed">
+          Las <strong class="text-slate-900 dark:text-white">Subastas Educativas</strong> permiten a los docentes ofertar incentivos formativos (por ejemplo: elección de turnos de exposición, pases de revisión extendida o comodines temáticos) para que los estudiantes administren estratégicamente sus recompensas.
+        </p>
+      </div>
+    </section>
+
+    <!-- 4. Roles -->
+    <section class="space-y-6">
+      <div class="border-b border-border pb-3">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+          Roles en EduBid
+        </h2>
+        <p class="text-xs sm:text-sm text-text-muted mt-1">Permisos adaptados para cada participante de la institución.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl border border-border bg-surface space-y-2">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Estudiante</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Aprendizaje Activo</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Consulta actividades, revisa calificaciones, supervisa su saldo de EduCoins y puja en subastas activas desde cualquier dispositivo.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-border bg-surface space-y-2">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Docente</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Gestión y Moderación</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Administra grupos, publica asignaciones con bonificaciones, califica entregas y configura las rondas de subasta para sus asignaturas.
+          </p>
+        </div>
+
+        <div class="p-6 rounded-2xl border border-border bg-surface space-y-2">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Rector / Coordinador</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Supervisión e Identidad</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+            Supervisa el rendimiento global de la institución, audita la distribución de EduCoins y personaliza la identidad institucional.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Back to Home CTA -->
+    <section class="text-center pt-8 border-t border-border">
+      <a
+        routerLink="/"
+        class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-colors"
+      >
+        <span>Volver a la Página Principal</span>
+        <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </a>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-border bg-bg py-8 text-xs text-text-muted transition-colors duration-200">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-900 dark:text-white">EduBid</span>
+        <span>•</span>
+        <span>Plataforma educativa con EduCoins y subastas</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a routerLink="/" class="hover:text-text transition-colors">Inicio</a>
+        <span>•</span>
+        <span>© 2026 EduBid</span>
+      </div>
+    </div>
+  </footer>
+</div>

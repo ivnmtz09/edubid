@@ -65,13 +65,17 @@ export class AuthService {
   }
 
   register(data: RegisterRequest): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(AUTH_ENDPOINTS.REGISTER, data);
+    const payload = {
+      ...data,
+      institucion_id: data.institucion_id ?? data.institution ?? null,
+    };
+    return this.http.post<RegisterResponse>(AUTH_ENDPOINTS.REGISTER, payload);
   }
 
   logout(): void {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    this.removeStorageItem(STORAGE_KEYS.ACCESS_TOKEN);
+    this.removeStorageItem(STORAGE_KEYS.REFRESH_TOKEN);
+    this.removeStorageItem(STORAGE_KEYS.USER);
     this._user.set(null);
     this._isAuthenticated.set(false);
     this.router.navigate(['/']);
@@ -83,7 +87,7 @@ export class AuthService {
   }
 
   refreshAccessToken(): Observable<TokenRefreshResponse> {
-    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    const refreshToken = this.getStorageItem(STORAGE_KEYS.REFRESH_TOKEN);
     if (!refreshToken) {
       return throwError(() => new Error('No refresh token'));
     }
@@ -103,7 +107,7 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    return this.getStorageItem(STORAGE_KEYS.ACCESS_TOKEN);
   }
 
   getUserRole(): UserRole | null {
@@ -124,13 +128,13 @@ export class AuthService {
   }
 
   private storeTokens(tokens: AuthTokens): void {
-    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access);
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh);
+    this.setStorageItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access);
+    this.setStorageItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh);
   }
 
   private storeUser(user: User): void {
     const safeUser = this.sanitizeUser(user);
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(safeUser));
+    this.setStorageItem(STORAGE_KEYS.USER, JSON.stringify(safeUser));
   }
 
   private sanitizeUser(user: User): Partial<User> {
@@ -139,8 +143,8 @@ export class AuthService {
   }
 
   private loadUserFromStorage(): void {
-    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-    const userJson = localStorage.getItem(STORAGE_KEYS.USER);
+    const token = this.getStorageItem(STORAGE_KEYS.ACCESS_TOKEN);
+    const userJson = this.getStorageItem(STORAGE_KEYS.USER);
 
     if (token && userJson) {
       try {
@@ -151,6 +155,33 @@ export class AuthService {
       } catch {
         this.logout();
       }
+    }
+  }
+
+  private getStorageItem(key: string): string | null {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  private setStorageItem(key: string, value: string): void {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(key, value);
+      } catch {}
+    }
+  }
+
+  private removeStorageItem(key: string): void {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.removeItem(key);
+      } catch {}
     }
   }
 

@@ -1,7 +1,7 @@
 <div class="min-h-screen flex items-center justify-center p-8 bg-surface">
   <div class="w-full max-w-lg">
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-primary">EduBid</h1>
+      <a routerLink="/" class="text-4xl font-bold text-primary hover:opacity-90 inline-block transition-opacity">EduBid</a>
       <h2 class="text-2xl font-semibold mt-4">Crear Cuenta</h2>
     </div>
 
@@ -51,16 +51,74 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium mb-1">Rol</label>
-        <div class="flex gap-4">
-          <label class="flex items-center gap-2">
-            <input type="radio" formControlName="role" value="estudiante" class="text-primary" />
-            Estudiante
-          </label>
-          <label class="flex items-center gap-2">
-            <input type="radio" formControlName="role" value="docente" class="text-primary" />
-            Docente
-          </label>
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-sm font-medium">Rol</label>
+          <span class="text-xs font-semibold text-slate-900 dark:text-white capitalize">{{ currentRole }}</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Rol educativo">
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="currentRole === 'estudiante'"
+            (click)="setRole('estudiante')"
+            [class.border-slate-900]="currentRole === 'estudiante'"
+            [class.bg-slate-100]="currentRole === 'estudiante'"
+            [class.text-slate-900]="currentRole === 'estudiante'"
+            [class.ring-2]="currentRole === 'estudiante'"
+            [class.ring-slate-900]="currentRole === 'estudiante'"
+            [class.dark:border-white]="currentRole === 'estudiante'"
+            [class.dark:bg-slate-800]="currentRole === 'estudiante'"
+            [class.dark:text-white]="currentRole === 'estudiante'"
+            [class.dark:ring-white]="currentRole === 'estudiante'"
+            [class.border-border]="currentRole !== 'estudiante'"
+            [class.text-muted]="currentRole !== 'estudiante'"
+            class="flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer text-left"
+          >
+            <span class="font-medium text-sm">Estudiante</span>
+            <div
+              [class.border-slate-900]="currentRole === 'estudiante'"
+              [class.dark:border-white]="currentRole === 'estudiante'"
+              [class.border-slate-300]="currentRole !== 'estudiante'"
+              [class.dark:border-slate-600]="currentRole !== 'estudiante'"
+              class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+            >
+              @if (currentRole === 'estudiante') {
+                <div class="w-2 h-2 rounded-full bg-slate-900 dark:bg-white"></div>
+              }
+            </div>
+          </button>
+
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="currentRole === 'docente'"
+            (click)="setRole('docente')"
+            [class.border-slate-900]="currentRole === 'docente'"
+            [class.bg-slate-100]="currentRole === 'docente'"
+            [class.text-slate-900]="currentRole === 'docente'"
+            [class.ring-2]="currentRole === 'docente'"
+            [class.ring-slate-900]="currentRole === 'docente'"
+            [class.dark:border-white]="currentRole === 'docente'"
+            [class.dark:bg-slate-800]="currentRole === 'docente'"
+            [class.dark:text-white]="currentRole === 'docente'"
+            [class.dark:ring-white]="currentRole === 'docente'"
+            [class.border-border]="currentRole !== 'docente'"
+            [class.text-muted]="currentRole !== 'docente'"
+            class="flex items-center justify-between p-3 rounded-lg border transition-all cursor-pointer text-left"
+          >
+            <span class="font-medium text-sm">Docente</span>
+            <div
+              [class.border-slate-900]="currentRole === 'docente'"
+              [class.dark:border-white]="currentRole === 'docente'"
+              [class.border-slate-300]="currentRole !== 'docente'"
+              [class.dark:border-slate-600]="currentRole !== 'docente'"
+              class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+            >
+              @if (currentRole === 'docente') {
+                <div class="w-2 h-2 rounded-full bg-slate-900 dark:bg-white"></div>
+              }
+            </div>
+          </button>
         </div>
       </div>
 
@@ -113,7 +171,7 @@
 
     <p class="mt-6 text-center text-sm text-muted">
       ¿Ya tienes cuenta?
-      <a routerLink="/" class="text-primary hover:underline">Iniciar Sesión</a>
+      <a routerLink="/login" class="text-primary hover:underline">Iniciar Sesión</a>
     </p>
   </div>
 </div>

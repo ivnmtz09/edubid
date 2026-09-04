@@ -1,0 +1,268 @@
+<div class="min-h-screen bg-bg text-text transition-colors duration-200">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-border">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a routerLink="/" class="text-xs font-semibold text-text-muted hover:text-text flex items-center gap-1.5 transition-colors">
+          <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Inicio</span>
+        </a>
+        <span class="text-border">|</span>
+        <a routerLink="/" class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
+          EduBid
+          <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-600 shrink-0"></span>
+        </a>
+      </div>
+
+      <!-- Segmented Theme Switcher -->
+      <div class="flex items-center bg-bg border border-border rounded-xl p-1 text-xs font-medium">
+        <button
+          type="button"
+          (click)="setTheme('light')"
+          [class.bg-surface]="themeService.mode() === 'light'"
+          [class.text-text]="themeService.mode() === 'light'"
+          class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1.5"
+          title="Modo claro"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span class="hidden sm:inline">Claro</span>
+        </button>
+        <button
+          type="button"
+          (click)="setTheme('dark')"
+          [class.bg-surface]="themeService.mode() === 'dark'"
+          [class.text-text]="themeService.mode() === 'dark'"
+          class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1.5"
+          title="Modo oscuro"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          <span class="hidden sm:inline">Oscuro</span>
+        </button>
+        <button
+          type="button"
+          (click)="setTheme('system')"
+          [class.bg-surface]="themeService.mode() === 'system'"
+          [class.text-text]="themeService.mode() === 'system'"
+          class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1.5"
+          title="Tema del sistema"
+        >
+          <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="hidden sm:inline">Sistema</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Document Content -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-10">
+    <!-- Header info -->
+    <div class="border-b border-border pb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-surface border border-border text-text-muted mb-4">
+        <span>Ámbito territorial: República de Colombia</span>
+      </div>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        Términos y Condiciones de Uso y Registro — EduBid SaaS
+      </h1>
+      <p class="text-xs sm:text-sm text-text-muted mt-2">
+        Última actualización: 3 de septiembre de 2026
+      </p>
+      <div class="mt-4 p-4 rounded-xl bg-surface border border-border text-xs sm:text-sm text-text-muted leading-relaxed">
+        El presente contrato regula el acceso, registro y uso de la plataforma digital <strong>EduBid SaaS</strong> (en adelante, la "Plataforma" o "EduBid"). Al registrarse, acceder o utilizar los servicios, el Usuario (o su representante legal, en caso de menores de edad) declara que ha leído, comprendido y aceptado en su totalidad estos Términos y Condiciones.
+      </div>
+    </div>
+
+    <!-- Clauses -->
+    <div class="space-y-8 text-xs sm:text-sm leading-relaxed text-text-muted">
+      
+      <!-- 1 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          1. Naturaleza del Servicio y Modelo B2B
+        </h2>
+        <p>
+          <strong>1.1.</strong> EduBid es una solución tecnológica educativa en la modalidad de software como servicio (SaaS multi-tenant) orientada a instituciones educativas reconocidas por el Ministerio de Educación Nacional de Colombia (MEN) y registradas con su respectivo código DANE.
+        </p>
+        <p>
+          <strong>1.2.</strong> La Plataforma implementa dinámicas de gamificación educativa ("Aprende, Gana, Crece") destinadas a fortalecer la motivación académica mediante el reconocimiento del esfuerzo a través de puntos y monedas simbólicas.
+        </p>
+      </section>
+
+      <!-- 2 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          2. Marco Legal Aplicable
+        </h2>
+        <p>Estos Términos y Condiciones se rigen e interpretan bajo el ordenamiento jurídico de la República de Colombia:</p>
+        <ul class="list-disc pl-5 space-y-1 text-text-muted">
+          <li><strong>Ley 1581 de 2012 y Decreto 1377 de 2013:</strong> Régimen General de Protección de Datos Personales (Habeas Data).</li>
+          <li><strong>Ley 1098 de 2006:</strong> Código de la Infancia y la Adolescencia (garantía del interés superior de niños, niñas y adolescentes).</li>
+          <li><strong>Ley 527 de 1999:</strong> Reglamentación de mensajes de datos y validez del consentimiento electrónico.</li>
+          <li><strong>Ley 1480 de 2011:</strong> Estatuto del Consumidor, en lo relativo a plataformas de servicios digitales.</li>
+          <li><strong>Ley 1620 de 2013:</strong> Sistema Nacional de Convivencia Escolar y mitigación de la violencia y el ciberacoso escolar.</li>
+        </ul>
+      </section>
+
+      <!-- 3 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          3. Roles de Usuario y Requisitos de Registro
+        </h2>
+        <p>El acceso a la Plataforma está segmentado por los siguientes perfiles:</p>
+        <ul class="list-disc pl-5 space-y-1 text-text-muted">
+          <li><strong>Rector / Directivo:</strong> Administra la identidad institucional, personal docente y configuración institucional.</li>
+          <li><strong>Coordinador:</strong> Supervisa el rendimiento académico y la gestión de grupos.</li>
+          <li><strong>Docente:</strong> Gestiona asignaturas, actividades evaluativas, asignación de incentivos pedagógicos y subastas académicas.</li>
+          <li><strong>Estudiante:</strong> Participa en actividades, acumula incentivos simbólicos y realiza posturas en subastas dentro de su aula.</li>
+          <li><strong>Administrador Global:</strong> Personal técnico de soporte de EduBid.</li>
+        </ul>
+        <div class="p-3.5 rounded-xl bg-surface border border-border mt-2">
+          <strong>Condición de Vinculación Institucional:</strong> Para completar el registro, todo usuario debe estar formalmente vinculado a una institución educativa habilitada. En caso de registro mediante proveedores de autenticación federada (como Google OAuth), el usuario deberá completar obligatoriamente la asociación con su colegio antes de acceder a las funcionalidades del sistema.
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          4. Tratamiento Especial de Datos de Menores de Edad (NNA)
+        </h2>
+        <p>En cumplimiento del Artículo 7 de la Ley 1581 de 2012 y el Artículo 12 del Decreto 1377 de 2013:</p>
+        <p>
+          <strong>4.1. Finalidad estrictamente educativa:</strong> La recolección de datos personales de estudiantes menores de edad tiene como único propósito el seguimiento académico, la asignación de incentivos educativos y la operación de las dinámicas escolares autorizadas por la institución.
+        </p>
+        <p>
+          <strong>4.2. Autorización y Representación:</strong> El registro y tratamiento de datos de estudiantes menores de edad requiere la autorización previa, expresa e informada de sus padres, tutores o representantes legales. Dicha autorización podrá ser recolectada y custodiada directamente por la Institución Educativa (en su calidad de Responsable del Tratamiento) en el marco de la matrícula escolar, o a través de los mecanismos digitales de consentimiento provistos en la Plataforma.
+        </p>
+        <p>
+          <strong>4.3. Prevalencia de Derechos:</strong> En ningún caso se condicionará el derecho a la educación ni se recolectarán datos sensibles o biométricos innecesarios para la prestación del servicio.
+        </p>
+      </section>
+
+      <!-- 5 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          5. Naturaleza de los EduCoins, Puntos XP y Subastas
+        </h2>
+        <p>
+          <strong>5.1. Carácter Simbólico y No Financiero:</strong> Los EduCoins y los puntos de experiencia (XP) son fichas o unidades de cómputo digital estrictamente pedagógicas, destinadas al reconocimiento académico.
+        </p>
+        <p>
+          <strong>5.2. Prohibición de Conversión:</strong> Los EduCoins NO constituyen moneda de curso legal (pesos colombianos COP), divisas extranjeras, dinero electrónico, activos virtuales, criptomonedas ni títulos valores. No tienen valor económico fuera del aula, no son transferibles entre usuarios ajenos a la dinámica pedagógica y bajo ninguna circunstancia son canjeables o reembolsables por dinero real.
+        </p>
+        <p>
+          <strong>5.3. Exclusión de Juegos de Suerte y Azar:</strong> Las subastas y dinámicas dentro de EduBid son ejercicios de asignación de estímulos académicos (exoneraciones parciales, reconocimientos, materiales de clase, beneficios pedagógicos definidos por el docente) y no constituyen juegos de azar, rifas ni apuestas en los términos de la Ley 643 de 2001.
+        </p>
+        <p>
+          <strong>5.4. Billeteras Digitales Escolares:</strong> El saldo disponible y el saldo retenido en pujas representan exclusivamente disponibilidad de participación dentro del ciclo escolar definido por la institución educativa.
+        </p>
+      </section>
+
+      <!-- 6 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          6. Política de Protección de Datos Personales (Habeas Data)
+        </h2>
+        <p>
+          <strong>6.1. Roles en el Tratamiento:</strong> Para los efectos de la Ley 1581 de 2012, la Institución Educativa actúa en calidad de Responsable del Tratamiento respecto a los datos de su comunidad, y EduBid actúa en calidad de Encargado del Tratamiento, limitándose a procesar los datos para la debida ejecución del servicio.
+        </p>
+        <p><strong>6.2. Derechos del Titular:</strong> Los titulares (o sus representantes) tienen derecho a:</p>
+        <ul class="list-disc pl-5 space-y-1 text-text-muted">
+          <li>Conocer, actualizar y rectificar sus datos personales frente a los responsables o encargados.</li>
+          <li>Solicitar prueba de la autorización otorgada.</li>
+          <li>Ser informados sobre el uso que se le ha dado a sus datos.</li>
+          <li>Revocar la autorización o solicitar la supresión del dato cuando no medie un deber legal o contractual de permanecer en la base de datos.</li>
+          <li>Presentar quejas ante la Superintendencia de Industria y Comercio (SIC).</li>
+        </ul>
+        <p>
+          <strong>6.3. Canales de Atención:</strong> Las solicitudes de Habeas Data pueden canalizarse a través del canal oficial de soporte designado por la Plataforma o ante la respectiva Institución Educativa.
+        </p>
+      </section>
+
+      <!-- 7 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          7. Uso Aceptable y Convivencia Escolar
+        </h2>
+        <p>Queda estrictamente prohibido a los usuarios:</p>
+        <ul class="list-disc pl-5 space-y-1 text-text-muted">
+          <li>Utilizar la Plataforma para conductas que configuren ciberacoso, intimidación, difamación o vulneración de los derechos de estudiantes, docentes o directivos (Ley 1620 de 2013).</li>
+          <li>Intentar vulnerar la seguridad, autenticación, aislamiento de datos multi-tenant o realizar ataques de denegación de servicio.</li>
+          <li>Manipular indebidamente saldos de EduCoins, transacciones o calificaciones mediante ingeniería inversa, bots o explotación de vulnerabilidades técnicas.</li>
+          <li>Compartir credenciales de acceso personales con terceros.</li>
+        </ul>
+        <p>
+          El incumplimiento de estas normas facultará a la Plataforma y a la Institución Educativa a suspender o cancelar la cuenta del infractor, sin perjuicio de las medidas disciplinarias escolares y acciones legales a que haya lugar.
+        </p>
+      </section>
+
+      <!-- 8 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          8. Propiedad Intelectual
+        </h2>
+        <p>
+          <strong>8.1.</strong> Todo el código fuente, interfaces, diseños, marcas, logotipos de EduBid y arquitectura de software son propiedad exclusiva de los titulares de EduBid, protegidos por la Decisión Andina 351 de 1993, la Ley 23 de 1982 y convenios internacionales en materia de derechos de autor.
+        </p>
+        <p>
+          <strong>8.2.</strong> Los logotipos, colores y contenidos cargados por cada institución educativa permanecen bajo la titularidad de dicha institución, otorgando a EduBid una licencia limitada para su exhibición dentro de la personalización de marca (white-labeling).
+        </p>
+      </section>
+
+      <!-- 9 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          9. Disponibilidad y Limitación de Responsabilidad
+        </h2>
+        <p>
+          <strong>9.1.</strong> EduBid realiza esfuerzos comercialmente razonables para garantizar la disponibilidad continua del servicio SaaS; sin embargo, no garantiza la operación ininterrumpida ante eventos de fuerza mayor, fallas imprevistas de infraestructura o ventanas programadas de mantenimiento.
+        </p>
+        <p>
+          <strong>9.2.</strong> EduBid no es responsable del contenido de las actividades académicas formuladas por los docentes ni de la entrega efectiva de los incentivos pedagógicos no digitales prometidos por los colegios en sus subastas internas.
+        </p>
+      </section>
+
+      <!-- 10 -->
+      <section class="space-y-2">
+        <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          10. Modificaciones y Resolución de Controversias
+        </h2>
+        <p>
+          <strong>10.1.</strong> EduBid se reserva el derecho de actualizar estos términos para reflejar cambios legales o técnicos, notificando a las instituciones y usuarios a través de la Plataforma.
+        </p>
+        <p>
+          <strong>10.2.</strong> Cualquier controversia que no pueda resolverse de mutuo acuerdo se someterá a la jurisdicción de los jueces competentes de la República de Colombia.
+        </p>
+      </section>
+
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <a
+        routerLink="/"
+        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-colors"
+      >
+        <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span>Volver a EduBid</span>
+      </a>
+      <span class="text-xs text-text-muted">© 2026 EduBid • República de Colombia</span>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-border bg-surface py-6 text-xs text-text-muted text-center">
+    <div class="max-w-4xl mx-auto px-4 flex items-center justify-between">
+      <span>EduBid SaaS Multi-Tenant</span>
+      <a routerLink="/" class="hover:text-text transition-colors">Página Principal</a>
+    </div>
+  </footer>
+</div>

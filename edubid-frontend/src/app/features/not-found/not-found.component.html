@@ -1,0 +1,94 @@
+<div class="min-h-screen flex flex-col justify-between bg-bg text-text transition-colors duration-200">
+  <!-- Minimalist Header -->
+  <header class="h-16 border-b border-border bg-surface/85 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between">
+    <a routerLink="/" class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-1">
+      EduBid
+      <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-600 shrink-0"></span>
+    </a>
+
+    <!-- Theme Switcher -->
+    <div class="flex items-center bg-bg border border-border rounded-xl p-1 text-xs font-medium">
+      <button
+        type="button"
+        (click)="setTheme('light')"
+        [class.bg-surface]="themeService.mode() === 'light'"
+        [class.text-text]="themeService.mode() === 'light'"
+        class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1"
+        title="Modo claro"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        (click)="setTheme('dark')"
+        [class.bg-surface]="themeService.mode() === 'dark'"
+        [class.text-text]="themeService.mode() === 'dark'"
+        class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1"
+        title="Modo oscuro"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        (click)="setTheme('system')"
+        [class.bg-surface]="themeService.mode() === 'system'"
+        [class.text-text]="themeService.mode() === 'system'"
+        class="px-2.5 py-1 rounded-lg text-text-muted hover:text-text transition-all cursor-pointer flex items-center gap-1"
+        title="Tema del sistema"
+      >
+        <svg class="w-3.5 h-3.5 shrink-0" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Empty State Body -->
+  <main class="flex-1 flex items-center justify-center p-6 sm:p-12">
+    <div class="max-w-md w-full text-center space-y-6">
+      <!-- Minimalist Empty-State SVG Illustration -->
+      <div class="mx-auto w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-surface border border-border flex items-center justify-center shadow-xs">
+        <svg class="w-12 h-12 sm:w-14 sm:h-14 text-text-muted shrink-0" width="56" height="56" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+
+      <!-- Text -->
+      <div class="space-y-2">
+        <span class="text-xs font-mono font-bold tracking-wider text-text-muted uppercase">Error 404</span>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Página no encontrada</h1>
+        <p class="text-sm text-text-muted leading-relaxed max-w-sm mx-auto">
+          La dirección que intentas consultar no existe o ha sido reubicada dentro de la plataforma.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+        <a
+          routerLink="/"
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-colors"
+        >
+          <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Volver al Inicio
+        </a>
+        <a
+          routerLink="/sobre-nosotros"
+          class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold text-text-muted hover:text-text border border-border bg-surface hover:bg-bg transition-colors"
+        >
+          Sobre Nosotros
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-border bg-surface py-6 text-xs text-text-muted text-center">
+    <p>© 2026 EduBid • Plataforma educativa gamificada</p>
+  </footer>
+</div>

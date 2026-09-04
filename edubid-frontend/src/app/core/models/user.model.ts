@@ -47,7 +47,8 @@ export interface RegisterRequest {
   first_name: string;
   last_name: string;
   email: string;
-  institution?: number;
+  institucion_id?: number | null;
+  institution?: number | null;
   role: UserRole;
   password: string;
   password_confirm: string;

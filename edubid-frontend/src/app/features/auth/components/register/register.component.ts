@@ -47,6 +47,14 @@ export class RegisterComponent implements OnInit {
     );
   }
 
+  get currentRole(): string {
+    return this.registerForm.get('role')?.value || 'estudiante';
+  }
+
+  setRole(role: string): void {
+    this.registerForm.get('role')?.setValue(role);
+  }
+
   ngOnInit(): void {
     this.loadInstitutions();
   }

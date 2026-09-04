@@ -1,25 +1,29 @@
-@import "tailwindcss";
+@use "tailwindcss";
+@plugin "flowbite/plugin";
+@source "../node_modules/flowbite/**/*.js";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* === Variables CSS globales === */
 :root {
-  --brand-primary: #f97316;
-  --brand-primary-hover: #ea580c;
+  --brand-primary: #ea580c;
+  --brand-primary-hover: #c2410c;
   --brand-accent: #3b82f6;
   --brand-accent-hover: #2563eb;
 
-  --color-bg: #ffffff;
-  --color-surface: #f8fafc;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
   --color-text: #0f172a;
   --color-text-muted: #64748b;
   --color-border: #e2e8f0;
 }
 
 .dark {
-  --color-bg: #0f172a;
-  --color-surface: #1e293b;
-  --color-text: #f1f5f9;
+  --color-bg: #0b0f19;
+  --color-surface: #111827;
+  --color-text: #f8fafc;
   --color-text-muted: #94a3b8;
-  --color-border: #334155;
+  --color-border: #1f2937;
 }
 
 /* === Brand colors via Tailwind === */
@@ -30,8 +34,18 @@
   --color-accent-hover: var(--brand-accent-hover);
   --color-surface: var(--color-surface);
   --color-bg: var(--color-bg);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
 }
 
 body {
-  @apply bg-bg text-text font-sans antialiased;
+  @apply bg-bg text-text font-sans antialiased min-h-screen transition-colors duration-200;
 }
+
+/* Regla defensiva para SVGs en caso de carga asíncrona o fallback */
+svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
