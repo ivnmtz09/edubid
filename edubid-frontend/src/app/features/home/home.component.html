@@ -343,23 +343,23 @@
       <!-- Lado Derecho: Botón Inicial "Acceder" o Formularios (Login/Register) (Proporción Áurea ~38%) -->
       <div class="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
         
-        <!-- ESTADO INICIAL: Botón "Acceder a EduBid" -->
+        <!-- ESTADO INICIAL: Acciones Libres sin Caja -->
         @if (!showAuthForms()) {
-          <div class="rounded-2xl border border-border bg-surface p-8 sm:p-10 shadow-xs text-center space-y-6 animate-in fade-in duration-200">
-            <div class="space-y-2 max-w-sm mx-auto">
-              <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+          <div class="space-y-6 animate-in fade-in duration-300">
+            <div class="space-y-2">
+              <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Comienza en EduBid
               </h2>
-              <p class="text-xs sm:text-sm text-text-muted leading-relaxed">
+              <p class="text-sm text-text-muted leading-[1.618]">
                 Accede con tu cuenta educativa para ingresar a tus aulas, verificar tu billetera de EduCoins y participar en actividades.
               </p>
             </div>
 
-            <div class="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+            <div class="flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
                 (click)="openAuthForms('login')"
-                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all cursor-pointer"
+                class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
               >
                 <span>Acceder a EduBid</span>
                 <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -370,17 +370,15 @@
               <button
                 type="button"
                 (click)="openAuthForms('register')"
-                class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3.5 rounded-xl font-semibold text-sm text-text-muted hover:text-text border border-border bg-bg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                class="inline-flex items-center justify-center px-5 py-3.5 rounded-xl font-semibold text-sm text-text-muted hover:text-text border border-border hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 ease-out cursor-pointer"
               >
                 Crear Cuenta
               </button>
             </div>
 
-            <div class="pt-2 border-t border-border/80">
-              <p class="text-xs text-text-muted">
-                Solución multi-tenant orientada a instituciones educativas de Colombia.
-              </p>
-            </div>
+            <p class="text-xs text-text-muted border-t border-border pt-4">
+              Solución multi-tenant orientada a instituciones educativas de Colombia.
+            </p>
           </div>
         }
 
@@ -898,7 +896,7 @@
           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text text-xs font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
           title="Compartir EduBid"
         >
-          <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 shrink-0 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
           <span>Compartir</span>

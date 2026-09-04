@@ -31,320 +31,222 @@
     </div>
   </header>
 
-  <!-- Main Content Container -->
-  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-20">
+  <!-- Main Content Container (Diseño Editorial Abierto, Textos Fuera de Cajas) -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 space-y-20">
     <!-- Introduction -->
-    <section class="text-center max-w-3xl mx-auto space-y-4">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-surface border border-border text-text-muted">
-        <span class="w-1.5 h-1.5 rounded-full bg-orange-600"></span>
-        <span>Innovación Pedagógica</span>
-      </div>
-      <h1 class="text-3xl sm:text-4xl lg:text-[2.618rem] font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.18]">
+    <section class="space-y-4">
+      <span class="text-xs font-semibold tracking-wider text-text-muted uppercase">
+        Innovación Pedagógica
+      </span>
+      <h1 class="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
         Sobre EduBid
       </h1>
-      <p class="text-base sm:text-lg text-text-muted leading-[1.618]">
+      <p class="text-base sm:text-lg text-text-muted leading-[1.618] font-normal">
         EduBid transforma el aula en un ecosistema activo y participativo. Mediante dinámicas de gamificación sustentadas en méritos y recompensas justas, ayudamos a instituciones educativas a fomentar la motivación intrínseca, el trabajo continuo y la excelencia formativa.
       </p>
     </section>
 
-    <!-- 1. Características Principales (Bento Grid Asimétrico & Curado) -->
-    <section class="space-y-6">
-      <div class="border-b border-border pb-3">
-        <h2 class="text-xl sm:text-[1.618rem] font-bold text-slate-900 dark:text-white">
+    <!-- 1. Características Principales (Lista Editorial Abierta, Sin Cajas) -->
+    <section class="space-y-8">
+      <div class="border-b border-border pb-4">
+        <h2 class="text-2xl sm:text-[1.85rem] font-bold text-slate-900 dark:text-white tracking-tight">
           Características Principales
         </h2>
         <p class="text-xs sm:text-sm text-text-muted mt-1 leading-[1.618]">Herramientas creadas específicamente para el entorno formativo.</p>
       </div>
 
-      <!-- Bento Grid Asimétrico: Col-span 7 / 5 siguiendo proporciones áureas -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Hero Card (Subastas en Tiempo Real) - 7 cols -->
-        <div class="lg:col-span-7 p-6 sm:p-8 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out flex flex-col justify-between group">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
-                <span class="w-1.5 h-1.5 rounded-full bg-orange-600 animate-pulse"></span>
-                En Tiempo Real
-              </span>
-              <span class="text-xs text-text-muted font-mono">0.1s latencia</span>
-            </div>
-            <h3 class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl tracking-tight">
-              Subastas en Vivo y Dinámicas
-            </h3>
-            <p class="text-sm text-text-muted leading-[1.618]">
-              Módulo de pujas sincronizadas con temporizadores de alta precisión. Los estudiantes compiten sanamente por incentivos académicos autorizados por el docente, aprendiendo a gestionar sus recursos con estrategia y criterio.
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-border flex items-center justify-between text-xs text-text-muted">
-            <span class="font-medium">Pujas pedagógicas controladas</span>
-            <span class="text-orange-600 font-semibold">Subasta Activa →</span>
-          </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+        <!-- 01 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-semibold text-text-muted">01 • TIEMPO REAL</span>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Subastas en Vivo y Dinámicas</h3>
+          <p class="text-sm text-text-muted leading-[1.618]">
+            Módulo de pujas sincronizadas con temporizadores de alta precisión. Los estudiantes compiten sanamente por incentivos formativos autorizados por el docente, aprendiendo a gestionar sus recursos con estrategia.
+          </p>
         </div>
 
-        <!-- Supporting Card (Billetera de EduCoins) - 5 cols -->
-        <div class="lg:col-span-5 p-6 sm:p-8 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out flex flex-col justify-between">
-          <div class="space-y-3">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-border">
-              Economía Conductual
-            </span>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight">
-              Billetera de EduCoins
-            </h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              Registro contable inmutable que audita el esfuerzo académico. Monitorea ingresos por méritos (asistencia, retos, proyectos) y salidas en pujas.
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-border text-xs text-text-muted font-mono">
-            Auditable • Sin especulación
-          </div>
+        <!-- 02 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-semibold text-text-muted">02 • ECONOMÍA CONDUCTUAL</span>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Billetera de EduCoins</h3>
+          <p class="text-sm text-text-muted leading-[1.618]">
+            Registro contable inmutable que audita el esfuerzo académico. Monitorea ingresos por méritos (asistencia, retos, proyectos) y salidas en subastas con total transparencia pedagógica.
+          </p>
         </div>
 
-        <!-- Supporting Card (Aulas y Actividades) - 5 cols -->
-        <div class="lg:col-span-5 p-6 sm:p-8 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out flex flex-col justify-between">
-          <div class="space-y-3">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-border">
-              Gestión Pedagógica
-            </span>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight">
-              Aulas y Actividades
-            </h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              Publicación estructurada de talleres, tareas y retos con fechas límite, rúbricas transparentes y retroalimentación formativa continua.
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-border text-xs text-text-muted font-mono">
-            Evaluación continua
-          </div>
+        <!-- 03 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-semibold text-text-muted">03 • GESTIÓN PEDAGÓGICA</span>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Aulas y Actividades Dinámicas</h3>
+          <p class="text-sm text-text-muted leading-[1.618]">
+            Publicación estructurada de talleres, tareas y proyectos con fechas límite, rúbricas claras y retroalimentación formativa directa y constructiva entre profesores y alumnos.
+          </p>
         </div>
 
-        <!-- Supporting Card (Multi-Tenant) - 7 cols -->
-        <div class="lg:col-span-7 p-6 sm:p-8 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out flex flex-col justify-between">
-          <div class="space-y-3">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-border">
-              Escalabilidad & Marca
-            </span>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight">
-              Arquitectura Multi-Tenant & White-Label
-            </h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              Aislamiento seguro de datos para cada colegio o universidad, con capacidad de personalizar colores, logotipo y gobierno institucional de forma 100% autónoma.
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-border text-xs text-text-muted font-mono">
-            Código DANE • Soporte Institucional
-          </div>
+        <!-- 04 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-semibold text-text-muted">04 • AUTONOMÍA INSTITUCIONAL</span>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Arquitectura Multi-Tenant</h3>
+          <p class="text-sm text-text-muted leading-[1.618]">
+            Aislamiento seguro de datos para cada colegio o universidad con código DANE, adaptando el logotipo, colores corporativos y gobierno escolar de manera 100% autónoma.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- 2. Cómo Funciona (Timeline / Proceso Conectado sin Bento) -->
-    <section class="space-y-6">
-      <div class="border-b border-border pb-3">
-        <h2 class="text-xl sm:text-[1.618rem] font-bold text-slate-900 dark:text-white">
+    <!-- 2. Cómo Funciona (Flujo Narrativo Abierto, Sin Cajas) -->
+    <section class="space-y-8">
+      <div class="border-b border-border pb-4">
+        <h2 class="text-2xl sm:text-[1.85rem] font-bold text-slate-900 dark:text-white tracking-tight">
           Cómo Funciona
         </h2>
-        <p class="text-xs sm:text-sm text-text-muted mt-1 leading-[1.618]">El ciclo virtuoso de participación, mérito y reconocimiento en el aula.</p>
+        <p class="text-xs sm:text-sm text-text-muted mt-1 leading-[1.618]">El ciclo virtuoso de participación y reconocimiento en el aula.</p>
       </div>
 
-      <!-- Connected Horizontal Timeline Flow -->
-      <div class="relative">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-          <!-- Step 1 -->
-          <div class="space-y-3 relative group">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full border-2 border-orange-600 bg-surface flex items-center justify-center font-bold text-sm text-orange-600 shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110">
-                01
-              </div>
-              <div class="h-0.5 flex-1 bg-border hidden md:block"></div>
-            </div>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">
-              Configuración
-            </h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              El docente crea el aula e invita al grupo mediante matrícula o código único de acceso.
-            </p>
-          </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <!-- Paso 01 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-bold text-slate-900 dark:text-white block border-b border-border pb-2">FASE 01</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Configuración</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
+            El docente crea el aula e invita al grupo mediante matrícula o código único de acceso institucional.
+          </p>
+        </div>
 
-          <!-- Step 2 -->
-          <div class="space-y-3 relative group">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-surface flex items-center justify-center font-bold text-sm text-slate-900 dark:text-white shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110 group-hover:border-orange-600">
-                02
-              </div>
-              <div class="h-0.5 flex-1 bg-border hidden md:block"></div>
-            </div>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">
-              Cumplimiento
-            </h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              Los estudiantes entregan actividades a tiempo, demuestran constancia y resuelven desafíos.
-            </p>
-          </div>
+        <!-- Paso 02 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-bold text-slate-900 dark:text-white block border-b border-border pb-2">FASE 02</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Cumplimiento</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
+            Los estudiantes entregan actividades a tiempo, demuestran constancia y resuelven desafíos de clase.
+          </p>
+        </div>
 
-          <!-- Step 3 -->
-          <div class="space-y-3 relative group">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-surface flex items-center justify-center font-bold text-sm text-slate-900 dark:text-white shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110 group-hover:border-orange-600">
-                03
-              </div>
-              <div class="h-0.5 flex-1 bg-border hidden md:block"></div>
-            </div>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">
-              Recompensa
-            </h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              El sistema acredita automáticamente o con aval docente los EduCoins ganados por cada mérito.
-            </p>
-          </div>
+        <!-- Paso 03 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-bold text-slate-900 dark:text-white block border-b border-border pb-2">FASE 03</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Recompensa</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
+            El sistema acredita automáticamente o con aval docente los EduCoins correspondientes a cada mérito.
+          </p>
+        </div>
 
-          <!-- Step 4 -->
-          <div class="space-y-3 relative group">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full border-2 border-slate-300 dark:border-slate-600 bg-surface flex items-center justify-center font-bold text-sm text-slate-900 dark:text-white shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110 group-hover:border-orange-600">
-                04
-              </div>
-            </div>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">
-              Canje en Subasta
-            </h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              Los puntos se transforman en beneficios formativos reales en eventos de puja calendarizados.
-            </p>
-          </div>
+        <!-- Paso 04 -->
+        <div class="space-y-2">
+          <span class="text-xs font-mono font-bold text-slate-900 dark:text-white block border-b border-border pb-2">FASE 04</span>
+          <h3 class="font-bold text-slate-900 dark:text-white text-base">Canje en Subasta</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
+            Los puntos se transforman en beneficios formativos reales mediante eventos de puja calendarizados.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- 3. EduCoins & Subastas (Composición Áurea 61.8% / 38.2%) -->
-    <section class="space-y-6">
-      <div class="border-b border-border pb-3">
-        <h2 class="text-xl sm:text-[1.618rem] font-bold text-slate-900 dark:text-white">
+    <!-- 3. EduCoins & Subastas (Ensayo Editorial Abierto, Sin Cajas) -->
+    <section class="space-y-8">
+      <div class="border-b border-border pb-4">
+        <h2 class="text-2xl sm:text-[1.85rem] font-bold text-slate-900 dark:text-white tracking-tight">
           EduCoins & Subastas
         </h2>
         <p class="text-xs sm:text-sm text-text-muted mt-1 leading-[1.618]">El motor de economía conductual dentro del aprendizaje.</p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <!-- Major Section (61.8% / 7 cols) -->
-        <div class="lg:col-span-7 rounded-2xl border border-border bg-surface p-6 sm:p-8 space-y-4">
-          <h3 class="font-bold text-slate-900 dark:text-white text-lg sm:text-xl">
-            Pedagogía del Reconocimiento
-          </h3>
-          <p class="text-sm text-text-muted leading-[1.618]">
-            Los <strong class="text-slate-900 dark:text-white font-semibold">EduCoins</strong> no son una moneda especulativa ni tienen valor financiero externo: representan unidades de cómputo del esfuerzo, la puntualidad y el mérito académico.
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <div class="lg:col-span-7 space-y-4">
+          <p class="text-base sm:text-lg text-slate-800 dark:text-slate-200 leading-[1.618] font-medium">
+            Los <strong class="text-slate-900 dark:text-white font-bold">EduCoins</strong> no son una moneda especulativa ni tienen valor financiero externo: representan unidades de cómputo del esfuerzo, la puntualidad y el mérito académico.
           </p>
-          <p class="text-sm text-text-muted leading-[1.618]">
+          <p class="text-sm sm:text-base text-text-muted leading-[1.618]">
             Las <strong class="text-slate-900 dark:text-white font-semibold">Subastas Educativas</strong> permiten a los docentes ofertar incentivos formativos regulados (elección de turnos de sustentación, extensiones de plazo o comodines de prueba) para que los estudiantes aprendan a administrar estratégicamente sus recompensas.
           </p>
         </div>
 
-        <!-- Minor Section (38.2% / 5 cols) -->
-        <div class="lg:col-span-5 rounded-2xl border border-border bg-surface/50 p-6 sm:p-8 flex flex-col justify-center space-y-4">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-            Principios Inquebrantables
-          </h4>
+        <div class="lg:col-span-5 space-y-4 pt-2 lg:pt-0 lg:border-l lg:border-border lg:pl-8">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+            Principios Pedagógicos
+          </h3>
           <ul class="space-y-3 text-xs sm:text-sm text-text-muted leading-[1.618]">
-            <li class="flex items-start gap-2">
-              <span class="text-green-600 dark:text-green-400 font-bold shrink-0">✓</span>
-              <span>100% pedagógico, no financiero ni transferible a dinero real.</span>
+            <li class="flex items-start gap-2.5">
+              <span class="text-slate-900 dark:text-white font-bold">—</span>
+              <span>100% formativo, sin conversión a dinero real.</span>
             </li>
-            <li class="flex items-start gap-2">
-              <span class="text-green-600 dark:text-green-400 font-bold shrink-0">✓</span>
-              <span>Auditabilidad completa de transacciones y saldos.</span>
+            <li class="flex items-start gap-2.5">
+              <span class="text-slate-900 dark:text-white font-bold">—</span>
+              <span>Auditoría transparente de méritos y transacciones.</span>
             </li>
-            <li class="flex items-start gap-2">
-              <span class="text-green-600 dark:text-green-400 font-bold shrink-0">✓</span>
-              <span>Control y supervisión directa por los docentes del aula.</span>
+            <li class="flex items-start gap-2.5">
+              <span class="text-slate-900 dark:text-white font-bold">—</span>
+              <span>Supervisión y control docente directo en cada aula.</span>
             </li>
           </ul>
         </div>
       </div>
     </section>
 
-    <!-- 4. Roles en EduBid (Disposición Asimétrica Jerárquica) -->
-    <section class="space-y-6">
-      <div class="border-b border-border pb-3">
-        <h2 class="text-xl sm:text-[1.618rem] font-bold text-slate-900 dark:text-white">
+    <!-- 4. Roles en EduBid (Disposición Editorial Abierta, Sin Cajas) -->
+    <section class="space-y-8">
+      <div class="border-b border-border pb-4">
+        <h2 class="text-2xl sm:text-[1.85rem] font-bold text-slate-900 dark:text-white tracking-tight">
           Roles en EduBid
         </h2>
-        <p class="text-xs sm:text-sm text-text-muted mt-1 leading-[1.618]">Permisos adaptados para cada participante de la institución.</p>
+        <p class="text-xs sm:text-sm text-text-muted mt-1 leading-[1.618]">Permisos adaptados para cada participante de la comunidad educativa.</p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Estudiante (Foco principal - 7 cols) -->
-        <div class="lg:col-span-7 p-6 sm:p-8 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out space-y-4">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider">Perfil Central</span>
-            <span class="text-xs text-text-muted font-mono">Aula Interactiva</span>
-          </div>
-          <h3 class="font-extrabold text-slate-900 dark:text-white text-xl sm:text-2xl tracking-tight">
-            Estudiante • Aprendizaje Activo
-          </h3>
-          <p class="text-sm text-text-muted leading-[1.618]">
-            Consulta actividades formativas, supervisa su saldo de EduCoins en tiempo real, analiza historiales de transacciones y participa en pujas programadas desde cualquier dispositivo móvil o de escritorio.
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+        <div class="space-y-2">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Perfil Central</span>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Estudiante</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
+            Consulta actividades formativas, supervisa su saldo de EduCoins en tiempo real, analiza historiales de esfuerzo y puja en subastas activas desde cualquier dispositivo.
           </p>
-          <div class="pt-2 flex flex-wrap gap-2 text-xs">
-            <span class="px-2.5 py-1 rounded-lg bg-surface border border-border text-text-muted">Pujas en vivo</span>
-            <span class="px-2.5 py-1 rounded-lg bg-surface border border-border text-text-muted">Billetera de méritos</span>
-            <span class="px-2.5 py-1 rounded-lg bg-surface border border-border text-text-muted">Entrega de talleres</span>
-          </div>
         </div>
 
-        <!-- Docente y Rector apilados proporcionalmente (5 cols) -->
-        <div class="lg:col-span-5 space-y-4">
-          <!-- Docente -->
-          <div class="p-5 sm:p-6 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out space-y-2">
-            <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Docente</span>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">Gestión y Moderación</h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              Administra asignaturas, publica tareas con bonificaciones en EduCoins, evalúa entregas y programa rondas de subastas pedagógicas.
-            </p>
-          </div>
+        <div class="space-y-2">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Gestión Pedagógica</span>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Docente</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
+            Administra asignaturas, publica tareas con bonificaciones en EduCoins, califica entregas formativas y programa las rondas de subasta para sus grupos.
+          </p>
+        </div>
 
-          <!-- Rector / Coordinador -->
-          <div class="p-5 sm:p-6 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out space-y-2">
-            <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Rector / Coordinador</span>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">Supervisión e Identidad</h3>
-            <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
-              Supervisa las estadísticas globales del colegio, audita la distribución de EduCoins y personaliza la identidad institucional.
-            </p>
-          </div>
+        <div class="space-y-2">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Supervisión e Identidad</span>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">Rector / Coordinador</h3>
+          <p class="text-xs sm:text-sm text-text-muted leading-[1.618]">
+            Supervisa el rendimiento académico general de la institución, audita la distribución de EduCoins y personaliza la identidad institucional.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- 5. Creadores -->
+    <!-- 5. Creadores (Limpio y Elegante, Sin Cajas Pesadas) -->
     <section class="space-y-6">
-      <div class="border-b border-border pb-3">
-        <h2 class="text-xl sm:text-[1.618rem] font-bold text-slate-900 dark:text-white">
+      <div class="border-b border-border pb-4">
+        <h2 class="text-2xl sm:text-[1.85rem] font-bold text-slate-900 dark:text-white tracking-tight">
           Creadores
         </h2>
         <p class="text-xs sm:text-sm text-text-muted mt-1 leading-[1.618]">El equipo detrás de la arquitectura y diseño de EduBid.</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl">
+      <div class="flex flex-wrap items-center gap-8 sm:gap-12">
         <!-- Iván Martínez -->
         <a
           href="https://github.com/ivnmtz09"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-4 p-4 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out hover:scale-[1.02] group"
+          class="flex items-center gap-3.5 group transition-opacity duration-200 hover:opacity-80"
         >
           <img
             src="https://github.com/ivnmtz09.png?size=120"
             alt="Iván Martínez"
             class="w-12 h-12 rounded-full border border-border shrink-0 object-cover"
           />
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center justify-between">
-              <h3 class="font-bold text-sm text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors flex items-center gap-1.5">
-                <span>ivnmtz09</span>
-              </h3>
-              <svg class="w-3.5 h-3.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </div>
-            <p class="text-xs text-text-muted font-mono mt-0.5">github.com/ivnmtz09</p>
+          <div>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white group-hover:underline flex items-center gap-1.5">
+              <span>Iván Martínez</span>
+              <span class="text-xs text-text-muted font-normal font-mono">&#64;ivnmtz09</span>
+            </h3>
+            <p class="text-xs text-text-muted mt-0.5">Arquitectura & Desarrollo</p>
           </div>
         </a>
 
@@ -353,23 +255,19 @@
           href="https://github.com/juankAnez"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-4 p-4 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-300 ease-out hover:scale-[1.02] group"
+          class="flex items-center gap-3.5 group transition-opacity duration-200 hover:opacity-80"
         >
           <img
             src="https://github.com/juankAnez.png?size=120"
             alt="Juan Carlos Áñez"
             class="w-12 h-12 rounded-full border border-border shrink-0 object-cover"
           />
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center justify-between">
-              <h3 class="font-bold text-sm text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors flex items-center gap-1.5">
-                <span>juankAnez</span>
-              </h3>
-              <svg class="w-3.5 h-3.5 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </div>
-            <p class="text-xs text-text-muted font-mono mt-0.5">github.com/juankAnez</p>
+          <div>
+            <h3 class="font-bold text-sm text-slate-900 dark:text-white group-hover:underline flex items-center gap-1.5">
+              <span>Juan Carlos Áñez</span>
+              <span class="text-xs text-text-muted font-normal font-mono">&#64;juankAnez</span>
+            </h3>
+            <p class="text-xs text-text-muted mt-0.5">Arquitectura & Desarrollo</p>
           </div>
         </a>
       </div>
@@ -392,7 +290,7 @@
 
   <!-- Footer -->
   <footer class="border-t border-border bg-surface py-6 sm:py-8 text-xs text-text-muted transition-colors duration-200">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <div class="flex items-center gap-2">
         <span class="font-bold text-slate-900 dark:text-white">EduBid</span>
         <span>•</span>
@@ -409,7 +307,7 @@
           class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text text-xs font-medium transition-all duration-300 ease-out hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
           title="Compartir EduBid"
         >
-          <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 shrink-0 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
           </svg>
           <span>Compartir</span>
