@@ -12,10 +12,17 @@
     <div class="w-full max-w-md">
       <h2 class="text-3xl font-bold mb-6">Iniciar Sesión</h2>
 
-      <!-- Error general -->
+      <!-- Error general del formulario -->
       @if (errorMessage()) {
         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
           {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Error de Google Auth -->
+      @if (googleAuth.errorMessage()) {
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          {{ googleAuth.errorMessage() }}
         </div>
       }
 
@@ -34,6 +41,26 @@
           <a routerLink="/forgot-password" class="underline text-sm">Restablecer contraseña</a>
         </div>
       }
+
+      <!-- Botón nativo de Google Identity Services -->
+      <div #googleBtn class="w-full min-h-[44px] mb-4 flex items-center justify-center">
+        @if (googleAuth.isLoading()) {
+          <div class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded border border-gray-200 bg-white text-sm text-gray-500">
+            <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Iniciando sesión con Google...
+          </div>
+        }
+      </div>
+
+      <!-- Divisor -->
+      <div class="relative flex py-2 items-center mb-4">
+        <div class="grow border-t border-gray-200"></div>
+        <span class="shrink mx-3 text-xs text-gray-400 uppercase">o con correo</span>
+        <div class="grow border-t border-gray-200"></div>
+      </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
         <div>

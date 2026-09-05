@@ -1,4 +1,13 @@
-import { Component, inject, signal, OnInit, HostListener, ElementRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  AfterViewInit,
+  HostListener,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -10,6 +19,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
+import { GoogleAuthService } from '../../core/services/google-auth.service';
 import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { PublicInstitution, UserRole } from '../../core/models/user.model';
 import { AUTH_ENDPOINTS } from '../../core/constants/api.constants';
@@ -21,13 +31,18 @@ import { InteractiveDotsComponent } from '../../shared/components/ui/interactive
   imports: [CommonModule, ReactiveFormsModule, RouterLink, InteractiveDotsComponent],
   templateUrl: './home.component.html',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  readonly authService = inject(AuthService);
+  readonly googleAuth = inject(GoogleAuthService);
+  readonly router = inject(Router);
   private http = inject(HttpClient);
   private elementRef = inject(ElementRef);
   readonly themeService = inject(ThemeService);
+
+  // Contenedores donde se renderizan los botones nativos de Google
+  @ViewChild('googleLoginBtn') googleLoginBtnRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('googleRegisterBtn') googleRegisterBtnRef!: ElementRef<HTMLDivElement>;
 
   // Selector de tema: Dropdown en el header
   isThemeDropdownOpen = signal(false);
@@ -107,6 +122,28 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInstitutions();
+    // Pre-inicializar GSI para que esté listo cuando el usuario abra los formularios
+    this.googleAuth.initialize();
+  }
+
+  ngAfterViewInit(): void {
+    // Los ViewChild estarán disponibles solo cuando activeTab() muestre el form.
+    // La renderización real la dispara openAuthForms() vía renderGoogleButtons().
+  }
+
+  /** Renderiza los botones nativos de Google en ambos contenedores (si existen en el DOM). */
+  private renderGoogleButtons(): void {
+    // Usamos setTimeout 0 para asegurarnos de que Angular terminó de renderizar el @if
+    setTimeout(() => {
+      if (this.googleLoginBtnRef?.nativeElement) {
+        this.googleLoginBtnRef.nativeElement.innerHTML = '';
+        this.googleAuth.renderButton(this.googleLoginBtnRef.nativeElement, { text: 'continue_with' });
+      }
+      if (this.googleRegisterBtnRef?.nativeElement) {
+        this.googleRegisterBtnRef.nativeElement.innerHTML = '';
+        this.googleAuth.renderButton(this.googleRegisterBtnRef.nativeElement, { text: 'signup_with' });
+      }
+    }, 0);
   }
 
   // Cerrar dropdown si se hace click afuera
@@ -134,6 +171,8 @@ export class HomeComponent implements OnInit {
     this.activeTab.set(tab);
     this.showAuthForms.set(true);
     this.clearMessages();
+    // Renderizar botones nativos de Google una vez que el @if muestre el formulario
+    this.renderGoogleButtons();
   }
 
   closeAuthForms(): void {
@@ -144,6 +183,8 @@ export class HomeComponent implements OnInit {
   switchTab(tab: 'login' | 'register'): void {
     this.activeTab.set(tab);
     this.clearMessages();
+    // Re-renderizar al cambiar de pestaña
+    this.renderGoogleButtons();
   }
 
   clearMessages(): void {
@@ -299,10 +340,40 @@ export class HomeComponent implements OnInit {
       });
   }
 
-  // Manejo de Google Auth (UI + Hook hacia backend /api/users/google/)
+  /**
+   * Fallback de Google Auth para navegadores sin soporte de renderButton
+   * o cuando el usuario hace click en el botón personalizado SVG.
+   * El flujo real lo gestiona GSI vía renderButton/promptOneTap en GoogleAuthService.
+   */
   loginWithGoogle(): void {
-    this.errorMessage.set(
-      'Para autenticación con Google, asegúrate de configurar tu Google Client ID en el entorno.'
-    );
+    this.clearMessages();
+    // Intentar One Tap como fallback si el botón nativo de GSI no está disponible
+    this.googleAuth.promptOneTap();
+  }
+
+  get userRoleLabel(): string {
+    const role = this.authService.getUserRole();
+    if (!role) return '';
+    const roleLabels: Record<string, string> = {
+      admin: 'Administrador',
+      rector: 'Rector',
+      coordinador: 'Coordinador',
+      docente: 'Docente',
+      estudiante: 'Estudiante',
+    };
+    return roleLabels[role] || role;
+  }
+
+  goToDashboard(): void {
+    const role = this.authService.getUserRole();
+    if (role === 'rector') {
+      this.router.navigate(['/dashboard/rector']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
+  logout(): void {
+    this.authService.logout();
   }
 }

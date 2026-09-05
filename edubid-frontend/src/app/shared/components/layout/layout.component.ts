@@ -25,13 +25,13 @@ interface NavItem {
           
           <!-- Lado Izquierdo: Botón Toggle Sidebar + Logo y Escuela -->
           <div class="flex items-center gap-3 sm:gap-4">
-            <!-- Botón Colapsar/Desplegar Sidebar (Desktop & Mobile) -->
+            <!-- Botón Colapsar/Desplegar Sidebar (Mobile only) -->
             <button
               type="button"
               (click)="toggleSidebar()"
-              class="p-2 rounded-xl text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Alternar barra lateral"
-              aria-label="Alternar barra lateral"
+              class="lg:hidden p-2 rounded-xl text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Abrir menú"
+              aria-label="Abrir menú"
             >
               <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -118,7 +118,9 @@ interface NavItem {
                       Claro
                     </span>
                     @if (themeService.mode() === 'light') {
-                      <span class="text-orange-600 font-bold">✓</span>
+                      <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
                     }
                   </button>
 
@@ -135,7 +137,9 @@ interface NavItem {
                       Oscuro
                     </span>
                     @if (themeService.mode() === 'dark') {
-                      <span class="text-orange-600 font-bold">✓</span>
+                      <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
                     }
                   </button>
 
@@ -152,7 +156,9 @@ interface NavItem {
                       Tema del sistema
                     </span>
                     @if (themeService.mode() === 'system') {
-                      <span class="text-orange-600 font-bold">✓</span>
+                      <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
                     }
                   </button>
                 </div>

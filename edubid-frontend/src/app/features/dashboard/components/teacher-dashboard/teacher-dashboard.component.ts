@@ -108,7 +108,7 @@ interface TeacherAuction {
           <span class="text-xs font-medium text-text-muted">EduCoins Acreditados</span>
           <div class="mt-4">
             <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
-              1,420 🪙
+              1,420 EC
             </div>
             <p class="text-xs text-text-muted mt-1">Recompensas este periodo</p>
           </div>
@@ -180,7 +180,7 @@ interface TeacherAuction {
                       {{ a.title }}
                     </h4>
                     <p class="text-xs text-text-muted">
-                      Líder actual: <strong class="text-slate-900 dark:text-white">{{ a.leadingStudent }}</strong> ({{ a.leadingBid }} 🪙)
+                      Líder actual: <strong class="text-slate-900 dark:text-white">{{ a.leadingStudent }}</strong> ({{ a.leadingBid }} EC)
                     </p>
                   </div>
 
@@ -229,7 +229,7 @@ interface TeacherAuction {
                   </div>
 
                   <span class="text-xs font-bold font-mono text-emerald-600 shrink-0">
-                    +{{ rev.suggestedCoins }} 🪙
+                    +{{ rev.suggestedCoins }} EC
                   </span>
                 </div>
 

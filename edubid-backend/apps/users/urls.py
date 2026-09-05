@@ -25,6 +25,9 @@ urlpatterns = [
     path('password-reset/', views.PasswordResetRequestView.as_view(), name='password-reset'),
     path('password-reset-confirm/<uidb64>/<token>/', views.PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     
+    # Dashboard & Estadísticas
+    path('dashboard-stats/', views.api_dashboard_stats, name='dashboard-stats'),
+    
     # Gestión de usuarios (admin)
     path('list/', views.api_list_users, name='list-users'),
     path('<int:user_id>/update/', views.api_update_user, name='update-user'),

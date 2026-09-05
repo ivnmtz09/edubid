@@ -333,10 +333,18 @@ class GoogleLoginAPIView(APIView):
                 logger.warning(f"❌ Email de Google no verificado: {email}")
                 return Response({"detail": "Email no verificado por Google"}, status=status.HTTP_400_BAD_REQUEST)
 
+            # ── Generar username único (evita IntegrityError en campo único) ──
+            base_username = email.split("@")[0]
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exclude(email=email).exists():
+                username = f"{base_username}_{counter}"
+                counter += 1
+
             user, created = User.objects.get_or_create(email=email, defaults={
                 "first_name": first_name,
                 "last_name": last_name,
-                "username": email.split("@")[0],
+                "username": username,
                 "is_active": True,
                 "email_verified": True,  # ✅ Google ya verificó el email
             })
@@ -368,6 +376,7 @@ class GoogleLoginAPIView(APIView):
 
             refresh = RefreshToken.for_user(user)
             data = {
+                "message": "Inicio de sesión con Google exitoso",
                 "user": UserProfileSerializer(user).data,
                 "tokens": {
                     "access": str(refresh.access_token),
@@ -627,9 +636,113 @@ def api_delete_account(request):
     
     return Response({
         'message': 'Cuenta eliminada exitosamente',
-        'email': user_email
     }, status=status.HTTP_200_OK)
 
+
+# --------------------------
+# Dashboard Stats
+# --------------------------
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_dashboard_stats(request):
+    """
+    Retorna métricas para el dashboard según el rol del usuario.
+    """
+    from django.db.models import Sum, Count
+    from apps.classrooms.models import Classroom
+    from apps.tokens.models import Wallet, CoinTransaction
+    from apps.auctions.models import Auction
+    from django.utils import timezone
+    
+    user = request.user
+    
+    # 1. Admin o Rector
+    if user.role in ['admin', 'rector', 'coordinador']:
+        base_qs = User.objects.filter(is_active=True)
+        if user.role != 'admin' and hasattr(user, 'profile') and user.profile.institucion:
+            base_qs = base_qs.filter(profile__institucion=user.profile.institucion)
+            classrooms_qs = Classroom.objects.filter(docente__profile__institucion=user.profile.institucion)
+            wallets_qs = Wallet.objects.filter(usuario__profile__institucion=user.profile.institucion)
+            txs_qs = CoinTransaction.objects.filter(wallet__usuario__profile__institucion=user.profile.institucion)
+            auctions_qs = Auction.objects.filter(grupo__classroom__docente__profile__institucion=user.profile.institucion)
+        else:
+            classrooms_qs = Classroom.objects.all()
+            wallets_qs = Wallet.objects.all()
+            txs_qs = CoinTransaction.objects.all()
+            auctions_qs = Auction.objects.all()
+
+        total_students = base_qs.filter(role='estudiante').count()
+        total_teachers = base_qs.filter(role='docente').count()
+        active_classrooms = classrooms_qs.count()
+        total_educoins = wallets_qs.aggregate(total=Sum('saldo_educoins'))['total'] or 0
+
+        # Audits / Transacciones recientes
+        recent_txs = txs_qs.order_by('-creado')[:5]
+        recent_audits = []
+        for tx in recent_txs:
+            recent_audits.append({
+                'id': tx.id,
+                'timestamp': tx.creado.strftime("%Y-%m-%d %H:%M"),
+                'action': f"{tx.descripcion} ({'+' if tx.tipo == 'ingreso' else '-'}{tx.cantidad_educoins} EC)",
+                'classroom': tx.wallet.grupo.classroom.nombre if tx.wallet.grupo else 'N/A',
+                'teacher': tx.wallet.usuario.first_name + " " + tx.wallet.usuario.last_name
+            })
+            
+        # Add latest auctions as audits
+        recent_aucs = auctions_qs.order_by('-creado')[:5]
+        for auc in recent_aucs:
+            recent_audits.append({
+                'id': f"auc_{auc.id}",
+                'timestamp': auc.creado.strftime("%Y-%m-%d %H:%M"),
+                'action': f"Subasta {'creada' if auc.estado == 'active' else 'cerrada'}: {auc.titulo}",
+                'classroom': auc.grupo.classroom.nombre if auc.grupo else 'N/A',
+                'teacher': auc.creador.first_name + " " + auc.creador.last_name
+            })
+            
+        # sort combined audits by timestamp descending
+        recent_audits.sort(key=lambda x: x['timestamp'], reverse=True)
+        recent_audits = recent_audits[:5]
+
+        # Grade Metrics (aggregated by Group name or Grade)
+        # Using simple grouped data to avoid complex queries if not needed
+        grade_metrics = []
+        from apps.groups.models import Group
+        if user.role != 'admin' and hasattr(user, 'profile') and user.profile.institucion:
+            groups = Group.objects.filter(classroom__docente__profile__institucion=user.profile.institucion)
+        else:
+            groups = Group.objects.all()
+            
+        for group in groups[:4]:
+            group_wallets = Wallet.objects.filter(grupo=group)
+            coins = group_wallets.aggregate(total=Sum('saldo_educoins'))['total'] or 0
+            # mock participation rate based on students
+            st_count = group.estudiantes.count()
+            part = min(100, 50 + st_count * 2) if st_count > 0 else 0
+            grade_metrics.append({
+                'grade': group.nombre,
+                'participationRate': part,
+                'totalCoins': coins,
+                'activeClassrooms': Classroom.objects.filter(grupos_clases=group).distinct().count()
+            })
+            
+        # Fallback si no hay grupos reales
+        if not grade_metrics:
+            grade_metrics = [
+                {'grade': 'General', 'participationRate': 100, 'totalCoins': total_educoins, 'activeClassrooms': active_classrooms}
+            ]
+
+        return Response({
+            'total_students': total_students,
+            'total_teachers': total_teachers,
+            'active_classrooms': active_classrooms,
+            'total_educoins': total_educoins,
+            'grade_metrics': grade_metrics,
+            'recent_audits': recent_audits
+        }, status=status.HTTP_200_OK)
+
+    # 2. Estudiante o Docente (Se maneja mayormente via APIs existentes en el frontend, 
+    # pero devolvemos algo básico para no fallar)
+    return Response({"detail": "Dashboard stats para este rol en desarrollo."}, status=status.HTTP_200_OK)
 
 # --------------------------
 # Lista de usuarios (solo admin)

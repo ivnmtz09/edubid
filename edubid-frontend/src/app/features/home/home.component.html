@@ -340,11 +340,52 @@
         </div>
       </div>
 
-      <!-- Lado Derecho: Botón Inicial "Acceder" o Formularios (Login/Register) (Proporción Áurea ~38%) -->
+      <!-- Lado Derecho: Panel de Usuario Autenticado o Botón Inicial / Formularios (Proporción Áurea ~38%) -->
       <div class="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
         
-        <!-- ESTADO INICIAL: Acciones Libres sin Caja -->
-        @if (!showAuthForms()) {
+        @if (authService.isAuthenticated()) {
+          <!-- ESTADO AUTENTICADO: Ya está logeado -->
+          <div class="space-y-6 animate-in fade-in duration-300">
+            <div class="space-y-2">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 dark:bg-orange-950/50 dark:text-orange-300 border border-orange-200 dark:border-orange-900/50">
+                Sesión activa
+              </span>
+              <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Hola, {{ authService.currentUser()?.first_name || 'de nuevo' }}
+              </h2>
+              <p class="text-sm text-text-muted leading-[1.618]">
+                Ya has iniciado sesión con el rol de <strong class="text-slate-900 dark:text-white capitalize">{{ userRoleLabel }}</strong>. Puedes continuar a tu panel de actividades.
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                (click)="goToDashboard()"
+                class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              >
+                <span>Volver al panel ({{ userRoleLabel }})</span>
+                <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                (click)="logout()"
+                class="inline-flex items-center justify-center px-5 py-3.5 rounded-xl font-semibold text-sm text-text-muted hover:text-text border border-border hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300 ease-out cursor-pointer"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+
+            <p class="text-xs text-text-muted border-t border-border pt-4">
+              Conectado como <span class="font-medium text-slate-900 dark:text-white">{{ authService.currentUser()?.email }}</span>
+            </p>
+          </div>
+        } @else {
+          <!-- ESTADO INICIAL: Acciones Libres sin Caja -->
+          @if (!showAuthForms()) {
           <div class="space-y-6 animate-in fade-in duration-300">
             <div class="space-y-2">
               <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
@@ -433,6 +474,12 @@
               </div>
             }
 
+            @if (googleAuth.errorMessage()) {
+              <div class="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 text-xs px-3.5 py-2.5 rounded-xl mb-4">
+                {{ googleAuth.errorMessage() }}
+              </div>
+            }
+
             @if (successMessage()) {
               <div class="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs px-3.5 py-2.5 rounded-xl mb-4">
                 {{ successMessage() }}
@@ -449,20 +496,18 @@
             @if (activeTab() === 'login') {
               <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="space-y-4">
                 <!-- Botón Google Login -->
-                <button
-                  type="button"
-                  (click)="loginWithGoogle()"
-                  class="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold border border-border bg-bg hover:bg-slate-100 dark:hover:bg-slate-800 text-text transition-colors cursor-pointer shadow-xs"
-                >
-                  <!-- Google G SVG -->
-                  <svg class="w-4 h-4 shrink-0" width="16" height="16" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                  </svg>
-                  <span>Continuar con Google</span>
-                </button>
+                <!-- Botón nativo de Google Identity Services -->
+                <div #googleLoginBtn class="w-full min-h-[44px] flex items-center justify-center">
+                  @if (googleAuth.isLoading()) {
+                    <div class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-border bg-bg text-xs text-text-muted">
+                      <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Iniciando sesión con Google...
+                    </div>
+                  }
+                </div>
 
                 <!-- Divisor visual -->
                 <div class="relative flex py-1 items-center">
@@ -546,20 +591,18 @@
             <!-- TAB 2: REGISTER FORMULARIO (Mapeado a serializers de DRF) -->
             @if (activeTab() === 'register') {
               <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="space-y-3.5">
-                <!-- Botón Google Register -->
-                <button
-                  type="button"
-                  (click)="loginWithGoogle()"
-                  class="w-full flex items-center justify-center gap-2.5 py-2 px-4 rounded-xl text-xs sm:text-sm font-semibold border border-border bg-bg hover:bg-slate-100 dark:hover:bg-slate-800 text-text transition-colors cursor-pointer shadow-xs"
-                >
-                  <svg class="w-4 h-4 shrink-0" width="16" height="16" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                  </svg>
-                  <span>Registrarse con Google</span>
-                </button>
+                <!-- Botón nativo de Google Identity Services -->
+                <div #googleRegisterBtn class="w-full min-h-[44px] flex items-center justify-center">
+                  @if (googleAuth.isLoading()) {
+                    <div class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-border bg-bg text-xs text-text-muted">
+                      <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Conectando con Google...
+                    </div>
+                  }
+                </div>
 
                 <div class="relative flex py-0.5 items-center">
                   <div class="grow border-t border-border"></div>
@@ -774,6 +817,7 @@
 
           </div>
         }
+      }
 
       </div>
 

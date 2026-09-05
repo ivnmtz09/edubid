@@ -74,7 +74,7 @@ interface PendingTask {
           <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-text-muted">Saldo Disponible</span>
-              <span class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-xs">🪙</span>
+              <span class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-xs">EC</span>
             </div>
             <div class="mt-4">
               <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
@@ -89,7 +89,7 @@ interface PendingTask {
           <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-text-muted">En Pujas Activas</span>
-              <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs">⚡</span>
+              <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs">XP</span>
             </div>
             <div class="mt-4">
               <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
@@ -104,7 +104,7 @@ interface PendingTask {
           <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
             <div class="flex items-center justify-between">
               <span class="text-xs font-medium text-text-muted">Méritos Históricos</span>
-              <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs">📈</span>
+              <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs">Nvl</span>
             </div>
             <div class="mt-4">
               <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
@@ -163,7 +163,7 @@ interface PendingTask {
                   <div>
                     <span class="text-xs text-text-muted block">Puja más alta actual</span>
                     <span class="text-lg font-extrabold text-slate-900 dark:text-white font-mono">
-                      {{ item.currentBid }} 🪙
+                      {{ item.currentBid }} EC
                     </span>
                     @if (item.isLeading) {
                       <span class="ml-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
@@ -177,7 +177,7 @@ interface PendingTask {
                     (click)="placeBid(item)"
                     class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
                   >
-                    Pujar {{ item.minNextBid }} 🪙
+                    Pujar {{ item.minNextBid }} EC
                   </button>
                 </div>
               </div>
@@ -213,7 +213,7 @@ interface PendingTask {
 
                   <div class="shrink-0 text-right">
                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      +{{ task.rewardCoins }} 🪙
+                      +{{ task.rewardCoins }} EC
                     </span>
                   </div>
                 </div>
@@ -233,19 +233,19 @@ interface PendingTask {
             <ul class="space-y-2.5 text-xs">
               <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
                 <span class="text-text-muted truncate">Taller de Cálculo Diferencial (Entrega puntual)</span>
-                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+30 🪙</span>
+                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+30 EC</span>
               </li>
               <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
                 <span class="text-text-muted truncate">Participación destacada en Ciencias</span>
-                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+15 🪙</span>
+                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+15 EC</span>
               </li>
               <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
                 <span class="text-text-muted truncate">Puja en Subasta: Comodín de Examen</span>
-                <span class="font-bold font-mono text-slate-900 dark:text-white shrink-0 ml-2">-80 🪙</span>
+                <span class="font-bold font-mono text-slate-900 dark:text-white shrink-0 ml-2">-80 EC</span>
               </li>
               <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
                 <span class="text-text-muted truncate">Asistencia semanal completa</span>
-                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+20 🪙</span>
+                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+20 EC</span>
               </li>
             </ul>
           </div>

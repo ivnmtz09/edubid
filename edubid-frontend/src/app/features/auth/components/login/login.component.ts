@@ -1,8 +1,16 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  AfterViewInit,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { GoogleAuthService } from '../../../../core/services/google-auth.service';
 
 @Component({
   selector: 'app-login',
@@ -10,9 +18,12 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  readonly googleAuth = inject(GoogleAuthService);
+
+  @ViewChild('googleBtn') googleBtnRef!: ElementRef<HTMLDivElement>;
 
   loginForm: FormGroup;
   isLoading = signal(false);
@@ -26,6 +37,18 @@ export class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.googleAuth.initialize();
+    setTimeout(() => {
+      if (this.googleBtnRef?.nativeElement) {
+        this.googleAuth.renderButton(this.googleBtnRef.nativeElement, {
+          text: 'continue_with',
+          size: 'large',
+        });
+      }
+    }, 0);
   }
 
   onSubmit(): void {
@@ -59,14 +82,8 @@ export class LoginComponent {
     });
   }
 
-  loginWithGoogle(idToken: string): void {
-    this.isLoading.set(true);
-    this.authService.loginWithGoogle(idToken).subscribe({
-      next: () => this.isLoading.set(false),
-      error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Error con Google');
-      },
-    });
+  /** Mantener por compatibilidad si algo lo llama directamente */
+  loginWithGoogle(): void {
+    this.googleAuth.promptOneTap();
   }
 }

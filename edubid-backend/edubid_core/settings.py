@@ -30,6 +30,8 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.railway.ap
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.netlify.app',
+    'http://localhost:4200',
+    'http://127.0.0.1:4200',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:8000',
@@ -97,10 +99,14 @@ MIDDLEWARE = [
 # ─────────────────────────────────────────────
 # CORS
 # ─────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:5173,http://127.0.0.1:5173'
-).split(',')
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in config(
+        'CORS_ALLOWED_ORIGINS',
+        default='http://localhost:4200,http://127.0.0.1:4200,http://localhost:5173,http://127.0.0.1:5173'
+    ).split(',')
+    if origin.strip()
+]
 
 CORS_ALLOW_CREDENTIALS = True
 

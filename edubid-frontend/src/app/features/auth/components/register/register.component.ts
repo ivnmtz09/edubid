@@ -1,4 +1,12 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  AfterViewInit,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -9,6 +17,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { GoogleAuthService } from '../../../../core/services/google-auth.service';
 import { PublicInstitution } from '../../../../core/models/user.model';
 import { AUTH_ENDPOINTS } from '../../../../core/constants/api.constants';
 import { HttpClient } from '@angular/common/http';
@@ -19,11 +28,14 @@ import { HttpClient } from '@angular/common/http';
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  readonly googleAuth = inject(GoogleAuthService);
   private router = inject(Router);
   private http = inject(HttpClient);
+
+  @ViewChild('googleBtn') googleBtnRef!: ElementRef<HTMLDivElement>;
 
   registerForm: FormGroup;
   institutions = signal<PublicInstitution[]>([]);
@@ -57,6 +69,18 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInstitutions();
+    this.googleAuth.initialize();
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      if (this.googleBtnRef?.nativeElement) {
+        this.googleAuth.renderButton(this.googleBtnRef.nativeElement, {
+          text: 'signup_with',
+          size: 'large',
+        });
+      }
+    }, 0);
   }
 
   passwordMatchValidator(control: AbstractControl): { [key: string]: boolean } | null {

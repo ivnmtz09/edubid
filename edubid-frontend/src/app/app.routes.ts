@@ -89,6 +89,24 @@ export const routes: Routes = [
     redirectTo: 'terminos-y-condiciones',
   },
   {
+    // Ruta directa para nuevos usuarios Google sin institución asignada
+    path: 'completar-perfil',
+    title: 'Completar Perfil | EduBid',
+    loadComponent: () =>
+      import('./features/auth/components/complete-profile/complete-profile.component').then(
+        m => m.CompleteProfileComponent
+      ),
+  },
+  {
+    // Confirmación de registro: el usuario debe verificar su correo
+    path: 'email-sent',
+    title: 'Verifica tu correo | EduBid',
+    loadComponent: () =>
+      import('./features/auth/components/email-sent/email-sent.component').then(
+        m => m.EmailSentComponent
+      ),
+  },
+  {
     path: '404',
     title: 'Página no encontrada | EduBid',
     loadComponent: () =>
