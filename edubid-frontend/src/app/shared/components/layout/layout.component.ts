@@ -237,6 +237,23 @@ interface NavItem {
               </div>
             }
 
+            <!-- Botón Colapsar Desktop (Movido arriba) -->
+            <button
+              type="button"
+              (click)="toggleDesktopCollapse()"
+              class="hidden lg:flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              [title]="isDesktopExpanded() ? 'Contraer menú lateral' : 'Expandir menú lateral'"
+            >
+              <svg class="w-5 h-5 shrink-0 transition-transform duration-300" [class.rotate-180]="!isDesktopExpanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+              @if (isDesktopExpanded()) {
+                <span class="truncate">Contraer Menú</span>
+              }
+            </button>
+
+            <div class="border-t border-border my-2"></div>
+
             <!-- Lista de Enlaces de Navegación -->
             <nav class="space-y-1">
               @for (item of filteredNavItems(); track item.route) {
@@ -260,7 +277,7 @@ interface NavItem {
             </nav>
           </div>
 
-          <!-- Pie del Sidebar: Botón de Colapso Desktop & Ver Sitio -->
+          <!-- Pie del Sidebar: Ver Sitio -->
           <div class="p-3 border-t border-border space-y-1">
             <!-- Enlace al Inicio Público -->
             <a
@@ -275,21 +292,6 @@ interface NavItem {
                 <span class="truncate">Sitio Público</span>
               }
             </a>
-
-            <!-- Botón Colapsar Desktop -->
-            <button
-              type="button"
-              (click)="toggleDesktopCollapse()"
-              class="hidden lg:flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-              [title]="isDesktopExpanded() ? 'Contraer menú lateral' : 'Expandir menú lateral'"
-            >
-              <svg class="w-5 h-5 shrink-0 transition-transform duration-300" [class.rotate-180]="!isDesktopExpanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
-              @if (isDesktopExpanded()) {
-                <span class="truncate">Contraer Menú</span>
-              }
-            </button>
           </div>
         </aside>
 

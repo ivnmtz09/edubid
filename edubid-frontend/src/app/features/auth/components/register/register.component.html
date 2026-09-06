@@ -160,14 +160,21 @@
         }
       </div>
 
-      <div class="flex items-start gap-2">
-        <input type="checkbox" formControlName="accept_terms" class="mt-1" />
-        <span class="text-sm">
+      <div class="flex items-start gap-2 mt-4">
+        <div class="flex items-center h-5">
+          <input 
+            id="accept_terms" 
+            type="checkbox" 
+            formControlName="accept_terms" 
+            class="w-4 h-4 border border-border rounded bg-bg focus:ring-2 focus:ring-primary/50 text-primary cursor-pointer mt-0.5" 
+          />
+        </div>
+        <label for="accept_terms" class="text-sm text-text cursor-pointer select-none">
           Acepto los
-          <button type="button" (click)="showTermsModal.set(true)" class="text-primary underline">
+          <button type="button" (click)="showTermsModal.set(true); $event.stopPropagation()" class="text-primary hover:underline">
             términos y condiciones
           </button>
-        </span>
+        </label>
       </div>
 
       <button
