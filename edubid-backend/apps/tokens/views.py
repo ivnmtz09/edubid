@@ -20,6 +20,14 @@ class PeriodViewSet(viewsets.ModelViewSet):
         # Admin ve todos los periodos
         if user.is_staff or user.role == 'admin':
             return Period.objects.all().order_by("-creado")
+            
+        # Rector y coordinador ven periodos de su institución
+        if user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                return Period.objects.filter(
+                    grupo__classroom__docente__institucion_id=user.institucion_id
+                ).select_related('grupo', 'grupo__classroom').order_by("-creado")
+            return Period.objects.none()
         
         # Docente solo ve periodos de sus grupos
         if user.role == 'docente':
@@ -120,9 +128,21 @@ class WalletViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == "estudiante":
-            return Wallet.objects.filter(usuario=user)
-        return super().get_queryset()
+        if user.role == 'admin':
+            return Wallet.objects.all().select_related("usuario", "grupo", "periodo")
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                return Wallet.objects.filter(
+                    grupo__classroom__docente__institucion_id=user.institucion_id
+                ).select_related("usuario", "grupo", "periodo")
+            return Wallet.objects.none()
+        elif user.role == 'docente':
+            return Wallet.objects.filter(
+                grupo__classroom__docente=user
+            ).select_related("usuario", "grupo", "periodo")
+        elif user.role == "estudiante":
+            return Wallet.objects.filter(usuario=user).select_related("usuario", "grupo", "periodo")
+        return Wallet.objects.none()
 
     @action(detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated])
     def mi_wallet(self, request):
@@ -161,6 +181,11 @@ class WalletViewSet(viewsets.ModelViewSet):
     def depositar(self, request, pk=None):
         """Endpoint para que el docente agregue monedas"""
         wallet = self.get_object()
+        
+        # Verify that the docente owns the classroom this wallet belongs to
+        if request.user.role == 'docente' and wallet.grupo.classroom.docente != request.user:
+            raise ValidationError("No tienes permiso para depositar en esta billetera.")
+            
         cantidad = request.data.get("cantidad", 0)
         descripcion = request.data.get("descripcion", "Depósito del docente")
         
@@ -181,6 +206,18 @@ class CoinTransactionViewSet(viewsets.ReadOnlyModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
-        if user.role == "estudiante":
-            return CoinTransaction.objects.filter(wallet__usuario=user)
-        return super().get_queryset()
+        if user.role == 'admin':
+            return CoinTransaction.objects.all().select_related("wallet", "wallet__usuario")
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                return CoinTransaction.objects.filter(
+                    wallet__grupo__classroom__docente__institucion_id=user.institucion_id
+                ).select_related("wallet", "wallet__usuario")
+            return CoinTransaction.objects.none()
+        elif user.role == 'docente':
+            return CoinTransaction.objects.filter(
+                wallet__grupo__classroom__docente=user
+            ).select_related("wallet", "wallet__usuario")
+        elif user.role == "estudiante":
+            return CoinTransaction.objects.filter(wallet__usuario=user).select_related("wallet", "wallet__usuario")
+        return CoinTransaction.objects.none()

@@ -659,12 +659,12 @@ def api_dashboard_stats(request):
     # 1. Admin o Rector
     if user.role in ['admin', 'rector', 'coordinador']:
         base_qs = User.objects.filter(is_active=True)
-        if user.role != 'admin' and hasattr(user, 'profile') and user.profile.institucion:
-            base_qs = base_qs.filter(profile__institucion=user.profile.institucion)
-            classrooms_qs = Classroom.objects.filter(docente__profile__institucion=user.profile.institucion)
-            wallets_qs = Wallet.objects.filter(usuario__profile__institucion=user.profile.institucion)
-            txs_qs = CoinTransaction.objects.filter(wallet__usuario__profile__institucion=user.profile.institucion)
-            auctions_qs = Auction.objects.filter(grupo__classroom__docente__profile__institucion=user.profile.institucion)
+        if user.role != 'admin' and user.institucion_id:
+            base_qs = base_qs.filter(institucion_id=user.institucion_id)
+            classrooms_qs = Classroom.objects.filter(docente__institucion_id=user.institucion_id)
+            wallets_qs = Wallet.objects.filter(usuario__institucion_id=user.institucion_id)
+            txs_qs = CoinTransaction.objects.filter(wallet__usuario__institucion_id=user.institucion_id)
+            auctions_qs = Auction.objects.filter(grupo__classroom__docente__institucion_id=user.institucion_id)
         else:
             classrooms_qs = Classroom.objects.all()
             wallets_qs = Wallet.objects.all()
@@ -707,8 +707,8 @@ def api_dashboard_stats(request):
         # Using simple grouped data to avoid complex queries if not needed
         grade_metrics = []
         from apps.groups.models import Group
-        if user.role != 'admin' and hasattr(user, 'profile') and user.profile.institucion:
-            groups = Group.objects.filter(classroom__docente__profile__institucion=user.profile.institucion)
+        if user.role != 'admin' and user.institucion_id:
+            groups = Group.objects.filter(classroom__docente__institucion_id=user.institucion_id)
         else:
             groups = Group.objects.all()
             
@@ -745,57 +745,82 @@ def api_dashboard_stats(request):
     return Response({"detail": "Dashboard stats para este rol en desarrollo."}, status=status.HTTP_200_OK)
 
 # --------------------------
-# Lista de usuarios (solo admin)
+# Lista de usuarios
 # --------------------------
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsAdmin])
+@permission_classes([IsAuthenticated])
 def api_list_users(request):
     """
-    Lista todos los usuarios del sistema (solo admin)
+    Lista los usuarios del sistema.
+    Admin: todos.
+    Rector/Coordinador: solo los de su institución.
+    Docente/Estudiante: no permitido (o según lógica posterior).
     """
     logger.info(f"📋 Listando usuarios - solicitado por: {request.user.email}")
-    users = User.objects.all().order_by('-date_joined')
+    user = request.user
+    
+    if user.role == 'admin':
+        users = User.objects.all().order_by('-date_joined')
+    elif user.role in ['rector', 'coordinador']:
+        if user.institucion_id:
+            users = User.objects.filter(institucion_id=user.institucion_id).order_by('-date_joined')
+        else:
+            users = User.objects.none()
+    else:
+        return Response({"detail": "No tienes permiso para listar usuarios"}, status=status.HTTP_403_FORBIDDEN)
+        
     serializer = UserProfileSerializer(users, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # --------------------------
-# Actualizar usuario (solo admin)
+# Actualizar usuario
 # --------------------------
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticated, IsAdmin])
+@permission_classes([IsAuthenticated])
 def api_update_user(request, user_id):
     """
-    Actualizar datos de un usuario (solo admin)
+    Actualizar datos de un usuario.
+    Admin: todos.
+    Rector/Coordinador: solo los de su institución.
     """
-    logger.info(f"✏️ Actualizando usuario {user_id} - admin: {request.user.email}")
+    logger.info(f"✏️ Actualizando usuario {user_id} - solicitado por: {request.user.email}")
     
     try:
-        user = User.objects.get(id=user_id)
+        user_to_update = User.objects.get(id=user_id)
     except User.DoesNotExist:
         logger.warning(f"❌ Usuario no encontrado para actualizar: {user_id}")
         return Response({"detail": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
+    req_user = request.user
+    if req_user.role == 'admin':
+        pass # Admin puede actualizar a cualquiera
+    elif req_user.role in ['rector', 'coordinador']:
+        if not req_user.institucion_id or user_to_update.institucion_id != req_user.institucion_id:
+            return Response({"detail": "No tienes permiso para actualizar a este usuario"}, status=status.HTTP_403_FORBIDDEN)
+    else:
+        return Response({"detail": "No tienes permiso para actualizar usuarios"}, status=status.HTTP_403_FORBIDDEN)
+
     # Actualizar campos básicos del usuario
-    user.first_name = request.data.get("first_name", user.first_name)
-    user.last_name = request.data.get("last_name", user.last_name)
-    user.email = request.data.get("email", user.email)
-    user.role = request.data.get("role", user.role)
-    user.is_active = request.data.get("is_active", user.is_active)
-    user.save()
+    user_to_update.first_name = request.data.get("first_name", user_to_update.first_name)
+    user_to_update.last_name = request.data.get("last_name", user_to_update.last_name)
+    user_to_update.email = request.data.get("email", user_to_update.email)
+    user_to_update.role = request.data.get("role", user_to_update.role)
+    user_to_update.is_active = request.data.get("is_active", user_to_update.is_active)
+    user_to_update.save()
 
     # Actualizar perfil si hay datos
     if 'profile' in request.data:
         profile_data = request.data['profile']
-        profile_serializer = ProfileSerializer(user.profile, data=profile_data, partial=True)
+        profile_serializer = ProfileSerializer(user_to_update.profile, data=profile_data, partial=True)
         if profile_serializer.is_valid():
             profile_serializer.save()
 
-    logger.info(f"✅ Usuario actualizado exitosamente: {user.email}")
+    logger.info(f"✅ Usuario actualizado exitosamente: {user_to_update.email}")
     
     return Response({
         "message": "Usuario actualizado exitosamente",
-        "user": UserProfileSerializer(user).data
+        "user": UserProfileSerializer(user_to_update).data
     }, status=status.HTTP_200_OK)
 
 

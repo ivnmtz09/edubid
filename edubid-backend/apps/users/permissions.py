@@ -85,3 +85,10 @@ class IsInstitutionStaff(BasePermission):
                 )
             )
         )
+class IsInstitutionStaffOrDocente(BasePermission):
+    """Permite acceso a admin, rector, coordinador o docente."""
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role in ('admin', 'rector', 'coordinador', 'docente')
+        )

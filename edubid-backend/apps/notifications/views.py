@@ -88,6 +88,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
         Permite a docentes enviar notificaciones a sus estudiantes
         """
         from apps.classrooms.models import Classroom
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
         
         user = request.user
         
@@ -99,14 +101,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
         
         # Obtener estudiantes del docente
         classrooms = Classroom.objects.filter(docente=user)
-        estudiantes = []
-        for classroom in classrooms:
-            estudiantes.extend(classroom.estudiantes.all())
+        estudiantes = User.objects.filter(role="estudiante", student_groups__classroom__in=classrooms).distinct()
         
-        if not estudiantes:
-            return Response({
-                'error': 'No tienes estudiantes asignados'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        if not estudiantes.exists():
+            return Response({"error": "No hay estudiantes en esta clase"}, status=status.HTTP_400_BAD_REQUEST)
         
         # Crear notificaciones para cada estudiante
         titulo = request.data.get('titulo')

@@ -13,7 +13,13 @@ class ClassroomViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'docente':
+        if user.role == 'admin':
+            return Classroom.objects.all()
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                return Classroom.objects.filter(docente__institucion_id=user.institucion_id)
+            return Classroom.objects.none()
+        elif user.role == 'docente':
             return Classroom.objects.filter(docente=user)
         elif user.role == 'estudiante':
             # Estudiantes ven clases de los grupos a los que pertenecen

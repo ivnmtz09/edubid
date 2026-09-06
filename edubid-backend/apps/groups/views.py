@@ -15,7 +15,13 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'docente':
+        if user.role == 'admin':
+            return Group.objects.all()
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                return Group.objects.filter(classroom__docente__institucion_id=user.institucion_id)
+            return Group.objects.none()
+        elif user.role == 'docente':
             return Group.objects.filter(classroom__docente=user)
         elif user.role == 'estudiante':
             return Group.objects.filter(estudiantes=user)

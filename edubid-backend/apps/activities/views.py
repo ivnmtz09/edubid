@@ -22,7 +22,14 @@ class ActivityViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = Activity.objects.select_related('group', 'group__classroom')
         
-        if user.role == 'docente':
+        if user.role == 'admin':
+            pass # No additional filter
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                queryset = queryset.filter(group__classroom__docente__institucion_id=user.institucion_id)
+            else:
+                return Activity.objects.none()
+        elif user.role == 'docente':
             queryset = queryset.filter(group__classroom__docente=user)
         elif user.role == 'estudiante':
             queryset = queryset.filter(group__estudiantes=user, habilitada=True)
@@ -70,10 +77,19 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             'activity__group__classroom'
         )
         
-        if user.role == 'docente':
+        if user.role == 'admin':
+            pass # No additional filter
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                queryset = queryset.filter(activity__group__classroom__docente__institucion_id=user.institucion_id)
+            else:
+                return Submission.objects.none()
+        elif user.role == 'docente':
             queryset = queryset.filter(activity__group__classroom__docente=user)
         elif user.role == 'estudiante':
             queryset = queryset.filter(estudiante=user)
+        else:
+            return Submission.objects.none()
         
         activity_id = self.request.query_params.get('activity')
         if activity_id:
@@ -124,6 +140,9 @@ class SubmissionViewSet(viewsets.ModelViewSet):
 
         if user.role != "docente":
             raise PermissionDenied("Solo los docentes pueden calificar entregas.")
+            
+        if submission.activity.group.classroom.docente != user:
+            raise PermissionDenied("No puedes calificar entregas de otros docentes.")
 
         nota = request.data.get("nota")
         retro = request.data.get("retroalimentacion", "")

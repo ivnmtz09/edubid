@@ -36,7 +36,17 @@ class AuctionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        if user.role == 'docente':
+        if user.is_staff or user.role == 'admin':
+            return Auction.objects.all().select_related('creador', 'grupo').prefetch_related('bids')
+            
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                return Auction.objects.filter(
+                    grupo__classroom__docente__institucion_id=user.institucion_id
+                ).select_related('creador', 'grupo', 'grupo__classroom').prefetch_related('bids')
+            return Auction.objects.none()
+            
+        elif user.role == 'docente':
             # Docente ve subastas de sus grupos
             return Auction.objects.filter(
                 grupo__classroom__docente=user
@@ -47,10 +57,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
             return Auction.objects.filter(
                 grupo__estudiantes=user
             ).select_related('creador', 'grupo', 'grupo__classroom').prefetch_related('bids')
-        
-        elif user.role == 'admin' or user.is_staff:
-            return Auction.objects.all().select_related('creador', 'grupo').prefetch_related('bids')
-        
+            
         return Auction.objects.none()
 
     def get_permissions(self):
@@ -221,7 +228,17 @@ class BidViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        if user.role == 'docente':
+        if user.is_staff or user.role == 'admin':
+            return Bid.objects.all().select_related('auction', 'estudiante', 'registrado_por')
+            
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                return Bid.objects.filter(
+                    auction__grupo__classroom__docente__institucion_id=user.institucion_id
+                ).select_related('auction', 'estudiante', 'registrado_por')
+            return Bid.objects.none()
+            
+        elif user.role == 'docente':
             return Bid.objects.filter(
                 auction__grupo__classroom__docente=user
             ).select_related('auction', 'estudiante', 'registrado_por')
@@ -230,10 +247,7 @@ class BidViewSet(viewsets.ModelViewSet):
             return Bid.objects.filter(
                 estudiante=user
             ).select_related('auction', 'estudiante', 'registrado_por')
-        
-        elif user.role == 'admin' or user.is_staff:
-            return Bid.objects.all().select_related('auction', 'estudiante', 'registrado_por')
-        
+            
         return Bid.objects.none()
 
     def get_serializer_class(self):

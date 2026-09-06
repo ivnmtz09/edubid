@@ -26,14 +26,22 @@ class GradeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == "estudiante":
-            return Grade.objects.filter(student=user).select_related(
-                "activity", "student", "activity__group"
-            )
+        if user.role == "admin":
+            return Grade.objects.all().select_related("activity", "student", "activity__group")
+        elif user.role in ["rector", "coordinador"]:
+            if user.institucion_id:
+                return Grade.objects.filter(
+                    activity__group__classroom__docente__institucion_id=user.institucion_id
+                ).select_related("activity", "student", "activity__group")
+            return Grade.objects.none()
         elif user.role == "docente":
             return Grade.objects.filter(
                 activity__group__classroom__docente=user
             ).select_related("activity", "student", "activity__group")
+        elif user.role == "estudiante":
+            return Grade.objects.filter(student=user).select_related(
+                "activity", "student", "activity__group"
+            )
         return Grade.objects.none()
 
     def get_permissions(self):
@@ -165,6 +173,12 @@ class GradeViewSet(viewsets.ModelViewSet):
             return Response(
                 {"detail": "Actividad no encontrada."},
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+        if request.user.role == "docente" and activity.group.classroom.docente != request.user:
+            return Response(
+                {"detail": "No puedes calificar actividades de otros docentes."},
+                status=status.HTTP_403_FORBIDDEN
             )
 
         creadas = []
