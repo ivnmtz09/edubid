@@ -45,48 +45,75 @@ Los estudiantes pueden utilizar sus tokens en un **sistema de subastas estratég
 
 ---
 
-## 🏢 Arquitectura SaaS Multi-Tenant & White-Labeling
+## 🏢 Arquitectura SaaS Multi-Tenant, Gobernanza & White-Labeling
 
-EduBid incorpora capacidades multi-inquilino (*multi-tenant*) con personalización de marca (*white-labeling*):
+EduBid incorpora capacidades multi-inquilino (*multi-tenant*) con aislamiento estricto de datos y personalización de marca (*white-labeling*):
 
-1. **Aislamiento Institucional**: Cada usuario está asociado a una institución (`institucion_id`). Las consultas y transacciones se filtran estrictamente a nivel de queryset en la API según el rol y la institución del usuario.
-2. **Identidad Visual Personalizada (White-Label)**: Cada colegio personaliza su experiencia con:
-   - Nombre oficial y Código DANE.
-   - Logotipo institucional en alta resolución.
-   - Paleta de color primario y secundario inyectada dinámicamente en tiempo real en el frontend mediante variables CSS (`--brand-primary`, `--brand-accent`).
-3. **Gobernanza Institucional**: Regla de unicidad a nivel de modelo que garantiza la designación de un único **Rector** por colegio para la toma de decisiones directivas.
+1. **Aislamiento Institucional Estricto**:
+   - **SuperAdmin (`admin`)**: Ámbito global estricto. Por regla de integridad de negocio (`User.clean()` y `User.save()`), el administrador global tiene garantizado `institucion = None` y accede a un selector multi-institución dinámico.
+   - **Rectoría y Coordinación (`rector`, `coordinador`)**: Acceso delimitado a su institución (`institucion_id`), supervisando docentes, estudiantes, salones y métricas de su respectivo colegio.
+   - **Docente (`docente`)**: Gestiona sus Aulas (`Classroom`) y sus Grupos (`Group`), diseñando actividades y subastas para sus estudiantes.
+   - **Estudiante (`estudiante`)**: Pertenece a grupos escolares mediante códigos de acceso únicos de 6 caracteres; su billetera digital de EduCoins opera por grupo y período académico.
+2. **Jerarquía Académica del Modelo**:
+   ```
+   Institución (Tenant / White-Label)
+     └── Docente
+           └── Aula / Asignatura (Classroom)
+                 └── Grupos Escolares (Group - con código de unión)
+                       ├── Matrícula de Estudiantes (Inscripción vía código)
+                       ├── Períodos Académicos / Cortes
+                       │     └── Billetera Virtual (Wallet de EduCoins por estudiante)
+                       ├── Actividades Gamificadas (Retos, Misiones, Evaluaciones)
+                       │     └── Entregas (Submissions) -> Calificaciones (Grades con EduCoins)
+                       └── Subastas de Incentivos (Auctions con sistema de pujas y retención)
+   ```
+3. **Identidad Visual Dinámica (White-Label)**:
+   - Cada colegio define su Nombre oficial, Código DANE y Logotipo en alta resolución.
+   - Paleta de color primario y secundario inyectada en tiempo de ejecución en el frontend mediante variables CSS (`--brand-primary`, `--brand-accent`).
+   - Módulo de personalización institucional para Rectores y Administradores (`InstitutionBrandingComponent`).
+4. **Gobernanza Institucional**:
+   - Regla de unicidad a nivel de base de datos (`UniqueConstraint`) que garantiza un único **Rector** activo por institución.
 
 ---
 
 ## 👥 Roles y Control de Acceso (RBAC)
 
-El sistema implementa un control de acceso robusto basado en roles (**RBAC**):
+El sistema implementa un control de acceso robusto basado en roles (**RBAC**) verificado en backend y protegido mediante guards reactivos en frontend:
 
 | Rol | Ámbito | Responsabilidades Clave |
 |-----|--------|-------------------------|
-| **SuperAdmin (`admin`)** | Global | Gestión de instituciones, aprovisionamiento de tenants y monitoreo global de la plataforma. |
-| **Rector (`rector`)** | Institucional | Configuración de identidad visual del colegio (colores, logo), analítica institucional y supervisión. |
-| **Coordinador (`coordinador`)** | Institucional | Monitoreo del progreso académico entre grados y grupos, gestión de alertas y reportes. |
-| **Docente (`docente`)** | Aulas / Grupos | Creación de aulas, retos y evaluaciones, calificación masiva, asignación de EduCoins y subastas. |
-| **Estudiante (`estudiante`)** | Grupos | Billetera digital de EduCoins, entrega de actividades, participación en subastas y ranking. |
+| **SuperAdmin (`admin`)** | Global (Sin Institución) | Gestión global de colegios, selector de tenant en vivo, métricas globales de la plataforma, aprovisionamiento de rectores y auditoría de usuarios. |
+| **Rector (`rector`)** | Institucional | Personalización de identidad corporativa (branding, logo, colores), analítica institucional de desempeño y supervisión de docentes y estudiantes. |
+| **Coordinador (`coordinador`)** | Institucional | Supervisión pedagógica, monitoreo de progreso académico entre grados/grupos y trazabilidad de rendimiento. |
+| **Docente (`docente`)** | Aulas / Grupos | Creación de asignaturas y salones, generación de códigos de unión, asignación de retos con recompensas, calificación y gestión de subastas. |
+| **Estudiante (`estudiante`)** | Grupos Matriculados | Billetera de EduCoins, entrega de actividades, participación en subastas con retención y reembolso automático, y consulta de calificaciones. |
 
 ---
 
 ## ✨ Características Principales
 
+### 👑 Para SuperAdministradores (Global Admin)
+- **🏢 Directorio de Instituciones**: Vista general interactiva con buscador, métricas agregadas y estado de activación.
+- **🔄 Selector Dinámico de Institución**: Capacidad de cambiar el contexto visual y operativo para auditar cualquier colegio en tiempo real.
+- **🎨 Gestor de Identidad Tenant**: Creación y edición de colegios con selector de paletas cromáticas predefinidas o códigos HEX personalizados y subida de logotipo.
+- **👥 Administración Global de Usuarios**: Directorio de usuarios con filtros por rol, institución y estado de activación.
+
+### 🏛️ Para Rectores y Coordinadores
+- **📊 Panel Directivo y Analítica**: Métricas de adopción estudiantil, actividad docente y volumen de EduCoins en circulación.
+- **🎨 Módulo de Marca (White-Label)**: Edición directa del logo y colores institucionales con previsualización en vivo.
+- **👥 Gestión de Comunidad Escolar**: Directorio de docentes y estudiantes matriculados en la institución.
+
 ### 👨‍🏫 Para Docentes
-- **🏛️ Gestión de Aulas y Grupos**: Control centralizado de asignaturas, grupos y periodos académicos (cortes).
-- **🏆 Actividades Gamificadas**: Creación de retos, misiones, proyectos y evaluaciones con valores asignados de EduCoins y puntos de experiencia (XP).
-- **📊 Calificación Inteligente**: Registro de notas con cálculo y acreditación automática de EduCoins mediante señales (*Django signals*).
-- **🔨 Centro de Subastas Dinámicas**: Creación de subastas con precio inicial e incrementos mínimos, seguimiento de ofertas en vivo y cierre automático con cobro y reembolso.
-- **📈 Tableros Analíticos**: Estadísticas de rendimiento grupal, notas promedio e impacto de la motivación.
+- **🏛️ Estructura Clases -> Grupos**: Organización clara de asignaturas (`Classrooms`) y sub-secciones o salones (`Groups`) con códigos de unión generados automáticamente.
+- **🏆 Actividades y Misiones Gamificadas**: Creación de retos, misiones, proyectos y evaluaciones asignando valor en EduCoins y XP.
+- **📊 Calificación con Acreditación Automática**: Las notas asignadas disparan automáticamente la acreditación de EduCoins hacia la billetera del estudiante según el porcentaje obtenido.
+- **🔨 Centro de Subastas Dinámicas**: Creación de subastas por grupo, seguimiento de pujas en vivo y cierre con cobro automático al ganador y desbloqueo de saldo a los demás participantes.
 
 ### 👨‍🎓 Para Estudiantes
-- **💰 Billetera Virtual (EduCoins)**: Monitoreo en tiempo real de saldo disponible, saldo bloqueado en pujas activas y balance histórico.
-- **🎯 Sistema de Subastas Estratégicas**: Ofertas en tiempo real; el sistema retiene el saldo de la puja y lo reintegra automáticamente si la oferta es superada o no resulta ganadora.
-- **📜 Historial y Trazabilidad Transaccional**: Registro detallado e inmutable de cada EduCoin ganado o utilizado.
-- **🏅 Ranking y Progreso**: Visualización clara del posicionamiento dentro del grupo escolar.
-- **🔔 Notificaciones Proactivas**: Alertas automáticas ante nuevas notas, actividades por vencer, subastas abiertas y mensajes del docente.
+- **🔑 Unión Rápida por Código**: Ingreso a grupos mediante código alfanumérico de 6 caracteres con provisión automática de billetera.
+- **💰 Billetera Virtual (EduCoins)**: Monitoreo en tiempo real de saldo disponible, saldo bloqueado en subastas activas e historial transaccional inmutable.
+- **🎯 Sistema de Subastas Estratégicas**: Participación en pujas con validación inmediata de saldo y retención temporal inteligente.
+- **📚 Entregas y Retroalimentación**: Envío de actividades con archivos adjuntos y consulta de rúbricas y notas.
 
 ---
 
@@ -94,18 +121,19 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**):
 
 ### 🔧 Backend
 - **Framework**: [Django 5.2.6](https://www.djangoproject.com/) con [Django REST Framework 3.16](https://www.django-rest-framework.org/)
-- **Base de Datos**: [MySQL 8.0](https://www.mysql.com/) (conector [PyMySQL](https://pymysql.readthedocs.io/))
-- **Autenticación**: JWT con [djangorestframework-simplejwt](https://django-rest-framework-simplejwt.readthedocs.io/) (rotación y lista negra de tokens)
-- **SSO**: [Google OAuth 2.0](https://developers.google.com/identity) con integración `google-auth`
-- **Mensajería & Email**: [SendGrid](https://sendgrid.com/) para verificación de correos y recuperación de contraseñas
+- **Base de Datos**: [MySQL 8.0](https://www.mysql.com/) con driver [PyMySQL](https://pymysql.readthedocs.io/)
+- **Autenticación**: JWT con [djangorestframework-simplejwt](https://django-rest-framework-simplejwt.readthedocs.io/) (rotación y blacklist de tokens)
+- **SSO**: [Google OAuth 2.0](https://developers.google.com/identity) (`google-auth` backend verification)
+- **Servicios de Correo**: [SendGrid](https://sendgrid.com/) para verificación de cuenta y recuperación de contraseña
 - **Producción**: [Gunicorn](https://gunicorn.org/) + [WhiteNoise](https://whitenoise.readthedocs.io/)
 
 ### 🎨 Frontend
-- **Framework**: [Angular 19+ / 22](https://angular.dev/) (Standalone Components, Signals, Typed Reactive Forms)
+- **Framework**: [Angular 19+](https://angular.dev/) (Standalone Components, Signals reactivos, Formularios Reactivos tipados)
 - **Estilos**: [Tailwind CSS 4.x](https://tailwindcss.com/) + [Flowbite](https://flowbite.com/)
-- **Iconografía**: [Ng-Icons (Heroicons)](https://ng-icons.github.io/ng-icons/)
-- **Notificaciones**: [ngx-toastr](https://github.com/scttcper/ngx-toastr)
-- **Gestión de Temas**: Modo Claro / Oscuro / Sistema y personalización dinámica tenant white-label
+- **Iconografía & UI**: Iconos vectoriales estándar SVG Flowbite y [Ng-Icons (Heroicons)](https://ng-icons.github.io/ng-icons/) (cero emojis en componentes de interfaz)
+- **Identidad de Marca**: Logotipo corporativo (`edubid.png`) y favicon (`edubid.ico`) integrados globalmente
+- **Notificaciones**: [ngx-toastr](https://github.com/scttcper/ngx-toastr) + servicio centralizado `NotificationService`
+- **Gestión de Temas**: Modo Claro / Oscuro / Sistema y personalización tenant en vivo (`ThemeService`)
 
 ### 🐳 DevOps e Infraestructura
 - **Docker & Docker Compose**: MySQL 8.0 aislado con credenciales parametrizadas mediante `.env`
@@ -118,53 +146,66 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**):
 
 ```
 edubid/
-├── edubid-backend/                   # API REST en Django
+├── edubid-backend/                   # API REST en Django 5.2.6 + DRF
 │   ├── apps/
 │   │   ├── activities/               # Actividades (retos, misiones, proyectos y entregas)
-│   │   ├── auctions/                 # Subastas y sistema de pujas
-│   │   ├── classrooms/               # Aulas académicas y asignaturas
+│   │   ├── auctions/                 # Subastas y sistema de pujas con retención
+│   │   ├── classrooms/               # Aulas académicas y asignaturas (Docente)
 │   │   ├── common/                   # Modelos base, utilidades y mixins compartidos
 │   │   ├── grades/                   # Calificaciones y disparadores de EduCoins
-│   │   ├── groups/                   # Grupos de clase, matrículas y periodos
+│   │   ├── groups/                   # Grupos escolares, matrículas por código y períodos
 │   │   ├── institutions/             # Módulo SaaS Multi-Tenant y White-Labeling
 │   │   ├── notifications/            # Motor de alertas y notificaciones proactivas
 │   │   ├── reports/                  # Informes y analítica académica
 │   │   ├── tokens/                   # Wallets, periodos y transacciones de EduCoins
-│   │   └── users/                    # Autenticación, perfiles, RBAC y verificación
+│   │   └── users/                    # Autenticación JWT, RBAC estricto, Google SSO y perfiles
 │   ├── edubid_core/                  # Configuración Django (settings, urls, wsgi, asgi)
 │   ├── docker-compose.yml            # Orquestación de MySQL 8.0
 │   ├── .env.example                  # Plantilla de variables para backend y base de datos
 │   ├── manage.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   ├── BACKEND_API_MAP.md            # Especificación técnica exhaustiva de la API
+│   └── README.md                     # Guía de arquitectura y uso del backend
 │
-├── edubid-frontend/                  # Single Page Application en Angular
+├── edubid-frontend/                  # Single Page Application en Angular 19+
+│   ├── public/                       # Activos públicos de marca (edubid.png, edubid.ico)
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── core/                 # Servicios singleton (Auth, Theme, Notification), guards, interceptors
-│   │   │   ├── shared/               # Componentes reutilizables, layouts, directivas y pipes
-│   │   │   └── features/             # Módulos de negocio lazy-loaded:
-│   │   │       ├── auth/             # Login, Registro institucional, Verificación de email
-│   │   │       ├── dashboard/        # Dashboards por rol (Docente, Estudiante, Rector)
-│   │   │       ├── classrooms/       # Aulas y clases
-│   │   │       ├── groups/           # Grupos escolares
-│   │   │       ├── activities/       # Actividades académicas y entregas
-│   │   │       ├── auctions/         # Subastas y pujas en tiempo real
-│   │   │       ├── wallet/           # Billetera y transacciones de EduCoins
-│   │   │       ├── profile/          # Gestión de perfil de usuario
-│   │   │       ├── notifications/    # Centro de notificaciones
-│   │   │       ├── home/             # Landing page
-│   │   │       ├── about/            # Sobre el proyecto
+│   │   │   ├── core/                 # Servicios singleton, guards e interceptores
+│   │   │   │   ├── services/         # AuthService, ThemeService, NotificationService,
+│   │   │   │   │                     # ActivityService, AuctionService, ClassroomService,
+│   │   │   │   │                     # GradeService, GroupService, InstitutionService,
+│   │   │   │   │                     # UserService, WalletService, DashboardService, GoogleAuthService
+│   │   │   │   ├── guards/           # authGuard, roleGuard
+│   │   │   │   ├── interceptors/     # authInterceptor (JWT + auto-refresh)
+│   │   │   │   └── models/           # Interfaces TypeScript (User, Group, Classroom, etc.)
+│   │   │   ├── shared/               # Componentes reutilizables y estructura
+│   │   │   │   ├── components/       # Layout (Aside sidebar + Header + Footer), UI atoms,
+│   │   │   │   │                     # institution-branding (White-label)
+│   │   │   │   └── pipes/            # Pipes de utilidad
+│   │   │   └── features/             # Módulos y vistas de negocio:
+│   │   │       ├── auth/             # Login, Register, Complete Profile, Email Sent, Google SSO
+│   │   │       ├── dashboard/        # 5 Dashboards (Admin, Rector, Coordinator, Teacher, Student)
+│   │   │       ├── classrooms/       # Gestión de Aulas y detalle con grupos anidados
+│   │   │       ├── groups/           # Vista de grupos para estudiantes y unión por código
+│   │   │       ├── activities/       # Retos, entregas y evaluación
+│   │   │       ├── auctions/         # Subastas y centro de pujas
+│   │   │       ├── wallet/           # Billetera digital y libro de transacciones
+│   │   │       ├── profile/          # Perfil de usuario y ajustes
+│   │   │       ├── notifications/    # Bandeja interactiva de notificaciones
+│   │   │       ├── home/             # Landing page con estado dinámico de sesión
+│   │   │       ├── about/            # Información y misión
 │   │   │       ├── terms/            # Términos y condiciones
-│   │   │       └── not-found/        # Página de error 404
+│   │   │       └── not-found/        # Página 404
 │   │   ├── environments/             # Configuración por ambiente (local, prod, example)
-│   │   ├── styles.scss               # Estilos globales y temas CSS
+│   │   ├── styles.scss               # Estilos globales y tokens Tailwind CSS 4
 │   │   └── main.ts                   # Bootstrap standalone de la aplicación
-│   ├── angular.json                  # Configuración de compilación de Angular CLI
+│   ├── angular.json                  # Configuración Angular CLI
 │   ├── proxy.conf.json               # Proxy para redirección local de API
-│   ├── .env.example                  # Plantilla de variables de entorno frontend
+│   ├── .env.example                  # Plantilla de variables frontend
 │   └── package.json
 │
-├── ANGULAR_ACTION_PLAN.md            # Hoja de ruta y arquitectura técnica del frontend
+├── ANGULAR_ACTION_PLAN.md            # Plan de acción y registro de migración a Angular
 └── README.md                         # Documentación principal del repositorio
 ```
 
@@ -384,6 +425,7 @@ La aplicación SPA en Angular se compila mediante `npm run build`, generando una
 
 ## 📚 Documentación Adicional
 
+- [Guía y Arquitectura del Backend Django](edubid-backend/README.md)
 - [Mapeo Completo de Endpoints Backend](edubid-backend/BACKEND_API_MAP.md)
 - [Guía de Arquitectura del Frontend Angular](edubid-frontend/README.md)
 - [Plan de Acción de Migración a Angular](ANGULAR_ACTION_PLAN.md)

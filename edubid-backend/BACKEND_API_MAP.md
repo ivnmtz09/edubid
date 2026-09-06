@@ -1,7 +1,7 @@
 # BACKEND_API_MAP.md — EduBid Backend (Django REST Framework)
 
-> **Generado automáticamente** — 2026-08-27
-> Base: `edubid-backend/` (Django 5.2.6 + DRF + SimpleJWT + MySQL)
+> **Actualizado a la última versión** — 2026-09-06
+> Base: `edubid-backend/` (Django 5.2.6 + DRF + SimpleJWT + MySQL 8.0)
 
 ---
 
@@ -9,7 +9,7 @@
 
 1. [Tabla de Endpoints](#1-tabla-de-endpoints)
 2. [Flujo de Autenticación](#2-flujo-de-autenticación)
-3. [Aislamiento Multi-Tenant](#3-aislamiento-multi-tenant)
+3. [Aislamiento Multi-Tenant & RBAC](#3-aislamiento-multi-tenant)
 4. [Formato de Respuestas JSON Clave](#4-formato-de-respuestas-json-clave)
 
 ---
@@ -27,14 +27,14 @@
 | `/api/users/verify-email/<token>/` | GET | No | Verificar email con token enviado por SendGrid. Activa la cuenta. |
 | `/api/users/resend-verification/` | POST | No | Reenviar email de verificación. Invalida tokens anteriores. |
 | `/api/users/profile/` | GET | Sí | Obtener perfil del usuario autenticado. |
-| `/api/users/profile/update/` | PATCH | Sí | Actualizar nombre, apellido, institución (escritura única), datos del profile. |
+| `/api/users/profile/update/` | PATCH | Sí | Actualizar nombre, apellido, institución (escritura única, rechazada para admin), bio, teléfono, avatar. |
 | `/api/users/delete-account/` | DELETE | Sí | Eliminar cuenta propia (requiere password para confirmar). |
 | `/api/users/change-password/` | PATCH | Sí | Cambiar contraseña (requiere old_password + new_password + confirm_password). |
 | `/api/users/password-reset/` | POST | No | Solicitar reset de contraseña. Envía email con link de reset. |
 | `/api/users/password-reset-confirm/<uidb64>/<token>/` | POST | No | Confirmar nueva contraseña con token de reset. |
-| `/api/users/list/` | GET | Sí (admin) | Listar todos los usuarios del sistema. |
-| `/api/users/<user_id>/update/` | PATCH | Sí (admin) | Actualizar cualquier usuario (admin). |
-| `/api/users/<user_id>/delete/` | DELETE | Sí (admin) | Eliminar cualquier usuario (admin). |
+| `/api/users/list/` | GET | Sí (admin/rector/coordinador) | Listar usuarios (Admin: todos; Rector/Coordinador: solo los de su institución). |
+| `/api/users/<user_id>/update/` | PATCH | Sí (admin/rector/coordinador) | Actualizar usuario (Admin: cualquiera; Rector/Coordinador: solo los de su institución). |
+| `/api/users/<user_id>/delete/` | DELETE | Sí (admin) | Eliminar cualquier usuario (solo admin global). |
 
 ### 1.2 Classrooms (`/api/classrooms/`)
 
@@ -56,7 +56,7 @@
 | `/api/groups/{id}/` | GET | Sí | Detalle de grupo con estudiantes detallados. |
 | `/api/groups/{id}/` | PUT/PATCH | Sí (docente) | Actualizar grupo. |
 | `/api/groups/{id}/` | DELETE | Sí (docente) | Eliminar grupo. |
-| `/api/groups/join/` | POST | Sí (estudiante) | Unirse a grupo por código. Crea wallet automáticamente. |
+| `/api/groups/join/` | POST | Sí (estudiante) | Unirse a grupo por código alfanumérico (6 caracteres, ej. `ABC-123`). Auto-crea Wallet para el estudiante en el período activo. |
 | `/api/groups/{id}/join/` | POST | Sí (estudiante) | Unirse a grupo por ID. |
 | `/api/groups/{id}/estudiantes/` | GET | Sí | Listar estudiantes de un grupo. |
 
@@ -80,7 +80,7 @@
 | Ruta | Método | Auth | Propósito |
 |------|--------|------|-----------|
 | `/api/grades/` | GET | Sí | Listar calificaciones (docente: de sus clases, estudiante: las suyas). |
-| `/api/grades/` | POST | Sí (docente) | Crear calificación. Signal dispara asignación automática de EduCoins. |
+| `/api/grades/` | POST | Sí (docente) | Crear calificación. Valida que la actividad pertenezca a un aula del docente. Signal dispara asignación automática de EduCoins a la wallet. |
 | `/api/grades/{id}/` | GET | Sí | Detalle de calificación con coins_ganados calculados. |
 | `/api/grades/mis-notas/` | GET | Sí (estudiante) | Notas propias con promedio general y total EduCoins ganados. |
 | `/api/grades/grupo/{group_id}/reporte/` | GET | Sí (docente) | Reporte detallado de notas y EduCoins por grupo. |
@@ -97,11 +97,11 @@
 | `/api/tokens/periods/{id}/` | DELETE | Sí (docente/admin) | Eliminar periodo. |
 | `/api/tokens/periods/{id}/activar/` | POST | Sí (docente/admin) | Activar periodo (desactiva los demás del mismo grupo). |
 | `/api/tokens/periods/mis_periodos/` | GET | Sí | Periodos del usuario según su rol. |
-| `/api/tokens/wallets/` | GET | Sí | Listar wallets (estudiante: solo las suyas). |
+| `/api/tokens/wallets/` | GET | Sí | Listar wallets (estudiante: solo las suyas; docente/rector/coordinador: de su institución/grupos). |
 | `/api/tokens/wallets/{id}/` | GET | Sí | Detalle de wallet con transacciones. |
 | `/api/tokens/wallets/mi-wallet/` | GET | Sí (estudiante) | Wallet del periodo activo del estudiante. |
-| `/api/tokens/wallets/{id}/depositar/` | POST | Sí (docente) | Depositar monedas a wallet de un estudiante. |
-| `/api/tokens/transactions/` | GET | Sí | Listar transacciones (estudiante: solo las suyas). |
+| `/api/tokens/wallets/{id}/depositar/` | POST | Sí (docente) | Depositar monedas a wallet. Valida estrictamente que el docente sea dueño del aula/grupo asociado para evitar depósitos cruzados no autorizados. |
+| `/api/tokens/transactions/` | GET | Sí | Listar transacciones (estudiante: solo las suyas; directivos/docentes: de sus grupos/institución). |
 | `/api/tokens/transactions/{id}/` | GET | Sí | Detalle de transacción. |
 
 ### 1.7 Subastas (`/api/auctions/`)
@@ -218,9 +218,9 @@ POST /api/users/token/refresh/
 
 ## 3. Aislamiento Multi-Tenant
 
-### 3.1 Mecanismo: FK `institucion_id` en el modelo User
+### 3.1 Mecanismo: FK `institucion_id` y Scope Global de Admin
 
-El multi-tenant NO es a nivel de base de datos separada ni por schema. Se implementa mediante una **relación ForeignKey** en el modelo `User` hacia `Institution`:
+El multi-tenant se implementa mediante una **relación ForeignKey** en el modelo `User` hacia `Institution`, con reglas estrictas de integridad y alcance según el rol:
 
 ```python
 # apps/users/models.py
@@ -232,9 +232,26 @@ class User(AbstractUser, BaseModel):
         related_name='usuarios'
     )
     role = models.CharField(...)  # admin|rector|coordinador|docente|estudiante
+
+    def clean(self):
+        super().clean()
+        # Garantiza que el SuperAdmin no pertenezca a ninguna institución
+        if self.role == 'admin' and self.institucion_id is not None:
+            raise ValidationError({'institucion': 'Un Administrador Global no puede estar asociado a una institución específica.'})
+
+    def save(self, *args, **kwargs):
+        # Limpieza forzada en base de datos para rol admin
+        if self.role == 'admin':
+            self.institucion = None
+        super().save(*args, **kwargs)
 ```
 
-### 3.2 Modelo Institution (White-Label)
+**Reglas clave de integridad de usuarios:**
+- El **SuperAdmin (`admin`)** tiene garantizado `institucion = None` a nivel de modelo (`clean` y `save`), en serializers (`ProfileSerializer.get_institucion` retorna `None`) y en endpoints (`api_update_profile` rechaza asignación de institución).
+- Los usuarios con rol `docente` o `estudiante` asocian su institución en el registro o mediante `PATCH /api/users/profile/update/` (asignación de **escritura única**).
+- **Rector Único**: Restricción de unicidad (`UniqueConstraint`) que garantiza que no pueda existir más de un usuario con rol `rector` activo por institución.
+
+### 3.2 Modelo Institution (White-Labeling)
 
 ```python
 class Institution(BaseModel):
@@ -242,64 +259,63 @@ class Institution(BaseModel):
     codigo_dane = models.CharField(max_length=50, unique=True, null=True, blank=True)
     activo = models.BooleanField(default=True)
     # White-Label
-    color_primario = models.CharField(max_length=7, default='#f97316')
+    color_primario = models.CharField(max_length=7, default='#ea580c')
     color_secundario = models.CharField(max_length=7, default='#3b82f6')
     logo = models.ImageField(upload_to='instituciones/logos/', null=True, blank=True)
 ```
 
-### 3.3 Cómo se Filtra por Institución
+### 3.3 Aislamiento de Querysets y Control de Acceso por Módulo (RBAC)
 
-El filtrado se hace **a nivel de queryset en cada ViewSet**, no a nivel de middleware. Cada vista filtra según el rol del usuario:
+El filtrado de datos se aplica **a nivel de queryset en cada ViewSet / API View**:
 
-| Rol | Filtrado aplicado |
-|-----|-------------------|
-| `admin` | Ve todo (todas las instituciones) |
-| `rector` | Ve solo su institución (`institucion_id` del usuario) |
-| `coordinador` | Ve su institución (filtros en signals/notifications) |
-| `docente` | Filtra por `classroom.docente == user` (implícitamente restringido a su institución) |
-| `estudiante` | Filtra por `estudiantes=user` (solo ve lo de sus grupos) |
+| Módulo / ViewSet | SuperAdmin (`admin`) | Rector / Coordinador | Docente (`docente`) | Estudiante (`estudiante`) |
+|------------------|----------------------|----------------------|---------------------|---------------------------|
+| **Usuarios (`/api/users/`)** | Todos los usuarios globales | Solo usuarios de su institución (`institucion_id`) | Sin acceso directo al listado | Sin acceso al listado |
+| **Aulas (`/api/classrooms/`)** | Todas las aulas | Aulas de docentes de su institución | Solo sus propias aulas (`docente=user`) | Aulas asociadas a sus grupos matriculados |
+| **Grupos (`/api/groups/`)** | Todos los grupos | Grupos de aulas en su institución | Grupos de sus propias aulas | Grupos donde está matriculado (`estudiantes=user`) |
+| **Actividades (`/api/activities/`)** | Todas las actividades | Actividades de aulas en su institución | Actividades de sus aulas/grupos | Actividades habilitadas de sus grupos matriculados |
+| **Entregas (`/api/submissions/`)** | Todas las entregas | Entregas de su institución | Entregas de estudiantes en sus grupos | Solo sus propias entregas |
+| **Calificaciones (`/api/grades/`)** | Todas las notas | Notas de aulas en su institución | Notas registradas en sus aulas | Solo sus propias notas |
+| **Billeteras (`/api/tokens/wallets/`)** | Todas las wallets | Wallets de estudiantes de su institución | Wallets de sus estudiantes matriculados | Solo su propia wallet |
+| **Subastas (`/api/auctions/`)** | Todas las subastas | Subastas de su institución | Subastas creadas en sus grupos | Subastas activas de sus grupos |
+| **Pujas (`/api/auctions/bids/`)** | Todas las pujas | Pujas de subastas de su institución | Pujas realizadas en sus subastas | Solo sus propias pujas |
 
-### 3.4 Constraint de Rector por Institución
+### 3.4 Validaciones de Seguridad a Nivel de Endpoint
 
-```python
-# apps/users/models.py
-UniqueConstraint(
-    fields=['institucion'],
-    condition=Q(role='rector'),
-    name='unique_rector_per_institution',
-)
-# Garantiza que cada institución tenga UN SOLO rector.
-```
+1. **Protección contra Depósitos Cruzados de EduCoins (`/api/tokens/wallets/{id}/depositar/`)**:
+   El endpoint valida que el docente que efectúa el depósito sea el propietario del aula/grupo al que pertenece la billetera del estudiante. Si no coincide, retorna `403 Forbidden`.
+2. **Validación de Calificaciones Cruzadas (`/api/grades/`)**:
+   El registro y edición de notas verifica que la actividad y el grupo pertenezcan al docente autenticado, impidiendo que un docente altere calificaciones de salones ajenos.
+3. **Pujas de Subastas Seguras (`/api/auctions/bids/`)**:
+   El estudiante solo puede ofertar por sí mismo (`estudiante == request.user`). El backend comprueba que disponga de saldo suficiente no bloqueado y retiene el importe ofertado en su `Wallet`. Al cerrar la subasta, se cobra al ganador y se reembolsa automáticamente a los no ganadores.
+4. **Matrícula Automatizada por Código (`/api/groups/join/`)**:
+   El estudiante envía el código único del grupo (ej. `ABC-123`). El sistema valida la vigencia del código, matricula al estudiante en la relación Many-to-Many del grupo y provisiona su `Wallet` para el período académico activo.
 
-### 3.5 Restricciones de Escritura en Institución
-
-- Un usuario solo puede **asignar su institución una vez** (escritura única en `api_update_profile`).
-- Un rector solo puede **editar datos de personalización** (colores, logo) de su institución.
-- Solo un admin global puede **crear o eliminar** instituciones.
-- El rector **NO puede cambiar** `activo` ni `codigo_dane`.
-
-### 3.6 Herencia de Institución en el Modelo de Datos
+### 3.5 Jerarquía Académica Completa del Modelo de Datos
 
 ```
-Institution
-  └── User (institucion FK)
-        ├── Classroom (docente FK → User)
-        │     └── Group (classroom FK → Classroom)
-        │           ├── Estudiantes (M2H → User)
-        │           ├── Period → Wallet (usuario FK → User)
-        │           ├── Activity
-        │           │     └── Submission
-        │           │           └── Grade
-        │           └── Auction → Bid
-        └── Notification (institucion FK → Institution)
+Institution (Colegio / Tenant)
+  ├── Rector (Único por institución)
+  ├── Coordinadores
+  └── Docentes (FK -> Institution)
+        └── Classroom (Aula / Asignatura - asignada al docente)
+              └── Group (Grupo escolar - código de acceso de 6 caracteres)
+                    ├── Estudiantes (Relación Many-to-Many inscritos vía código)
+                    ├── Academic Periods (Cortes académicos)
+                    │     └── Wallet (Billetera de EduCoins por estudiante y período)
+                    │           └── CoinTransactions (earn, spend, hold, refund)
+                    ├── Activities (Retos, misiones, proyectos, evaluaciones)
+                    │     └── Submissions (Entregas de estudiantes con archivo/enlace)
+                    │           └── Grade (Calificación asignada por docente -> Dispara EduCoins)
+                    └── Auctions (Subastas de incentivos creadas por docente)
+                          └── Bids (Pujas de estudiantes con retención de saldo en Wallet)
 ```
 
-### 3.7 Notas Importantes para el Frontend
+### 3.6 Parámetros Clave para el Frontend
 
-- El `institucion_id` se envía en el registro (`POST /api/users/register/`) como campo opcional.
-- Se puede asignar después vía `PATCH /api/users/profile/update/` pero **solo una vez**.
-- El frontend debe consultar `GET /api/institutions/public/` para obtener la lista de instituciones disponibles para el select de registro.
-- El `user.institucion` en el serializer de perfil retorna el objeto anidado con `{ id, nombre, color_primario, color_secundario, logo }`.
+- **Admin en Frontend**: El frontend detecta `user.role === 'admin'`, garantizando que `institucion` sea `null`, desactivando el requerimiento de completar perfil institucional y renderizando el selector de colegios dinámico.
+- **Lista Pública de Colegios**: `GET /api/institutions/public/` retorna `[{ id, nombre }]` para selects de registro.
+- **Identidad Visual**: El objeto `user.profile.institucion` contiene `{ id, nombre, color_primario, color_secundario, logo }` para la inyección de estilos por `ThemeService`.
 
 ---
 

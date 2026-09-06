@@ -1,10 +1,11 @@
 # 🅰️ EduBid Frontend — Angular 19+ SPA
 
-> **Interfaz moderna, reactiva y gamificada para EduBid** | Arquitectura Standalone, Signals, Tailwind CSS 4.x y Flowbite
+> **Interfaz moderna, reactiva y gamificada para EduBid** | Arquitectura Standalone, Signals, Tailwind CSS 4.x, Flowbite & Multi-Tenant White-Labeling
 
 [![Framework: Angular](https://img.shields.io/badge/Angular-19%2B-DD0031?style=flat-square&logo=angular)](https://angular.dev/)
 [![CSS: Tailwind v4](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![Components: Flowbite](https://img.shields.io/badge/UI-Flowbite-1C64F2?style=flat-square&logo=flowbite)](https://flowbite.com/)
+[![Icons: SVG Flowbite](https://img.shields.io/badge/Icons-Flowbite%20%2B%20Heroicons-darkblue?style=flat-square)](https://flowbite.com/icons/)
 [![Language: TypeScript](https://img.shields.io/badge/Language-TypeScript%205.x-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](../LICENSE)
 
@@ -12,16 +13,33 @@
 
 ## 📋 Descripción
 
-Este proyecto constituye la aplicación cliente (Single Page Application) de **EduBid**, diseñada para brindar una experiencia de usuario fluida, accesible y gamificada en instituciones educativas. La interfaz interactúa con la API REST de Django mediante autenticación JWT segura y consumo eficiente de datos.
+Este proyecto constituye la aplicación cliente (*Single Page Application*) de **EduBid**, construida en Angular 19 con componentes Standalone, Signals para gestión reactiva de estado y Tailwind CSS 4 para estilización de alto rendimiento.
 
-### 🌟 Principales Características
+La plataforma implementa un ecosistema educativo gamificado donde las calificaciones y el mérito académico se traducen en **EduCoins**, habilitando un centro de subastas de incentivos, billeteras virtuales en tiempo real y personalización visual multi-inquilino (*White-Labeling*).
 
-- **⚡ Angular Standalone & Signals**: Arquitectura moderna sin `NgModules`, optimizada para rendimiento y gestión reactiva del estado con Signals.
-- **🎨 White-Labeling & Theming Dinámico**: `ThemeService` con soporte para modo Claro / Oscuro / Sistema y personalización en tiempo real de colores institucionales (`--brand-primary`, `--brand-accent`) según el tenant del colegio.
-- **🔐 Autenticación Segura & SSR-Safe**: Control de sesión con JWT (access/refresh tokens), rotación automática mediante `HttpInterceptor`, login con Google OAuth (Google Identity Services) y manejo seguro de almacenamiento local.
-- **🛡️ Control de Acceso por Roles (RBAC)**: Enrutamiento protegido mediante `authGuard` y `roleGuard` adaptado a los 5 roles: `admin`, `rector`, `coordinador`, `docente` y `estudiante`.
-- **🔔 Notificaciones y Feedback**: Integración de alertas reactivas con `NotificationService` y toasts con `ngx-toastr`.
-- **📱 Diseño Adaptativo**: Totalmente responsivo mediante Tailwind CSS 4 y componentes estilizados con Flowbite.
+---
+
+## 🌟 Principales Características
+
+- **⚡ Angular Standalone & Signals**: Arquitectura limpia y reactiva sin módulos (`NgModule`), reduciendo boilerplate y optimizando la detección de cambios mediante `signal()`, `computed()` y `effect()`.
+- **👑 5 Paneles (Dashboards) Adaptativos por Rol**:
+  - **SuperAdmin (`AdminDashboardComponent`)**: Ámbito global (sin institución). Dispone de un selector dinámico de instituciones para auditar en tiempo real cualquier colegio, directorio interactivo de instituciones con métricas agregadas, asistente de creación/edición de colegios con paletas cromáticas o códigos HEX personalizados, y administración global de usuarios con filtros por rol y estado.
+  - **Rector (`RectorDashboardComponent`)**: Panel institucional directivo con métricas de profesores, estudiantes, clases activas y volumen de EduCoins. Incorpora el módulo `InstitutionBrandingComponent` para personalizar logotipo escolar y paleta cromática (`--brand-primary`, `--brand-accent`).
+  - **Coordinador (`CoordinatorDashboardComponent`)**: Supervisión pedagógica, monitoreo de clases, docentes asignados y avance de grupos escolares.
+  - **Docente (`TeacherDashboardComponent`)**: Gestión de aulas y asignaturas, métricas de grupos, accesos directos a actividades por calificar y subastas en curso.
+  - **Estudiante (`StudentDashboardComponent`)**: Billetera interactiva (saldo disponible, saldo retenido en pujas), subastas en vivo para pujar, actividades pendientes de entrega y calificaciones recientes con desglose de EduCoins ganados.
+- **🏛️ Jerarquía Académica (Clases -> Grupos -> Unión por Código)**:
+  - **Docente**: Crea Aulas (`Classroom`) y dentro de ellas organiza Grupos escolares (`Group`). El sistema genera códigos de unión alfanuméricos únicos de 6 caracteres (ej. `ABC-123`).
+  - **Estudiante**: Vista `StudentGroupsComponent` para consultar sus grupos inscritos y modal para ingresar el código de invitación. Al unirse, el sistema le provisiona automáticamente su billetera (`Wallet`) vinculada al grupo y período académico activo.
+- **🎨 White-Labeling & Theming Dinámico (`ThemeService`)**: Soporte para modo Claro / Oscuro / Sistema y personalización en tiempo real inyectando `--brand-primary` y `--brand-accent` en el elemento raíz del DOM según el tenant del colegio logueado.
+- **📐 Arquitectura de Layout con Scroll Independiente (`LayoutComponent`)**: Barra lateral `aside` fija con navegación adaptada por rol e independencia de desplazamiento vertical respecto a la columna principal (`header`, `main content`, `footer`).
+- **🛡️ Estandarización Visual e Identidad de Marca**:
+  - Reemplazo total de emojis por iconografía vectorial estándar SVG (Flowbite Icons y Heroicons).
+  - Integración del logotipo oficial `edubid.png` y favicon `edubid.ico`.
+  - Header adaptativo que muestra "EduBid Admin" para superadministradores o la identidad y escudo del colegio para usuarios vinculados.
+- **🔐 Seguridad y Control de Acceso (RBAC)**:
+  - Manejo de sesión con JWT (`access` y `refresh` tokens), rotación transparente mediante `authInterceptor`, soporte SSO con Google Identity Services y guards de ruta funcionales (`authGuard`, `roleGuard`).
+  - Garantía en frontend y backend de que el rol `admin` mantenga `institucion = null`, suprimiendo la exigencia de completar perfil institucional y habilitando el selector global.
 
 ---
 
@@ -29,46 +47,100 @@ Este proyecto constituye la aplicación cliente (Single Page Application) de **E
 
 ```
 edubid-frontend/
+├── public/                                  # Recursos estáticos de identidad de marca
+│   ├── edubid.png                           # Logotipo oficial EduBid
+│   ├── edubid.ico                           # Favicon corporativo
+│   ├── favicon.svg                          # Favicon vectorial SVG
+│   └── favicon.ico                          # Favicon estándar
+│
 ├── src/
 │   ├── app/
-│   │   ├── core/                        # Núcleo de la aplicación (Singletons)
-│   │   │   ├── services/                # AuthService, ThemeService, NotificationService
-│   │   │   ├── guards/                  # auth.guard, role.guard
-│   │   │   ├── interceptors/            # auth.interceptor (JWT + auto-refresh)
-│   │   │   ├── models/                  # Interfaces y tipos TypeScript (User, Tokens, etc.)
-│   │   │   └── constants/               # Mapeo de rutas y endpoints de la API
-│   │   ├── shared/                      # Módulos compartidos reutilizables
-│   │   │   ├── components/              # Layout (Header, Sidebar), UI atoms, Patterns
-│   │   │   ├── pipes/                   # Pipes de utilidad (ej. time-ago)
-│   │   │   └── directives/              # Directivas (ej. click-outside)
-│   │   ├── features/                    # Módulos de negocio (Lazy Loaded)
-│   │   │   ├── home/                    # Landing page principal
-│   │   │   ├── about/                   # Información institucional y misión
-│   │   │   ├── auth/                    # Login, Registro, Recuperación, Verificación
-│   │   │   ├── dashboard/               # Paneles por rol (Docente, Estudiante, Rector)
-│   │   │   ├── classrooms/              # Aulas académicas
-│   │   │   ├── groups/                  # Grupos de clase
-│   │   │   ├── activities/              # Retos, misiones, proyectos y entregas
-│   │   │   ├── auctions/                # Subastas y pujas de incentivos
-│   │   │   ├── wallet/                  # Billetera digital y transacciones EduCoins
-│   │   │   ├── profile/                 # Perfil de usuario y ajustes
-│   │   │   ├── notifications/           # Bandeja de alertas y eventos
-│   │   │   ├── terms/                   # Términos y condiciones
-│   │   │   └── not-found/               # Página de error 404 personalizada
-│   │   ├── app.routes.ts                # Configuración principal de enrutamiento
-│   │   ├── app.config.ts                # Providers globales de la aplicación
-│   │   └── app.ts                       # Componente raíz con inicialización de temas
-│   ├── environments/                    # Variables de entorno
-│   │   ├── environment.ts               # Desarrollo local
-│   │   ├── environment.prod.ts          # Producción
-│   │   └── environment.example.ts       # Plantilla de ejemplo
-│   ├── styles.scss                      # Importación de Tailwind CSS y variables raíz
-│   └── main.ts                          # Bootstrap standalone
-├── angular.json                         # Configuración de compilación Angular
-├── proxy.conf.json                      # Proxy local para redirigir peticiones a Django
-├── .env.example                         # Plantilla de variables de entorno
+│   │   ├── core/                            # Núcleo de la aplicación (Singletons)
+│   │   │   ├── services/                    # Servicios de comunicación con la API:
+│   │   │   │   ├── auth.service.ts          # Autenticación JWT, estado de sesión, Signals
+│   │   │   │   ├── google-auth.service.ts   # Integración SDK Google Identity Services
+│   │   │   │   ├── theme.service.ts         # Control de temas (Light/Dark) y White-Labeling
+│   │   │   │   ├── notification.service.ts  # Feedback visual y toasts
+│   │   │   │   ├── dashboard.service.ts     # Métricas y analítica agregada
+│   │   │   │   ├── institution.service.ts   # CRUD de instituciones y branding
+│   │   │   │   ├── user.service.ts          # Gestión de usuarios del sistema
+│   │   │   │   ├── classroom.service.ts     # Aulas y asignaturas del docente
+│   │   │   │   ├── group.service.ts         # Grupos, códigos de unión y estudiantes
+│   │   │   │   ├── activity.service.ts      # Actividades, misiones y entregas
+│   │   │   │   ├── grade.service.ts         # Calificaciones y EduCoins
+│   │   │   │   ├── auction.service.ts       # Subastas y sistema de pujas
+│   │   │   │   └── wallet.service.ts        # Billeteras y transacciones de tokens
+│   │   │   ├── guards/                      # Guards funcionales
+│   │   │   │   ├── auth.guard.ts            # Protección de rutas autenticadas
+│   │   │   │   └── role.guard.ts            # Control de acceso por rol (RBAC)
+│   │   │   ├── interceptors/                # Interceptores HTTP
+│   │   │   │   └── auth.interceptor.ts      # Inyección de Bearer Token y auto-refresh 401
+│   │   │   ├── models/                      # Interfaces TypeScript estrictas
+│   │   │   └── constants/                   # Endpoints y claves de localStorage
+│   │   │
+│   │   ├── shared/                          # Componentes reutilizables
+│   │   │   ├── components/                  # Layout (Aside sidebar, Header, Footer),
+│   │   │   │                                # institution-branding (White-label)
+│   │   │   └── ui/                          # Spinners, loading-screen, modales
+│   │   │
+│   │   ├── features/                        # Vistas y módulos de negocio (Lazy-loaded):
+│   │   │   ├── home/                        # Landing page con estado dinámico de sesión
+│   │   │   ├── about/                       # Sobre EduBid y misión formativa
+│   │   │   ├── terms/                       # Términos y condiciones de uso
+│   │   │   ├── not-found/                   # Página 404 personalizada
+│   │   │   ├── auth/                        # Login, Register, Complete Profile, Email Sent
+│   │   │   ├── dashboard/                   # Componente orquestador y 5 dashboards por rol:
+│   │   │   │   ├── admin-dashboard/         # Selector de colegios, directorio, branding y usuarios
+│   │   │   │   ├── rector-dashboard/        # Analítica directiva y White-Labeling institucional
+│   │   │   │   ├── coordinator-dashboard/   # Supervisión de grupos y avance académico
+│   │   │   │   ├── teacher-dashboard/       # Aulas, grupos y subastas del docente
+│   │   │   │   └── student-dashboard/       # Wallet, pujas activas, notas y actividades
+│   │   │   ├── classrooms/                  # Mis Clases y Detalle con grupos anidados
+│   │   │   ├── groups/                      # Vista de grupos para estudiantes y unión por código
+│   │   │   ├── activities/                  # Retos y entregas
+│   │   │   ├── auctions/                    # Centro de subastas y pujas
+│   │   │   ├── wallet/                      # Billetera digital y transacciones
+│   │   │   └── profile/                     # Perfil de usuario y avatar
+│   │   │
+│   │   ├── app.routes.ts                    # Matriz de rutas de la SPA
+│   │   ├── app.config.ts                    # Providers globales (HttpClient, Animations, Toastr)
+│   │   └── app.component.ts                 # Shell raíz de la aplicación
+│   │
+│   ├── environments/                        # Configuraciones de entorno
+│   │   ├── environment.ts                   # Desarrollo local
+│   │   ├── environment.prod.ts              # Producción
+│   │   └── environment.example.ts           # Plantilla base
+│   │
+│   ├── styles.scss                          # Importación de Tailwind CSS 4 y variables CSS
+│   └── main.ts                              # Punto de entrada y bootstrap standalone
+│
+├── scripts/
+│   └── set-env.js                           # Generador automático de environments desde .env
+├── angular.json                             # Configuración del compilador Angular CLI
+├── proxy.conf.json                          # Proxy de desarrollo para redirección a Django
+├── .env.example                             # Plantilla de variables frontend
 └── package.json
 ```
+
+---
+
+## 🧭 Matriz de Rutas y Permisos
+
+| Ruta | Componente | Acceso / Guard | Descripción |
+|------|------------|----------------|-------------|
+| `/` | `HomeComponent` | Público | Landing page con llamado a la acción condicional según sesión |
+| `/login` | `LoginComponent` | Público | Inicio de sesión con correo y Google SSO |
+| `/register` | `RegisterComponent` | Público | Registro de estudiantes o docentes con selección de institución |
+| `/email-sent` | `EmailSentComponent` | Público | Pantalla de confirmación tras registro |
+| `/completar-perfil` | `CompleteProfileComponent` | Autenticado | Asignación de institución para nuevos usuarios Google |
+| `/dashboard` | `DashboardComponent` | `authGuard` | Orquestador reactivo que renderiza el dashboard según el rol |
+| `/dashboard/rector` | `RectorDashboardComponent` | `authGuard` + `roleGuard(['rector'])` | Vista directa del panel directivo del colegio |
+| `/classrooms` | `ClassroomsComponent` | `authGuard` + `roleGuard(['docente', 'rector', 'coordinador'])` | Gestión de asignaturas y aulas escolares |
+| `/classrooms/:id` | `ClassroomDetailComponent` | `authGuard` + `roleGuard(['docente', 'rector', 'coordinador'])` | Detalle del aula con grupos, retos y subastas |
+| `/groups` | `StudentGroupsComponent` | `authGuard` + `roleGuard(['estudiante', 'docente', 'rector', 'coordinador'])` | Directorio de grupos inscritos y unión mediante código |
+| `/sobre-nosotros` | `AboutComponent` | Público | Información institucional del proyecto EduBid |
+| `/terminos-y-condiciones`| `TermsComponent` | Público | Términos de servicio y privacidad |
+| `**` | `NotFoundComponent` | Público | Vista de página no encontrada (404) |
 
 ---
 
@@ -78,7 +150,7 @@ edubid-frontend/
 
 - **Node.js**: v18.0 o superior (recomendado v20 LTS / v22)
 - **npm**: v9.0 o superior
-- **Angular CLI**: v19+ (opcional pero recomendado: `npm install -g @angular/cli`)
+- **Angular CLI**: v19+ (`npm install -g @angular/cli`)
 
 ### 1. Instalar dependencias
 
@@ -89,7 +161,7 @@ npm install
 
 ### 2. Configurar Variables de Entorno
 
-Copia el archivo `.env.example` como `.env` y define tus credenciales locales:
+Copia la plantilla de configuración `.env.example`:
 
 ```bash
 cp .env.example .env
@@ -103,19 +175,17 @@ PRODUCTION_API_URL=https://edubid-backend-production.up.railway.app/api
 ```
 
 > [!NOTE]
-> Al ejecutar `npm start`, `npm run build` o `npm run config:env`, el script `scripts/set-env.js` lee automáticamente `.env` y genera `src/environments/environment.ts` y `environment.prod.ts`. Estos dos archivos están protegidos en `.gitignore` para evitar filtraciones de credenciales en el repositorio.
+> Al iniciar el servidor con `npm start` o compilar con `npm run build`, el script `scripts/set-env.js` genera dinámicamente `src/environments/environment.ts` y `environment.prod.ts`. Ambos archivos se encuentran protegidos en `.gitignore` para salvaguardar credenciales.
 
-### 3. Ejecutar el Servidor de Desarrollo
+### 3. Iniciar el Servidor de Desarrollo
 
 ```bash
 npm start
-# o alternativamente:
+# o con Angular CLI:
 ng serve
 ```
 
 La aplicación estará disponible en: **`http://localhost:4200`**
-
-El servidor recargará automáticamente los módulos al guardar cambios en el código fuente.
 
 ---
 
@@ -123,22 +193,14 @@ El servidor recargará automáticamente los módulos al guardar cambios en el c�
 
 | Comando | Descripción |
 |---------|-------------|
-| `npm start` | Inicia el servidor de desarrollo en `http://localhost:4200` |
-| `npm run build` | Compila la aplicación para producción en la carpeta `dist/` |
-| `npm run watch` | Compila y escucha cambios continuos en modo desarrollo |
-| `npm test` | Ejecuta las pruebas unitarias mediante Vitest |
-
----
-
-## 🔗 Integración con el Backend
-
-El frontend se comunica con el backend Django a través de:
-- **Base URL**: `http://localhost:8000/api` (o vía `proxy.conf.json` en `/api`)
-- **Autenticación**: Cabecera `Authorization: Bearer <access_token>` inyectada automáticamente por el interceptor HTTP.
-- **Multi-Tenant**: El objeto del usuario logueado provee `institucion` (nombre, logo y colores primario/secundario), aplicados dinámicamente al DOM por `ThemeService`.
+| `npm start` | Genera environments e inicia el servidor de desarrollo en `http://localhost:4200` |
+| `npm run build` | Compila la aplicación optimizada para producción en `dist/` |
+| `npm run watch` | Compilación continua con recarga en modo desarrollo |
+| `npm test` | Ejecuta las pruebas unitarias automatizadas |
+| `npm run config:env` | Ejecuta manualmente la sincronización del archivo `.env` hacia environments |
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está bajo la licencia MIT.
+Este proyecto se encuentra bajo la licencia **MIT**. Consulta el archivo [LICENSE](../LICENSE) para más información.
