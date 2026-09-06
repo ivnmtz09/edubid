@@ -1,22 +1,47 @@
-<div class="space-y-6">
-  <div class="bg-surface p-6 rounded-2xl shadow-sm border border-border">
-    <h2 class="text-2xl font-bold text-text mb-2">Panel de Coordinación Académica</h2>
-    <p class="text-text-muted">Supervisión de aulas y docentes de la institución.</p>
+<div class="space-y-6 animate-in fade-in duration-300">
+  <div class="bg-surface p-6 rounded-2xl shadow-xs border border-border">
+    <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-bg border border-border text-text-muted mb-2">
+      <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+      <span>Gestión Académica</span>
+      <span>•</span>
+      <span class="font-mono text-slate-900 dark:text-white">Coordinación</span>
+    </div>
+    <h2 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Panel de Coordinación Académica</h2>
+    <p class="text-sm text-text-muted mt-1">Supervisión de clases, grupos, docentes y métricas formativas de tu institución.</p>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <!-- Stat Cards placeholders -->
-    <div class="bg-surface p-6 rounded-xl shadow-sm border border-border">
-      <h3 class="text-text-muted text-sm font-medium">Total Estudiantes</h3>
-      <p class="text-3xl font-bold text-primary mt-2">--</p>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Total Estudiantes -->
+    <div class="bg-surface p-5 rounded-2xl shadow-xs border border-border">
+      <span class="text-text-muted text-xs font-medium">Total Estudiantes</span>
+      <div class="mt-4">
+        <p class="text-3xl font-extrabold text-primary font-mono">
+          {{ stats()?.total_students || 0 }}
+        </p>
+        <p class="text-xs text-text-muted mt-1">En tu institución</p>
+      </div>
     </div>
-    <div class="bg-surface p-6 rounded-xl shadow-sm border border-border">
-      <h3 class="text-text-muted text-sm font-medium">Docentes Activos</h3>
-      <p class="text-3xl font-bold text-primary mt-2">--</p>
+
+    <!-- Docentes Activos -->
+    <div class="bg-surface p-5 rounded-2xl shadow-xs border border-border">
+      <span class="text-text-muted text-xs font-medium">Docentes Activos</span>
+      <div class="mt-4">
+        <p class="text-3xl font-extrabold text-primary font-mono">
+          {{ stats()?.total_teachers || 0 }}
+        </p>
+        <p class="text-xs text-text-muted mt-1">Profesores registrados</p>
+      </div>
     </div>
-    <div class="bg-surface p-6 rounded-xl shadow-sm border border-border">
-      <h3 class="text-text-muted text-sm font-medium">Aulas en Curso</h3>
-      <p class="text-3xl font-bold text-primary mt-2">--</p>
+
+    <!-- Clases en Curso -->
+    <div class="bg-surface p-5 rounded-2xl shadow-xs border border-border">
+      <span class="text-text-muted text-xs font-medium">Clases en Curso</span>
+      <div class="mt-4">
+        <p class="text-3xl font-extrabold text-primary font-mono">
+          {{ stats()?.active_classrooms || 0 }}
+        </p>
+        <p class="text-xs text-text-muted mt-1">Clases y asignaturas activas</p>
+      </div>
     </div>
   </div>
 </div>

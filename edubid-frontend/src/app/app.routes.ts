@@ -56,17 +56,39 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        title: 'Aulas Virtuales | EduBid',
+        title: 'Mis Clases | EduBid',
         loadComponent: () =>
           import('./features/classrooms/components/classrooms.component').then(m => m.ClassroomsComponent),
       },
       {
         path: ':id',
-        title: 'Detalle de Aula | EduBid',
+        title: 'Detalle de Clase | EduBid',
         loadComponent: () =>
           import('./features/classrooms/components/classroom-detail.component').then(m => m.ClassroomDetailComponent),
       },
     ],
+  },
+  {
+    path: 'clases',
+    redirectTo: 'classrooms',
+  },
+  {
+    path: 'groups',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        title: 'Mis Grupos | EduBid',
+        loadComponent: () =>
+          import('./features/groups/components/student-groups.component').then(m => m.StudentGroupsComponent),
+      },
+    ],
+  },
+  {
+    path: 'grupos',
+    redirectTo: 'groups',
   },
   {
     path: 'sobre-nosotros',

@@ -22,6 +22,7 @@ export interface User {
   role: UserRole;
   avatar: string | null;
   date_joined: string;
+  is_active?: boolean;
   profile: UserProfile;
 }
 

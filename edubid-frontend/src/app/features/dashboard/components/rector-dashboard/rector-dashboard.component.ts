@@ -88,14 +88,14 @@ interface RecentActivityAudit {
             </div>
           </div>
 
-          <!-- Aulas en Operación -->
+          <!-- Clases en Operación -->
           <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between">
-            <span class="text-xs font-medium text-text-muted">Aulas Virtuales</span>
+            <span class="text-xs font-medium text-text-muted">Clases Activas</span>
             <div class="mt-4">
               <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
                 {{ stats()?.active_classrooms || 0 }}
               </div>
-              <p class="text-xs text-text-muted mt-1">Grupos escolares creados</p>
+              <p class="text-xs text-text-muted mt-1">Clases y asignaturas registradas</p>
             </div>
           </div>
 
@@ -144,7 +144,7 @@ interface RecentActivityAudit {
                   </div>
 
                   <div class="flex items-center justify-between text-xs text-text-muted pt-1">
-                    <span>{{ g.activeClassrooms }} aulas activas</span>
+                    <span>{{ g.activeClassrooms }} clases activas</span>
                     <span class="font-mono font-semibold text-slate-900 dark:text-white">
                       {{ g.totalCoins }} EC distribuidos
                     </span>

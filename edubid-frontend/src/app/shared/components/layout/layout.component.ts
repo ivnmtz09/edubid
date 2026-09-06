@@ -5,11 +5,14 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
 import { UserRole } from '../../../core/models/user.model';
 
+export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users';
+
 interface NavItem {
   label: string;
   route: string;
-  iconSvg: string;
+  icon: NavIcon;
   roles?: UserRole[];
+  exact?: boolean;
 }
 
 @Component({
@@ -225,7 +228,7 @@ interface NavItem {
           <!-- Navegación Superior del Sidebar -->
           <div class="p-3 space-y-4">
             
-            <!-- Rol Badge en Sidebar (cuando está expandido) -->
+            <!-- Rol Badge en Sidebar -->
             @if (isDesktopExpanded() || isMobileDrawerOpen()) {
               <div class="px-3 py-2 rounded-xl bg-bg border border-border flex items-center justify-between">
                 <div class="flex items-center gap-2 min-w-0">
@@ -235,13 +238,20 @@ interface NavItem {
                   </span>
                 </div>
               </div>
+            } @else {
+              <div class="flex justify-center" [title]="'Rol: ' + userRole()">
+                <div class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-[10px] uppercase">
+                  {{ userRole().slice(0, 2) }}
+                </div>
+              </div>
             }
 
-            <!-- Botón Colapsar Desktop (Movido arriba) -->
+            <!-- Botón Colapsar Desktop -->
             <button
               type="button"
               (click)="toggleDesktopCollapse()"
               class="hidden lg:flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              [class.justify-center]="!isDesktopExpanded()"
               [title]="isDesktopExpanded() ? 'Contraer menú lateral' : 'Expandir menú lateral'"
             >
               <svg class="w-5 h-5 shrink-0 transition-transform duration-300" [class.rotate-180]="!isDesktopExpanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,14 +269,43 @@ interface NavItem {
               @for (item of filteredNavItems(); track item.route) {
                 <a
                   [routerLink]="item.route"
-                  routerLinkActive="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold"
-                  [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+                  routerLinkActive="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold shadow-xs"
+                  [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
                   (click)="closeMobileDrawer()"
                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors group cursor-pointer"
+                  [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
                   [title]="item.label"
                 >
-                  <!-- SVG Icon -->
-                  <span class="w-5 h-5 shrink-0 flex items-center justify-center text-text-muted group-hover:text-text" [innerHTML]="item.iconSvg"></span>
+                  <!-- SVG Icon Rendered Directly (No DomSanitizer Purge) -->
+                  <span class="w-5 h-5 shrink-0 flex items-center justify-center text-text-muted group-hover:text-primary transition-colors">
+                    @switch (item.icon) {
+                      @case ('dashboard') {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                      }
+                      @case ('classrooms') {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                      }
+                      @case ('groups') {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      }
+                      @case ('rector') {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      }
+                      @case ('users') {
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      }
+                    }
+                  </span>
                   
                   <!-- Label (visible solo cuando está expandido) -->
                   @if (isDesktopExpanded() || isMobileDrawerOpen()) {
@@ -283,6 +322,7 @@ interface NavItem {
             <a
               routerLink="/"
               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+              [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
               title="Página de Inicio de EduBid"
             >
               <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,20 +401,38 @@ export class LayoutComponent {
     {
       label: 'Panel Principal',
       route: '/dashboard',
-      iconSvg: `
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-      `,
+      icon: 'dashboard',
+      exact: true,
     },
     {
-      label: 'Aulas Virtuales',
+      label: 'Panel de Rectoría',
+      route: '/dashboard/rector',
+      icon: 'rector',
+      roles: ['rector'],
+    },
+    {
+      label: 'Mis Clases',
       route: '/classrooms',
-      iconSvg: `
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      `,
+      icon: 'classrooms',
+      roles: ['docente'],
+    },
+    {
+      label: 'Mis Grupos',
+      route: '/groups',
+      icon: 'groups',
+      roles: ['estudiante'],
+    },
+    {
+      label: 'Supervisión de Clases',
+      route: '/classrooms',
+      icon: 'classrooms',
+      roles: ['rector', 'coordinador'],
+    },
+    {
+      label: 'Gestión de Clases',
+      route: '/classrooms',
+      icon: 'classrooms',
+      roles: ['admin'],
     },
   ];
 

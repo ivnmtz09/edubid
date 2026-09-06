@@ -1,29 +1,12 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-
-interface AuctionItem {
-  id: number;
-  title: string;
-  subject: string;
-  teacher: string;
-  currentBid: number;
-  minNextBid: number;
-  timeLeft: string;
-  category: string;
-  isLeading?: boolean;
-}
-
-interface PendingTask {
-  id: number;
-  title: string;
-  subject: string;
-  rewardCoins: number;
-  dueDate: string;
-  isUrgent?: boolean;
-}
+import { WalletService, Wallet, CoinTransaction } from '../../../../core/services/wallet.service';
+import { GradeService } from '../../../../core/services/grade.service';
+import { AuctionService, Auction } from '../../../../core/services/auction.service';
+import { ActivityService, Activity } from '../../../../core/services/activity.service';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -49,314 +32,374 @@ interface PendingTask {
 
         <div class="flex items-center gap-3">
           <a
-            routerLink="/classrooms"
+            routerLink="/groups"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            <span>Mis Aulas</span>
+            <span>Mis Grupos</span>
           </a>
         </div>
       </div>
 
-      <!-- Métricas de la Billetera de EduCoins -->
-      <section class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-            Billetera de EduCoins
-          </h2>
-          <span class="text-xs text-text-muted font-mono">Actualizado en tiempo real</span>
+      <!-- Banner de Estado de Billetera Inactiva -->
+      @if (!isLoading() && !hasActiveWallet()) {
+        <div class="p-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 text-amber-800 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </span>
+            <div class="text-xs">
+              <p class="font-bold">Billetera de EduCoins pendiente de activación</p>
+              <p class="opacity-90 mt-0.5">Únete a un grupo con el código proporcionado por tu docente para habilitar tu billetera y comenzar a ganar EduCoins.</p>
+            </div>
+          </div>
+          <a
+            routerLink="/groups"
+            class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shrink-0 text-center transition-colors"
+          >
+            Unirse a un Grupo
+          </a>
         </div>
+      }
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <!-- Saldo Disponible -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-medium text-text-muted">Saldo Disponible</span>
-              <span class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-xs">EC</span>
-            </div>
-            <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
-                {{ availableCoins() }}
-                <span class="text-sm font-normal text-text-muted">EduCoins</span>
-              </div>
-              <p class="text-xs text-text-muted mt-1">Listos para pujar en subastas</p>
-            </div>
-          </div>
-
-          <!-- Saldo Retenido en Pujas -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-medium text-text-muted">En Pujas Activas</span>
-              <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs">XP</span>
-            </div>
-            <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
-                {{ lockedCoins() }}
-                <span class="text-sm font-normal text-text-muted">EduCoins</span>
-              </div>
-              <p class="text-xs text-text-muted mt-1">Retenidos temporalmente en 2 ofertas</p>
-            </div>
-          </div>
-
-          <!-- Méritos Totales Acumulados -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-medium text-text-muted">Méritos Históricos</span>
-              <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs">Nvl</span>
-            </div>
-            <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
-                {{ totalEarnedCoins() }}
-                <span class="text-sm font-normal text-text-muted">EduCoins</span>
-              </div>
-              <p class="text-xs text-text-muted mt-1">Total ganado por esfuerzo académico</p>
-            </div>
-          </div>
+      @if (isLoading()) {
+        <div class="flex justify-center items-center py-20">
+          <svg class="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
         </div>
-      </section>
-
-      <!-- Grid Principal: Subastas Pedagógicas Activas & Próximas Tareas -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- Columna Izquierda (7 cols): Subastas en Vivo -->
-        <div class="lg:col-span-7 space-y-4">
-          <div class="flex items-center justify-between border-b border-border pb-3">
+      } @else {
+        <!-- Métricas de la Billetera de EduCoins (Datos Reales) -->
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
               <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                Subastas Pedagógicas en Vivo
+                Billetera de EduCoins
               </h2>
+              @if (activePeriodName()) {
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-text-muted">
+                  {{ activePeriodName() }}
+                </span>
+              }
             </div>
-            <span class="text-xs text-text-muted">Incentivos autorizados</span>
+            <span class="text-xs text-text-muted font-mono">Actualizado en tiempo real</span>
           </div>
 
-          <div class="space-y-4">
-            @for (item of auctions(); track item.id) {
-              <div class="p-5 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-200">
-                <div class="flex items-start justify-between gap-4">
-                  <div class="space-y-1">
-                    <div class="flex items-center gap-2">
-                      <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-bg border border-border text-text-muted">
-                        {{ item.subject }}
-                      </span>
-                      <span class="text-xs text-text-muted">Prof. {{ item.teacher }}</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Saldo Disponible -->
+            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-text-muted">Saldo Disponible</span>
+                <span class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-xs">EC</span>
+              </div>
+              <div class="mt-4">
+                <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+                  {{ availableCoins() }}
+                  <span class="text-sm font-normal text-text-muted">EduCoins</span>
+                </div>
+                <p class="text-xs text-text-muted mt-1">Listos para pujar en subastas</p>
+              </div>
+            </div>
+
+            <!-- Saldo Retenido en Pujas -->
+            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-text-muted">En Pujas Activas</span>
+                <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs">EC</span>
+              </div>
+              <div class="mt-4">
+                <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+                  {{ lockedCoins() }}
+                  <span class="text-sm font-normal text-text-muted">EduCoins</span>
+                </div>
+                <p class="text-xs text-text-muted mt-1">Bloqueados temporalmente en ofertas</p>
+              </div>
+            </div>
+
+            <!-- Méritos Totales Acumulados -->
+            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-text-muted">Méritos Históricos</span>
+                <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs">XP</span>
+              </div>
+              <div class="mt-4">
+                <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+                  {{ totalEarnedCoins() }}
+                  <span class="text-sm font-normal text-text-muted">EduCoins</span>
+                </div>
+                <p class="text-xs text-text-muted mt-1">Total ganado por esfuerzo académico</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Grid Principal: Subastas Pedagógicas Activas & Próximas Tareas -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Columna Izquierda (7 cols): Subastas en Vivo -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex items-center justify-between border-b border-border pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-orange-600 animate-pulse"></span>
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                  Subastas Pedagógicas en Vivo
+                </h2>
+              </div>
+              <span class="text-xs text-text-muted">Incentivos de grupo</span>
+            </div>
+
+            @if (auctions().length === 0) {
+              <div class="p-8 rounded-2xl border border-border bg-surface text-center space-y-2">
+                <div class="w-10 h-10 rounded-full bg-orange-500/10 text-orange-600 flex items-center justify-center mx-auto">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm">No hay subastas activas</h3>
+                <p class="text-xs text-text-muted max-w-sm mx-auto">
+                  Tus docentes publicarán incentivos y comodines pedagógicos en subastas cuando concluyan evaluaciones o proyectos.
+                </p>
+              </div>
+            } @else {
+              <div class="space-y-4">
+                @for (item of auctions(); track item.id) {
+                  <div class="p-5 rounded-2xl border border-border bg-surface hover:border-slate-400 dark:hover:border-slate-600 transition-all duration-200">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                          <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-bg border border-border text-text-muted">
+                            {{ item.grupo_nombre || 'Grupo' }}
+                          </span>
+                          <span class="text-xs text-text-muted">{{ item.creador_nombre || 'Profesor' }}</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-base">
+                          {{ item.titulo }}
+                        </h3>
+                        <p class="text-xs text-text-muted line-clamp-2">
+                          {{ item.descripcion }}
+                        </p>
+                      </div>
+
+                      <div class="text-right shrink-0">
+                        <span class="text-xs font-mono text-text-muted block">Ofertas</span>
+                        <span class="text-xs font-mono font-bold text-slate-900 dark:text-white">
+                          {{ item.total_pujas }} pujas
+                        </span>
+                      </div>
                     </div>
-                    <h3 class="font-bold text-slate-900 dark:text-white text-base">
-                      {{ item.title }}
-                    </h3>
-                  </div>
 
-                  <div class="text-right shrink-0">
-                    <span class="text-xs font-mono text-text-muted block">Tiempo restante</span>
-                    <span class="text-xs font-mono font-bold text-slate-900 dark:text-white flex items-center gap-1 justify-end">
-                      <svg class="w-3.5 h-3.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {{ item.timeLeft }}
-                    </span>
-                  </div>
-                </div>
+                    <div class="mt-4 pt-3 border-t border-border flex items-center justify-between">
+                      <div>
+                        <span class="text-xs text-text-muted block">Puja más alta actual</span>
+                        <span class="text-lg font-extrabold text-slate-900 dark:text-white font-mono">
+                          {{ item.puja_mas_alta?.cantidad_educoins || item.valor_minimo_educoins }} EC
+                        </span>
+                        @if (item.puja_mas_alta?.estudiante_nombre) {
+                          <span class="ml-1.5 text-[11px] text-text-muted">
+                            ({{ item.puja_mas_alta?.estudiante_nombre }})
+                          </span>
+                        }
+                      </div>
 
-                <div class="mt-4 pt-3 border-t border-border flex items-center justify-between">
-                  <div>
-                    <span class="text-xs text-text-muted block">Puja más alta actual</span>
-                    <span class="text-lg font-extrabold text-slate-900 dark:text-white font-mono">
-                      {{ item.currentBid }} EC
-                    </span>
-                    @if (item.isLeading) {
-                      <span class="ml-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                        ¡Vas liderando!
-                      </span>
-                    }
+                      <button
+                        type="button"
+                        (click)="placeBid(item)"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+                      >
+                        Pujar en subasta
+                      </button>
+                    </div>
                   </div>
-
-                  <button
-                    type="button"
-                    (click)="placeBid(item)"
-                    class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
-                  >
-                    Pujar {{ item.minNextBid }} EC
-                  </button>
-                </div>
+                }
               </div>
             }
           </div>
-        </div>
 
-        <!-- Columna Derecha (5 cols): Próximas Entregas & Historial de Méritos -->
-        <div class="lg:col-span-5 space-y-8">
-          <!-- Actividades con Recompensa -->
-          <div class="space-y-4">
-            <div class="border-b border-border pb-3">
-              <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                Próximas Entregas
-              </h2>
-              <p class="text-xs text-text-muted">Cumple a tiempo para ganar EduCoins.</p>
-            </div>
+          <!-- Columna Derecha (5 cols): Próximas Entregas & Historial de Méritos -->
+          <div class="lg:col-span-5 space-y-8">
+            <!-- Actividades con Recompensa -->
+            <div class="space-y-4">
+              <div class="border-b border-border pb-3">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                  Próximas Actividades
+                </h2>
+                <p class="text-xs text-text-muted">Cumple a tiempo para ganar EduCoins.</p>
+              </div>
 
-            <div class="space-y-3">
-              @for (task of pendingTasks(); track task.id) {
-                <div class="p-4 rounded-xl border border-border bg-surface flex items-center justify-between gap-3">
-                  <div class="space-y-0.5 min-w-0">
-                    <span class="text-[11px] font-semibold text-text-muted block truncate">
-                      {{ task.subject }}
-                    </span>
-                    <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">
-                      {{ task.title }}
-                    </h4>
-                    <span class="text-xs text-text-muted font-mono block">
-                      Vence: {{ task.dueDate }}
-                    </span>
-                  </div>
+              @if (pendingTasks().length === 0) {
+                <div class="p-6 rounded-xl border border-border bg-surface text-center text-xs text-text-muted">
+                  No tienes actividades pendientes por entregar.
+                </div>
+              } @else {
+                <div class="space-y-3">
+                  @for (task of pendingTasks(); track task.id) {
+                    <div class="p-4 rounded-xl border border-border bg-surface flex items-center justify-between gap-3">
+                      <div class="space-y-0.5 min-w-0">
+                        <span class="text-[11px] font-semibold text-text-muted block truncate capitalize">
+                          {{ task.tipo }}
+                        </span>
+                        <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">
+                          {{ task.nombre }}
+                        </h4>
+                        <span class="text-xs text-text-muted font-mono block">
+                          {{ task.tiempo_restante || task.fecha_entrega }}
+                        </span>
+                      </div>
 
-                  <div class="shrink-0 text-right">
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      +{{ task.rewardCoins }} EC
-                    </span>
-                  </div>
+                      <div class="shrink-0 text-right">
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          +{{ task.valor_educoins }} EC
+                        </span>
+                      </div>
+                    </div>
+                  }
                 </div>
               }
             </div>
-          </div>
 
-          <!-- Historial de Transacciones de Méritos -->
-          <div class="space-y-4">
-            <div class="border-b border-border pb-3">
-              <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                Últimos Movimientos
-              </h2>
-              <p class="text-xs text-text-muted">Auditoría de tu esfuerzo en el aula.</p>
+            <!-- Historial de Transacciones de Méritos Reales -->
+            <div class="space-y-4">
+              <div class="border-b border-border pb-3">
+                <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                  Últimos Movimientos
+                </h2>
+                <p class="text-xs text-text-muted">Historial de EduCoins acreditados y usados.</p>
+              </div>
+
+              @if (transactions().length === 0) {
+                <div class="p-6 rounded-xl border border-border bg-surface text-center text-xs text-text-muted">
+                  Aún no tienes movimientos registrados en tu billetera.
+                </div>
+              } @else {
+                <ul class="space-y-2.5 text-xs">
+                  @for (tx of transactions(); track tx.id) {
+                    <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
+                      <span class="text-text-muted truncate">{{ tx.descripcion }}</span>
+                      <span class="font-bold font-mono shrink-0 ml-2" [class.text-emerald-600]="tx.tipo === 'earn' || tx.tipo === 'ingreso'" [class.text-slate-900]="tx.tipo !== 'earn' && tx.tipo !== 'ingreso'" [class.dark:text-white]="tx.tipo !== 'earn' && tx.tipo !== 'ingreso'">
+                        {{ tx.tipo === 'earn' || tx.tipo === 'ingreso' ? '+' : '-' }}{{ tx.cantidad_educoins }} EC
+                      </span>
+                    </li>
+                  }
+                </ul>
+              }
             </div>
 
-            <ul class="space-y-2.5 text-xs">
-              <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
-                <span class="text-text-muted truncate">Taller de Cálculo Diferencial (Entrega puntual)</span>
-                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+30 EC</span>
-              </li>
-              <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
-                <span class="text-text-muted truncate">Participación destacada en Ciencias</span>
-                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+15 EC</span>
-              </li>
-              <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
-                <span class="text-text-muted truncate">Puja en Subasta: Comodín de Examen</span>
-                <span class="font-bold font-mono text-slate-900 dark:text-white shrink-0 ml-2">-80 EC</span>
-              </li>
-              <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
-                <span class="text-text-muted truncate">Asistencia semanal completa</span>
-                <span class="font-bold font-mono text-emerald-600 shrink-0 ml-2">+20 EC</span>
-              </li>
-            </ul>
           </div>
 
         </div>
-
-      </div>
+      }
     </div>
   `,
 })
-export class StudentDashboardComponent {
+export class StudentDashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  private walletService = inject(WalletService);
+  private gradeService = inject(GradeService);
+  private auctionService = inject(AuctionService);
+  private activityService = inject(ActivityService);
 
-  availableCoins = signal(340);
-  lockedCoins = signal(80);
-  totalEarnedCoins = signal(580);
+  isLoading = signal<boolean>(true);
+  availableCoins = signal<number>(0);
+  lockedCoins = signal<number>(0);
+  totalEarnedCoins = signal<number>(0);
+  hasActiveWallet = signal<boolean>(false);
+  activePeriodName = signal<string>('');
 
-  userName = signal(
-    this.authService.currentUser()?.first_name || 'Estudiante'
-  );
+  auctions = signal<Auction[]>([]);
+  pendingTasks = signal<Activity[]>([]);
+  transactions = signal<CoinTransaction[]>([]);
 
-  auctions = signal<AuctionItem[]>([
-    {
-      id: 1,
-      title: 'Comodín de Examen Parcial',
-      subject: 'Matemáticas Avanzadas',
-      teacher: 'García',
-      currentBid: 80,
-      minNextBid: 90,
-      timeLeft: '02h 45m',
-      category: 'Incentivo Formativo',
-      isLeading: true,
-    },
-    {
-      id: 2,
-      title: 'Elección de Fecha de Sustentación',
-      subject: 'Ciencias Naturales',
-      teacher: 'Rodríguez',
-      currentBid: 45,
-      minNextBid: 50,
-      timeLeft: '07h 12m',
-      category: 'Organización de Clase',
-      isLeading: false,
-    },
-    {
-      id: 3,
-      title: 'Revisión Extendida con Rúbrica Especial',
-      subject: 'Lenguaje y Comunicación',
-      teacher: 'Pérez',
-      currentBid: 30,
-      minNextBid: 35,
-      timeLeft: '1d 04h',
-      category: 'Retroalimentación',
-      isLeading: false,
-    },
-  ]);
+  userName = computed(() => {
+    const user = this.authService.currentUser();
+    return user?.first_name || 'Estudiante';
+  });
 
-  pendingTasks = signal<PendingTask[]>([
-    {
-      id: 101,
-      title: 'Taller de Cálculo Integral - Ejercicios 1 a 15',
-      subject: 'Matemáticas Avanzadas',
-      rewardCoins: 35,
-      dueDate: 'Mañana, 11:59 PM',
-      isUrgent: true,
-    },
-    {
-      id: 102,
-      title: 'Informe de Laboratorio: Reacciones Químicas',
-      subject: 'Ciencias Naturales',
-      rewardCoins: 25,
-      dueDate: 'Jueves, 06:00 PM',
-    },
-    {
-      id: 103,
-      title: 'Ensayo Crítico sobre Literatura Contemporánea',
-      subject: 'Lenguaje y Comunicación',
-      rewardCoins: 40,
-      dueDate: 'Próx. Lunes',
-    },
-  ]);
+  ngOnInit(): void {
+    this.loadStudentData();
+  }
 
-  placeBid(item: AuctionItem): void {
-    if (this.availableCoins() < item.minNextBid) {
+  loadStudentData(): void {
+    this.isLoading.set(true);
+
+    // 1. Cargar Billetera del Estudiante
+    this.walletService.getMyWallet().subscribe({
+      next: (wallet) => {
+        this.availableCoins.set(wallet.saldo_disponible ?? wallet.saldo_educoins ?? 0);
+        this.lockedCoins.set(wallet.bloqueado_educoins ?? 0);
+        this.hasActiveWallet.set(true);
+        this.activePeriodName.set(wallet.periodo_nombre || '');
+        this.transactions.set(wallet.transacciones || []);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.availableCoins.set(0);
+        this.lockedCoins.set(0);
+        this.hasActiveWallet.set(false);
+        this.transactions.set([]);
+        this.isLoading.set(false);
+      },
+    });
+
+    // 2. Cargar Calificaciones y Total Histórico de Coins
+    this.gradeService.getMyGrades().subscribe({
+      next: (grades) => {
+        this.totalEarnedCoins.set(grades.total_educoins_ganados || 0);
+      },
+      error: () => {
+        this.totalEarnedCoins.set(0);
+      },
+    });
+
+    // 3. Cargar Subastas Activas
+    this.auctionService.getAuctions().subscribe({
+      next: (aucs) => {
+        this.auctions.set(aucs || []);
+      },
+      error: () => {
+        this.auctions.set([]);
+      },
+    });
+
+    // 4. Cargar Actividades Pendientes
+    this.activityService.getActivities().subscribe({
+      next: (acts) => {
+        this.pendingTasks.set(acts || []);
+      },
+      error: () => {
+        this.pendingTasks.set([]);
+      },
+    });
+  }
+
+  placeBid(item: Auction): void {
+    const currentHighest = item.puja_mas_alta?.cantidad_educoins || item.valor_minimo_educoins;
+    const minIncrement = item.incremento_minimo_educoins || 10;
+    const nextBid = currentHighest + minIncrement;
+
+    if (this.availableCoins() < nextBid) {
       this.notificationService.error(
-        `Saldo insuficiente. Necesitas ${item.minNextBid} EduCoins para superar la puja.`
+        `Saldo insuficiente. Necesitas al menos ${nextBid} EduCoins para superar la puja.`
       );
       return;
     }
 
-    // Deducción y actualización simulada
-    this.availableCoins.update((c) => c - (item.minNextBid - item.currentBid));
-    this.lockedCoins.update((c) => c + (item.minNextBid - item.currentBid));
-
-    this.auctions.update((list) =>
-      list.map((a) => {
-        if (a.id === item.id) {
-          return {
-            ...a,
-            currentBid: item.minNextBid,
-            minNextBid: item.minNextBid + 10,
-            isLeading: true,
-          };
-        }
-        return a;
-      })
-    );
-
-    this.notificationService.success(
-      `¡Puja exitosa de ${item.minNextBid} EduCoins por "${item.title}"!`
-    );
+    this.auctionService.createBid(item.id, nextBid).subscribe({
+      next: () => {
+        this.notificationService.success(
+          `¡Puja de ${nextBid} EduCoins registrada con éxito para "${item.titulo}"!`
+        );
+        this.loadStudentData();
+      },
+      error: (err) => {
+        const msg = err.error?.detail || err.error?.message || 'No se pudo registrar la puja';
+        this.notificationService.error(msg, 'Error en puja');
+      },
+    });
   }
 }

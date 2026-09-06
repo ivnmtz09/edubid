@@ -21,6 +21,7 @@ import { GoogleAuthService } from '../../../../core/services/google-auth.service
 import { PublicInstitution } from '../../../../core/models/user.model';
 import { AUTH_ENDPOINTS } from '../../../../core/constants/api.constants';
 import { HttpClient } from '@angular/common/http';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
   selector: 'app-register',
@@ -34,6 +35,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   readonly googleAuth = inject(GoogleAuthService);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private notificationService = inject(NotificationService);
 
   @ViewChild('googleBtn') googleBtnRef!: ElementRef<HTMLDivElement>;
 
@@ -101,8 +103,70 @@ export class RegisterComponent implements OnInit, AfterViewInit {
       });
   }
 
+  handleDisabledSubmitClick(event: MouseEvent): void {
+    if (this.registerForm.invalid) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.focusFirstInvalidField();
+    }
+  }
+
+  openTermsModal(): void {
+    this.showTermsModal.set(true);
+  }
+
+  closeTermsModal(): void {
+    this.showTermsModal.set(false);
+  }
+
+  acceptTermsFromModal(): void {
+    this.registerForm.get('accept_terms')?.setValue(true);
+    this.showTermsModal.set(false);
+  }
+
+  focusFirstInvalidField(): void {
+    this.registerForm.markAllAsTouched();
+
+    const fieldOrder = [
+      { name: 'first_name', label: 'Nombre', id: 'register-first-name' },
+      { name: 'last_name', label: 'Apellido', id: 'register-last-name' },
+      { name: 'email', label: 'Correo electrónico', id: 'register-email' },
+      { name: 'institution', label: 'Institución', id: 'register-institution' },
+      { name: 'password', label: 'Contraseña', id: 'register-password' },
+      { name: 'password_confirm', label: 'Confirmar contraseña', id: 'register-password-confirm' },
+      { name: 'accept_terms', label: 'Aceptar términos y condiciones', id: 'accept_terms' },
+    ];
+
+    for (const field of fieldOrder) {
+      const control = this.registerForm.get(field.name);
+      if (control && control.invalid) {
+        const el = document.getElementById(field.id) || (document.querySelector(`[formControlName="${field.name}"]`) as HTMLElement);
+        const visualEl = (field.name === 'accept_terms' ? document.getElementById('accept-terms-box') : null) || el;
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.focus();
+        }
+        if (visualEl) {
+          // Resaltado visual temporal
+          visualEl.classList.add('ring-2', 'ring-orange-500');
+          setTimeout(() => {
+            visualEl.classList.remove('ring-2', 'ring-orange-500');
+          }, 2000);
+        }
+        this.notificationService.warning(
+          `Por favor completa o verifica el campo: ${field.label}`,
+          'Campo requerido'
+        );
+        break;
+      }
+    }
+  }
+
   onSubmit(): void {
-    if (this.registerForm.invalid) return;
+    if (this.registerForm.invalid) {
+      this.focusFirstInvalidField();
+      return;
+    }
 
     this.isLoading.set(true);
     this.errorMessage.set(null);

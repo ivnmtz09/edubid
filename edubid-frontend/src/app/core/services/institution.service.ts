@@ -15,6 +15,10 @@ export class InstitutionService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/institutions/`;
 
+  getInstitutions(): Observable<any[]> {
+    return this.http.get<any[]>(this.baseUrl);
+  }
+
   updateInstitution(id: number, data: InstitutionUpdateRequest): Observable<any> {
     return this.http.patch(`${this.baseUrl}${id}/`, data);
   }

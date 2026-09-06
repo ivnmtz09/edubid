@@ -775,21 +775,46 @@
 
                 <!-- Checkbox con botón de Términos y Condiciones que abre el Modal -->
                 <div class="flex items-start gap-2 pt-0.5">
-                  <input
-                    id="reg-terms"
-                    type="checkbox"
-                    formControlName="accept_terms"
-                    class="mt-1 accent-slate-900 dark:accent-slate-100"
-                  />
-                  <label for="reg-terms" class="text-xs text-text-muted">
-                    Acepto los
-                    <button
-                      type="button"
-                      (click)="openTermsModal()"
-                      class="font-semibold text-text underline hover:text-slate-900 dark:hover:text-white cursor-pointer ml-0.5"
-                    >
-                      términos y condiciones
-                    </button>
+                  <label class="flex items-start gap-2.5 cursor-pointer select-none group w-full">
+                    <div class="relative flex items-center justify-center mt-0.5 shrink-0">
+                      <input
+                        id="reg-terms"
+                        type="checkbox"
+                        formControlName="accept_terms"
+                        class="peer sr-only"
+                      />
+                      <div
+                        id="home-accept-terms-box"
+                        class="w-4.5 h-4.5 rounded-md border-2 transition-all flex items-center justify-center shadow-xs bg-white dark:bg-slate-900 group-hover:border-orange-500 peer-focus-visible:ring-2 peer-focus-visible:ring-orange-500"
+                        [class.border-orange-500]="registerForm.get('accept_terms')?.value"
+                        [class.border-slate-300]="!registerForm.get('accept_terms')?.value"
+                        [class.dark:border-slate-600]="!registerForm.get('accept_terms')?.value"
+                      >
+                        @if (registerForm.get('accept_terms')?.value) {
+                          <svg
+                            class="w-3.5 h-3.5 text-orange-500 dark:text-orange-500 fill-current"
+                            viewBox="0 0 20 20"
+                            aria-hidden="true"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        }
+                      </div>
+                    </div>
+                    <span class="text-xs text-text-muted">
+                      Acepto los
+                      <button
+                        type="button"
+                        (click)="openTermsModal(); $event.stopPropagation()"
+                        class="font-semibold text-text underline hover:text-slate-900 dark:hover:text-white cursor-pointer ml-0.5"
+                      >
+                        términos y condiciones
+                      </button>
+                    </span>
                   </label>
                 </div>
 
