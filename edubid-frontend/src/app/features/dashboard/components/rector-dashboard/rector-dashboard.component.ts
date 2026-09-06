@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { DashboardService, DashboardStats } from '../../../../core/services/dashboard.service';
+import { InstitutionBrandingComponent } from './components/institution-branding.component';
 
 interface GradeMetric {
   grade: string;
@@ -22,7 +23,7 @@ interface RecentActivityAudit {
 @Component({
   selector: 'app-rector-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, InstitutionBrandingComponent],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
       <!-- Encabezado de Rectoría -->
@@ -45,7 +46,7 @@ interface RecentActivityAudit {
           <button
             type="button"
             (click)="downloadReport()"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all duration-200 hover:scale-[1.02] cursor-pointer"
           >
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -163,23 +164,7 @@ interface RecentActivityAudit {
           <div class="lg:col-span-5 space-y-6">
             
             <!-- Identidad de Marca Institucional (White-label) -->
-            <div class="p-5 rounded-2xl border border-border bg-surface space-y-3">
-              <h3 class="font-bold text-slate-900 dark:text-white text-base">
-                Identidad Institucional
-              </h3>
-              <p class="text-xs text-text-muted leading-relaxed">
-                EduBid adapta la paleta cromática y logotipo para reflejar la identidad oficial de su colegio.
-              </p>
-              <div class="pt-2 flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center text-white font-bold text-xs shadow-xs">
-                  EB
-                </div>
-                <div class="text-xs">
-                  <div class="font-bold text-slate-900 dark:text-white">Código DANE {{ getCodigoDane() }}</div>
-                  <span class="text-text-muted">Acreditación MEN vigente</span>
-                </div>
-              </div>
-            </div>
+            <app-institution-branding />
 
             <!-- Auditoría de Transacciones Recientes -->
             <div class="space-y-3">

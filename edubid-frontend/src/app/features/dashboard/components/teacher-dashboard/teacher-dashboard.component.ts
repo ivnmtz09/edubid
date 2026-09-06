@@ -58,7 +58,7 @@ interface TeacherAuction {
           <button
             type="button"
             (click)="createNewTaskAlert()"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-[1.02] cursor-pointer"
           >
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -237,7 +237,7 @@ interface TeacherAuction {
                   <button
                     type="button"
                     (click)="gradeSubmission(rev)"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-2xs transition-all cursor-pointer"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-primary hover:bg-primary-hover dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-2xs transition-all cursor-pointer"
                   >
                     Aprobar y Acreditar
                   </button>

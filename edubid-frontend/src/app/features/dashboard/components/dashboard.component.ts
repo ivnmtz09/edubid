@@ -4,6 +4,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { StudentDashboardComponent } from './student-dashboard/student-dashboard.component';
 import { TeacherDashboardComponent } from './teacher-dashboard/teacher-dashboard.component';
 import { RectorDashboardComponent } from './rector-dashboard/rector-dashboard.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { CoordinatorDashboardComponent } from './coordinator-dashboard/coordinator-dashboard.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,6 +15,8 @@ import { RectorDashboardComponent } from './rector-dashboard/rector-dashboard.co
     StudentDashboardComponent,
     TeacherDashboardComponent,
     RectorDashboardComponent,
+    AdminDashboardComponent,
+    CoordinatorDashboardComponent,
   ],
   template: `
     <div class="w-full">
@@ -27,10 +31,10 @@ import { RectorDashboardComponent } from './rector-dashboard/rector-dashboard.co
           <app-rector-dashboard />
         }
         @case ('coordinador') {
-          <app-rector-dashboard />
+          <app-coordinator-dashboard />
         }
         @case ('admin') {
-          <app-rector-dashboard />
+          <app-admin-dashboard />
         }
         @default {
           <app-student-dashboard />

@@ -38,31 +38,32 @@ interface NavItem {
               </svg>
             </button>
 
-            <!-- Logo EduBid -->
+            <!-- Logo Institucional o EduBid -->
             <a routerLink="/dashboard" class="flex items-center gap-2 group">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-6 h-6 shrink-0 transition-transform duration-200 group-hover:scale-105">
-                <circle cx="32" cy="32" r="23" fill="none" class="stroke-slate-400 dark:stroke-slate-500" stroke-width="1.8" stroke-dasharray="3 2"/>
-                <polygon points="32,15 17,22 32,29 47,22" class="fill-slate-900 dark:fill-white"/>
-                <path d="M 23 25.5 L 23 29 Q 32 34 41 29 L 41 25.5" fill="none" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="1.6"/>
-                <circle cx="45" cy="28" r="2.5" fill="#ea580c"/>
-                <line x1="20" y1="48" x2="44" y2="48" class="stroke-slate-400 dark:stroke-slate-600" stroke-width="2" stroke-linecap="round"/>
-                <rect x="23" y="33" width="18" height="6" rx="2" class="fill-slate-900 dark:fill-white"/>
-                <rect x="30.5" y="33" width="3" height="6" fill="#ea580c"/>
-                <line x1="32" y1="39" x2="32" y2="45" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="2.5" stroke-linecap="round"/>
-              </svg>
-              <span class="font-extrabold text-base tracking-tight text-slate-900 dark:text-white hidden sm:flex items-center gap-1">
-                EduBid
-                <span class="inline-block w-1.5 h-1.5 rounded-full bg-orange-600 shrink-0"></span>
+              @if (institutionLogo()) {
+                <img [src]="institutionLogo()" alt="Escudo de la Institución" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-8 h-8 shrink-0 transition-transform duration-200 group-hover:scale-105">
+                  <circle cx="32" cy="32" r="23" fill="none" class="stroke-slate-400 dark:stroke-slate-500" stroke-width="1.8" stroke-dasharray="3 2"/>
+                  <polygon points="32,15 17,22 32,29 47,22" class="fill-slate-900 dark:fill-white"/>
+                  <path d="M 23 25.5 L 23 29 Q 32 34 41 29 L 41 25.5" fill="none" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="1.6"/>
+                  <circle cx="45" cy="28" r="2.5" fill="var(--color-primary, #ea580c)"/>
+                  <line x1="20" y1="48" x2="44" y2="48" class="stroke-slate-400 dark:stroke-slate-600" stroke-width="2" stroke-linecap="round"/>
+                  <rect x="23" y="33" width="18" height="6" rx="2" class="fill-slate-900 dark:fill-white"/>
+                  <rect x="30.5" y="33" width="3" height="6" fill="var(--color-primary, #ea580c)"/>
+                  <line x1="32" y1="39" x2="32" y2="45" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+              }
+
+              <!-- Nombre (Institución preferida) -->
+              <span class="font-extrabold text-base md:text-lg tracking-tight text-primary hidden sm:flex items-center gap-1">
+                @if (institutionName()) {
+                  {{ institutionName() }}
+                } @else {
+                  EduBid
+                }
               </span>
             </a>
-
-            <!-- Nombre de Institución (Si aplica) -->
-            @if (institutionName()) {
-              <span class="hidden md:inline-block text-border">|</span>
-              <span class="hidden md:inline-block text-xs font-semibold text-text-muted truncate max-w-xs">
-                {{ institutionName() }}
-              </span>
-            }
           </div>
 
           <!-- Lado Derecho: Selector de Tema + Usuario y Logout -->
@@ -168,7 +169,7 @@ interface NavItem {
             <!-- Perfil del Usuario & Rol -->
             <div class="flex items-center gap-2 pl-2 border-l border-border">
               <!-- Avatar o Inicial -->
-              <div class="w-8 h-8 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+              <div class="w-8 h-8 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
                 {{ userInitials() }}
               </div>
 
@@ -348,6 +349,9 @@ export class LayoutComponent {
   });
   institutionName = computed(() => {
     return this.authService.currentUser()?.profile?.institucion?.nombre || null;
+  });
+  institutionLogo = computed(() => {
+    return this.authService.currentUser()?.profile?.institucion?.logo || null;
   });
 
   // Ítems de Navegación según el Rol
