@@ -47,16 +47,7 @@ interface NavItem {
               @if (institutionLogo()) {
                 <img [src]="institutionLogo()" alt="Escudo de la Institución" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
               } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" class="w-8 h-8 shrink-0 transition-transform duration-200 group-hover:scale-105">
-                  <circle cx="32" cy="32" r="23" fill="none" class="stroke-slate-400 dark:stroke-slate-500" stroke-width="1.8" stroke-dasharray="3 2"/>
-                  <polygon points="32,15 17,22 32,29 47,22" class="fill-slate-900 dark:fill-white"/>
-                  <path d="M 23 25.5 L 23 29 Q 32 34 41 29 L 41 25.5" fill="none" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="1.6"/>
-                  <circle cx="45" cy="28" r="2.5" fill="var(--color-primary, #ea580c)"/>
-                  <line x1="20" y1="48" x2="44" y2="48" class="stroke-slate-400 dark:stroke-slate-600" stroke-width="2" stroke-linecap="round"/>
-                  <rect x="23" y="33" width="18" height="6" rx="2" class="fill-slate-900 dark:fill-white"/>
-                  <rect x="30.5" y="33" width="3" height="6" fill="var(--color-primary, #ea580c)"/>
-                  <line x1="32" y1="39" x2="32" y2="45" class="stroke-slate-500 dark:stroke-slate-400" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
+                <img src="edubid.png" alt="EduBid Logo" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
               }
               @if (isDesktopExpanded() || isMobileDrawerOpen()) {
                 <span class="font-extrabold text-base tracking-tight text-primary truncate">
@@ -206,9 +197,12 @@ interface NavItem {
                 </svg>
               </button>
 
-              <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
-                {{ institutionName() || 'EduBid Plataforma' }}
-              </span>
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img [src]="institutionLogo() || 'edubid.png'" alt="Logo" class="w-7 h-7 rounded-lg object-contain shrink-0" />
+                <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                  {{ institutionName() || 'EduBid Plataforma' }}
+                </span>
+              </div>
             </div>
 
             <!-- Lado Derecho: Selector de Tema + Usuario y Logout -->
