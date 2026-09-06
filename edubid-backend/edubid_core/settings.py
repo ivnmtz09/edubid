@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
 import os
+import sys
 import pymysql
 
 # Configurar pymysql como driver de MySQL
@@ -163,6 +164,12 @@ DATABASES = {
         }
     }
 }
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
 
 # ─────────────────────────────────────────────
 # Validación de contraseñas

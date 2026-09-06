@@ -18,6 +18,7 @@ from .serializers import (
 )
 from apps.users.permissions import AdminOrDocente, IsDocente
 from apps.tokens.models import Wallet, Period
+from .services import cerrar_subasta, cerrar_subastas_expiradas
 
 
 class AuctionViewSet(viewsets.ModelViewSet):
@@ -82,6 +83,19 @@ class AuctionViewSet(viewsets.ModelViewSet):
             "total_generales": queryset.count(),
         })
 
+    def list(self, request, *args, **kwargs):
+        # Auto-cierre de subastas cuya fecha_fin haya expirado
+        cerrar_subastas_expiradas()
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.estado == "active" and instance.fecha_fin <= now():
+            cerrar_subasta(instance)
+            instance.refresh_from_db()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     def perform_create(self, serializer):
         """Al crear, asignar el docente como creador"""
         serializer.save(creador=self.request.user)
@@ -124,11 +138,10 @@ class AuctionViewSet(viewsets.ModelViewSet):
         instance.delete()
 
     @action(detail=True, methods=["post"], permission_classes=[AdminOrDocente])
-    @transaction.atomic
     def close(self, request, pk=None):
         """
         Cerrar la subasta y procesar el ganador.
-        Solo el docente creador o admin puede cerrar.
+        Solo el docente creador o admin puede cerrar manualmente.
         """
         auction = self.get_object()
         user = request.user
@@ -143,76 +156,22 @@ class AuctionViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Marcar como cerrada
-        auction.estado = "closed"
-        auction.save()
+        res = cerrar_subasta(auction)
+        if not res.get("success"):
+            return Response(
+                {"detail": res.get("error", res.get("message", "Error al procesar el cierre de la subasta."))},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Obtener la puja más alta
-        highest_bid = auction.bids.order_by("-cantidad_educoins").first()
-
-        if not highest_bid:
+        if not res.get("ganador"):
             return Response({
                 "detail": "Subasta cerrada sin pujas."
             }, status=status.HTTP_200_OK)
 
-        ganador = highest_bid.estudiante
-        monto = highest_bid.cantidad_educoins
-
-        # Obtener periodo activo
-        periodo_activo = Period.objects.filter(grupo=auction.grupo, activo=True).first()
-        
-        if not periodo_activo:
-            return Response({
-                "detail": "No hay periodo activo para procesar el pago."
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # 1. Cobrar coins al ganador
-        try:
-            wallet_ganador = Wallet.objects.get(
-                usuario=ganador, 
-                grupo=auction.grupo, 
-                periodo=periodo_activo
-            )
-            wallet_ganador.bloqueado_educoins -= monto
-            wallet_ganador.saldo_educoins -= monto
-            wallet_ganador.save()
-
-            # Registrar transacción
-            from apps.tokens.models import CoinTransaction
-            CoinTransaction.objects.create(
-                wallet=wallet_ganador,
-                tipo="spend",
-                cantidad_educoins=monto,
-                descripcion=f"Pago por ganar subasta: {auction.titulo}"
-            )
-        except Wallet.DoesNotExist:
-            return Response({
-                "detail": "Error: El ganador no tiene billetera activa."
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # 2. Devolver coins a los demás participantes
-        otras_pujas = auction.bids.exclude(id=highest_bid.id)
-        for bid in otras_pujas:
-            try:
-                wallet = Wallet.objects.get(
-                    usuario=bid.estudiante, 
-                    grupo=auction.grupo, 
-                    periodo=periodo_activo
-                )
-                wallet.bloqueado_educoins -= bid.cantidad_educoins
-                wallet.save()
-            except Wallet.DoesNotExist:
-                pass
-
         return Response({
-            "detail": f"Subasta cerrada exitosamente",
-            "ganador": {
-                "id": ganador.id,
-                "email": ganador.email,
-                "nombre": f"{ganador.first_name} {ganador.last_name}".strip(),
-                "monto_pagado": monto
-            },
-            "total_participantes": auction.bids.count()
+            "detail": "Subasta cerrada exitosamente",
+            "ganador": res.get("ganador"),
+            "total_participantes": res.get("total_participantes", 0)
         }, status=status.HTTP_200_OK)
 
 
