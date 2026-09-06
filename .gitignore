@@ -34,6 +34,11 @@ __pycache__/
 # Base de datos local
 db.sqlite3
 
+# Archivos de medios subidos por usuarios (uploads)
+media/
+*/media/*
+!*/media/.gitkeep
+
 # Migraciones opcionales (si quieres versionarlas, quita el comentario)
 # */migrations/*.py
 # */migrations/*.pyc
