@@ -19,7 +19,7 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 | # | Ítem / Funcionalidad | Área | Prioridad | Riesgo de NO hacerlo | Esfuerzo Estimado |
 |---|---|---|---|---|---|
 | **1** | Cierre Automático de Subastas (Background Job) | Backend | ✅ **COMPLETADO** | Subastas atascadas, saldo bloqueado sin devolver, insatisfacción de usuarios | Medio |
-| **2** | Suite de Pruebas Automatizadas (Unit & Integration Tests) | Backend / QA | 🔴 **ALTA** | Fallos silenciosos en lógica transaccional de EduCoins y fugas de aislamiento multi-tenant | Alto |
+| **2** | Suite de Pruebas Automatizadas (Unit & Integration Tests) | Backend / QA | ✅ **COMPLETADO** | Fallos silenciosos en lógica transaccional de EduCoins y fugas de aislamiento multi-tenant | Alto |
 | **3** | Rate Limiting y Protección de Endpoints Auth | Backend / Seguridad | 🟡 **MEDIA-ALTA** | Ataques de fuerza bruta, spam de usuarios, denegación de servicio (DoS) | Bajo |
 | **4** | Sincronización Real-Time con WebSockets | Backend / Frontend | 🟡 **MEDIA** | Subastas lentas, requiere refrescar la página manualmente para ver pujas | Alto |
 | **5** | Almacenamiento Nube para Archivos Media (S3/Cloudinary) | DevOps / Backend | 🟡 **MEDIA** | Pérdida de imágenes y tareas adjuntas al reiniciar contenedores en producción | Medio |
@@ -59,12 +59,13 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 * **¿Por qué hay que hacerlo?**  
   Actualmente, los archivos `tests.py` en todas las apps backend contienen únicamente 4 líneas de código con la plantilla básica. La lógica financiera (depósitos, gastos, reinicios de saldo en `Wallet`) y las reglas de seguridad Multi-Tenant (aislamiento estricto por `institucion_id`) carecen de pruebas automáticas que garanticen que un cambio futuro no rompa el sistema.
 
-* **Prioridad:** 🔴 **ALTA** (Esencial para la estabilidad y confiabilidad del software).
-
-* **Beneficios:**
-  * **Cero saldo corrupto:** Garantiza matemáticamente que los EduCoins no se dupliquen ni desaparezcan.
-  * **Seguridad Multi-Tenant:** Asegura que los datos de un colegio sean invisibles e inalcanzables para otros colegios.
-  * **Refactorización segura:** Permite agregar funciones en el futuro sin miedo a romper lo existente.
+* **Estado:** ✅ **COMPLETADO & TESTEADO (29/29 tests aprobados en apps core)**
+* **Implementación:**
+  * **`apps/users/tests.py` (7 tests):** Restricciones de SuperAdmin (aislamiento estricto `institucion = None`), regla de unicidad `UniqueConstraint` para un solo rector por institución, 5 roles del RBAC, perfiles automáticos vía signal y permisos `IsDocente`, `AdminOrDocente`.
+  * **`apps/tokens/tests.py` (6 tests):** Operaciones financieras en `Wallet` (`depositar`, `gastar` con prevención de saldo negativo, `resetear`), auditoría mediante `CoinTransaction` y ciclo de vida de periodos/cortes (`Period.activar()`).
+  * **`apps/grades/tests.py` (5 tests):** Cálculo proporcional de EduCoins sobre experiencia de actividad, bonificación del 10% por excelencia académica, acreditación automática a billetera vía señal `post_save` y prevención de doble calificación.
+  * **`apps/groups/tests.py` (6 tests):** Generación automática de códigos alfanuméricos de 6 caracteres, matrícula de estudiantes con auto-provisión de `Wallet`, prevención de dobles inscripciones y aislamiento de datos por institución y rol.
+  * **`apps/auctions/tests.py` (5 tests):** Cierre y liquidación de subastas, transacciones de compra, devoluciones a postores no ganadores y comando CLI.
 
 ---
 
