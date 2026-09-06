@@ -53,7 +53,7 @@ export class AuthService {
     return this.http.post<LoginResponse>(AUTH_ENDPOINTS.GOOGLE_LOGIN, body).pipe(
       tap((res) => {
         this.handleAuthSuccess(res);
-        if (!res.user.profile?.institucion) {
+        if (res.user.role !== 'admin' && !res.user.profile?.institucion) {
           this.router.navigate(['/completar-perfil']);
         }
       }),
@@ -115,11 +115,15 @@ export class AuthService {
   }
 
   private handleAuthSuccess(res: LoginResponse): void {
+    if (res.user.role === 'admin' && res.user.profile) {
+      res.user.profile.institucion = null;
+    }
     this.storeTokens(res.tokens);
     this.storeUser(res.user);
     this._user.set(res.user);
     this._isAuthenticated.set(true);
-    this.themeService.injectBrandColors(res.user.profile?.institucion ?? null);
+    const brand = res.user.role === 'admin' ? null : (res.user.profile?.institucion ?? null);
+    this.themeService.injectBrandColors(brand);
     this.navigateByRole(res.user.role);
   }
 
@@ -139,6 +143,12 @@ export class AuthService {
 
   private sanitizeUser(user: User): Partial<User> {
     const { ...safeUser } = user;
+    if (safeUser.role === 'admin' && safeUser.profile) {
+      safeUser.profile = {
+        ...safeUser.profile,
+        institucion: null,
+      };
+    }
     return safeUser;
   }
 
@@ -149,9 +159,13 @@ export class AuthService {
     if (token && userJson) {
       try {
         const user = JSON.parse(userJson) as User;
+        if (user.role === 'admin' && user.profile) {
+          user.profile.institucion = null;
+        }
         this._user.set(user);
         this._isAuthenticated.set(true);
-        this.themeService.injectBrandColors(user.profile?.institucion ?? null);
+        const brand = user.role === 'admin' ? null : (user.profile?.institucion ?? null);
+        this.themeService.injectBrandColors(brand);
       } catch {
         this.logout();
       }

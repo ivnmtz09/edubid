@@ -119,7 +119,7 @@ export class AdminDashboardComponent implements OnInit {
   institutionUsers = computed<User[]>(() => {
     const inst = this.selectedInstitution();
     if (!inst) return [];
-    return this.users().filter(u => u.profile?.institucion?.id === inst.id);
+    return this.users().filter(u => u.profile?.institucion?.id === inst.id && u.role !== 'admin');
   });
 
   // Conteo de estudiantes y docentes en la institución seleccionada
@@ -403,7 +403,7 @@ export class AdminDashboardComponent implements OnInit {
 
   // Helper para contar miembros de una institución dada
   getInstitutionMemberCounts(instId: number): { students: number; teachers: number; total: number } {
-    const members = this.users().filter(u => u.profile?.institucion?.id === instId);
+    const members = this.users().filter(u => u.profile?.institucion?.id === instId && u.role !== 'admin');
     const students = members.filter(u => u.role === 'estudiante').length;
     const teachers = members.filter(u => u.role === 'docente').length;
     return { students, teachers, total: members.length };

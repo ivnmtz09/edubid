@@ -422,12 +422,15 @@
 
                     <!-- Institución -->
                     <td class="px-5 py-3.5 text-text-muted">
-                      @if (u.profile?.institucion?.nombre) {
+                      @if (u.role === 'admin') {
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                          <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                          SuperAdmin Global (SaaS)
+                        </span>
+                      } @else if (u.profile?.institucion?.nombre) {
                         <span class="font-medium text-slate-800 dark:text-slate-200">{{ u.profile?.institucion?.nombre }}</span>
-                      } @else if (u.role === 'admin') {
-                        <span class="italic text-[11px]">Plataforma Global</span>
                       } @else {
-                        <span class="text-text-muted/60">Sin asignar</span>
+                        <span class="text-text-muted/60 italic text-[11px]">Sin asignar</span>
                       }
                     </td>
 
