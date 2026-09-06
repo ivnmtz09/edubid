@@ -40,6 +40,17 @@ class User(AbstractUser, BaseModel):
             ),
         ]
 
+    def clean(self):
+        super().clean()
+        from django.core.exceptions import ValidationError
+        if self.role == 'admin' and self.institucion_id is not None:
+            raise ValidationError({'institucion': 'Un Administrador Global no puede estar asociado a una institución específica.'})
+
+    def save(self, *args, **kwargs):
+        if self.role == 'admin':
+            self.institucion = None
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.email} ({self.get_role_display()})'
 

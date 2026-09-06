@@ -81,6 +81,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_institucion(self, obj):
         """Retorna los datos de la institución desde la FK del User."""
         user = obj.user
+        if user and user.role == 'admin':
+            return None
         if user and user.institucion_id:
             return InstitutionMiniSerializer(user.institucion).data
         return None

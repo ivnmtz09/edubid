@@ -420,6 +420,12 @@ def api_update_profile(request):
     # ── Institución (solo escritura única) ──
     institucion_id = request.data.get('institucion_id') or request.data.get('institucion')
     if institucion_id is not None:
+        if user.role == 'admin':
+            return Response({
+                "detail": "Un Administrador Global no puede estar asociado a una institución.",
+                "errors": {"institucion_id": ["El rol admin no soporta instituciones."]}
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
         if user.institucion_id is not None:
             return Response({
                 "detail": "Ya tienes una institución asignada. No puedes cambiarla.",
