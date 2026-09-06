@@ -41,12 +41,12 @@
             (ngModelChange)="onSelectInstitution($event)"
             class="w-full pl-9 pr-8 py-2.5 text-xs font-semibold rounded-xl border-2 border-primary/30 bg-surface hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 text-slate-900 dark:text-white transition-all cursor-pointer shadow-xs"
           >
-            <option value="all">🌐 Vista General (Todas las Instituciones)</option>
+            <option value="all">Vista General (Todas las Instituciones)</option>
             @if (institutions().length > 0) {
-              <optgroup label="── Instituciones Individuales ──">
+              <optgroup label="Instituciones Registradas">
                 @for (inst of institutions(); track inst.id) {
                   <option [value]="inst.id.toString()">
-                    🏫 {{ inst.nombre }} {{ inst.activo ? '• (Activa)' : '• (Inactiva)' }}
+                    {{ inst.nombre }} {{ inst.activo ? '• Activa' : '• Inactiva' }}
                   </option>
                 }
               </optgroup>
