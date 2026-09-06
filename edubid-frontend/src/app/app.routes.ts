@@ -50,7 +50,7 @@ export const routes: Routes = [
   },
   {
     path: 'classrooms',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(['docente', 'rector', 'coordinador'])],
     loadComponent: () =>
       import('./shared/components/layout/layout.component').then(m => m.LayoutComponent),
     children: [

@@ -51,7 +51,7 @@ interface NavItem {
               }
               @if (isDesktopExpanded() || isMobileDrawerOpen()) {
                 <span class="font-extrabold text-base tracking-tight text-primary truncate">
-                  {{ institutionName() || 'EduBid' }}
+                  {{ sidebarBrandTitle() }}
                 </span>
               }
             </a>
@@ -200,7 +200,7 @@ interface NavItem {
               <div class="flex items-center gap-2.5 min-w-0">
                 <img [src]="institutionLogo() || 'edubid.png'" alt="Logo" class="w-7 h-7 rounded-lg object-contain shrink-0" />
                 <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
-                  {{ institutionName() || 'EduBid Plataforma' }}
+                  {{ headerTitle() }}
                 </span>
               </div>
             </div>
@@ -391,11 +391,32 @@ export class LayoutComponent {
     const l = user.last_name?.[0] || '';
     return (f + l).toUpperCase() || 'EB';
   });
+  sidebarBrandTitle = computed(() => {
+    const role = this.userRole();
+    if (role === 'admin') {
+      return 'EduBid';
+    }
+    return this.authService.currentUser()?.profile?.institucion?.nombre || 'EduBid';
+  });
+
+  headerTitle = computed(() => {
+    const role = this.userRole();
+    if (role === 'admin') {
+      return 'EduBid Admin';
+    }
+    return this.authService.currentUser()?.profile?.institucion?.nombre || 'EduBid Plataforma';
+  });
+
   institutionName = computed(() => {
     return this.authService.currentUser()?.profile?.institucion?.nombre || null;
   });
+
   institutionLogo = computed(() => {
-    return this.authService.currentUser()?.profile?.institucion?.logo || null;
+    const user = this.authService.currentUser();
+    if (!user || user.role === 'admin') {
+      return null;
+    }
+    return user.profile?.institucion?.logo || null;
   });
 
   // Ítems de Navegación según el Rol
@@ -429,12 +450,6 @@ export class LayoutComponent {
       route: '/classrooms',
       icon: 'classrooms',
       roles: ['rector', 'coordinador'],
-    },
-    {
-      label: 'Gestión de Clases',
-      route: '/classrooms',
-      icon: 'classrooms',
-      roles: ['admin'],
     },
   ];
 

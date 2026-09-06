@@ -375,7 +375,7 @@ export class ClassroomsComponent implements OnInit {
 
   userRole = computed(() => this.authService.currentUser()?.role || 'estudiante');
   isDocente = computed(() => this.userRole() === 'docente');
-  canManage = computed(() => ['docente', 'admin'].includes(this.userRole()));
+  canManage = computed(() => this.userRole() === 'docente');
 
   filteredClassrooms = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
