@@ -1,11 +1,13 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ClassroomService, Classroom } from '../../../../core/services/classroom.service';
 import { ActivityService, Submission } from '../../../../core/services/activity.service';
 import { AuctionService, Auction } from '../../../../core/services/auction.service';
+import { WebSocketService } from '../../../../core/services/websocket.service';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -280,12 +282,14 @@ import { AuctionService, Auction } from '../../../../core/services/auction.servi
     </div>
   `,
 })
-export class TeacherDashboardComponent implements OnInit {
+export class TeacherDashboardComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private classroomService = inject(ClassroomService);
   private activityService = inject(ActivityService);
   private auctionService = inject(AuctionService);
+  private wsService = inject(WebSocketService);
+  private wsSub = new Subscription();
 
   isLoading = signal<boolean>(true);
   classrooms = signal<Classroom[]>([]);
@@ -307,6 +311,70 @@ export class TeacherDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTeacherData();
+    this.initRealTimeListeners();
+  }
+
+  ngOnDestroy(): void {
+    this.wsSub.unsubscribe();
+  }
+
+  private initRealTimeListeners(): void {
+    // 1. Escuchar nuevas ofertas en tiempo real
+    this.wsSub.add(
+      this.wsService.onBidUpdate$().subscribe((bidEvent) => {
+        let isMyAuction = false;
+        this.teacherAuctions.update((current) =>
+          current.map((auc) => {
+            if (auc.id === bidEvent.auction_id) {
+              isMyAuction = true;
+              return {
+                ...auc,
+                puja_mas_alta: bidEvent.puja_mas_alta,
+                total_pujas: bidEvent.total_pujas,
+                incremento_minimo_educoins: bidEvent.incremento_minimo_educoins,
+              };
+            }
+            return auc;
+          })
+        );
+
+        if (isMyAuction) {
+          this.notificationService.info(
+            `Nueva oferta de ${bidEvent.puja_mas_alta.estudiante_nombre} (${bidEvent.puja_mas_alta.cantidad_educoins} EC) en "${bidEvent.auction_titulo}"`,
+            'Subasta en Vivo'
+          );
+        }
+      })
+    );
+
+    // 2. Escuchar cierres de subasta en tiempo real
+    this.wsSub.add(
+      this.wsService.onAuctionClosed$().subscribe((closedEvent) => {
+        let closedAuctionTitle = '';
+        this.teacherAuctions.update((current) =>
+          current.map((auc) => {
+            if (auc.id === closedEvent.auction_id) {
+              closedAuctionTitle = auc.titulo;
+              return {
+                ...auc,
+                estado: 'closed',
+              };
+            }
+            return auc;
+          })
+        );
+
+        if (closedAuctionTitle) {
+          const winnerMsg = closedEvent.ganador
+            ? `Ganador: ${closedEvent.ganador.nombre} (${closedEvent.ganador.monto_pagado} EC)`
+            : 'Finalizada sin ofertas.';
+          this.notificationService.success(
+            `La subasta "${closedAuctionTitle}" ha concluido. ${winnerMsg}`,
+            'Subasta Finalizada'
+          );
+        }
+      })
+    );
   }
 
   loadTeacherData(): void {

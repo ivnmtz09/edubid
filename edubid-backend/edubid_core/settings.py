@@ -52,6 +52,7 @@ CSRF_COOKIE_HTTPONLY = False
 # Apps instaladas
 # ─────────────────────────────────────────────
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,6 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
+    'channels',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -147,6 +149,27 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'edubid_core.wsgi.application'
+ASGI_APPLICATION = 'edubid_core.asgi.application'
+
+# ─────────────────────────────────────────────
+# Channels & WebSockets (Real-Time)
+# ─────────────────────────────────────────────
+REDIS_URL = config('REDIS_URL', default=None)
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
 
 # ─────────────────────────────────────────────
 # Base de datos

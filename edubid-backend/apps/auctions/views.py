@@ -18,7 +18,7 @@ from .serializers import (
 )
 from apps.users.permissions import AdminOrDocente, IsDocente
 from apps.tokens.models import Wallet, Period
-from .services import cerrar_subasta, cerrar_subastas_expiradas
+from .services import cerrar_subasta, cerrar_subastas_expiradas, broadcast_bid_update
 
 
 class AuctionViewSet(viewsets.ModelViewSet):
@@ -352,6 +352,15 @@ class BidViewSet(viewsets.ModelViewSet):
             wallet.save()
             
             logger.info(f"Nueva puja creada exitosamente: {bid.cantidad_educoins}, total bloqueado: {wallet.bloqueado_educoins}")
+
+        # Emitir actualización en tiempo real vía WebSocket
+        estudiante_anterior_id = highest_bid.estudiante_id if highest_bid and highest_bid.estudiante_id != estudiante.id else None
+        broadcast_bid_update(
+            auction=auction,
+            estudiante=estudiante,
+            cantidad=cantidad,
+            estudiante_anterior_id=estudiante_anterior_id
+        )
 
     # ... (el resto de los métodos permanecen igual)
     def perform_update(self, serializer):

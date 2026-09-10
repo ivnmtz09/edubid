@@ -168,7 +168,7 @@ def cerrar_subasta(auction: Auction) -> dict:
     except Exception as e:
         logger.error("Error al notificar al docente creador: %s", e)
 
-    return {
+    resultado = {
         "success": True,
         "ganador": {
             "id": ganador.id,
@@ -178,6 +178,8 @@ def cerrar_subasta(auction: Auction) -> dict:
         },
         "total_participantes": auction.bids.count()
     }
+    broadcast_auction_closed(auction, resultado)
+    return resultado
 
 
 def cerrar_subastas_expiradas() -> list:
@@ -203,3 +205,71 @@ def cerrar_subastas_expiradas() -> list:
             resultados.append({"auction_id": auction.id, "error": str(e)})
 
     return resultados
+
+
+def broadcast_bid_update(auction: Auction, estudiante, cantidad: int, estudiante_anterior_id: int = None):
+    """
+    Emite un evento de actualización de puja a través de Django Channels
+    para sincronización en tiempo real.
+    """
+    try:
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+        channel_layer = get_channel_layer()
+        if not channel_layer:
+            return
+
+        nombre_estudiante = f"{estudiante.first_name} {estudiante.last_name}".strip() or estudiante.username
+        payload = {
+            "type": "bid_update",
+            "data": {
+                "event": "bid_created",
+                "auction_id": auction.id,
+                "auction_titulo": auction.titulo,
+                "grupo_id": auction.grupo_id,
+                "puja_mas_alta": {
+                    "cantidad_educoins": cantidad,
+                    "estudiante_nombre": nombre_estudiante,
+                    "estudiante_id": estudiante.id,
+                },
+                "total_pujas": auction.bids.count(),
+                "incremento_minimo_educoins": auction.incremento_minimo_educoins,
+                "estudiante_anterior_id": estudiante_anterior_id,
+            }
+        }
+
+        async_to_sync(channel_layer.group_send)("auctions_general", payload)
+        if auction.grupo_id:
+            async_to_sync(channel_layer.group_send)(f"auctions_group_{auction.grupo_id}", payload)
+    except Exception as e:
+        logger.warning("No se pudo emitir evento WebSocket de puja: %s", e)
+
+
+def broadcast_auction_closed(auction: Auction, resultado: dict):
+    """
+    Emite un evento de cierre de subasta a través de Django Channels.
+    """
+    try:
+        from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
+        channel_layer = get_channel_layer()
+        if not channel_layer:
+            return
+
+        payload = {
+            "type": "auction_closed",
+            "data": {
+                "event": "auction_closed",
+                "auction_id": auction.id,
+                "auction_titulo": auction.titulo,
+                "grupo_id": auction.grupo_id,
+                "ganador": resultado.get("ganador"),
+                "total_participantes": resultado.get("total_participantes", 0)
+            }
+        }
+
+        async_to_sync(channel_layer.group_send)("auctions_general", payload)
+        if auction.grupo_id:
+            async_to_sync(channel_layer.group_send)(f"auctions_group_{auction.grupo_id}", payload)
+    except Exception as e:
+        logger.warning("No se pudo emitir evento WebSocket de cierre: %s", e)

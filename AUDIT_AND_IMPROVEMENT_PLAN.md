@@ -98,16 +98,34 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 ### 4. ⚡ Sincronización en Tiempo Real mediante WebSockets
 
 * **¿Qué hay que hacer?**  
-  Integrar **Django Channels** en el backend y consumidores de WebSockets con **RxJS** en el frontend.
+  Integrar **Django Channels** y **Daphne** en el backend y consumidores de WebSockets con **RxJS** en el frontend de Angular.
 
 * **¿Por qué hay que hacerlo?**  
-  Las subastas son un proceso competitivo. Actualmente, si el Estudiante A realiza una puja, el Estudiante B no ve el nuevo precio en su pantalla hasta que recarga la página o se realiza una petición HTTP.
+  Las subastas son un proceso competitivo. Anteriormente, si el Estudiante A realizaba una puja, el Estudiante B no veía el nuevo precio en su pantalla hasta que recargaba la página.
 
-* **Prioridad:** 🟡 **MEDIA** (Mejora dramática de la experiencia de juego).
-
-* **Beneficios:**
-  * **Pujas en vivo:** Los estudiantes ven el contador de la subasta y las ofertas subir al instante sin recargar.
-  * **Notificaciones instantáneas:** Notificación inmediata en pantalla cuando un usuario es superado en una puja.
+* **Estado:** ✅ **COMPLETADO & TESTEADO (Subastas y Pujas en Vivo 100% reactivas)**
+* **Implementación:**
+  * **Backend (Django Channels & ASGI):**
+    * Instalación y configuración de `channels>=4.0.0` y `daphne>=4.0.0`.
+    * Configurado `edubid_core/settings.py` con `daphne` en cabeza de `INSTALLED_APPS`, `ASGI_APPLICATION = 'edubid_core.asgi.application'`, y `CHANNEL_LAYERS` con fallback inteligente a memoria local (`InMemoryChannelLayer`) o Redis (`RedisChannelLayer`) según la variable de entorno `REDIS_URL`.
+    * Creado `apps/auctions/consumers.py` (`AuctionConsumer`) gestionando las salas `auctions_general` y `auctions_group_{group_id}` con soporte para ping/pong keepalive.
+    * Creado enrutador `apps/auctions/routing.py` (`ws/auctions/` y `ws/auctions/<int:group_id>/`).
+    * Configurado `edubid_core/asgi.py` con `ProtocolTypeRouter`, `AuthMiddlewareStack` y `URLRouter`.
+    * Creados métodos de difusión en tiempo real `broadcast_bid_update` y `broadcast_auction_closed` en `apps/auctions/services.py`.
+    * Conectado `BidViewSet.perform_create` en `apps/auctions/views.py` para emitir eventos de nuevas pujas en vivo a todos los clientes suscritos.
+    * Conectado `AuctionClosingService` para emitir el evento `auction_closed` notificando el ganador y monto de cierre en tiempo real.
+    * Creada suite de pruebas unitarias `AuctionWebSocketTests` en `apps/auctions/tests.py` validando conexión WS, recepción de mensaje de bienvenida y respuesta a pings (56/56 tests aprobados en todo el backend).
+  * **Frontend (Angular & RxJS):**
+    * Creado servicio reactivo `WebSocketService` (`core/services/websocket.service.ts`) con auto-reconexión exponencial y tipado estricto de eventos (`BidUpdateEvent`, `AuctionClosedEvent`).
+    * Integrado en `StudentDashboardComponent` (`features/dashboard/components/student-dashboard/`):
+      * Actualización inmediata de la señal reactiva `auctions()` al recibir nuevas pujas en tiempo real.
+      * Notificación toast de advertencia cuando un estudiante es superado en una puja por otro alumno.
+      * Notificación toast de felicitación en vivo al ganador de una subasta y remoción de la subasta concluida.
+    * Integrado en `TeacherDashboardComponent` (`features/dashboard/components/teacher-dashboard/`):
+      * Actualización reactiva de la señal `teacherAuctions()` con el líder y oferta más alta en curso.
+      * Notificación informativa en vivo al docente cuando se realizan pujas en sus subastas pedagógicas.
+      * Notificación de cierre con detalle del ganador y monto final adjudicado.
+    * Compilación de producción validada exitosamente con `npx ng build` (0 errores).
 
 ---
 

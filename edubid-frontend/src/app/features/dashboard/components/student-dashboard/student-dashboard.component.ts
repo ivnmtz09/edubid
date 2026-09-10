@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -7,6 +7,8 @@ import { WalletService, Wallet, CoinTransaction } from '../../../../core/service
 import { GradeService } from '../../../../core/services/grade.service';
 import { AuctionService, Auction } from '../../../../core/services/auction.service';
 import { ActivityService, Activity } from '../../../../core/services/activity.service';
+import { WebSocketService } from '../../../../core/services/websocket.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -296,13 +298,15 @@ import { ActivityService, Activity } from '../../../../core/services/activity.se
     </div>
   `,
 })
-export class StudentDashboardComponent implements OnInit {
+export class StudentDashboardComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private walletService = inject(WalletService);
   private gradeService = inject(GradeService);
   private auctionService = inject(AuctionService);
   private activityService = inject(ActivityService);
+  private wsService = inject(WebSocketService);
+  private wsSub = new Subscription();
 
   isLoading = signal<boolean>(true);
   availableCoins = signal<number>(0);
@@ -322,6 +326,65 @@ export class StudentDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStudentData();
+    this.initRealTimeListeners();
+  }
+
+  ngOnDestroy(): void {
+    this.wsSub.unsubscribe();
+  }
+
+  private initRealTimeListeners(): void {
+    // 1. Escuchar nuevas pujas en vivo
+    this.wsSub.add(
+      this.wsService.onBidUpdate$().subscribe((bidEvent) => {
+        // Actualizar reactivamente la subasta en memoria
+        this.auctions.update((currentAuctions) =>
+          currentAuctions.map((auc) => {
+            if (auc.id === bidEvent.auction_id) {
+              return {
+                ...auc,
+                puja_mas_alta: bidEvent.puja_mas_alta,
+                total_pujas: bidEvent.total_pujas,
+                incremento_minimo_educoins: bidEvent.incremento_minimo_educoins,
+              };
+            }
+            return auc;
+          })
+        );
+
+        // Alerta en vivo si el estudiante actual fue superado en una puja
+        const currentUserId = this.authService.currentUser()?.id;
+        if (
+          currentUserId &&
+          bidEvent.estudiante_anterior_id === currentUserId &&
+          bidEvent.puja_mas_alta.estudiante_id !== currentUserId
+        ) {
+          this.notificationService.warning(
+            `¡Tu puja en "${bidEvent.auction_titulo}" ha sido superada por ${bidEvent.puja_mas_alta.estudiante_nombre} (${bidEvent.puja_mas_alta.cantidad_educoins} EC)!`,
+            'Puja Superada'
+          );
+        }
+      })
+    );
+
+    // 2. Escuchar cierres de subastas en vivo
+    this.wsSub.add(
+      this.wsService.onAuctionClosed$().subscribe((closedEvent) => {
+        this.auctions.update((currentAuctions) =>
+          currentAuctions.filter((auc) => auc.id !== closedEvent.auction_id)
+        );
+
+        const currentUserId = this.authService.currentUser()?.id;
+        if (closedEvent.ganador && closedEvent.ganador.id === currentUserId) {
+          this.notificationService.success(
+            `¡Felicidades! Ganaste la subasta "${closedEvent.auction_titulo}" por ${closedEvent.ganador.monto_pagado} EduCoins.`,
+            '¡Subasta Ganada!'
+          );
+        }
+        // Refrescar saldo del estudiante
+        this.loadStudentData();
+      })
+    );
   }
 
   loadStudentData(): void {

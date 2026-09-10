@@ -242,3 +242,32 @@ class AuctionClosingTests(TestCase):
 
         subasta_vencida.refresh_from_db()
         self.assertEqual(subasta_vencida.estado, "closed")
+
+
+class AuctionWebSocketTests(TestCase):
+    async def test_websocket_connection_and_welcome(self):
+        """Verifica que un cliente pueda conectarse al WebSocket y reciba el mensaje de bienvenida."""
+        from channels.testing import WebsocketCommunicator
+        from edubid_core.asgi import application
+
+        communicator = WebsocketCommunicator(application, "/ws/auctions/")
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+        response = await communicator.receive_json_from()
+        self.assertEqual(response["type"], "connection_established")
+        await communicator.disconnect()
+
+    async def test_websocket_ping_pong(self):
+        """Verifica que el WebSocket responda a un ping con un pong."""
+        from channels.testing import WebsocketCommunicator
+        from edubid_core.asgi import application
+
+        communicator = WebsocketCommunicator(application, "/ws/auctions/")
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+        await communicator.receive_json_from()  # Consumir mensaje de bienvenida
+        await communicator.send_json_to({"type": "ping"})
+        response = await communicator.receive_json_from()
+        self.assertEqual(response["type"], "pong")
+        await communicator.disconnect()
+
