@@ -20,7 +20,7 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 |---|---|---|---|---|---|
 | **1** | Cierre Automático de Subastas (Background Job) | Backend | ✅ **COMPLETADO** | Subastas atascadas, saldo bloqueado sin devolver, insatisfacción de usuarios | Medio |
 | **2** | Suite de Pruebas Automatizadas (Unit & Integration Tests) | Backend / QA | ✅ **COMPLETADO** | Fallos silenciosos en lógica transaccional de EduCoins y fugas de aislamiento multi-tenant | Alto |
-| **3** | Rate Limiting y Protección de Endpoints Auth | Backend / Seguridad | 🟡 **MEDIA-ALTA** | Ataques de fuerza bruta, spam de usuarios, denegación de servicio (DoS) | Bajo |
+| **3** | Rate Limiting y Protección de Endpoints Auth | Backend / Seguridad | ✅ **COMPLETADO** | Ataques de fuerza bruta, spam de usuarios, denegación de servicio (DoS) | Bajo |
 | **4** | Sincronización Real-Time con WebSockets | Backend / Frontend | 🟡 **MEDIA** | Subastas lentas, requiere refrescar la página manualmente para ver pujas | Alto |
 | **5** | Almacenamiento Nube para Archivos Media (S3/Cloudinary) | DevOps / Backend | 🟡 **MEDIA** | Pérdida de imágenes y tareas adjuntas al reiniciar contenedores en producción | Medio |
 | **6** | Normalización de Dependencias Frontend & Build | Frontend | 🟡 **MEDIA** | Incompatibilidades de compilación CLI, builds de producción pesados | Bajo |
@@ -81,11 +81,17 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 * **¿Por qué hay que hacerlo?**  
   Los endpoints de inicio de sesión (`/login/`), registro (`/register/`), inicio con Google (`/google/`) y recuperación de contraseña no tienen límites de intentos. Un bot maligno podría realizar miles de peticiones por segundo para adivinar contraseñas o saturar el servidor.
 
-* **Prioridad:** 🟡 **MEDIA-ALTA** (Requisito indispensable de ciberseguridad).
+* **Estado:** ✅ **COMPLETADO & TESTEADO (HTTP 429 verificado en tests unitarios)**
+* **Implementación:**
+  * Creadas clases aceleradoras en `apps/users/throttles.py`: `AuthRateThrottle` (`scope = 'auth'`) y `PasswordResetRateThrottle` (`scope = 'password_reset'`), identificando a los clientes por IP de manera robusta.
+  * Configurado `REST_FRAMEWORK` en `settings.py` con `DEFAULT_THROTTLE_CLASSES` (`AnonRateThrottle` y `UserRateThrottle`) y cuotas dinámicas configurables vía `.env`:
+    * `auth`: `10/min` (login, registro, google, reenvío de verificación).
+    * `password_reset`: `5/min` (solicitud y confirmación de reseteo).
+    * `user`: `120/min`.
+    * `anon`: `100/day`.
+  * Aplicados decoradores `@throttle_classes` y atributos de clase en `apps/users/views.py` para todos los endpoints de autenticación y reseteo.
+  * Agregados tests automatizados en `apps/users/tests.py` (`test_login_rate_limiting_exceeded`, `test_password_reset_rate_limiting_exceeded`) verificando el bloqueo con código HTTP 429.
 
-* **Beneficios:**
-  * **Protección contra Fuerza Bruta:** Bloquea IP o usuarios tras un número de intentos fallidos.
-  * **Estabilidad del Servidor:** Evita que scripts maliciosos tumben la API.
 
 ---
 

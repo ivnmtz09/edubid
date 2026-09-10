@@ -4,7 +4,7 @@ from rest_framework import status
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from django.conf import settings
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -17,6 +17,7 @@ from threading import Thread
 
 from .models import User
 from .token_models import EmailVerificationToken, PasswordResetAttempt, LoginFailureTracker
+from .throttles import AuthRateThrottle, PasswordResetRateThrottle
 from .email_utils import (
     send_verification_email_api,  # 🆕 Importar función API
     send_welcome_email_api,       # 🆕 Importar función API  
@@ -61,6 +62,7 @@ def get_client_ip(request):
 # --------------------------
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
 def api_register(request):
     """
     Registro manual - requiere verificación de email
@@ -182,6 +184,7 @@ def verify_email(request, token):
 # --------------------------
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
 def resend_verification_email(request):
     """
     Re-envía el email de verificación
@@ -243,6 +246,7 @@ def resend_verification_email(request):
 # --------------------------
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
 def api_login(request):
     """
     Login con tracking de fallos y sugerencia de reset
@@ -309,6 +313,7 @@ def api_login(request):
 # --------------------------
 class GoogleLoginAPIView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [AuthRateThrottle]
 
     def post(self, request):
         token = request.data.get("id_token")
@@ -499,6 +504,7 @@ class ChangePasswordView(APIView):
 # --------------------------
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [PasswordResetRateThrottle]
 
     def post(self, request):
         email = request.data.get("email")
@@ -554,6 +560,7 @@ class PasswordResetRequestView(APIView):
 
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [PasswordResetRateThrottle]
 
     def post(self, request, uidb64, token):
         logger.info(f"🔐 Confirmando reset de contraseña con UID: {uidb64}")

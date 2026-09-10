@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from apps.users.models import User, Profile
 from apps.institutions.models import Institution
 from apps.users.permissions import IsDocente, AdminOrDocente
+from rest_framework.test import APIClient
 
 
 class UserModelTests(TestCase):
@@ -159,3 +160,57 @@ class UserPermissionsTests(TestCase):
         self.assertTrue(perm.has_permission(MockRequest(self.docente), None))
         self.assertTrue(perm.has_permission(MockRequest(self.admin), None))
         self.assertFalse(perm.has_permission(MockRequest(self.estudiante), None))
+
+
+class AuthRateLimitingTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        self.client = APIClient()
+
+    def tearDown(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def test_login_rate_limiting_exceeded(self):
+        """
+        Verifica que al superar la cuota máxima permitida (10 peticiones/minuto)
+        en el endpoint de login (/api/users/login/), la API responda con HTTP 429 Too Many Requests.
+        """
+        for i in range(10):
+            response = self.client.post(
+                "/api/users/login/",
+                {"email": "inexistente@edubid.com", "password": "wrongpassword"},
+                format="json"
+            )
+            self.assertEqual(response.status_code, 400)
+
+        # La 11va petición debe ser bloqueada por rate limiting (HTTP 429)
+        throttled_response = self.client.post(
+            "/api/users/login/",
+            {"email": "inexistente@edubid.com", "password": "wrongpassword"},
+            format="json"
+        )
+        self.assertEqual(throttled_response.status_code, 429)
+
+    def test_password_reset_rate_limiting_exceeded(self):
+        """
+        Verifica que al superar la cuota permitida (5 peticiones/minuto) en
+        /api/users/password-reset/, la API bloquee las peticiones con HTTP 429.
+        """
+        for i in range(5):
+            response = self.client.post(
+                "/api/users/password-reset/",
+                {"email": "usuario@edubid.com"},
+                format="json"
+            )
+            self.assertEqual(response.status_code, 200)
+
+        # La 6ta petición debe retornar HTTP 429
+        throttled_response = self.client.post(
+            "/api/users/password-reset/",
+            {"email": "usuario@edubid.com"},
+            format="json"
+        )
+        self.assertEqual(throttled_response.status_code, 429)
+

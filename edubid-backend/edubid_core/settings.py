@@ -213,10 +213,14 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
     'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'user': '30/min',
+        'anon': config('THROTTLE_ANON_RATE', default='100/day'),
+        'user': config('THROTTLE_USER_RATE', default='120/min'),
+        'auth': config('THROTTLE_AUTH_RATE', default='10/min'),
+        'password_reset': config('THROTTLE_PASSWORD_RESET_RATE', default='5/min'),
     },
 }
 
