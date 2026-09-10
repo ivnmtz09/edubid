@@ -20,7 +20,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = Activity.objects.select_related('group', 'group__classroom')
+        queryset = Activity.objects.select_related('group', 'group__classroom', 'group__classroom__docente')
         
         if user.role == 'admin':
             pass # No additional filter
@@ -74,7 +74,8 @@ class SubmissionViewSet(viewsets.ModelViewSet):
             'activity', 
             'estudiante',
             'activity__group',
-            'activity__group__classroom'
+            'activity__group__classroom',
+            'activity__group__classroom__docente'
         )
         
         if user.role == 'admin':

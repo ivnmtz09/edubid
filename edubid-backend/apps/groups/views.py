@@ -15,16 +15,19 @@ class GroupViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        base_qs = Group.objects.select_related(
+            'classroom', 'classroom__docente', 'classroom__docente__institucion'
+        ).prefetch_related('estudiantes')
         if user.role == 'admin':
-            return Group.objects.all()
+            return base_qs.all()
         elif user.role in ['rector', 'coordinador']:
             if user.institucion_id:
-                return Group.objects.filter(classroom__docente__institucion_id=user.institucion_id)
+                return base_qs.filter(classroom__docente__institucion_id=user.institucion_id)
             return Group.objects.none()
         elif user.role == 'docente':
-            return Group.objects.filter(classroom__docente=user)
+            return base_qs.filter(classroom__docente=user)
         elif user.role == 'estudiante':
-            return Group.objects.filter(estudiantes=user)
+            return base_qs.filter(estudiantes=user)
         return Group.objects.none()
 
     def get_permissions(self):

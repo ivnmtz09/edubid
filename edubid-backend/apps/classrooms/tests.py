@@ -121,3 +121,66 @@ class ClassroomApiAndMultiTenantTests(TestCase):
         nombres = [c["nombre"] for c in response.data]
         self.assertIn("Matemáticas Avanzadas", nombres)
         self.assertIn("Historia Universal", nombres)
+
+    def test_paginacion_dinamica_y_retrocompatibilidad(self):
+        """
+        Verifica que:
+        1. Sin parámetros, la API devuelve una lista plana completa (retrocompatibilidad).
+        2. Con ?page=1&page_size=1, la API devuelve la estructura paginada con metadatos.
+        """
+        self.client.force_authenticate(user=self.admin)
+
+        # 1. Petición sin parámetros -> Lista plana
+        res_unpaginated = self.client.get("/api/classrooms/")
+        self.assertEqual(res_unpaginated.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(res_unpaginated.data, list)
+        self.assertEqual(len(res_unpaginated.data), 2)
+
+        # 2. Petición con paginación -> Diccionario con metadatos
+        res_paginated = self.client.get("/api/classrooms/?page=1&page_size=1")
+        self.assertEqual(res_paginated.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(res_paginated.data, dict)
+        self.assertEqual(res_paginated.data["count"], 2)
+        self.assertEqual(res_paginated.data["total_pages"], 2)
+        self.assertEqual(res_paginated.data["current_page"], 1)
+        self.assertEqual(res_paginated.data["page_size"], 1)
+        self.assertIsNotNone(res_paginated.data["next"])
+        self.assertIsNone(res_paginated.data["previous"])
+        self.assertEqual(len(res_paginated.data["results"]), 1)
+
+        # 3. Petición a la página 2
+        res_page_2 = self.client.get("/api/classrooms/?page=2&page_size=1")
+        self.assertEqual(res_page_2.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_page_2.data["current_page"], 2)
+        self.assertIsNone(res_page_2.data["next"])
+        self.assertIsNotNone(res_page_2.data["previous"])
+
+    def test_optimizacion_orm_consultas_acotadas(self):
+        """
+        Verifica que select_related y prefetch_related acotan el número de consultas SQL
+        al listar aulas con docentes, grupos y conteo de alumnos.
+        """
+        from apps.groups.models import Group
+
+        # Crear grupos adicionales en el aula del docente
+        for i in range(3):
+            grupo = Group.objects.create(
+                nombre=f"Grupo P-{i}",
+                classroom=self.classroom_a,
+                codigo=f"GP00{i}"
+            )
+            grupo.estudiantes.add(self.estudiante_a)
+
+        self.client.force_authenticate(user=self.docente_a)
+
+        # Con select_related y prefetch_related, listar el aula con sus 3 grupos
+        # y estudiantes se resuelve en solo 3 consultas SQL (sin N+1)
+        with self.assertNumQueries(3):
+            # 1: Classroom + docente + institucion select_related
+            # 2: grupos_clases prefetch
+            # 3: estudiantes prefetch
+            response = self.client.get("/api/classrooms/")
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(len(response.data), 1)
+            self.assertEqual(response.data[0]["estudiantes_count"], 3)
+

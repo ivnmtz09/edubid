@@ -235,6 +235,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    'DEFAULT_PAGINATION_CLASS': 'edubid_core.pagination.EduBidPagination',
+    'PAGE_SIZE': config('PAGE_SIZE', default=20, cast=int),
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',

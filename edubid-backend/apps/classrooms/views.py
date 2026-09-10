@@ -13,17 +13,20 @@ class ClassroomViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        base_qs = Classroom.objects.select_related(
+            'docente', 'docente__institucion'
+        ).prefetch_related('grupos_clases__estudiantes').order_by('-creado')
         if user.role == 'admin':
-            return Classroom.objects.all()
+            return base_qs.all()
         elif user.role in ['rector', 'coordinador']:
             if user.institucion_id:
-                return Classroom.objects.filter(docente__institucion_id=user.institucion_id)
+                return base_qs.filter(docente__institucion_id=user.institucion_id)
             return Classroom.objects.none()
         elif user.role == 'docente':
-            return Classroom.objects.filter(docente=user)
+            return base_qs.filter(docente=user)
         elif user.role == 'estudiante':
             # Estudiantes ven clases de los grupos a los que pertenecen
-            return Classroom.objects.filter(grupos_clases__estudiantes=user).distinct()
+            return base_qs.filter(grupos_clases__estudiantes=user).distinct()
         return Classroom.objects.none()
 
     def get_permissions(self):

@@ -17,7 +17,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Notification.objects.filter(
             usuario=user,
             institucion=user.institucion,
-        ).select_related('usuario')
+        ).select_related('usuario', 'institucion')
 
     def get_serializer_class(self):
         """

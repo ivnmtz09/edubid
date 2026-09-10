@@ -17,29 +17,31 @@ class PeriodViewSet(viewsets.ModelViewSet):
         """Filtrar periodos según el rol del usuario"""
         user = self.request.user
         
+        base_qs = Period.objects.select_related('grupo', 'grupo__classroom', 'grupo__classroom__docente').order_by("-creado")
+        
         # Admin ve todos los periodos
         if user.is_staff or user.role == 'admin':
-            return Period.objects.all().order_by("-creado")
+            return base_qs.all()
             
         # Rector y coordinador ven periodos de su institución
         if user.role in ['rector', 'coordinador']:
             if user.institucion_id:
-                return Period.objects.filter(
+                return base_qs.filter(
                     grupo__classroom__docente__institucion_id=user.institucion_id
-                ).select_related('grupo', 'grupo__classroom').order_by("-creado")
+                )
             return Period.objects.none()
         
         # Docente solo ve periodos de sus grupos
         if user.role == 'docente':
-            return Period.objects.filter(
+            return base_qs.filter(
                 grupo__classroom__docente=user
-            ).select_related('grupo', 'grupo__classroom').order_by("-creado")
+            )
         
         # Estudiantes ven periodos de sus grupos
         if user.role == 'estudiante':
-            return Period.objects.filter(
+            return base_qs.filter(
                 grupo__estudiantes=user
-            ).select_related('grupo', 'grupo__classroom').order_by("-creado")
+            )
         
         return Period.objects.none()
 
@@ -201,23 +203,24 @@ class WalletViewSet(viewsets.ModelViewSet):
 
 
 class CoinTransactionViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = CoinTransaction.objects.all().select_related("wallet", "wallet__usuario")
+    queryset = CoinTransaction.objects.all().select_related("wallet", "wallet__usuario", "wallet__grupo", "wallet__periodo")
     serializer_class = CoinTransactionSerializer
     
     def get_queryset(self):
         user = self.request.user
+        base_qs = CoinTransaction.objects.select_related("wallet", "wallet__usuario", "wallet__grupo", "wallet__periodo")
         if user.role == 'admin':
-            return CoinTransaction.objects.all().select_related("wallet", "wallet__usuario")
+            return base_qs.all()
         elif user.role in ['rector', 'coordinador']:
             if user.institucion_id:
-                return CoinTransaction.objects.filter(
+                return base_qs.filter(
                     wallet__grupo__classroom__docente__institucion_id=user.institucion_id
-                ).select_related("wallet", "wallet__usuario")
+                )
             return CoinTransaction.objects.none()
         elif user.role == 'docente':
-            return CoinTransaction.objects.filter(
+            return base_qs.filter(
                 wallet__grupo__classroom__docente=user
-            ).select_related("wallet", "wallet__usuario")
+            )
         elif user.role == "estudiante":
-            return CoinTransaction.objects.filter(wallet__usuario=user).select_related("wallet", "wallet__usuario")
+            return base_qs.filter(wallet__usuario=user)
         return CoinTransaction.objects.none()

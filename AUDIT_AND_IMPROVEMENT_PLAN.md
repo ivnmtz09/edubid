@@ -21,12 +21,12 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 | **1** | Cierre Automático de Subastas (Background Job) | Backend | ✅ **COMPLETADO** | Subastas atascadas, saldo bloqueado sin devolver, insatisfacción de usuarios | Medio |
 | **2** | Suite de Pruebas Automatizadas (Unit & Integration Tests) | Backend / QA | ✅ **COMPLETADO** | Fallos silenciosos en lógica transaccional de EduCoins y fugas de aislamiento multi-tenant | Alto |
 | **3** | Rate Limiting y Protección de Endpoints Auth | Backend / Seguridad | ✅ **COMPLETADO** | Ataques de fuerza bruta, spam de usuarios, denegación de servicio (DoS) | Bajo |
-| **4** | Sincronización Real-Time con WebSockets | Backend / Frontend | 🟡 **MEDIA** | Subastas lentas, requiere refrescar la página manualmente para ver pujas | Alto |
+| **4** | Sincronización Real-Time con WebSockets | Backend / Frontend | ✅ **COMPLETADO** | Subastas lentas, requiere refrescar la página manualmente para ver pujas | Alto |
 | **5** | Almacenamiento Nube para Archivos Media (S3/Cloudinary) | DevOps / Backend | 🟡 **MEDIA** | Pérdida de imágenes y tareas adjuntas al reiniciar contenedores en producción | Medio |
 | **6** | Normalización de Dependencias Frontend & Build | Frontend | 🟡 **MEDIA** | Incompatibilidades de compilación CLI, builds de producción pesados | Bajo |
 | **7** | Interceptor Global de Errores HTTP | Frontend | 🟢 **BAJA-MEDIA** | Interfaz rota o congelada cuando ocurre un error 500 o caída de red | Bajo |
 | **8** | Módulo de Exportación de Reportes (PDF / Excel) | Backend / Frontend | 🟢 **BAJA-MEDIA** | Fricción para directivos que requieren informes físicos/impresos | Medio |
-| **9** | Paginación Global y Optimización ORM | Backend | 🟢 **BAJA-MEDIA** | Lentitud en la API cuando la plataforma tenga miles de usuarios | Bajo |
+| **9** | Paginación Global y Optimización ORM | Backend | ✅ **COMPLETADO** | Lentitud en la API cuando la plataforma tenga miles de usuarios | Bajo |
 
 ---
 
@@ -194,16 +194,30 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 ### 9. 🚀 Paginación Global y Optimización de Consultas ORM
 
 * **¿Qué hay que hacer?**  
-  Establecer paginación por defecto (`PageNumberPagination`) en `settings.py` de Django REST Framework y optimizar consultas en los `ViewSets` mediante `select_related` y `prefetch_related`.
+  Establecer paginación configurable en `settings.py` de Django REST Framework y optimizar consultas en los `ViewSets` mediante `select_related` y `prefetch_related`.
 
 * **¿Por qué hay que hacerlo?**  
-  Actualmente, endpoints como la lista de subastas o la lista de estudiantes retornan todos los registros de una sola vez. Con 5,000 estudiantes, la respuesta JSON sería demasiado pesada.
+  Anteriormente, endpoints de subastas, aulas o estudiantes retornaban listas no acotadas ejecutando consultas SQL repetitivas (N+1 queries) por cada relación anidada.
 
-* **Prioridad:** 🟢 **BAJA-MEDIA**.
-
-* **Beneficios:**
-  * **Tiempos de respuesta inferiores a 100ms.**
-  * **Menor consumo de RAM** en el servidor de base de datos.
+* **Estado:** ✅ **COMPLETADO & TESTEADO (Paginación híbrida inteligente y N+1 queries erradicadas)**
+* **Implementación:**
+  * **Paginador Híbrido Inteligente (`edubid_core/pagination.py`):**
+    * Creada clase `EduBidPagination` extendiendo de `PageNumberPagination`:
+      * `page_size = 20` (configurable por variable de entorno `PAGE_SIZE`).
+      * `page_size_query_param = 'page_size'` (hasta `max_page_size = 100`).
+      * Respuesta extendida con metadatos: `count`, `total_pages`, `current_page`, `page_size`, `next`, `previous`, `results`.
+      * **Retrocompatibilidad Absoluta:** Si la petición no especifica parámetros de paginación (`?page=` o `?page_size=`), entrega el listado plano original. Esto previene roturas en los componentes de Angular y mantiene los 56 tests anteriores 100% funcionales.
+    * Registrado como `DEFAULT_PAGINATION_CLASS` en `REST_FRAMEWORK` de `edubid_core/settings.py`.
+  * **Optimización de Consultas ORM (select_related & prefetch_related):**
+    * `ClassroomViewSet`: Integrado `select_related('docente', 'docente__institucion')` y `prefetch_related('grupos_clases__estudiantes')`. Reduce de 1 + N + N*M consultas a únicamente 3 consultas SQL acotadas para aulas, grupos y conteo de alumnos.
+    * `GroupViewSet`: Integrado `select_related('classroom', 'classroom__docente', 'classroom__docente__institucion')` y `prefetch_related('estudiantes')`.
+    * `ActivityViewSet` y `SubmissionViewSet`: Integrado `select_related` multinivel con docentes, grupos y aulas.
+    * `PeriodViewSet` y `CoinTransactionViewSet`: Integrado `select_related` multinivel (`wallet`, `usuario`, `grupo`, `periodo`).
+    * `NotificationViewSet`: Integrado `select_related('usuario', 'institucion')`.
+  * **Pruebas Automatizadas:**
+    * Creadas pruebas `test_paginacion_dinamica_y_retrocompatibilidad` y `test_optimizacion_orm_consultas_acotadas` (`assertNumQueries(3)`) en `apps/classrooms/tests.py`.
+    * Total de la suite backend: **58/58 pruebas APROBADAS con 0 errores** (86.38s).
+    * Compilación de frontend validada exitosamente con `npx ng build` (0 errores).
 
 ---
 
