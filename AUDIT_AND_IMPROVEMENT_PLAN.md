@@ -59,13 +59,17 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 * **¿Por qué hay que hacerlo?**  
   Actualmente, los archivos `tests.py` en todas las apps backend contienen únicamente 4 líneas de código con la plantilla básica. La lógica financiera (depósitos, gastos, reinicios de saldo en `Wallet`) y las reglas de seguridad Multi-Tenant (aislamiento estricto por `institucion_id`) carecen de pruebas automáticas que garanticen que un cambio futuro no rompa el sistema.
 
-* **Estado:** ✅ **COMPLETADO & TESTEADO (29/29 tests aprobados en apps core)**
+* **Estado:** ✅ **COMPLETADO & TESTEADO (52/52 tests aprobados con 0 errores en 100% de apps backend)**
 * **Implementación:**
-  * **`apps/users/tests.py` (7 tests):** Restricciones de SuperAdmin (aislamiento estricto `institucion = None`), regla de unicidad `UniqueConstraint` para un solo rector por institución, 5 roles del RBAC, perfiles automáticos vía signal y permisos `IsDocente`, `AdminOrDocente`.
-  * **`apps/tokens/tests.py` (6 tests):** Operaciones financieras en `Wallet` (`depositar`, `gastar` con prevención de saldo negativo, `resetear`), auditoría mediante `CoinTransaction` y ciclo de vida de periodos/cortes (`Period.activar()`).
-  * **`apps/grades/tests.py` (5 tests):** Cálculo proporcional de EduCoins sobre experiencia de actividad, bonificación del 10% por excelencia académica, acreditación automática a billetera vía señal `post_save` y prevención de doble calificación.
-  * **`apps/groups/tests.py` (6 tests):** Generación automática de códigos alfanuméricos de 6 caracteres, matrícula de estudiantes con auto-provisión de `Wallet`, prevención de dobles inscripciones y aislamiento de datos por institución y rol.
-  * **`apps/auctions/tests.py` (5 tests):** Cierre y liquidación de subastas, transacciones de compra, devoluciones a postores no ganadores y comando CLI.
+  * **`apps/users/tests.py` (7 tests):** Restricciones de SuperAdmin (`institucion = None`), unicidad de rector por institución, 5 roles RBAC, perfiles automáticos y permisos `IsDocente`, `AdminOrDocente`.
+  * **`apps/tokens/tests.py` (6 tests):** Operaciones financieras en `Wallet` (`depositar`, `gastar`, `resetear`), auditoría mediante `CoinTransaction` y ciclo de vida de periodos (`Period.activar()`).
+  * **`apps/grades/tests.py` (5 tests):** Cálculo proporcional de EduCoins, bonificación del 10% por excelencia y acreditación automática vía `post_save`.
+  * **`apps/groups/tests.py` (6 tests):** Códigos únicos de grupo de 6 caracteres, matrícula con auto-provisión de `Wallet` y aislamiento multi-tenant.
+  * **`apps/auctions/tests.py` (5 tests):** Cierre y liquidación de subastas, transacciones de compra, devoluciones y comando CLI.
+  * **`apps/institutions/tests.py` (6 tests):** Validación de modelo `Institution`, `codigo_dane` único, endpoints públicos `/api/institutions/public/`, control CRUD solo admin y actualización de branding restringida a rectores.
+  * **`apps/classrooms/tests.py` (5 tests):** Creación de aulas por docentes, restricción a estudiantes y aislamiento estricto multi-tenant entre docentes, rectores y superadmin.
+  * **`apps/activities/tests.py` (6 tests):** Creación de actividades en grupos propios vs ajenos, entregas (`Submission`), cancelación de entregas no calificadas y bloqueo de cancelación tras ser calificada.
+  * **`apps/notifications/tests.py` (6 tests):** Creación y tipos de notificación, aislamiento privado por usuario, filtros de no leídas, acciones masivas y estadísticas.
 
 ---
 

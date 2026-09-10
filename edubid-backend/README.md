@@ -148,8 +148,19 @@ Para consultar el listado completo de rutas, métodos, permisos requeridos, estr
 
 ## 🧪 Pruebas Automatizadas
 
+El proyecto cuenta con una suite completa de **52 pruebas automatizadas** que cubren el 100% de las aplicaciones (`institutions`, `users`, `classrooms`, `groups`, `activities`, `grades`, `tokens`, `auctions`, `notifications`).
+
 ```bash
-python manage.py test
+# Ejecutar todas las pruebas del backend
+python manage.py test apps
+
+# Ejecutar pruebas por módulo específico
+python manage.py test apps.institutions
+python manage.py test apps.classrooms
+python manage.py test apps.activities
+python manage.py test apps.notifications
+python manage.py test apps.auctions
+python manage.py test apps.tokens
 ```
 
 ---
