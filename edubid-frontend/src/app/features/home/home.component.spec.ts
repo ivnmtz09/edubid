@@ -122,8 +122,9 @@ describe('HomeComponent', () => {
     expect(component.registerForm.get('role')?.value).toBe('estudiante');
   });
 
-  it('should provide notification on Google Auth button click', () => {
+  it('should trigger Google Auth promptOneTap on Google Auth button click', () => {
+    const googleAuthSpy = vi.spyOn((component as any).googleAuth, 'promptOneTap').mockImplementation(() => {});
     component.loginWithGoogle();
-    expect(component.errorMessage()).toContain('Google Client ID');
+    expect(googleAuthSpy).toHaveBeenCalled();
   });
 });
