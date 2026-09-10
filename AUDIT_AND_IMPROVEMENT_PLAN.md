@@ -24,7 +24,7 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 | **4** | Sincronización Real-Time con WebSockets | Backend / Frontend | ✅ **COMPLETADO** | Subastas lentas, requiere refrescar la página manualmente para ver pujas | Alto |
 | **5** | Almacenamiento Nube para Archivos Media (S3/Cloudinary) | DevOps / Backend | 🟡 **MEDIA** | Pérdida de imágenes y tareas adjuntas al reiniciar contenedores en producción | Medio |
 | **6** | Normalización de Dependencias Frontend & Build | Frontend | ✅ **COMPLETADO** | Incompatibilidades de compilación CLI, builds de producción pesados | Bajo |
-| **7** | Interceptor Global de Errores HTTP | Frontend | 🟢 **BAJA-MEDIA** | Interfaz rota o congelada cuando ocurre un error 500 o caída de red | Bajo |
+| **7** | Interceptor Global de Errores HTTP | Frontend | ✅ **COMPLETADO** | Interfaz rota o congelada cuando ocurre un error 500 o caída de red | Bajo |
 | **8** | Módulo de Exportación de Reportes (PDF / Excel) | Backend / Frontend | 🟢 **BAJA-MEDIA** | Fricción para directivos que requieren informes físicos/impresos | Medio |
 | **9** | Paginación Global y Optimización ORM | Backend | ✅ **COMPLETADO** | Lentitud en la API cuando la plataforma tenga miles de usuarios | Bajo |
 
@@ -171,15 +171,25 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 ### 7. 🚨 Interceptor Global de Errores HTTP en Frontend
 
 * **¿Qué hay que hacer?**  
-  Implementar un `HttpErrorInterceptor` en la capa `core/interceptors/` de Angular.
+  Implementar un interceptor funcional `errorInterceptor` en la capa `core/interceptors/` de Angular que capture globalmente anomalías de comunicación HTTP.
 
 * **¿Por qué hay que hacerlo?**  
-  Si la API falla (error 500) o la conexión a internet cae, los componentes individuales deben manejar el error. Sin un interceptor global, algunas pantallas se quedan cargando infinitamente sin dar información al usuario.
+  Si la API falla (error 500), la conexión a internet cae (código 0), se exceden límites de cuota (429 Too Many Requests) o se intenta acceder a recursos sin permisos (403 Forbidden), los componentes individuales debían capturar el error de forma manual o la interfaz quedaba congelada en estados de carga.
 
-* **Prioridad:** 🟢 **BAJA-MEDIA**.
-
-* **Beneficios:**
-  * **UX Profesional:** Muestra notificaciones limpias (*Toastr*) como *"Conexión perdida con el servidor"* o *"Ocurrió un error inesperado, reintentando..."*.
+* **Estado:** ✅ **COMPLETADO & TESTEADO (Captura global de caídas, rate limiting y 23/23 tests aprobados)**
+* **Implementación:**
+  * **Interceptor Funcional Angular 19 (`core/interceptors/error.interceptor.ts`):**
+    * Detección de fallos de red / conectividad (`status === 0`): Emite toast de advertencia *"No es posible conectar con el servidor. Verifica tu conexión a internet o intenta más tarde."*.
+    * Detección de Rate Limiting (`status === 429`): Emite toast de advertencia *"Demasiadas solicitudes. Por favor espera un momento antes de reintentar."*.
+    * Detección de denegación de permisos (`status === 403`): Emite toast de error *"No tienes permisos suficientes para realizar esta acción."*.
+    * Detección de fallos internos del servidor (`status >= 500`): Emite toast de error *"Ocurrió un error inesperado en el servidor. Intenta de nuevo más tarde."*.
+    * **Bypass configurable:** Soporte para cabecera HTTP `X-Skip-Error-Toast: true` para peticiones que gestionan sus propios mensajes de error localmente.
+    * **Cadena de interceptores en `app.config.ts`:** Registrado en la canalización HTTP junto a `authInterceptor` sin interferir con la renovación silenciosa de tokens JWT ni el flujo normal de peticiones.
+    * **Propagación limpia:** Reemite el error con `throwError(() => error)` para garantizar que las señales y spinners de los componentes (`loading.set(false)`) se liberen adecuadamente.
+  * **Pruebas Automatizadas Unitarias (`core/interceptors/error.interceptor.spec.ts`):**
+    * 5 pruebas unitarias cubriendo: errores de red (status 0), rate limiting (status 429), fallos del servidor (status 500), acceso denegado (status 403), omisión de toasts mediante `X-Skip-Error-Toast`, y retransmisión de observables de error.
+    * **Resultados de pruebas frontend (`npx ng test --watch=false`):** **6/6 suites pasadas, 23/23 tests aprobados con 0 errores**.
+    * **Compilación frontend (`npx ng build`):** **Exitosa en código 0**, presupuesto inicial de 527kB dentro del límite asignado.
 
 ---
 
