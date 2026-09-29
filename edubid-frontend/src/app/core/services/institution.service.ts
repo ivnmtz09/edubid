@@ -57,4 +57,17 @@ export class InstitutionService {
   deleteInstitution(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}${id}/`);
   }
+
+  exportInstitutionPdf(id: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${id}/exportar-pdf/`, {
+      responseType: 'blob'
+    });
+  }
+
+  exportInstitutionExcel(id: number): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}${id}/exportar-excel/`, {
+      responseType: 'blob'
+    });
+  }
 }
+

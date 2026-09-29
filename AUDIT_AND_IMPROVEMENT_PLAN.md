@@ -201,10 +201,24 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 * **¿Por qué hay que hacerlo?**  
   Los directivos (Rectores) y Coordinadores necesitan presentar informes físicos o consolidados en hojas de cálculo ante secretarías de educación o comités académicos.
 
-* **Prioridad:** 🟢 **BAJA-MEDIA**.
-
-* **Beneficios:**
-  * **Mayor utilidad institucional:** Aumenta el valor percibido del SaaS por parte de las directivas escolares.
+* **Estado:** ✅ **COMPLETADO & TESTEADO (Generador OpenPyXL y ReportLab para grupos e instituciones)**
+* **Implementación:**
+  * **Motor de Reportes Multi-Formato (`apps/common/reports.py`):**
+    * Integradas librerías de alto rendimiento `openpyxl==3.1.5` y `reportlab==5.0.1`.
+    * **Reporte de Grupo (Excel & PDF):** Genera planillas académicas con membrete de institución, materia y docente. Consolida por estudiante: Posición, Nombre, Correo, Saldo en EduCoins (Wallet), Actividades Calificadas, Promedio General y Estado Académico (Aprobado / En Riesgo).
+    * **Reporte Institucional (Excel & PDF / DANE):** Consolida indicadores clave para Rectoría: Total de Docentes, Matrícula de Alumnos, Clases y Grupos Activos, Masa Monetaria en Circulación (EduCoins), Tasa de Aprobación Global y Desglose por Niveles/Grados.
+  * **Endpoints Seguros en Django REST Framework:**
+    * `GET /api/grades/grupo/{id}/exportar-excel/` y `GET /api/grades/grupo/{id}/exportar-pdf/`: Con aislamiento de permisos por docente asignado o administrador.
+    * `GET /api/institutions/{id}/exportar-excel/` y `GET /api/institutions/{id}/exportar-pdf/`: Con validación multi-tenant para que cada Rector sólo pueda auditar su respectiva institución.
+  * **Servicios e Integración en Frontend (Angular 19):**
+    * `GradeService`: Métodos `exportGroupPdf(groupId)` y `exportGroupExcel(groupId)` recibiendo `Blob` y forzando descarga nativa en navegador.
+    * `InstitutionService`: Métodos `exportInstitutionPdf(id)` e `exportInstitutionExcel(id)`.
+    * UI en `RectorDashboardComponent`: Botones interactivos "Reporte PDF" y "Excel DANE" con estado de carga y notificaciones reactivas.
+    * UI en `ClassroomDetailComponent`: Botones de exportación rápida en tarjetas de grupo y dentro de los modales de Actividades y Estudiantes.
+  * **Validación Automatizada:**
+    * Pruebas en `apps/grades/tests.py` y `apps/institutions/tests.py` verificando `Content-Type`, `Content-Disposition` y control de acceso RBAC.
+    * Total de la suite backend: **45/45 pruebas aprobadas con 0 errores**.
+    * Suite frontend: **23/23 pruebas unitarias aprobadas**, build en código 0.
 
 ---
 

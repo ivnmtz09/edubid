@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { ClassroomService, Classroom, ClassroomGroup } from '../../../core/services/classroom.service';
 import { GroupService, Group, GroupStudent } from '../../../core/services/group.service';
 import { ActivityService, Activity } from '../../../core/services/activity.service';
+import { GradeService } from '../../../core/services/grade.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -212,7 +213,31 @@ import { NotificationService } from '../../../core/services/notification.service
                       <span>{{ group.estudiantes_count || 0 }} inscritos</span>
                     </span>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        (click)="exportGroupReport(group.id, 'pdf')"
+                        [disabled]="isExportingReport()"
+                        class="p-1.5 text-text-muted hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Exportar Reporte PDF (Notas y EduCoins)"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="exportGroupReport(group.id, 'excel')"
+                        [disabled]="isExportingReport()"
+                        class="p-1.5 text-text-muted hover:text-emerald-500 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Exportar Reporte Excel (.xlsx)"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </button>
+
                       <button
                         type="button"
                         (click)="openActivitiesModal(group)"
@@ -371,6 +396,32 @@ import { NotificationService } from '../../../core/services/notification.service
               </div>
 
               <div class="flex items-center gap-2">
+                @if (selectedGroupForActivities()) {
+                  <button
+                    type="button"
+                    (click)="exportGroupReport(selectedGroupForActivities()!.id, 'pdf')"
+                    [disabled]="isExportingReport()"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-red-500/10 text-red-600 hover:bg-red-500/20 transition cursor-pointer disabled:opacity-50"
+                    title="Descargar reporte académico en PDF"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    (click)="exportGroupReport(selectedGroupForActivities()!.id, 'excel')"
+                    [disabled]="isExportingReport()"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition cursor-pointer disabled:opacity-50"
+                    title="Descargar reporte académico en Excel"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Excel</span>
+                  </button>
+                }
                 @if (canManage()) {
                   <button
                     type="button"
@@ -650,16 +701,44 @@ import { NotificationService } from '../../../core/services/notification.service
                   Código de vinculación: <span class="font-mono font-bold text-primary">{{ selectedGroupForStudents()?.codigo }}</span>
                 </p>
               </div>
-              <button
-                type="button"
-                (click)="selectedGroupForStudents.set(null)"
-                class="text-text-muted hover:text-text p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                aria-label="Cerrar modal"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div class="flex items-center gap-2">
+                @if (selectedGroupForStudents()) {
+                  <button
+                    type="button"
+                    (click)="exportGroupReport(selectedGroupForStudents()!.id, 'pdf')"
+                    [disabled]="isExportingReport()"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-red-500/10 text-red-600 hover:bg-red-500/20 transition-colors cursor-pointer disabled:opacity-50"
+                    title="Descargar reporte académico en PDF"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span>PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    (click)="exportGroupReport(selectedGroupForStudents()!.id, 'excel')"
+                    [disabled]="isExportingReport()"
+                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 transition-colors cursor-pointer disabled:opacity-50"
+                    title="Descargar reporte académico en Excel"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span>Excel</span>
+                  </button>
+                }
+                <button
+                  type="button"
+                  (click)="selectedGroupForStudents.set(null)"
+                  class="text-text-muted hover:text-text p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  aria-label="Cerrar modal"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <!-- Modal Body (List of Students) -->
@@ -771,6 +850,7 @@ export class ClassroomDetailComponent implements OnInit {
   private classroomService = inject(ClassroomService);
   private groupService = inject(GroupService);
   private activityService = inject(ActivityService);
+  private gradeService = inject(GradeService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
@@ -779,6 +859,7 @@ export class ClassroomDetailComponent implements OnInit {
   classroom = signal<Classroom | null>(null);
   groups = signal<Group[]>([]);
   isLoading = signal(true);
+  isExportingReport = signal(false);
   copiedCode = signal<string | null>(null);
 
   // Modal Crear/Editar Grupo
@@ -1045,6 +1126,33 @@ export class ClassroomDetailComponent implements OnInit {
         const msg = err.error?.detail || 'Error al crear la actividad';
         this.notificationService.error(msg);
       },
+    });
+  }
+
+  exportGroupReport(groupId: number, format: 'pdf' | 'excel'): void {
+    this.isExportingReport.set(true);
+    const obs$ = format === 'pdf'
+      ? this.gradeService.exportGroupPdf(groupId)
+      : this.gradeService.exportGroupExcel(groupId);
+
+    obs$.subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte_grupo_${groupId}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.isExportingReport.set(false);
+        this.notificationService.success(`Reporte del grupo descargado en ${format.toUpperCase()} correctamente.`);
+      },
+      error: (err) => {
+        console.error('Error al exportar reporte de grupo:', err);
+        this.isExportingReport.set(false);
+        this.notificationService.error('Error al generar el reporte del grupo.');
+      }
     });
   }
 

@@ -111,3 +111,32 @@ class InstitutionModelAndApiTests(TestCase):
         self.assertEqual(self.institucion_a.codigo_dane, "555001")
         self.assertTrue(self.institucion_a.activo)
 
+    def test_rector_puede_exportar_reporte_pdf_institucional(self):
+        """El rector puede descargar el informe institucional en PDF."""
+        self.client.force_authenticate(user=self.rector)
+        response = self.client.get(f"/api/institutions/{self.institucion_a.id}/exportar-pdf/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertTrue(len(response.content) > 100)
+
+    def test_rector_puede_exportar_reporte_excel_institucional(self):
+        """El rector puede descargar el informe institucional en Excel (.xlsx)."""
+        self.client.force_authenticate(user=self.rector)
+        response = self.client.get(f"/api/institutions/{self.institucion_a.id}/exportar-excel/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertTrue(len(response.content) > 100)
+
+    def test_rector_no_puede_exportar_reporte_otra_institucion(self):
+        """El rector no puede descargar informes de instituciones ajenas."""
+        otra_inst = Institution.objects.create(nombre="Colegio Externo", codigo_dane="999888")
+        self.client.force_authenticate(user=self.rector)
+        response = self.client.get(f"/api/institutions/{otra_inst.id}/exportar-pdf/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+

@@ -2,10 +2,12 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
+from django.http import HttpResponse
 from apps.groups.models import Group
 from apps.tokens.models import Wallet
 from apps.activities.models import Activity
 from apps.users.permissions import AdminOrDocente
+from apps.common.reports import generar_excel_reporte_grupo, generar_pdf_reporte_grupo
 from .models import Grade
 from .serializers import GradeSerializer, GradeCreateSerializer
 
@@ -75,17 +77,11 @@ class GradeViewSet(viewsets.ModelViewSet):
             "calificaciones": serializer.data
         })
 
-    @action(detail=False, methods=["get"], url_path="grupo/(?P<group_id>[^/.]+)/reporte", 
-            permission_classes=[AdminOrDocente])
-    def group_report(self, request, group_id=None):
-        """
-        Genera un reporte completo de notas y educoins por grupo.
-        Solo accesible por docentes.
-        """
+    def _get_group_and_report_data(self, request, group_id):
         try:
-            group = Group.objects.get(pk=group_id)
+            group = Group.objects.select_related("classroom", "classroom__docente").get(pk=group_id)
         except Group.DoesNotExist:
-            return Response(
+            return None, Response(
                 {"detail": "Grupo no encontrado."},
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -93,7 +89,7 @@ class GradeViewSet(viewsets.ModelViewSet):
         # Verificar que el docente tenga acceso a este grupo
         if request.user.role == "docente":
             if not group.classroom or group.classroom.docente != request.user:
-                return Response(
+                return None, Response(
                     {"detail": "No tienes permiso para ver este grupo."},
                     status=status.HTTP_403_FORBIDDEN
                 )
@@ -130,7 +126,7 @@ class GradeViewSet(viewsets.ModelViewSet):
 
             data.append({
                 "student_id": est.id,
-                "student_name": f"{est.first_name} {est.last_name}",
+                "student_name": f"{est.first_name} {est.last_name}".strip() or est.email,
                 "student_email": est.email,
                 "promedio_nota": round(promedio, 2),
                 "total_educoins": saldo,
@@ -138,12 +134,59 @@ class GradeViewSet(viewsets.ModelViewSet):
                 "detalles": detalles,
             })
 
+        return (group, data), None
+
+    @action(detail=False, methods=["get"], url_path="grupo/(?P<group_id>[^/.]+)/reporte", 
+            permission_classes=[AdminOrDocente])
+    def group_report(self, request, group_id=None):
+        """
+        Genera un reporte completo de notas y educoins por grupo en JSON.
+        """
+        res, error_resp = self._get_group_and_report_data(request, group_id)
+        if error_resp:
+            return error_resp
+        group, data = res
         return Response({
             "grupo_id": group.id,
             "grupo_nombre": group.nombre,
             "total_estudiantes": len(data),
             "estudiantes": data
         })
+
+    @action(detail=False, methods=["get"], url_path="grupo/(?P<group_id>[^/.]+)/exportar-excel",
+            permission_classes=[AdminOrDocente])
+    def export_group_excel(self, request, group_id=None):
+        """
+        Exporta el reporte consolidado de notas y EduCoins del grupo en formato Excel (.xlsx).
+        """
+        res, error_resp = self._get_group_and_report_data(request, group_id)
+        if error_resp:
+            return error_resp
+        group, data = res
+        excel_bytes = generar_excel_reporte_grupo(group, data)
+        filename = f"Reporte_Grupo_{group.codigo or group.id}.xlsx"
+        response = HttpResponse(
+            excel_bytes,
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+    @action(detail=False, methods=["get"], url_path="grupo/(?P<group_id>[^/.]+)/exportar-pdf",
+            permission_classes=[AdminOrDocente])
+    def export_group_pdf(self, request, group_id=None):
+        """
+        Exporta el reporte consolidado de notas y EduCoins del grupo en formato PDF.
+        """
+        res, error_resp = self._get_group_and_report_data(request, group_id)
+        if error_resp:
+            return error_resp
+        group, data = res
+        pdf_bytes = generar_pdf_reporte_grupo(group, data)
+        filename = f"Reporte_Grupo_{group.codigo or group.id}.pdf"
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
 
     @action(detail=False, methods=["post"], url_path="calificar-multiple",
             permission_classes=[AdminOrDocente])

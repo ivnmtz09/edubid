@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { DashboardService, DashboardStats } from '../../../../core/services/dashboard.service';
+import { InstitutionService } from '../../../../core/services/institution.service';
 import { InstitutionBrandingComponent } from './components/institution-branding.component';
 
 interface GradeMetric {
@@ -42,16 +43,31 @@ interface RecentActivityAudit {
           </p>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <button
             type="button"
-            (click)="downloadReport()"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+            (click)="downloadReport('pdf')"
+            [disabled]="isExporting()"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs transition-all duration-200 hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+            title="Exportar informe institucional en formato PDF para rectoría"
           >
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span>Exportar Reporte DANE</span>
+            <span>{{ isExporting() ? 'Generando...' : 'Reporte PDF' }}</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="downloadReport('excel')"
+            [disabled]="isExporting()"
+            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-xs transition-all duration-200 hover:scale-[1.02] cursor-pointer disabled:opacity-50"
+            title="Exportar informe consolidado DANE en formato Excel (.xlsx)"
+          >
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>{{ isExporting() ? 'Generando...' : 'Excel DANE' }}</span>
           </button>
         </div>
       </div>
@@ -210,6 +226,7 @@ export class RectorDashboardComponent implements OnInit {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private dashboardService = inject(DashboardService);
+  private institutionService = inject(InstitutionService);
 
   userProfile = signal(this.authService.currentUser()?.profile);
   
@@ -219,6 +236,7 @@ export class RectorDashboardComponent implements OnInit {
   );
 
   isLoading = signal(true);
+  isExporting = signal(false);
   stats = signal<DashboardStats | null>(null);
 
   ngOnInit(): void {
@@ -248,10 +266,37 @@ export class RectorDashboardComponent implements OnInit {
     });
   }
 
-  downloadReport(): void {
-    this.notificationService.success(
-      'Generando reporte consolidado de economía conductual en formato PDF/Excel...'
-    );
+  downloadReport(format: 'pdf' | 'excel'): void {
+    const institutionId = this.authService.currentUser()?.profile?.institucion?.id;
+    if (!institutionId) {
+      this.notificationService.error('No se encontró la institución asociada para generar el reporte.');
+      return;
+    }
+
+    this.isExporting.set(true);
+    const obs$ = format === 'pdf'
+      ? this.institutionService.exportInstitutionPdf(institutionId)
+      : this.institutionService.exportInstitutionExcel(institutionId);
+
+    obs$.subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte_institucional_${institutionId}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.isExporting.set(false);
+        this.notificationService.success(`Reporte institucional en ${format.toUpperCase()} descargado con éxito.`);
+      },
+      error: (err) => {
+        console.error('Error al exportar reporte:', err);
+        this.isExporting.set(false);
+        this.notificationService.error('Error al generar el reporte institucional.');
+      }
+    });
   }
 }
 

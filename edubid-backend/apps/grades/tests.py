@@ -126,3 +126,36 @@ class GradeCalculationAndRewardTests(TestCase):
         )
         # Debe crearse la calificación aunque no haya wallet
         self.assertIsNotNone(grade.id)
+
+    def test_export_group_report_excel(self):
+        """Docente puede exportar reporte consolidado de grupo en formato Excel (.xlsx)."""
+        from rest_framework.test import APIClient
+        client = APIClient()
+        client.force_authenticate(user=self.docente)
+
+        # Vincular estudiante al grupo
+        self.group.estudiantes.add(self.estudiante)
+
+        response = client.get(f"/api/grades/grupo/{self.group.id}/exportar-excel/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertTrue(len(response.content) > 100)
+
+    def test_export_group_report_pdf(self):
+        """Docente puede exportar reporte consolidado de grupo en formato PDF."""
+        from rest_framework.test import APIClient
+        client = APIClient()
+        client.force_authenticate(user=self.docente)
+
+        self.group.estudiantes.add(self.estudiante)
+
+        response = client.get(f"/api/grades/grupo/{self.group.id}/exportar-pdf/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertTrue(len(response.content) > 100)
+
