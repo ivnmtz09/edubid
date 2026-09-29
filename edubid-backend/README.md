@@ -144,6 +144,10 @@ Para consultar el listado completo de rutas, métodos, permisos requeridos, estr
 
 👉 **[`BACKEND_API_MAP.md`](BACKEND_API_MAP.md)**
 
+Para consultar la guía paso a paso de conexión y migración a Supabase (PostgreSQL en la nube):
+
+👉 **[`MIGRACION_SUPABASE.md`](MIGRACION_SUPABASE.md)**
+
 ---
 
 ## 🧪 Pruebas Automatizadas
