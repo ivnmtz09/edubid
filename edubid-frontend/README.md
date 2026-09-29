@@ -32,6 +32,10 @@ La plataforma implementa un ecosistema educativo gamificado donde las calificaci
   - **Docente**: Crea Aulas (`Classroom`) y dentro de ellas organiza Grupos escolares (`Group`). El sistema genera códigos de unión alfanuméricos únicos de 6 caracteres (ej. `ABC-123`).
   - **Estudiante**: Vista `StudentGroupsComponent` para consultar sus grupos inscritos y modal para ingresar el código de invitación. Al unirse, el sistema le provisiona automáticamente su billetera (`Wallet`) vinculada al grupo y período académico activo.
 - **🎨 White-Labeling & Theming Dinámico (`ThemeService`)**: Soporte para modo Claro / Oscuro / Sistema y personalización en tiempo real inyectando `--brand-primary` y `--brand-accent` en el elemento raíz del DOM según el tenant del colegio logueado.
+- **🔔 Centro de Notificaciones In-App Reactivo (`InAppNotificationService`)**: Campana interactiva en cabecera con contador de notificaciones no leídas (`unreadCount`), distintivo con animación de pulso (`animate-pulse`), popover flotante con marcado como leído, vaciado rápido y redirección fluida a la actividad o subasta respectiva.
+- **⚡ Subastas y Eventos en Vivo por WebSockets (`WebSocketService`)**: Sincronización continua de ofertas, líderes de puja y notificaciones de cierre en tiempo real mediante canales reactivos RxJS y reconexión automática.
+- **🛡️ Resiliencia HTTP e Interceptor Global (`errorInterceptor`)**: Gestión unificada de caídas de red (código 0), límites de peticiones (429), permisos denegados (403) y fallos de servidor (500), normalizando el mensaje legible para Toasts con bypass opcional (`X-Skip-Error-Toast`).
+- **📄 Descarga de Informes Académicos Oficiales**: Exportación directa desde el navegador de reportes de notas en PDF membretado y planillas consolidadas institucionales en formato Excel (`.xlsx`) formato DANE.
 - **📐 Arquitectura de Layout con Scroll Independiente (`LayoutComponent`)**: Barra lateral `aside` fija con navegación adaptada por rol e independencia de desplazamiento vertical respecto a la columna principal (`header`, `main content`, `footer`).
 - **🛡️ Estandarización Visual e Identidad de Marca**:
   - Reemplazo total de emojis por iconografía vectorial estándar SVG (Flowbite Icons y Heroicons).
@@ -61,6 +65,8 @@ edubid-frontend/
 │   │   │   │   ├── google-auth.service.ts   # Integración SDK Google Identity Services
 │   │   │   │   ├── theme.service.ts         # Control de temas (Light/Dark) y White-Labeling
 │   │   │   │   ├── notification.service.ts  # Feedback visual y toasts
+│   │   │   │   ├── in-app-notification.service.ts # Centro de notificaciones in-app con Signals
+│   │   │   │   ├── websocket.service.ts     # Conexión persistente WebSockets para subastas
 │   │   │   │   ├── dashboard.service.ts     # Métricas y analítica agregada
 │   │   │   │   ├── institution.service.ts   # CRUD de instituciones y branding
 │   │   │   │   ├── user.service.ts          # Gestión de usuarios del sistema
@@ -74,12 +80,13 @@ edubid-frontend/
 │   │   │   │   ├── auth.guard.ts            # Protección de rutas autenticadas
 │   │   │   │   └── role.guard.ts            # Control de acceso por rol (RBAC)
 │   │   │   ├── interceptors/                # Interceptores HTTP
-│   │   │   │   └── auth.interceptor.ts      # Inyección de Bearer Token y auto-refresh 401
+│   │   │   │   ├── auth.interceptor.ts      # Inyección de Bearer Token y auto-refresh 401
+│   │   │   │   └── error.interceptor.ts     # Captura global de errores 0, 403, 429, 500
 │   │   │   ├── models/                      # Interfaces TypeScript estrictas
 │   │   │   └── constants/                   # Endpoints y claves de localStorage
 │   │   │
 │   │   ├── shared/                          # Componentes reutilizables
-│   │   │   ├── components/                  # Layout (Aside sidebar, Header, Footer),
+│   │   │   ├── components/                  # Layout (Aside sidebar, Header, Campana, Footer),
 │   │   │   │                                # institution-branding (White-label)
 │   │   │   └── ui/                          # Spinners, loading-screen, modales
 │   │   │

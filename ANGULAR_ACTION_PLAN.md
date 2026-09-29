@@ -1445,6 +1445,29 @@ La migración React → Angular 19+ ha sido completada exitosamente, alcanzando 
    - Reemplazo total de emojis por iconografía SVG estándar de Flowbite y Heroicons.
    - Marca oficial unificada mediante `public/edubid.png` y `public/edubid.ico`.
 
+6. **Centro de Notificaciones In-App Reactivo (`InAppNotificationService` & `LayoutComponent`)**:
+   - Integración de campana superior interactiva con contador en vivo de no leídas (`unreadCount`) e indicador visual de pulso (`animate-pulse`).
+   - Popover flotante con scroll desacoplado, clasificación de avisos por iconos de categoría, marcado interactivo como leído, vaciado de bandeja y navegación inteligente según el tipo de notificación.
+   - Detección de clics exteriores con `@HostListener('document:click')` para garantizar un cierre suave y natural.
+
+7. **Sincronización en Tiempo Real con WebSockets (`WebSocketService`)**:
+   - Canal bidireccional ASGI / Daphne conectado a las salas `auctions_general` y `auctions_group_{id}`.
+   - Actualización en tiempo real de ofertas más altas, ganadores en vivo y Toasts contextuales cuando un estudiante es superado o gana un premio.
+
+8. **Interceptor Global de Errores y Resiliencia HTTP (`errorInterceptor`)**:
+   - Captura centralizada de códigos 0 (sin red), 403 (permiso denegado), 429 (rate limiting) y 500+ (fallos de servidor), consumiendo el mensaje normalizado `detail` provisto por el backend.
+   - Cabecera configurable `X-Skip-Error-Toast` para peticiones con manejo de error local personalizado.
+
+9. **Protección Anti-Doble Clic y Escudos de Concurrencia**:
+   - Flags reactivos (`biddingAuctionId`, `closingAuctionId`, `isSubmitting`, `isSavingActivity`) para evitar transacciones duplicadas o doble gasto de EduCoins por clics repetidos.
+
+10. **Módulo de Exportación de Informes Oficiales**:
+   - Descarga directa de archivos binarios tipo `Blob` para reportes académicos de grupo y consolidados institucionales DANE en PDF membretado y hojas de cálculo Excel (`.xlsx`).
+
+11. **Garantía de Calidad y Suite de Pruebas Unitarias**:
+   - 23/23 tests unitarios aprobados (`npx ng test --watch=false`).
+   - Compilación para producción optimizada (`npx ng build`) en código 0 sin sobrepasar los presupuestos de empaquetado.
+
 ---
 
 *Plan de acción completado y ejecutado exitosamente en el proyecto EduBid.*

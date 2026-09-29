@@ -24,18 +24,18 @@ El código fuente está estructurado en módulos desacoplados bajo el directorio
 ```
 edubid-backend/
 ├── apps/
-│   ├── institutions/             # Aprovisionamiento SaaS de colegios, Código DANE y White-Labeling (colores, logo)
-│   ├── users/                    # Modelo User personalizado, RBAC, SimpleJWT, Google OAuth y verificación por email
-│   ├── classrooms/               # Aulas académicas / asignaturas gestionadas por docentes
+│   ├── institutions/             # Aprovisionamiento SaaS de colegios, Código DANE y reportes institucionales
+│   ├── users/                    # Modelo User personalizado, RBAC, SimpleJWT, Google OAuth y throttles
+│   ├── classrooms/               # Aulas académicas / asignaturas gestionadas por docentes con optimización ORM
 │   ├── groups/                   # Salones escolares, generación de códigos de unión (6 caracteres) y matrículas
 │   ├── activities/               # Retos, misiones, proyectos, evaluaciones y módulo de entregas (Submissions)
-│   ├── grades/                   # Registro de notas y señales automáticas de acreditación de EduCoins
+│   ├── grades/                   # Registro de notas, exportación de planillas y acreditación de EduCoins
 │   ├── tokens/                   # Períodos académicos (cortes), Billeteras virtuales (Wallets) y libro mayor contable
-│   ├── auctions/                 # Subastas de incentivos creadas por docentes con retención y reembolso de pujas
+│   ├── auctions/                 # Subastas en vivo, WebSockets (Daphne), pujas y liquidación con select_for_update
 │   ├── notifications/            # Sistema centralizado de alertas, eventos y anuncios institucionales
 │   ├── reports/                  # Métricas consolidadas, analítica agregada y reportes de rendimiento
-│   └── common/                   # Modelos abstractos base (`BaseModel`), mixins y utilidades compartidas
-├── edubid_core/                  # Ajustes del proyecto Django (`settings.py`, `urls.py`, `wsgi.py`, `asgi.py`)
+│   └── common/                   # Motor de reportes PDF/Excel, modelos base, tests y utilidades
+├── edubid_core/                  # Settings, enrutador ASGI, paginación inteligente y excepciones globales
 ├── docker-compose.yml            # Orquestación de contenedor MySQL 8.0
 ├── requirements.txt              # Dependencias de producción y desarrollo
 ├── BACKEND_API_MAP.md            # Especificación completa de endpoints, esquemas y payloads
@@ -148,10 +148,10 @@ Para consultar el listado completo de rutas, métodos, permisos requeridos, estr
 
 ## 🧪 Pruebas Automatizadas
 
-El proyecto cuenta con una suite completa de **52 pruebas automatizadas** que cubren el 100% de las aplicaciones (`institutions`, `users`, `classrooms`, `groups`, `activities`, `grades`, `tokens`, `auctions`, `notifications`).
+El proyecto cuenta con una suite completa de **76 pruebas automatizadas** que cubren el 100% de las aplicaciones (`institutions`, `users`, `classrooms`, `groups`, `activities`, `grades`, `tokens`, `auctions`, `notifications`, `common`).
 
 ```bash
-# Ejecutar todas las pruebas del backend
+# Ejecutar todas las pruebas del backend (76 tests)
 python manage.py test apps
 
 # Ejecutar pruebas por módulo específico
@@ -161,6 +161,7 @@ python manage.py test apps.activities
 python manage.py test apps.notifications
 python manage.py test apps.auctions
 python manage.py test apps.tokens
+python manage.py test apps.common
 ```
 
 ---

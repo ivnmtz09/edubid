@@ -28,6 +28,7 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 | **8** | Módulo de Exportación de Reportes (PDF / Excel) | Backend / Frontend | ✅ **COMPLETADO** | Fricción para directivos que requieren informes físicos/impresos | Medio |
 | **9** | Paginación Global y Optimización ORM | Backend | ✅ **COMPLETADO** | Lentitud en la API cuando la plataforma tenga miles de usuarios | Bajo |
 | **10** | Auditoría de Resiliencia, Concurrencia y Errores | Backend / Frontend | ✅ **COMPLETADO** | Doble gasto de monedas, peticiones simultáneas no controladas y fallos 500 no estructurados | Medio |
+| **11** | Centro de Notificaciones In-App (Campana Interactiva) | Frontend / UX | ✅ **COMPLETADO** | Avisos ignorados, falta de trazabilidad en tiempo real sobre notas, pujas y actividades | Bajo |
 
 ---
 
@@ -284,6 +285,31 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 
 ---
 
+### 11. 🔔 Centro de Notificaciones In-App con Campana Interactiva y Gestión de Avisos
+
+* **¿Qué hay que hacer?**  
+  Implementar un centro de notificaciones interactivo en la barra superior (`LayoutComponent`) consumiendo los endpoints de `/api/notifications/` mediante un servicio reactivo dedicado en Angular (`InAppNotificationService`), con contador dinámico de no leídas, animación de pulso, popover de avisos, filtros de lectura y navegación directa al recurso involucrado.
+
+* **¿Por qué hay que hacerlo?**  
+  Los usuarios requerían una forma centralizada de revisar avisos históricos importantes (calificaciones de tareas, acreditación de EduCoins, subastas ganadas o superadas, nuevas actividades y avisos de seguridad). Los toasts efímeros de pantalla desaparecen en pocos segundos, mientras que la campana interactiva persiste y permite gestionar la bandeja (marcar como leída, marcar todas, limpiar historial).
+
+* **Estado:** ✅ **COMPLETADO & TESTEADO (Campana reactiva con Signals y 23/23 tests aprobados)**
+* **Implementación:**
+  * **Servicio Reactivo Frontend (`core/services/in-app-notification.service.ts`):**
+    * Manejo de estado 100% reactivo con Angular Signals: `notifications`, `unreadCount`, `isLoading`.
+    * Integración con endpoints del backend: `GET /api/notifications/` (con paginación/límite), `GET /estadisticas/` para contador badge, `POST /{id}/marcar-leida/`, `POST /marcar-todas-leidas/` y `DELETE /eliminar-todas/`.
+  * **Componente de Interfaz (`shared/components/layout/layout.component.ts`):**
+    * Botón de campana interactivo con distintivo numérico (*badge*) con animación de pulso (`animate-pulse`) cuando hay notificaciones no leídas.
+    * Menú desplegable flotante (*popover*) con scroll independiente y diseño limpio adaptado a temas claro y oscuro.
+    * Identificadores visuales por tipo de aviso (calificaciones, EduCoins, subastas, anuncios, seguridad).
+    * Acciones rápidas: "Marcar todas como leídas", "Limpiar todo", y clic en notificación individual para marcarla como leída y navegar a la sección respectiva (`/dashboard`, `/classrooms`, etc.).
+    * Listener global de clics externos (`@HostListener('document:click')`) para cerrar el popover automáticamente si el usuario hace clic fuera.
+  * **Validación Automatizada:**
+    * 23/23 tests unitarios aprobados en frontend (`npm test -- --watch=false`).
+    * Build de producción exitoso con código 0 (`npm run build`).
+
+---
+
 ## 🗓️ Hoja de Ruta Recomendada (Fases de Ejecución)
 
 ```mermaid
@@ -305,6 +331,7 @@ flowchart TD
         H[8. Exportación PDF/Excel de Reportes]
         I[9. Paginación Global & Tuning ORM]
         J[10. Auditoría de Seguridad & Concurrencia]
+        K[11. Centro de Notificaciones In-App]
     end
 
     Fase 1 --> Fase 2 --> Fase 3
@@ -336,6 +363,8 @@ flowchart LR
 3. **Calificación Docente & Acreditación Inmediata de Recompensas:** El docente cuenta con un modal de evaluación en su panel (`TeacherDashboardComponent`), revisa el trabajo del estudiante, califica de 0 a 100 y redacta comentarios. El backend liquida la nota, calcula EduCoins ganados (incluyendo bonificación del 10% por excelencia) y actualiza la billetera del alumno.
 4. **Subastas Pedagógicas Integradas:** El docente puede programar subastas asociadas a sus grupos con precio base, incremento mínimo y fecha de cierre, además de poder cerrarlas manualmente si lo desea.
 5. **Pujas en Vivo & Liquidación:** Los estudiantes pujan en tiempo real por WebSockets; al finalizar el tiempo, el sistema cierra la subasta y adjudica el incentivo de forma autónoma.
+6. **Centro de Notificaciones en Vivo:** Campana superior interactiva con contador en tiempo real, histórico de notificaciones con estado leído/no leído, categorización de eventos escolares y accesos directos.
+7. **Exportación de Reportes Académicos:** Descargas instantáneas en PDF institucional y planillas Excel DANE para Rectores y Docentes.
 
 ### Métricas de Calidad y Validación:
 - **Backend:** 76/76 pruebas unitarias e integradas aprobadas (`python manage.py test apps`).

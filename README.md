@@ -121,10 +121,12 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 
 ### 🔧 Backend
 - **Framework**: [Django 5.2.6](https://www.djangoproject.com/) con [Django REST Framework 3.16](https://www.django-rest-framework.org/)
+- **Tiempo Real (WebSockets)**: [Django Channels 4.x](https://channels.readthedocs.io/) con servidor ASGI [Daphne](https://github.com/django/daphne)
 - **Base de Datos**: [MySQL 8.0](https://www.mysql.com/) con driver [PyMySQL](https://pymysql.readthedocs.io/)
 - **Autenticación**: JWT con [djangorestframework-simplejwt](https://django-rest-framework-simplejwt.readthedocs.io/) (rotación y blacklist de tokens)
 - **SSO**: [Google OAuth 2.0](https://developers.google.com/identity) (`google-auth` backend verification)
 - **Servicios de Correo**: [SendGrid](https://sendgrid.com/) para verificación de cuenta y recuperación de contraseña
+- **Generación de Reportes**: [ReportLab 5.x](https://www.reportlab.com/) (PDF membretado) y [OpenPyXL 3.1](https://openpyxl.readthedocs.io/) (planillas Excel DANE)
 - **Producción**: [Gunicorn](https://gunicorn.org/) + [WhiteNoise](https://whitenoise.readthedocs.io/)
 
 ### 🎨 Frontend
@@ -132,7 +134,9 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 - **Estilos**: [Tailwind CSS 4.x](https://tailwindcss.com/) + [Flowbite](https://flowbite.com/)
 - **Iconografía & UI**: Iconos vectoriales estándar SVG Flowbite y [Ng-Icons (Heroicons)](https://ng-icons.github.io/ng-icons/) (cero emojis en componentes de interfaz)
 - **Identidad de Marca**: Logotipo corporativo (`edubid.png`) y favicon (`edubid.ico`) integrados globalmente
-- **Notificaciones**: [ngx-toastr](https://github.com/scttcper/ngx-toastr) + servicio centralizado `NotificationService`
+- **Notificaciones**: Centro de notificaciones in-app interactivo (`InAppNotificationService`) + Toasts reactivos con [ngx-toastr](https://github.com/scttcper/ngx-toastr)
+- **Sincronización Real-Time**: WebSockets con RxJS (`WebSocketService`) para pujas en vivo y notificaciones dinámicas
+- **Resiliencia HTTP**: Interceptor funcional global `errorInterceptor` con captura de códigos 0, 403, 429 y 500
 - **Gestión de Temas**: Modo Claro / Oscuro / Sistema y personalización tenant en vivo (`ThemeService`)
 
 ### 🐳 DevOps e Infraestructura
@@ -149,17 +153,17 @@ edubid/
 ├── edubid-backend/                   # API REST en Django 5.2.6 + DRF
 │   ├── apps/
 │   │   ├── activities/               # Actividades (retos, misiones, proyectos y entregas)
-│   │   ├── auctions/                 # Subastas y sistema de pujas con retención
+│   │   ├── auctions/                 # Subastas en vivo, WebSockets (consumers), pujas con retención
 │   │   ├── classrooms/               # Aulas académicas y asignaturas (Docente)
-│   │   ├── common/                   # Modelos base, utilidades y mixins compartidos
-│   │   ├── grades/                   # Calificaciones y disparadores de EduCoins
+│   │   ├── common/                   # Modelos base, reportes (PDF/Excel), utilidades y mixins
+│   │   ├── grades/                   # Calificaciones, exportaciones y disparadores de EduCoins
 │   │   ├── groups/                   # Grupos escolares, matrículas por código y períodos
-│   │   ├── institutions/             # Módulo SaaS Multi-Tenant y White-Labeling
-│   │   ├── notifications/            # Motor de alertas y notificaciones proactivas
+│   │   ├── institutions/             # Módulo SaaS Multi-Tenant, exportaciones DANE y White-Labeling
+│   │   ├── notifications/            # Motor de alertas, señales automáticas y anuncios institucionales
 │   │   ├── reports/                  # Informes y analítica académica
 │   │   ├── tokens/                   # Wallets, periodos y transacciones de EduCoins
-│   │   └── users/                    # Autenticación JWT, RBAC estricto, Google SSO y perfiles
-│   ├── edubid_core/                  # Configuración Django (settings, urls, wsgi, asgi)
+│   │   └── users/                    # Autenticación JWT, RBAC estricto, Google SSO y throttles
+│   ├── edubid_core/                  # Configuración Django, ASGI Channels, paginación y excepciones globales
 │   ├── docker-compose.yml            # Orquestación de MySQL 8.0
 │   ├── .env.example                  # Plantilla de variables para backend y base de datos
 │   ├── manage.py
@@ -173,14 +177,15 @@ edubid/
 │   │   ├── app/
 │   │   │   ├── core/                 # Servicios singleton, guards e interceptores
 │   │   │   │   ├── services/         # AuthService, ThemeService, NotificationService,
+│   │   │   │   │                     # InAppNotificationService, WebSocketService,
 │   │   │   │   │                     # ActivityService, AuctionService, ClassroomService,
 │   │   │   │   │                     # GradeService, GroupService, InstitutionService,
 │   │   │   │   │                     # UserService, WalletService, DashboardService, GoogleAuthService
 │   │   │   │   ├── guards/           # authGuard, roleGuard
-│   │   │   │   ├── interceptors/     # authInterceptor (JWT + auto-refresh)
+│   │   │   │   ├── interceptors/     # authInterceptor (JWT), errorInterceptor (Resiliencia HTTP)
 │   │   │   │   └── models/           # Interfaces TypeScript (User, Group, Classroom, etc.)
 │   │   │   ├── shared/               # Componentes reutilizables y estructura
-│   │   │   │   ├── components/       # Layout (Aside sidebar + Header + Footer), UI atoms,
+│   │   │   │   ├── components/       # Layout (Aside sidebar + Header + Campana + Footer), UI atoms,
 │   │   │   │   │                     # institution-branding (White-label)
 │   │   │   │   └── pipes/            # Pipes de utilidad
 │   │   │   └── features/             # Módulos y vistas de negocio:
@@ -381,8 +386,8 @@ python manage.py makemigrations
 # Aplicar migraciones pendientes
 python manage.py migrate
 
-# Ejecutar tests automatizados
-python manage.py test
+# Ejecutar suite completa de tests automatizados (76 pruebas)
+python manage.py test apps
 
 # Cargar archivos estáticos
 python manage.py collectstatic --noinput
@@ -402,7 +407,7 @@ npm start
 # Compilar para producción (archivos optimizados en dist/)
 npm run build
 
-# Ejecutar pruebas unitarias
+# Ejecutar pruebas unitarias automatizadas (23 pruebas)
 npm test
 
 # Modo observación continua en desarrollo
@@ -425,6 +430,7 @@ La aplicación SPA en Angular se compila mediante `npm run build`, generando una
 
 ## 📚 Documentación Adicional
 
+- [Plan de Auditoría Técnica, Resiliencia y Mejoras del MVP](AUDIT_AND_IMPROVEMENT_PLAN.md)
 - [Guía y Arquitectura del Backend Django](edubid-backend/README.md)
 - [Mapeo Completo de Endpoints Backend](edubid-backend/BACKEND_API_MAP.md)
 - [Guía de Arquitectura del Frontend Angular](edubid-frontend/README.md)

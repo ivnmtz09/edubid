@@ -84,6 +84,8 @@
 | `/api/grades/{id}/` | GET | Sí | Detalle de calificación con coins_ganados calculados. |
 | `/api/grades/mis-notas/` | GET | Sí (estudiante) | Notas propias con promedio general y total EduCoins ganados. |
 | `/api/grades/grupo/{group_id}/reporte/` | GET | Sí (docente) | Reporte detallado de notas y EduCoins por grupo. |
+| `/api/grades/grupo/{group_id}/exportar-excel/` | GET | Sí (docente/admin) | Exportar planilla de calificaciones y balances de EduCoins en Excel (.xlsx). |
+| `/api/grades/grupo/{group_id}/exportar-pdf/` | GET | Sí (docente/admin) | Exportar informe académico oficial membretado en PDF. |
 | `/api/grades/calificar-multiple/` | POST | Sí (docente) | Calificación masiva para una actividad. |
 
 ### 1.6 Tokens / EduCoins (`/api/tokens/`)
@@ -147,6 +149,8 @@
 | `/api/institutions/{id}/` | GET | No | Detalle de institución (público). |
 | `/api/institutions/{id}/` | PUT/PATCH | Sí | Actualizar (rector: solo su institución; admin: cualquier una). |
 | `/api/institutions/{id}/` | DELETE | Sí (admin) | Eliminar institución (solo admin global). |
+| `/api/institutions/{id}/exportar-excel/` | GET | Sí (rector/admin) | Exportar consolidado institucional formato DANE en Excel (.xlsx). |
+| `/api/institutions/{id}/exportar-pdf/` | GET | Sí (rector/admin) | Exportar informe ejecutivo institucional en PDF. |
 | `/api/institutions/public/` | GET | No | Lista pública para selects de registro (solo id + nombre). |
 
 ---
@@ -612,6 +616,31 @@ Institution (Colegio / Tenant)
     "access": "eyJhbGciOiJIUzI1NiIs...",
     "refresh": "eyJhbGciOiJIUzI1NiIs..."
   }
+}
+```
+
+### 4.13 Manejador Global de Excepciones y Respuestas de Error Estandarizadas
+
+EduBid implementa un manejador global de excepciones (`edubid_core.exceptions.custom_exception_handler`) que normaliza cualquier falla o rechazo en la API para garantizar consistencia absoluta hacia los clientes Angular/móviles:
+
+1. **Garantía del campo `detail`**: Todas las respuestas con código 4xx y 5xx incluyen siempre un campo `detail: string` amigable y legible para Toasts y alertas en el frontend.
+2. **Captura de `IntegrityError` (DB)**: Transforma violaciones de claves foráneas o duplicados en HTTP 400 limpio sin exponer trazas internas de PostgreSQL.
+3. **Captura de `ValidationError` de Django**: Convierte errores de validación de modelo directamente a HTTP 400.
+4. **Protección contra fugas en HTTP 500**: Captura cualquier error no controlado, registra el traceback en logs seguros de servidor y responde con JSON estructurado `{ "detail": "...", "error_type": "server_error" }` en vez de HTML.
+
+**Ejemplo de respuesta en conflicto de integridad (400):**
+```json
+{
+  "detail": "Conflicto de integridad en la base de datos: el registro ya existe o viola una restricción de datos.",
+  "error_type": "integrity_error"
+}
+```
+
+**Ejemplo de respuesta normalizada ante error inesperado (500):**
+```json
+{
+  "detail": "Ocurrió un error inesperado en el servidor. Por favor intenta de nuevo más tarde.",
+  "error_type": "server_error"
 }
 ```
 
