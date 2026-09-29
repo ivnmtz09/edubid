@@ -1,16 +1,17 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ClassroomService, Classroom, ClassroomGroup } from '../../../core/services/classroom.service';
 import { GroupService, Group, GroupStudent } from '../../../core/services/group.service';
+import { ActivityService, Activity } from '../../../core/services/activity.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-classroom-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
       <!-- Breadcrumb y Volver -->
@@ -94,7 +95,7 @@ import { NotificationService } from '../../../core/services/notification.service
                 </span>
               </h2>
               <p class="text-xs text-text-muted mt-0.5">
-                Crea grupos (ej: Décimo A, Décimo B) y comparte su código único de 6 caracteres con tus estudiantes.
+                Crea grupos (ej: Décimo A, Décimo B), comparte su código de 6 caracteres y asigna actividades.
               </p>
             </div>
           </div>
@@ -150,7 +151,7 @@ import { NotificationService } from '../../../core/services/notification.service
                           <button
                             type="button"
                             (click)="openEditGroupModal(group)"
-                            class="p-1.5 text-text-muted hover:text-text rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                            class="p-1.5 text-text-muted hover:text-text rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                             title="Editar grupo"
                           >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +161,7 @@ import { NotificationService } from '../../../core/services/notification.service
                           <button
                             type="button"
                             (click)="confirmDeleteGroup(group)"
-                            class="p-1.5 text-red-500 hover:text-red-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                            class="p-1.5 text-red-500 hover:text-red-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                             title="Eliminar grupo"
                           >
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,8 +203,8 @@ import { NotificationService } from '../../../core/services/notification.service
                     </div>
                   </div>
 
-                  <!-- Footer del Grupo con botón para ver Estudiantes -->
-                  <div class="mt-5 pt-4 border-t border-border flex items-center justify-between gap-2">
+                  <!-- Footer del Grupo con botones de Actividades y Alumnos -->
+                  <div class="mt-5 pt-4 border-t border-border flex flex-wrap items-center justify-between gap-2">
                     <span class="text-xs text-text-muted flex items-center gap-1.5">
                       <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -211,16 +212,30 @@ import { NotificationService } from '../../../core/services/notification.service
                       <span>{{ group.estudiantes_count || 0 }} inscritos</span>
                     </span>
 
-                    <button
-                      type="button"
-                      (click)="openStudentsModal(group)"
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white transition-colors cursor-pointer"
-                    >
-                      <span>Ver Alumnos</span>
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        (click)="openActivitiesModal(group)"
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 transition-colors cursor-pointer"
+                        title="Ver y crear actividades"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <span>Actividades</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="openStudentsModal(group)"
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white transition-colors cursor-pointer"
+                      >
+                        <span>Alumnos</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
               }
@@ -325,6 +340,294 @@ import { NotificationService } from '../../../core/services/notification.service
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      }
+
+      <!-- MODAL: ACTIVIDADES DEL GRUPO -->
+      @if (selectedGroupForActivities()) {
+        <div
+          class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="relative w-full max-w-2xl bg-surface border border-border rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </span>
+                <div>
+                  <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                    Actividades: {{ selectedGroupForActivities()?.nombre }}
+                  </h3>
+                  <p class="text-xs text-text-muted">
+                    Asigna retos, proyectos y evaluaciones con recompensas de EduCoins y XP.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                @if (canManage()) {
+                  <button
+                    type="button"
+                    (click)="openCreateActivityForm()"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-2xs transition cursor-pointer"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>+ Nueva Actividad</span>
+                  </button>
+                }
+                <button
+                  type="button"
+                  (click)="closeActivitiesModal()"
+                  class="text-text-muted hover:text-text p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Modal Body (Lista de Actividades) -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-4">
+              @if (isLoadingActivities()) {
+                <div class="flex justify-center py-10">
+                  <svg class="animate-spin h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                </div>
+              } @else if (groupActivities().length === 0) {
+                <div class="text-center py-8 space-y-2">
+                  <div class="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center mx-auto">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h4 class="font-bold text-slate-900 dark:text-white text-sm">No hay actividades creadas en este grupo</h4>
+                  <p class="text-xs text-text-muted max-w-sm mx-auto">
+                    Publica retos, misiones o proyectos para que los alumnos ganen EduCoins y suban de nivel.
+                  </p>
+                </div>
+              } @else {
+                <div class="space-y-3">
+                  @for (act of groupActivities(); track act.id) {
+                    <div class="p-4 rounded-xl border border-border bg-bg/50 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors space-y-2">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-2">
+                            <span
+                              class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md"
+                              [class.bg-blue-500/10]="act.tipo === 'reto'"
+                              [class.text-blue-600]="act.tipo === 'reto'"
+                              [class.bg-purple-500/10]="act.tipo === 'mision'"
+                              [class.text-purple-600]="act.tipo === 'mision'"
+                              [class.bg-emerald-500/10]="act.tipo === 'proyecto'"
+                              [class.text-emerald-600]="act.tipo === 'proyecto'"
+                              [class.bg-amber-500/10]="act.tipo === 'evaluacion'"
+                              [class.text-amber-600]="act.tipo === 'evaluacion'"
+                            >
+                              {{ act.tipo }}
+                            </span>
+                            <span class="text-xs font-mono text-text-muted">
+                              Vence: {{ formatDate(act.fecha_entrega) }}
+                            </span>
+                          </div>
+                          <h4 class="font-bold text-sm text-slate-900 dark:text-white">
+                            {{ act.nombre }}
+                          </h4>
+                          @if (act.descripcion) {
+                            <p class="text-xs text-text-muted line-clamp-2">
+                              {{ act.descripcion }}
+                            </p>
+                          }
+                        </div>
+
+                        <div class="text-right shrink-0">
+                          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600">
+                            +{{ act.valor_educoins }} EC
+                          </span>
+                          <span class="block text-[11px] font-mono text-text-muted mt-0.5">
+                            +{{ act.puntos_experiencia }} XP
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-border flex justify-end bg-bg/50">
+              <button
+                type="button"
+                (click)="closeActivitiesModal()"
+                class="px-4 py-2 rounded-xl text-xs font-semibold bg-surface border border-border hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted transition cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- MODAL: CREAR NUEVA ACTIVIDAD -->
+      @if (showCreateActivityModal()) {
+        <div
+          class="fixed inset-0 z-60 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="relative w-full max-w-lg bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                </span>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                    Nueva Actividad Pedagógica
+                  </h3>
+                  <p class="text-xs text-text-muted">
+                    Para el grupo {{ selectedGroupForActivities()?.nombre }}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="closeCreateActivityForm()"
+                class="text-text-muted hover:text-text p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Modal Form -->
+            <div class="p-4 sm:p-6 space-y-4">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="act-tipo" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                    Tipo de Actividad *
+                  </label>
+                  <select
+                    id="act-tipo"
+                    [(ngModel)]="activityTipo"
+                    class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                  >
+                    <option value="reto">Reto formativo</option>
+                    <option value="mision">Misión especial</option>
+                    <option value="proyecto">Proyecto integrador</option>
+                    <option value="evaluacion">Evaluación diagnóstica</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="act-deadline" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                    Fecha Límite *
+                  </label>
+                  <input
+                    id="act-deadline"
+                    type="datetime-local"
+                    [(ngModel)]="activityFechaEntrega"
+                    class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label for="act-name" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                  Nombre de la Actividad *
+                </label>
+                <input
+                  id="act-name"
+                  type="text"
+                  [(ngModel)]="activityNombre"
+                  placeholder="Ej: Reto 1 - Análisis de Algoritmos"
+                  class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted"
+                />
+              </div>
+
+              <div>
+                <label for="act-desc" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                  Instrucciones y Criterios (Opcional)
+                </label>
+                <textarea
+                  id="act-desc"
+                  rows="3"
+                  [(ngModel)]="activityDescripcion"
+                  placeholder="Describe la consigna, recursos requeridos o directrices de entrega..."
+                  class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted leading-relaxed"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label for="act-coins" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                    Recompensa Máx (EC) *
+                  </label>
+                  <input
+                    id="act-coins"
+                    type="number"
+                    min="1"
+                    [(ngModel)]="activityEducoins"
+                    class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label for="act-xp" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                    Puntos de Exp (XP) *
+                  </label>
+                  <input
+                    id="act-xp"
+                    type="number"
+                    min="1"
+                    [(ngModel)]="activityXP"
+                    class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary font-mono"
+                  />
+                </div>
+              </div>
+
+              <!-- Modal Footer -->
+              <div class="flex items-center justify-end gap-3 pt-4 border-t border-border">
+                <button
+                  type="button"
+                  (click)="closeCreateActivityForm()"
+                  class="px-4 py-2.5 rounded-xl text-xs font-semibold border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  (click)="onSubmitCreateActivity()"
+                  [disabled]="isSavingActivity() || !activityNombre().trim() || !activityFechaEntrega()"
+                  class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  @if (isSavingActivity()) {
+                    <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <span>Creando...</span>
+                  } @else {
+                    <span>Publicar Actividad</span>
+                  }
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       }
@@ -467,6 +770,7 @@ export class ClassroomDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private classroomService = inject(ClassroomService);
   private groupService = inject(GroupService);
+  private activityService = inject(ActivityService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
@@ -488,6 +792,21 @@ export class ClassroomDetailComponent implements OnInit {
   selectedGroupForStudents = signal<Group | null>(null);
   groupStudents = signal<GroupStudent[]>([]);
   isLoadingStudents = signal(false);
+
+  // Modal Actividades del Grupo
+  selectedGroupForActivities = signal<Group | null>(null);
+  groupActivities = signal<Activity[]>([]);
+  isLoadingActivities = signal(false);
+
+  // Modal Crear Actividad
+  showCreateActivityModal = signal(false);
+  isSavingActivity = signal(false);
+  activityTipo = signal<string>('reto');
+  activityNombre = signal<string>('');
+  activityDescripcion = signal<string>('');
+  activityEducoins = signal<number>(100);
+  activityXP = signal<number>(10);
+  activityFechaEntrega = signal<string>('');
 
   groupForm: FormGroup = this.fb.group({
     nombre: ['', [Validators.required]],
@@ -512,7 +831,6 @@ export class ClassroomDetailComponent implements OnInit {
     this.classroomService.getClassroom(id).subscribe({
       next: (data) => {
         this.classroom.set(data);
-        // Cargar grupos de esta clase
         this.loadGroupsForClassroom(id);
       },
       error: (err) => {
@@ -590,22 +908,24 @@ export class ClassroomDetailComponent implements OnInit {
         },
       });
     } else {
-      this.groupService.createGroup({
-        nombre: formValue.nombre,
-        classroom: this.classroomId()!,
-        descripcion: formValue.descripcion,
-      }).subscribe({
-        next: () => {
-          this.isSavingGroup.set(false);
-          this.closeGroupModal();
-          this.notificationService.success('Grupo creado con su código de vinculación');
-          this.loadClassroomDetail(this.classroomId()!);
-        },
-        error: (err) => {
-          this.isSavingGroup.set(false);
-          this.notificationService.error(err.error?.detail || 'Error al crear el grupo');
-        },
-      });
+      this.groupService
+        .createGroup({
+          nombre: formValue.nombre,
+          classroom: this.classroomId()!,
+          descripcion: formValue.descripcion,
+        })
+        .subscribe({
+          next: () => {
+            this.isSavingGroup.set(false);
+            this.closeGroupModal();
+            this.notificationService.success('Grupo creado con su código de vinculación');
+            this.loadClassroomDetail(this.classroomId()!);
+          },
+          error: (err) => {
+            this.isSavingGroup.set(false);
+            this.notificationService.error(err.error?.detail || 'Error al crear el grupo');
+          },
+        });
     }
   }
 
@@ -646,5 +966,100 @@ export class ClassroomDetailComponent implements OnInit {
         this.isLoadingStudents.set(false);
       },
     });
+  }
+
+  // ================= GESTIÓN DE ACTIVIDADES =================
+
+  openActivitiesModal(group: Group): void {
+    this.selectedGroupForActivities.set(group);
+    this.loadGroupActivities(group.id);
+  }
+
+  closeActivitiesModal(): void {
+    this.selectedGroupForActivities.set(null);
+    this.showCreateActivityModal.set(false);
+  }
+
+  loadGroupActivities(groupId: number): void {
+    this.isLoadingActivities.set(true);
+    this.activityService.getActivities(groupId).subscribe({
+      next: (acts) => {
+        this.groupActivities.set(acts || []);
+        this.isLoadingActivities.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando actividades:', err);
+        this.groupActivities.set([]);
+        this.isLoadingActivities.set(false);
+      },
+    });
+  }
+
+  openCreateActivityForm(): void {
+    this.activityTipo.set('reto');
+    this.activityNombre.set('');
+    this.activityDescripcion.set('');
+    this.activityEducoins.set(100);
+    this.activityXP.set(10);
+
+    const inAWeek = new Date();
+    inAWeek.setDate(inAWeek.getDate() + 7);
+    inAWeek.setMinutes(inAWeek.getMinutes() - inAWeek.getTimezoneOffset());
+    this.activityFechaEntrega.set(inAWeek.toISOString().slice(0, 16));
+
+    this.showCreateActivityModal.set(true);
+  }
+
+  closeCreateActivityForm(): void {
+    this.showCreateActivityModal.set(false);
+  }
+
+  onSubmitCreateActivity(): void {
+    const grp = this.selectedGroupForActivities();
+    if (!grp || !this.activityNombre().trim() || !this.activityFechaEntrega()) {
+      this.notificationService.error('Ingresa el nombre y fecha de entrega de la actividad.');
+      return;
+    }
+
+    this.isSavingActivity.set(true);
+    const payload = {
+      group: grp.id,
+      tipo: this.activityTipo(),
+      nombre: this.activityNombre().trim(),
+      descripcion: this.activityDescripcion().trim(),
+      valor_educoins: this.activityEducoins(),
+      puntos_experiencia: this.activityXP(),
+      fecha_entrega: new Date(this.activityFechaEntrega()).toISOString(),
+      habilitada: true,
+    };
+
+    this.activityService.createActivity(payload).subscribe({
+      next: (created) => {
+        this.isSavingActivity.set(false);
+        this.showCreateActivityModal.set(false);
+        this.notificationService.success(`Actividad "${created.nombre}" creada con éxito.`);
+        this.loadGroupActivities(grp.id);
+      },
+      error: (err) => {
+        this.isSavingActivity.set(false);
+        const msg = err.error?.detail || 'Error al crear la actividad';
+        this.notificationService.error(msg);
+      },
+    });
+  }
+
+  formatDate(dateStr?: string): string {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
   }
 }
