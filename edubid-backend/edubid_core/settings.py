@@ -237,6 +237,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'edubid_core.pagination.EduBidPagination',
     'PAGE_SIZE': config('PAGE_SIZE', default=20, cast=int),
+    'EXCEPTION_HANDLER': 'edubid_core.exceptions.custom_exception_handler',
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
