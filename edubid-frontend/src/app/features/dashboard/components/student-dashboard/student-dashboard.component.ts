@@ -211,9 +211,18 @@ import { Subscription } from 'rxjs';
                       <button
                         type="button"
                         (click)="placeBid(item)"
-                        class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+                        [disabled]="biddingAuctionId() === item.id"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white shadow-xs transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 cursor-pointer"
                       >
-                        Pujar en subasta
+                        @if (biddingAuctionId() === item.id) {
+                          <svg class="animate-spin h-3.5 w-3.5 text-white dark:text-slate-900" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                          </svg>
+                          <span>Pujando...</span>
+                        } @else {
+                          <span>Pujar en subasta</span>
+                        }
                       </button>
                     </div>
                   </div>
@@ -458,9 +467,10 @@ import { Subscription } from 'rxjs';
                       <button
                         type="button"
                         (click)="cancelSubmission(mySub.id)"
-                        class="text-xs text-red-500 hover:text-red-700 hover:underline cursor-pointer"
+                        [disabled]="isCancelling()"
+                        class="text-xs text-red-500 hover:text-red-700 hover:underline disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
-                        Cancelar y retirar esta entrega
+                        {{ isCancelling() ? 'Cancelando entrega...' : 'Cancelar y retirar esta entrega' }}
                       </button>
                     </div>
                   }
@@ -564,6 +574,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   submissionText = signal<string>('');
   selectedFile = signal<File | null>(null);
   isSubmitting = signal<boolean>(false);
+  isCancelling = signal<boolean>(false);
+  biddingAuctionId = signal<number | null>(null);
 
   userName = computed(() => {
     const user = this.authService.currentUser();
@@ -684,6 +696,8 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   placeBid(item: Auction): void {
+    if (this.biddingAuctionId() !== null) return;
+
     const currentHighest = item.puja_mas_alta?.cantidad_educoins || item.valor_minimo_educoins;
     const minIncrement = item.incremento_minimo_educoins || 10;
     const nextBid = currentHighest + minIncrement;
@@ -695,14 +709,17 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.biddingAuctionId.set(item.id);
     this.auctionService.createBid(item.id, nextBid).subscribe({
       next: () => {
+        this.biddingAuctionId.set(null);
         this.notificationService.success(
           `¡Puja de ${nextBid} EduCoins registrada con éxito para "${item.titulo}"!`
         );
         this.loadStudentData();
       },
       error: (err) => {
+        this.biddingAuctionId.set(null);
         const msg = err.error?.detail || err.error?.message || 'No se pudo registrar la puja';
         this.notificationService.error(msg, 'Error en puja');
       },
@@ -732,7 +749,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
 
   submitTask(): void {
     const task = this.selectedTaskForSubmission();
-    if (!task) return;
+    if (!task || this.isSubmitting()) return;
 
     if (!this.submissionText().trim()) {
       this.notificationService.error('Por favor escribe tu respuesta o enlace antes de enviar.');
@@ -768,17 +785,22 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   }
 
   cancelSubmission(submissionId: number): void {
+    if (this.isCancelling()) return;
+
     if (!confirm('¿Deseas retirar esta entrega? Podrás volver a enviarla antes de la fecha límite.')) {
       return;
     }
 
+    this.isCancelling.set(true);
     this.activityService.cancelSubmission(submissionId).subscribe({
       next: () => {
+        this.isCancelling.set(false);
         this.notificationService.success('Entrega cancelada exitosamente.');
         this.closeSubmitModal();
         this.loadStudentData();
       },
       error: (err) => {
+        this.isCancelling.set(false);
         const msg = err.error?.detail || 'No se pudo cancelar la entrega';
         this.notificationService.error(msg);
       },

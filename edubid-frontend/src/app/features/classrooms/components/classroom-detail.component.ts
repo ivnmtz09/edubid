@@ -834,9 +834,10 @@ import { NotificationService } from '../../../core/services/notification.service
               <button
                 type="button"
                 (click)="onDeleteGroupSubmit()"
-                class="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs transition-colors cursor-pointer"
+                [disabled]="isDeletingGroup()"
+                class="px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                Eliminar Grupo
+                {{ isDeletingGroup() ? 'Eliminando...' : 'Eliminar Grupo' }}
               </button>
             </div>
           </div>
@@ -867,6 +868,7 @@ export class ClassroomDetailComponent implements OnInit {
   isEditingGroup = signal(false);
   editingGroupId = signal<number | null>(null);
   isSavingGroup = signal(false);
+  isDeletingGroup = signal(false);
   groupToDelete = signal<Group | null>(null);
 
   // Modal Estudiantes del Grupo
@@ -970,7 +972,7 @@ export class ClassroomDetailComponent implements OnInit {
   }
 
   onGroupSubmit(): void {
-    if (this.groupForm.invalid || !this.classroomId()) return;
+    if (this.groupForm.invalid || !this.classroomId() || this.isSavingGroup()) return;
 
     this.isSavingGroup.set(true);
     const formValue = this.groupForm.value;
@@ -1016,10 +1018,12 @@ export class ClassroomDetailComponent implements OnInit {
 
   onDeleteGroupSubmit(): void {
     const g = this.groupToDelete();
-    if (!g) return;
+    if (!g || this.isDeletingGroup()) return;
 
+    this.isDeletingGroup.set(true);
     this.groupService.deleteGroup(g.id).subscribe({
       next: () => {
+        this.isDeletingGroup.set(false);
         this.groupToDelete.set(null);
         this.notificationService.success(`Grupo "${g.nombre}" eliminado`);
         if (this.classroomId()) {
@@ -1027,6 +1031,7 @@ export class ClassroomDetailComponent implements OnInit {
         }
       },
       error: (err) => {
+        this.isDeletingGroup.set(false);
         this.groupToDelete.set(null);
         this.notificationService.error(err.error?.detail || 'Error al eliminar el grupo');
       },
@@ -1096,6 +1101,7 @@ export class ClassroomDetailComponent implements OnInit {
   }
 
   onSubmitCreateActivity(): void {
+    if (this.isSavingActivity()) return;
     const grp = this.selectedGroupForActivities();
     if (!grp || !this.activityNombre().trim() || !this.activityFechaEntrega()) {
       this.notificationService.error('Ingresa el nombre y fecha de entrega de la actividad.');

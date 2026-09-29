@@ -274,7 +274,7 @@ export class StudentGroupsComponent implements OnInit {
   }
 
   onJoinSubmit(): void {
-    if (this.joinForm.invalid) return;
+    if (this.joinForm.invalid || this.isJoining()) return;
 
     this.isJoining.set(true);
     const code = this.joinForm.value.code;

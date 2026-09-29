@@ -34,8 +34,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
       // 3. Error interno del servidor (status 500 a 599)
       else if (error.status >= 500 && error.status <= 599) {
+        const detail =
+          (typeof error.error === 'object' && error.error?.detail)
+            ? error.error.detail
+            : 'Ocurrió un error inesperado en el servidor. Por favor, inténtalo de nuevo más tarde.';
         notificationService.error(
-          'Ocurrió un error inesperado en el servidor. Por favor, inténtalo de nuevo más tarde.',
+          detail,
           'Error del Servidor'
         );
       }

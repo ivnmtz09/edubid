@@ -230,10 +230,11 @@ import { WebSocketService } from '../../../../core/services/websocket.service';
                           <button
                             type="button"
                             (click)="closeAuction(a)"
-                            class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-amber-700 bg-amber-500/10 hover:bg-amber-500/20 dark:text-amber-300 transition-colors cursor-pointer"
+                            [disabled]="closingAuctionId() === a.id"
+                            class="px-2.5 py-1.5 rounded-lg text-xs font-medium text-amber-700 bg-amber-500/10 hover:bg-amber-500/20 dark:text-amber-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             title="Finalizar subasta y cobrar al ganador"
                           >
-                            Cerrar
+                            {{ closingAuctionId() === a.id ? 'Cerrando...' : 'Cerrar' }}
                           </button>
                         }
                       </div>
@@ -617,6 +618,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   auctionMinCoins = signal<number>(50);
   auctionMinIncrement = signal<number>(10);
   auctionEndDate = signal<string>('');
+  closingAuctionId = signal<number | null>(null);
 
   teacherName = computed(() => {
     const user = this.authService.currentUser();
@@ -765,7 +767,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
 
   submitGrade(): void {
     const item = this.selectedReview();
-    if (!item) return;
+    if (!item || this.isSubmittingGrade()) return;
 
     const nota = this.reviewGrade();
     if (nota < 0 || nota > 100) {
@@ -821,6 +823,8 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   }
 
   submitCreateAuction(): void {
+    if (this.isCreatingAuction()) return;
+
     if (!this.auctionTitle().trim() || !this.auctionGroupId() || !this.auctionEndDate()) {
       this.notificationService.error('Completa los campos obligatorios para la subasta.');
       return;
@@ -855,12 +859,16 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   }
 
   closeAuction(auction: Auction): void {
+    if (this.closingAuctionId() !== null) return;
+
     if (!confirm(`¿Deseas cerrar la subasta "${auction.titulo}" ahora y declarar al ganador?`)) {
       return;
     }
 
+    this.closingAuctionId.set(auction.id);
     this.auctionService.closeAuction(auction.id).subscribe({
       next: (res) => {
+        this.closingAuctionId.set(null);
         this.teacherAuctions.update((list) =>
           list.map((a) => (a.id === auction.id ? { ...a, estado: 'closed' } : a))
         );
@@ -870,6 +878,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
         this.notificationService.success(`Subasta cerrada. ${winner}`, 'Subasta Concluida');
       },
       error: (err) => {
+        this.closingAuctionId.set(null);
         const msg = err.error?.detail || 'Error al cerrar la subasta';
         this.notificationService.error(msg);
       },
