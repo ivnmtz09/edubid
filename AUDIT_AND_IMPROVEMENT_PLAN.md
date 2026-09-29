@@ -25,8 +25,9 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 | **5** | Almacenamiento Nube para Archivos Media (S3/Cloudinary) | DevOps / Backend | 🟡 **MEDIA** | Pérdida de imágenes y tareas adjuntas al reiniciar contenedores en producción | Medio |
 | **6** | Normalización de Dependencias Frontend & Build | Frontend | ✅ **COMPLETADO** | Incompatibilidades de compilación CLI, builds de producción pesados | Bajo |
 | **7** | Interceptor Global de Errores HTTP | Frontend | ✅ **COMPLETADO** | Interfaz rota o congelada cuando ocurre un error 500 o caída de red | Bajo |
-| **8** | Módulo de Exportación de Reportes (PDF / Excel) | Backend / Frontend | 🟢 **BAJA-MEDIA** | Fricción para directivos que requieren informes físicos/impresos | Medio |
+| **8** | Módulo de Exportación de Reportes (PDF / Excel) | Backend / Frontend | ✅ **COMPLETADO** | Fricción para directivos que requieren informes físicos/impresos | Medio |
 | **9** | Paginación Global y Optimización ORM | Backend | ✅ **COMPLETADO** | Lentitud en la API cuando la plataforma tenga miles de usuarios | Bajo |
+| **10** | Auditoría de Resiliencia, Concurrencia y Errores | Backend / Frontend | ✅ **COMPLETADO** | Doble gasto de monedas, peticiones simultáneas no controladas y fallos 500 no estructurados | Medio |
 
 ---
 
@@ -252,6 +253,37 @@ El sistema presenta un diseño de arquitectura bien estructurado, con separació
 
 ---
 
+### 10. 🛡️ Auditoría Exhaustiva de Seguridad, Concurrencia y Resiliencia de Errores
+
+* **¿Qué hay que hacer?**  
+  Blindar la totalidad de endpoints y componentes contra fallos por concurrencia, doble gasto (*double-spending*) en EduCoins, fugas multi-tenant entre grupos e instituciones ajenas, excepciones no controladas en el backend que deriven en pantallas de error HTML 500, y peticiones duplicadas (*double-click*) en la interfaz de usuario.
+
+* **¿Por qué hay que hacerlo?**  
+  El usuario final utiliza las aplicaciones de formas impredecibles (doble clic rápido en botones de puja o entrega, apertura simultánea en múltiples pestañas, o manipulación de parámetros de grupo/subasta). Sin bloqueos a nivel de base de datos (`select_for_update`) y sin un formateador de excepciones global, los errores rompían la interfaz o podían permitir desbalances en las billeteras.
+
+* **Estado:** ✅ **COMPLETADO & AUDITADO (100% verificado en tests backend y frontend)**
+* **Implementación:**
+  * **Manejador Global de Excepciones (`edubid_core/exceptions.py`):**
+    * Normaliza automáticamente cualquier error de Django REST Framework en formato consistente `{ "detail": "Mensaje legible" }`.
+    * Captura excepciones `IntegrityError` de base de datos (por ejemplo, duplicidad de correos o claves foráneas) transformándolas en HTTP 400 Bad Request estructurado en vez de un choque 500.
+    * Captura errores de validación de modelos Django (`ValidationError`) y retorna respuestas legibles en campo `detail`.
+    * Intercepta fallos internos no previstos, registrándolos en los logs del servidor y respondiendo con un JSON estructurado HTTP 500 para evitar fugas de traza técnica sensible.
+    * Verificado mediante 6 pruebas unitarias específicas en `apps/common/tests.py`.
+  * **Bloqueos de Concurrencia y Prevención de Double-Spending:**
+    * `apps/auctions/views.py`: En `BidViewSet.perform_create`, tanto la subasta como la billetera del estudiante se bloquean mediante `select_for_update()` bajo transacción atómica `@transaction.atomic`. Valida además que el estudiante pertenezca al grupo vinculado antes de permitir cualquier puja.
+    * `AuctionViewSet.perform_destroy`: Protegido con transacción atómica y `select_for_update()` para devolver exactamente el saldo bloqueado a los postores, con fallback seguro para periodos activos.
+  * **Validación Multi-Tenant y de Dominio:**
+    * `apps/groups/views.py`: Los endpoints `join` y `join_by_id` verifican que el código de grupo no haya expirado (`codigo_expira_en > now`) y que el estudiante pertenezca a la misma institución educativa del grupo.
+    * `apps/activities/views.py`: `SubmissionViewSet.perform_create` valida que la actividad esté habilitada, no vencida y que el estudiante esté matriculado en dicho grupo.
+    * `apps/notifications/views.py`: Envíos masivos restringidos a aulas del docente y pertenecientes a su misma institución.
+  * **Escudos Anti-Doble Clic y Estados de Carga en Frontend (Angular):**
+    * `StudentDashboardComponent`: Agregado estado reactivo `biddingAuctionId` con desactivación de botón y spinner animado para impedir múltiples pujas concurrentes por clic rápido. Protegido `submitTask` y `cancelSubmission` (`isCancelling`).
+    * `TeacherDashboardComponent`: Agregado `closingAuctionId` para evitar duplicidad al cerrar subastas, y bloqueo reactivo en `submitGrade` y `submitCreateAuction`.
+    * `ClassroomDetailComponent`: Incorporado `isDeletingGroup` e `isSavingActivity` con deshabilitación de botones para prevenir transacciones huérfanas.
+    * `error.interceptor.ts`: Actualizado para desplegar directamente el campo `detail` estructurado devuelto por el backend en fallos del servidor.
+
+---
+
 ## 🗓️ Hoja de Ruta Recomendada (Fases de Ejecución)
 
 ```mermaid
@@ -272,6 +304,7 @@ flowchart TD
         G[7. WebSockets para Subastas en Vivo]
         H[8. Exportación PDF/Excel de Reportes]
         I[9. Paginación Global & Tuning ORM]
+        J[10. Auditoría de Seguridad & Concurrencia]
     end
 
     Fase 1 --> Fase 2 --> Fase 3
@@ -305,7 +338,7 @@ flowchart LR
 5. **Pujas en Vivo & Liquidación:** Los estudiantes pujan en tiempo real por WebSockets; al finalizar el tiempo, el sistema cierra la subasta y adjudica el incentivo de forma autónoma.
 
 ### Métricas de Calidad y Validación:
-- **Backend:** 58/58 pruebas unitarias e integradas aprobadas (`python manage.py test apps`).
+- **Backend:** 76/76 pruebas unitarias e integradas aprobadas (`python manage.py test apps`).
 - **Frontend:** 23/23 pruebas unitarias aprobadas (`npx ng test --watch=false`).
 - **Build de Producción:** Compilación exitosa en código 0 (`npx ng build`).
 
