@@ -110,6 +110,7 @@ class AuctionViewSet(viewsets.ModelViewSet):
         
         serializer.save()
 
+    @transaction.atomic
     def perform_destroy(self, instance):
         """Validar que el docente solo pueda eliminar sus propias subastas"""
         user = self.request.user
@@ -121,16 +122,19 @@ class AuctionViewSet(viewsets.ModelViewSet):
             raise ValidationError("No se puede eliminar una subasta cerrada.")
         
         # Devolver monedas bloqueadas antes de eliminar
+        periodo_activo = Period.objects.filter(grupo=instance.grupo, activo=True).first()
+        if not periodo_activo:
+            periodo_activo = Period.objects.filter(grupo=instance.grupo).order_by('-fecha_fin').first()
+
         for bid in instance.bids.all():
             try:
-                periodo_activo = Period.objects.filter(grupo=instance.grupo, activo=True).first()
                 if periodo_activo:
-                    wallet = Wallet.objects.get(
+                    wallet = Wallet.objects.select_for_update().get(
                         usuario=bid.estudiante, 
                         grupo=instance.grupo, 
                         periodo=periodo_activo
                     )
-                    wallet.bloqueado_educoins -= bid.cantidad_educoins
+                    wallet.bloqueado_educoins = max(0, wallet.bloqueado_educoins - bid.cantidad_educoins)
                     wallet.save()
             except Wallet.DoesNotExist:
                 pass
@@ -242,6 +246,9 @@ class BidViewSet(viewsets.ModelViewSet):
             if estudiante != user:
                 logger.warning(f"Estudiante {user.id} intentó pujar por otro estudiante {estudiante.id}")
                 raise PermissionDenied("Solo puedes crear pujas para ti mismo.")
+            if not auction.grupo.estudiantes.filter(id=user.id).exists():
+                logger.warning(f"Estudiante {user.id} no pertenece al grupo {auction.grupo.id}")
+                raise PermissionDenied("No perteneces al grupo asignado a esta subasta.")
         
         elif user.role == 'docente':
             if auction.grupo.classroom.docente != user:
@@ -251,6 +258,9 @@ class BidViewSet(viewsets.ModelViewSet):
         else:
             logger.warning(f"Usuario {user.id} con rol {user.role} intentó crear puja sin permisos")
             raise PermissionDenied("No tienes permiso para crear pujas.")
+
+        # Bloquear la subasta con select_for_update() para evitar condiciones de carrera concurrentes
+        auction = Auction.objects.select_for_update().get(id=auction.id)
 
         # Validar que la subasta esté activa
         if auction.estado != "active":
@@ -263,13 +273,15 @@ class BidViewSet(viewsets.ModelViewSet):
 
         # Buscar wallet y periodo activo
         periodo_activo = Period.objects.filter(grupo=auction.grupo, activo=True).first()
+        if not periodo_activo:
+            periodo_activo = Period.objects.filter(grupo=auction.grupo).order_by('-fecha_fin').first()
         
         if not periodo_activo:
             logger.warning(f"No hay periodo activo para grupo {auction.grupo.id}")
             raise ValidationError("No hay un periodo activo para este grupo.")
 
         try:
-            wallet = Wallet.objects.get(
+            wallet = Wallet.objects.select_for_update().get(
                 usuario=estudiante, 
                 grupo=auction.grupo, 
                 periodo=periodo_activo

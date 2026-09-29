@@ -243,6 +243,60 @@ class AuctionClosingTests(TestCase):
         subasta_vencida.refresh_from_db()
         self.assertEqual(subasta_vencida.estado, "closed")
 
+    def test_estudiante_no_puede_pujar_en_subasta_de_otro_grupo(self):
+        """Un estudiante que no pertenece al grupo de la subasta no puede pujar."""
+        otro_estudiante = User.objects.create_user(
+            username="estudiante_externo",
+            email="externo@edubid.com",
+            password="password123",
+            role="estudiante",
+            institucion=self.institucion
+        )
+        subasta = Auction.objects.create(
+            titulo="Subasta Restringida",
+            creador=self.docente,
+            grupo=self.group,
+            estado="active",
+            fecha_fin=timezone.now() + timedelta(days=2),
+            valor_minimo_educoins=10
+        )
+        client = APIClient()
+        client.force_authenticate(user=otro_estudiante)
+        response = client.post("/api/auctions/bids/", {
+            "auction": subasta.id,
+            "estudiante": otro_estudiante.id,
+            "cantidad_educoins": 20
+        }, format="json")
+        self.assertIn(response.status_code, [400, 403])
+        self.assertIn("no pertenece al grupo", str(response.data))
+
+    def test_eliminar_subasta_activa_libera_monedas_bloqueadas(self):
+        """Eliminar una subasta activa libera los fondos bloqueados de los postores de manera segura."""
+        subasta = Auction.objects.create(
+            titulo="Subasta Para Cancelar",
+            creador=self.docente,
+            grupo=self.group,
+            estado="active",
+            fecha_fin=timezone.now() + timedelta(days=1),
+            valor_minimo_educoins=10
+        )
+        Bid.objects.create(
+            auction=subasta,
+            estudiante=self.estudiante_ganador,
+            cantidad_educoins=40,
+            registrado_por=self.estudiante_ganador
+        )
+        self.wallet_ganador.bloqueado_educoins = 40
+        self.wallet_ganador.save()
+
+        client = APIClient()
+        client.force_authenticate(user=self.docente)
+        response = client.delete(f"/api/auctions/auctions/{subasta.id}/")
+        self.assertEqual(response.status_code, 204)
+
+        self.wallet_ganador.refresh_from_db()
+        self.assertEqual(self.wallet_ganador.bloqueado_educoins, 0)
+
 
 class AuctionWebSocketTests(TestCase):
     async def test_websocket_connection_and_welcome(self):

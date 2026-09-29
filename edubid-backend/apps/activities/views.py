@@ -1,7 +1,10 @@
+import logging
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
+
+logger = logging.getLogger(__name__)
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from apps.grades.models import Grade
 from apps.tokens.models import Wallet, Period
@@ -102,6 +105,17 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.role != "estudiante":
             raise PermissionDenied("Solo los estudiantes pueden enviar actividades.")
+
+        activity = serializer.validated_data.get('activity')
+        if not activity.habilitada:
+            raise ValidationError("Esta actividad no está habilitada para entregas.")
+
+        if activity.esta_vencida():
+            raise ValidationError("El plazo para entregar esta actividad ha vencido.")
+
+        if not activity.group.estudiantes.filter(id=user.id).exists():
+            raise PermissionDenied("No estás inscrito en el grupo correspondiente a esta actividad.")
+
         serializer.save(estudiante=user)
 
     def destroy(self, request, *args, **kwargs):
@@ -149,7 +163,20 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         retro = request.data.get("retroalimentacion", "")
 
         if nota is None:
-            return Response({"error": "Debes incluir una calificacion."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Debes incluir una calificación."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            nota_val = float(nota)
+            if nota_val < 0 or nota_val > 100:
+                return Response(
+                    {"detail": "La calificación debe ser un valor numérico entre 0 y 100."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except (ValueError, TypeError):
+            return Response(
+                {"detail": "La calificación debe ser un valor numérico válido."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # 1. Actualizar submission
         submission.calificacion = nota
@@ -168,6 +195,8 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         
         # 4. Obtener wallet actualizada para la respuesta
         periodo_activo = Period.objects.filter(grupo=submission.activity.group, activo=True).first()
+        if not periodo_activo:
+            periodo_activo = Period.objects.filter(grupo=submission.activity.group).order_by('-fecha_fin').first()
         wallet_saldo = 0
         
         if periodo_activo:
@@ -179,10 +208,11 @@ class SubmissionViewSet(viewsets.ModelViewSet):
                 )
                 wallet_saldo = wallet.saldo_educoins
             except Wallet.DoesNotExist:
-                print(f"ERROR: No se encontro wallet para {submission.estudiante.email}")
+                logger.error("No se encontró wallet para %s", submission.estudiante.email)
 
         # 5. Respuesta final
         return Response({
+            "detail": "Entrega calificada correctamente",
             "mensaje": "Entrega calificada correctamente",
             "submission_id": submission.id,
             "nota": submission.calificacion,

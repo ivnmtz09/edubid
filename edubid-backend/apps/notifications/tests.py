@@ -4,6 +4,8 @@ from rest_framework import status
 
 from apps.users.models import User
 from apps.institutions.models import Institution
+from apps.classrooms.models import Classroom
+from apps.groups.models import Group
 from apps.notifications.models import Notification
 
 
@@ -105,3 +107,31 @@ class NotificationModelAndApiTests(TestCase):
         self.assertEqual(response.data["no_leidas"], 1)
         self.assertEqual(response.data["leidas"], 1)
         self.assertEqual(response.data["por_tipo"]["subasta_ganada"], 1)
+
+    def test_docente_puede_enviar_notificacion_a_estudiantes(self):
+        """Un docente puede enviar notificaciones broadcast a todos sus estudiantes inscritos."""
+        docente = User.objects.create_user(
+            username="docente_notif",
+            email="docente_notif@edubid.com",
+            password="password123",
+            role="docente",
+            institucion=self.institucion
+        )
+        clase = Classroom.objects.create(nombre="Biología", docente=docente)
+        grupo = Group.objects.create(nombre="Grupo Bio-1", classroom=clase)
+        grupo.estudiantes.add(self.user_a, self.user_b)
+
+        self.client.force_authenticate(user=docente)
+        payload = {
+            "titulo": "Recordatorio de Clase",
+            "mensaje": "Mañana habrá laboratorio presencial.",
+            "tipo": "anuncio"
+        }
+        response = self.client.post("/api/notifications/enviar-estudiantes/", payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("detail", response.data)
+
+        notif_a = Notification.objects.filter(usuario=self.user_a, titulo="Recordatorio de Clase").first()
+        self.assertIsNotNone(notif_a)
+        self.assertEqual(notif_a.institucion, self.institucion)
+

@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 from django.test import TestCase
 from rest_framework.test import APIClient
 from apps.users.models import User
@@ -69,7 +71,7 @@ class GroupEnrollmentAndRBACTests(TestCase):
         """Al crear un grupo se autogenera un código único alfanumérico de 6 caracteres."""
         self.assertIsNotNone(self.group_1.codigo)
         self.assertEqual(len(self.group_1.codigo), 6)
-        self.assertTrue(self.group_1.codigo.isupper())
+        self.assertEqual(self.group_1.codigo, self.group_1.codigo.upper())
         self.assertIsNotNone(self.group_1.codigo_expira_en)
 
     def test_student_join_group_by_code_creates_wallet(self):
@@ -163,3 +165,23 @@ class GroupEnrollmentAndRBACTests(TestCase):
         data_est_after = resp_est_after.data if isinstance(resp_est_after.data, list) else resp_est_after.data.get("results", [])
         ids_est_after = [g["id"] for g in data_est_after]
         self.assertIn(self.group_1.id, ids_est_after)
+
+    def test_student_cannot_join_expired_code(self):
+        """Un código de vinculación cuya fecha ha vencido no permite la unión."""
+        self.group_1.codigo_expira_en = timezone.now() - timedelta(days=1)
+        self.group_1.save()
+
+        client = APIClient()
+        client.force_authenticate(user=self.estudiante)
+        response = client.post("/api/groups/join/", {"code": self.group_1.codigo})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("ha expirado", response.data.get("detail", ""))
+
+    def test_student_cannot_join_different_institution_group(self):
+        """Un estudiante de la Institución 1 no puede unirse a un grupo de la Institución 2."""
+        client = APIClient()
+        client.force_authenticate(user=self.estudiante)
+        response = client.post("/api/groups/join/", {"code": self.group_2.codigo})
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("institución educativa diferente", response.data.get("detail", ""))
+

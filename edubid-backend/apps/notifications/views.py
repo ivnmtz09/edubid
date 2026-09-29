@@ -14,10 +14,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Notification.objects.filter(
-            usuario=user,
-            institucion=user.institucion,
-        ).select_related('usuario', 'institucion')
+        qs = Notification.objects.filter(usuario=user)
+        if user.institucion_id:
+            qs = qs.filter(Q(institucion_id=user.institucion_id) | Q(institucion__isnull=True))
+        return qs.select_related('usuario', 'institucion')
 
     def get_serializer_class(self):
         """
@@ -96,15 +96,15 @@ class NotificationViewSet(viewsets.ModelViewSet):
         # Verificar que sea docente
         if user.role != 'docente':
             return Response({
-                'error': 'Solo los docentes pueden enviar notificaciones a estudiantes'
+                'detail': 'Solo los docentes pueden enviar notificaciones a estudiantes.'
             }, status=status.HTTP_403_FORBIDDEN)
         
         # Obtener estudiantes del docente
         classrooms = Classroom.objects.filter(docente=user)
-        estudiantes = User.objects.filter(role="estudiante", student_groups__classroom__in=classrooms).distinct()
+        estudiantes = User.objects.filter(role="estudiante", grupos_estudiante__classroom__in=classrooms).distinct()
         
         if not estudiantes.exists():
-            return Response({"error": "No hay estudiantes en esta clase"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "No hay estudiantes en tus clases."}, status=status.HTTP_400_BAD_REQUEST)
         
         # Crear notificaciones para cada estudiante
         titulo = request.data.get('titulo')
@@ -113,12 +113,13 @@ class NotificationViewSet(viewsets.ModelViewSet):
         
         if not titulo or not mensaje:
             return Response({
-                'error': 'Título y mensaje son requeridos'
+                'detail': 'Título y mensaje son requeridos.'
             }, status=status.HTTP_400_BAD_REQUEST)
         
         notificaciones = [
             Notification(
                 usuario=estudiante,
+                institucion=user.institucion,
                 tipo=tipo,
                 titulo=titulo,
                 mensaje=mensaje,
@@ -133,5 +134,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
         Notification.objects.bulk_create(notificaciones)
         
         return Response({
+            'detail': f'Notificación enviada a {len(estudiantes)} estudiantes.',
             'message': f'Notificación enviada a {len(estudiantes)} estudiantes'
         })

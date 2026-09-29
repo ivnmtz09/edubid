@@ -161,3 +161,34 @@ class ActivityAndSubmissionTests(TestCase):
         response = self.client.delete(f"/api/submissions/{submission.id}/")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue(Submission.objects.filter(id=submission.id).exists())
+
+    def test_estudiante_no_puede_entregar_en_grupo_ajeno(self):
+        """Un estudiante no puede enviar entregas a actividades de grupos donde no está inscrito."""
+        self.client.force_authenticate(user=self.estudiante_b)
+        data = {
+            "activity": self.actividad_a.id,
+            "contenido": "Intento de entrega no autorizada"
+        }
+        response = self.client.post("/api/submissions/", data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("detail", response.data)
+
+    def test_estudiante_no_puede_entregar_actividad_vencida(self):
+        """No se permite entregar actividades cuya fecha límite ya expiró."""
+        actividad_vencida = Activity.objects.create(
+            group=self.group_a,
+            tipo="reto",
+            nombre="Reto Expirado",
+            valor_educoins=30,
+            puntos_experiencia=10,
+            fecha_entrega=timezone.now() - timedelta(hours=2),
+            habilitada=True
+        )
+        self.client.force_authenticate(user=self.estudiante_a)
+        data = {
+            "activity": actividad_vencida.id,
+            "contenido": "Entrega tardía"
+        }
+        response = self.client.post("/api/submissions/", data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("detail", response.data)

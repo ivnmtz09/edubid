@@ -59,11 +59,24 @@ class GroupViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            group = Group.objects.get(codigo=code, activo=True)
+            group = Group.objects.select_related('classroom__docente__institucion').get(codigo=code, activo=True)
         except Group.DoesNotExist:
             return Response(
                 {"detail": "Codigo invalido o expirado."},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if group.codigo_expira_en and group.codigo_expira_en < timezone.now():
+            return Response(
+                {"detail": "El código de vinculación ha expirado. Solicita un nuevo código a tu docente."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        docente_institucion_id = getattr(getattr(group.classroom.docente, 'institucion', None), 'id', None)
+        if user.institucion_id and docente_institucion_id and user.institucion_id != docente_institucion_id:
+            return Response(
+                {"detail": "No puedes unirte a un grupo de una institución educativa diferente a la tuya."},
+                status=status.HTTP_403_FORBIDDEN
             )
         
         if group.estudiantes.filter(id=user.id).exists():
@@ -73,8 +86,14 @@ class GroupViewSet(viewsets.ModelViewSet):
             )
         
         with transaction.atomic():
+            if not user.institucion_id and docente_institucion_id:
+                user.institucion_id = docente_institucion_id
+                user.save(update_fields=['institucion'])
+
             # CREAR WALLET AL UNIRSE AL GRUPO
             periodo_activo = Period.objects.filter(grupo=group, activo=True).first()
+            if not periodo_activo:
+                periodo_activo = Period.objects.filter(grupo=group).order_by('-fecha_fin').first()
             wallet_creada = False
             
             if periodo_activo:
@@ -90,6 +109,7 @@ class GroupViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(group)
         return Response({
+            "detail": "Te has unido al grupo correctamente.",
             "mensaje": "Te has unido al grupo correctamente.",
             "grupo": serializer.data,
             "wallet_creada": wallet_creada,
@@ -107,16 +127,29 @@ class GroupViewSet(viewsets.ModelViewSet):
                 {"detail": "Solo los estudiantes pueden unirse a grupos."},
                 status=status.HTTP_403_FORBIDDEN
             )
+
+        docente_institucion_id = getattr(getattr(group.classroom.docente, 'institucion', None), 'id', None)
+        if user.institucion_id and docente_institucion_id and user.institucion_id != docente_institucion_id:
+            return Response(
+                {"detail": "No puedes unirte a un grupo de una institución educativa diferente a la tuya."},
+                status=status.HTTP_403_FORBIDDEN
+            )
         
         if group.estudiantes.filter(id=user.id).exists():
             return Response(
-                {"detail": "Ya estas en este grupo."},
+                {"detail": "Ya estás en este grupo."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         with transaction.atomic():
+            if not user.institucion_id and docente_institucion_id:
+                user.institucion_id = docente_institucion_id
+                user.save(update_fields=['institucion'])
+
             # CREAR WALLET AL UNIRSE AL GRUPO
             periodo_activo = Period.objects.filter(grupo=group, activo=True).first()
+            if not periodo_activo:
+                periodo_activo = Period.objects.filter(grupo=group).order_by('-fecha_fin').first()
             wallet_creada = False
             
             if periodo_activo:
@@ -127,14 +160,12 @@ class GroupViewSet(viewsets.ModelViewSet):
                     defaults={'saldo_educoins': 0, 'bloqueado_educoins': 0}
                 )
                 wallet_creada = created
-                print(f"Wallet creada: {wallet_creada} para {user.email} en grupo {group.nombre}")
-            else:
-                print(f"No hay periodo activo para el grupo {group.nombre}")
             
             group.estudiantes.add(user)
         
         serializer = self.get_serializer(group)
         return Response({
+            "detail": "Te has unido correctamente al grupo.",
             "mensaje": "Te has unido correctamente al grupo.",
             "grupo": serializer.data,
             "wallet_creada": wallet_creada,
