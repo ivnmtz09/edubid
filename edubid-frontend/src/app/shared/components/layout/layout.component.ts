@@ -1,8 +1,9 @@
-import { Component, inject, signal, computed, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, signal, computed, HostListener, ElementRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
+import { InAppNotificationService, InAppNotification } from '../../../core/services/in-app-notification.service';
 import { UserRole } from '../../../core/models/user.model';
 
 export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users';
@@ -205,9 +206,131 @@ interface NavItem {
               </div>
             </div>
 
-            <!-- Lado Derecho: Selector de Tema + Usuario y Logout -->
+            <!-- Lado Derecho: Notificaciones + Selector de Tema + Usuario y Logout -->
             <div class="flex items-center gap-2 sm:gap-3">
               
+              <!-- Centro de Notificaciones (Campana de Notificaciones In-App) -->
+              <div id="layout-notifications-dropdown-container" class="relative">
+                <button
+                  type="button"
+                  (click)="toggleNotificationsDropdown($event)"
+                  class="relative p-2 rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs"
+                  [attr.aria-expanded]="isNotificationsOpen()"
+                  aria-haspopup="true"
+                  title="Centro de Notificaciones"
+                >
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+
+                  <!-- Badge de No Leídas -->
+                  @if (unreadNotificationsCount() > 0) {
+                    <span class="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-extrabold text-white ring-2 ring-surface animate-pulse">
+                      {{ unreadNotificationsCount() > 99 ? '99+' : unreadNotificationsCount() }}
+                    </span>
+                  }
+                </button>
+
+                <!-- Menú Desplegable Flotante de Notificaciones -->
+                @if (isNotificationsOpen()) {
+                  <div class="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-surface shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                    <!-- Cabecera -->
+                    <div class="p-3.5 border-b border-border flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                          Notificaciones
+                        </span>
+                        @if (unreadNotificationsCount() > 0) {
+                          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400">
+                            {{ unreadNotificationsCount() }} nuevas
+                          </span>
+                        }
+                      </div>
+
+                      @if (unreadNotificationsCount() > 0) {
+                        <button
+                          type="button"
+                          (click)="markAllNotificationsAsRead()"
+                          class="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                        >
+                          Marcar leídas
+                        </button>
+                      }
+                    </div>
+
+                    <!-- Lista de Notificaciones -->
+                    <div class="max-h-80 overflow-y-auto divide-y divide-border">
+                      @if (inAppNotifService.isLoading()) {
+                        <div class="p-6 text-center">
+                          <svg class="animate-spin h-5 w-5 text-primary mx-auto" viewBox="0 0 24 24" fill="none">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                          </svg>
+                          <span class="text-xs text-text-muted mt-2 block">Cargando avisos...</span>
+                        </div>
+                      } @else if (notificationsList().length === 0) {
+                        <div class="p-8 text-center text-xs text-text-muted space-y-2">
+                          <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-text-muted flex items-center justify-center mx-auto">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                          </div>
+                          <p class="font-medium text-slate-800 dark:text-slate-200">No tienes notificaciones</p>
+                          <p class="text-[11px]">Te avisaremos cuando haya novedades en tus clases, tareas o subastas.</p>
+                        </div>
+                      } @else {
+                        @for (notif of notificationsList(); track notif.id) {
+                          <div
+                            (click)="onNotificationClick(notif)"
+                            class="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer flex items-start gap-3"
+                            [class.bg-orange-500/5]="!notif.leida"
+                          >
+                            <!-- Icono según tipo -->
+                            <span
+                              class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold font-mono"
+                              [ngClass]="getNotificationBadgeClass(notif.tipo)"
+                            >
+                              {{ getNotificationIcon(notif.tipo) }}
+                            </span>
+
+                            <div class="flex-1 min-w-0 space-y-0.5">
+                              <div class="flex items-center justify-between gap-1">
+                                <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate" [class.font-extrabold]="!notif.leida">
+                                  {{ notif.titulo }}
+                                </h4>
+                                @if (!notif.leida) {
+                                  <span class="w-2 h-2 rounded-full bg-orange-600 shrink-0" title="No leída"></span>
+                                }
+                              </div>
+                              <p class="text-xs text-text-muted line-clamp-2 leading-relaxed">
+                                {{ notif.mensaje }}
+                              </p>
+                              <span class="text-[10px] text-text-muted font-mono block">
+                                {{ notif.tiempo_transcurrido || formatNotificationDate(notif.creado) }}
+                              </span>
+                            </div>
+                          </div>
+                        }
+                      }
+                    </div>
+
+                    <!-- Pie del Popover -->
+                    <div class="p-2.5 border-t border-border bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between text-[11px]">
+                      <span class="text-text-muted font-mono text-[10px]">EduBid Centro de Avisos</span>
+                      @if (notificationsList().length > 0) {
+                        <button
+                          type="button"
+                          (click)="clearAllNotifications()"
+                          class="text-red-500 hover:text-red-700 hover:underline cursor-pointer"
+                        >
+                          Limpiar todo
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+
               <!-- Selector de Tema (Dropdown Idéntico a Home) -->
               <div id="layout-theme-dropdown-container" class="relative">
                 <button
@@ -367,9 +490,10 @@ interface NavItem {
     </div>
   `,
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   private authService = inject(AuthService);
   readonly themeService = inject(ThemeService);
+  readonly inAppNotifService = inject(InAppNotificationService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
 
@@ -377,6 +501,11 @@ export class LayoutComponent {
   isDesktopExpanded = signal(true);
   isMobileDrawerOpen = signal(false);
   isThemeDropdownOpen = signal(false);
+  isNotificationsOpen = signal(false);
+
+  // Notificaciones In-App
+  unreadNotificationsCount = computed(() => this.inAppNotifService.unreadCount());
+  notificationsList = computed(() => this.inAppNotifService.notifications());
 
   // Datos reactivos del usuario
   userRole = computed(() => this.authService.currentUser()?.role || 'estudiante');
@@ -461,12 +590,19 @@ export class LayoutComponent {
     });
   });
 
+  ngOnInit(): void {
+    this.inAppNotifService.loadUnreadCount().subscribe();
+  }
+
   // Cerrar dropdown si se hace click fuera
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!this.elementRef.nativeElement.querySelector('#layout-theme-dropdown-container')?.contains(target)) {
       this.isThemeDropdownOpen.set(false);
+    }
+    if (!this.elementRef.nativeElement.querySelector('#layout-notifications-dropdown-container')?.contains(target)) {
+      this.isNotificationsOpen.set(false);
     }
   }
 
@@ -488,12 +624,104 @@ export class LayoutComponent {
 
   toggleThemeDropdown(event?: Event): void {
     event?.stopPropagation();
+    this.isNotificationsOpen.set(false);
     this.isThemeDropdownOpen.update((open) => !open);
   }
 
   setTheme(mode: ThemeMode): void {
     this.themeService.setTheme(mode);
     this.isThemeDropdownOpen.set(false);
+  }
+
+  toggleNotificationsDropdown(event?: Event): void {
+    event?.stopPropagation();
+    this.isThemeDropdownOpen.set(false);
+    const nextState = !this.isNotificationsOpen();
+    this.isNotificationsOpen.set(nextState);
+    if (nextState) {
+      this.inAppNotifService.loadNotifications().subscribe();
+    }
+  }
+
+  markAllNotificationsAsRead(): void {
+    this.inAppNotifService.markAllAsRead().subscribe();
+  }
+
+  onNotificationClick(notif: InAppNotification): void {
+    if (!notif.leida) {
+      this.inAppNotifService.markAsRead(notif.id).subscribe();
+    }
+    this.isNotificationsOpen.set(false);
+    if (notif.auction_id) {
+      this.router.navigate(['/dashboard']);
+    } else if (notif.activity_id) {
+      if (this.userRole() === 'docente') {
+        this.router.navigate(['/classrooms']);
+      } else {
+        this.router.navigate(['/dashboard']);
+      }
+    }
+  }
+
+  clearAllNotifications(): void {
+    this.inAppNotifService.clearAll().subscribe();
+  }
+
+  getNotificationBadgeClass(tipo: string): string {
+    switch (tipo) {
+      case 'calificacion':
+      case 'monedas':
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
+      case 'subasta_nueva':
+      case 'subasta_ganada':
+      case 'subasta_abierta':
+        return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20';
+      case 'actividad':
+        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20';
+      case 'novedad_academica':
+        return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20';
+      case 'account_security':
+      case 'login_failed':
+        return 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20';
+      default:
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-border';
+    }
+  }
+
+  getNotificationIcon(tipo: string): string {
+    switch (tipo) {
+      case 'calificacion':
+      case 'monedas':
+        return 'EC';
+      case 'subasta_nueva':
+      case 'subasta_ganada':
+      case 'subasta_abierta':
+        return '🏷️';
+      case 'actividad':
+        return '📝';
+      case 'novedad_academica':
+        return '🏫';
+      case 'account_security':
+      case 'login_failed':
+        return '🛡️';
+      default:
+        return '🔔';
+    }
+  }
+
+  formatNotificationDate(dateStr?: string): string {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
   }
 
   logout(): void {
