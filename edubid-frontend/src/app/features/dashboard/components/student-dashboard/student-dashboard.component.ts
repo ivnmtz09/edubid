@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { WalletService, Wallet, CoinTransaction } from '../../../../core/services/wallet.service';
@@ -13,7 +14,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-student-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
       <!-- Banner de Bienvenida del Estudiante -->
@@ -142,7 +143,6 @@ import { Subscription } from 'rxjs';
 
         <!-- Grid Principal: Subastas Pedagógicas Activas & Próximas Tareas -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
           <!-- Columna Izquierda (7 cols): Subastas en Vivo -->
           <div class="lg:col-span-7 space-y-4">
             <div class="flex items-center justify-between border-b border-border pb-3">
@@ -226,11 +226,16 @@ import { Subscription } from 'rxjs';
           <div class="lg:col-span-5 space-y-8">
             <!-- Actividades con Recompensa -->
             <div class="space-y-4">
-              <div class="border-b border-border pb-3">
-                <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
-                  Próximas Actividades
-                </h2>
-                <p class="text-xs text-text-muted">Cumple a tiempo para ganar EduCoins.</p>
+              <div class="border-b border-border pb-3 flex items-center justify-between">
+                <div>
+                  <h2 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                    Actividades Pedagógicas
+                  </h2>
+                  <p class="text-xs text-text-muted">Cumple a tiempo para ganar EduCoins y XP.</p>
+                </div>
+                <span class="text-xs font-mono px-2 py-0.5 rounded-full bg-surface border border-border text-text-muted">
+                  {{ pendingTasks().length }} tareas
+                </span>
               </div>
 
               @if (pendingTasks().length === 0) {
@@ -240,23 +245,72 @@ import { Subscription } from 'rxjs';
               } @else {
                 <div class="space-y-3">
                   @for (task of pendingTasks(); track task.id) {
-                    <div class="p-4 rounded-xl border border-border bg-surface flex items-center justify-between gap-3">
-                      <div class="space-y-0.5 min-w-0">
-                        <span class="text-[11px] font-semibold text-text-muted block truncate capitalize">
-                          {{ task.tipo }}
-                        </span>
-                        <h4 class="font-bold text-sm text-slate-900 dark:text-white truncate">
-                          {{ task.nombre }}
-                        </h4>
-                        <span class="text-xs text-text-muted font-mono block">
-                          {{ task.tiempo_restante || task.fecha_entrega }}
-                        </span>
+                    <div class="p-4 rounded-xl border border-border bg-surface space-y-3 hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="space-y-0.5 min-w-0">
+                          <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-600">
+                              {{ task.tipo }}
+                            </span>
+                            <span class="text-xs text-text-muted font-mono truncate">
+                              {{ task.tiempo_restante || formatDate(task.fecha_entrega) }}
+                            </span>
+                          </div>
+                          <h4 class="font-bold text-sm text-slate-900 dark:text-white">
+                            {{ task.nombre }}
+                          </h4>
+                          @if (task.descripcion) {
+                            <p class="text-xs text-text-muted line-clamp-2">
+                              {{ task.descripcion }}
+                            </p>
+                          }
+                        </div>
+
+                        <div class="shrink-0 text-right">
+                          <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            +{{ task.valor_educoins }} EC
+                          </span>
+                        </div>
                       </div>
 
-                      <div class="shrink-0 text-right">
-                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                          +{{ task.valor_educoins }} EC
-                        </span>
+                      <div class="pt-2 border-t border-border flex items-center justify-between text-xs">
+                        @if (task.user_submission) {
+                          @if (task.user_submission.calificacion !== null) {
+                            <span class="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                              ✓ Calificada: {{ task.user_submission.calificacion }}/100
+                            </span>
+                          } @else {
+                            <span class="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                              ⏳ Entregada (Por calificar)
+                            </span>
+                          }
+                        } @else if (task.esta_vencida) {
+                          <span class="text-red-500 font-medium">
+                            Fecha límite vencida
+                          </span>
+                        } @else {
+                          <span class="text-text-muted">
+                            Pendiente
+                          </span>
+                        }
+
+                        @if (!task.user_submission && !task.esta_vencida) {
+                          <button
+                            type="button"
+                            (click)="openSubmitModal(task)"
+                            class="px-3 py-1 rounded-lg text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-2xs transition-all cursor-pointer"
+                          >
+                            Entregar Tarea
+                          </button>
+                        } @else if (task.user_submission) {
+                          <button
+                            type="button"
+                            (click)="openSubmitModal(task)"
+                            class="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 transition-colors cursor-pointer"
+                          >
+                            Ver Entrega
+                          </button>
+                        }
                       </div>
                     </div>
                   }
@@ -282,7 +336,12 @@ import { Subscription } from 'rxjs';
                   @for (tx of transactions(); track tx.id) {
                     <li class="flex items-center justify-between p-2.5 rounded-lg bg-surface border border-border">
                       <span class="text-text-muted truncate">{{ tx.descripcion }}</span>
-                      <span class="font-bold font-mono shrink-0 ml-2" [class.text-emerald-600]="tx.tipo === 'earn' || tx.tipo === 'ingreso'" [class.text-slate-900]="tx.tipo !== 'earn' && tx.tipo !== 'ingreso'" [class.dark:text-white]="tx.tipo !== 'earn' && tx.tipo !== 'ingreso'">
+                      <span
+                        class="font-bold font-mono shrink-0 ml-2"
+                        [class.text-emerald-600]="tx.tipo === 'earn' || tx.tipo === 'ingreso'"
+                        [class.text-slate-900]="tx.tipo !== 'earn' && tx.tipo !== 'ingreso'"
+                        [class.dark:text-white]="tx.tipo !== 'earn' && tx.tipo !== 'ingreso'"
+                      >
                         {{ tx.tipo === 'earn' || tx.tipo === 'ingreso' ? '+' : '-' }}{{ tx.cantidad_educoins }} EC
                       </span>
                     </li>
@@ -290,9 +349,190 @@ import { Subscription } from 'rxjs';
                 </ul>
               }
             </div>
-
           </div>
+        </div>
+      }
 
+      <!-- MODAL: ENTREGAR O VER DETALLES DE TAREA -->
+      @if (selectedTaskForSubmission()) {
+        <div
+          class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div class="relative w-full max-w-lg bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 sm:p-5 border-b border-border">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </span>
+                <div>
+                  <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                    {{ selectedTaskForSubmission()?.nombre }}
+                  </h3>
+                  <p class="text-xs text-text-muted">
+                    Recompensa: +{{ selectedTaskForSubmission()?.valor_educoins }} EC • +{{ selectedTaskForSubmission()?.puntos_experiencia }} XP
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="closeSubmitModal()"
+                class="text-text-muted hover:text-text p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-4 sm:p-6 space-y-4">
+              <!-- Descripción de la consigna -->
+              @if (selectedTaskForSubmission()?.descripcion) {
+                <div class="p-3.5 rounded-xl bg-bg border border-border text-xs text-text-muted space-y-1">
+                  <span class="font-semibold uppercase tracking-wider text-[10px] text-slate-900 dark:text-white block">
+                    Instrucciones del Docente
+                  </span>
+                  <p class="leading-relaxed text-slate-800 dark:text-slate-200 whitespace-pre-wrap">
+                    {{ selectedTaskForSubmission()?.descripcion }}
+                  </p>
+                </div>
+              }
+
+              <!-- Si ya tiene entrega registrada -->
+              @if (selectedTaskForSubmission()?.user_submission; as mySub) {
+                <div class="space-y-3">
+                  <div class="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                        Entrega Registrada
+                      </span>
+                      <span class="text-[11px] font-mono text-text-muted">
+                        {{ formatDate(mySub.creado) }}
+                      </span>
+                    </div>
+
+                    @if (mySub.contenido) {
+                      <p class="text-xs text-slate-900 dark:text-white whitespace-pre-wrap bg-surface p-2.5 rounded-lg border border-border">
+                        {{ mySub.contenido }}
+                      </p>
+                    }
+
+                    @if (mySub.archivo) {
+                      <a
+                        [href]="mySub.archivo"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Ver mi archivo adjunto</span>
+                      </a>
+                    }
+
+                    @if (mySub.calificacion !== null) {
+                      <div class="pt-2 border-t border-emerald-500/20 mt-2 space-y-1">
+                        <div class="flex items-center justify-between text-xs">
+                          <span class="font-bold text-slate-900 dark:text-white">Calificación Obtenida:</span>
+                          <span class="font-mono font-extrabold text-emerald-600 text-sm">
+                            {{ mySub.calificacion }}/100
+                          </span>
+                        </div>
+                        @if (mySub.retroalimentacion) {
+                          <p class="text-xs text-text-muted italic">
+                            "{{ mySub.retroalimentacion }}"
+                          </p>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  @if (mySub.calificacion === null && !selectedTaskForSubmission()?.esta_vencida) {
+                    <div class="flex justify-end pt-2">
+                      <button
+                        type="button"
+                        (click)="cancelSubmission(mySub.id)"
+                        class="text-xs text-red-500 hover:text-red-700 hover:underline cursor-pointer"
+                      >
+                        Cancelar y retirar esta entrega
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <!-- Formulario de Entrega para Alumno -->
+                <div class="space-y-4">
+                  <div>
+                    <label for="sub-content" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                      Respuesta / Enlace / Comentarios *
+                    </label>
+                    <textarea
+                      id="sub-content"
+                      rows="4"
+                      [(ngModel)]="submissionText"
+                      placeholder="Escribe tu respuesta, o pega el enlace a tu repositorio o documento de Google Drive..."
+                      class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted leading-relaxed"
+                    ></textarea>
+                  </div>
+
+                  <div>
+                    <label for="sub-file" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
+                      Archivo Adjunto (Opcional)
+                    </label>
+                    <input
+                      id="sub-file"
+                      type="file"
+                      (change)="onFileSelected($event)"
+                      class="w-full text-xs text-text-muted file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-surface file:border-border file:text-slate-900 dark:file:text-white hover:file:bg-slate-100 dark:hover:file:bg-slate-800 cursor-pointer"
+                    />
+                  </div>
+
+                  <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-900 dark:text-emerald-200 flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Tu nota determinará los EduCoins ganados. Las notas ≥ 90 reciben un 10% adicional.</span>
+                  </div>
+                </div>
+              }
+
+              <!-- Modal Footer -->
+              <div class="flex items-center justify-end gap-3 pt-4 border-t border-border">
+                <button
+                  type="button"
+                  (click)="closeSubmitModal()"
+                  class="px-4 py-2 rounded-xl text-xs font-semibold border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted transition cursor-pointer"
+                >
+                  Cerrar
+                </button>
+
+                @if (!selectedTaskForSubmission()?.user_submission && !selectedTaskForSubmission()?.esta_vencida) {
+                  <button
+                    type="button"
+                    (click)="submitTask()"
+                    [disabled]="isSubmitting() || !submissionText().trim()"
+                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    @if (isSubmitting()) {
+                      <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      <span>Enviando...</span>
+                    } @else {
+                      <span>Enviar Tarea</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
         </div>
       }
     </div>
@@ -319,6 +559,12 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   pendingTasks = signal<Activity[]>([]);
   transactions = signal<CoinTransaction[]>([]);
 
+  // Modal Entrega de Tareas
+  selectedTaskForSubmission = signal<Activity | null>(null);
+  submissionText = signal<string>('');
+  selectedFile = signal<File | null>(null);
+  isSubmitting = signal<boolean>(false);
+
   userName = computed(() => {
     const user = this.authService.currentUser();
     return user?.first_name || 'Estudiante';
@@ -337,7 +583,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     // 1. Escuchar nuevas pujas en vivo
     this.wsSub.add(
       this.wsService.onBidUpdate$().subscribe((bidEvent) => {
-        // Actualizar reactivamente la subasta en memoria
         this.auctions.update((currentAuctions) =>
           currentAuctions.map((auc) => {
             if (auc.id === bidEvent.auction_id) {
@@ -352,7 +597,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
           })
         );
 
-        // Alerta en vivo si el estudiante actual fue superado en una puja
         const currentUserId = this.authService.currentUser()?.id;
         if (
           currentUserId &&
@@ -381,7 +625,6 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
             '¡Subasta Ganada!'
           );
         }
-        // Refrescar saldo del estudiante
         this.loadStudentData();
       })
     );
@@ -429,7 +672,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
       },
     });
 
-    // 4. Cargar Actividades Pendientes
+    // 4. Cargar Actividades Asignadas
     this.activityService.getActivities().subscribe({
       next: (acts) => {
         this.pendingTasks.set(acts || []);
@@ -464,5 +707,96 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
         this.notificationService.error(msg, 'Error en puja');
       },
     });
+  }
+
+  // ================= ENTREGA DE ACTIVIDADES =================
+
+  openSubmitModal(task: Activity): void {
+    this.selectedTaskForSubmission.set(task);
+    this.submissionText.set('');
+    this.selectedFile.set(null);
+  }
+
+  closeSubmitModal(): void {
+    this.selectedTaskForSubmission.set(null);
+  }
+
+  onFileSelected(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      this.selectedFile.set(target.files[0]);
+    } else {
+      this.selectedFile.set(null);
+    }
+  }
+
+  submitTask(): void {
+    const task = this.selectedTaskForSubmission();
+    if (!task) return;
+
+    if (!this.submissionText().trim()) {
+      this.notificationService.error('Por favor escribe tu respuesta o enlace antes de enviar.');
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    const formData = new FormData();
+    formData.append('activity', task.id.toString());
+    formData.append('contenido', this.submissionText().trim());
+
+    const file = this.selectedFile();
+    if (file) {
+      formData.append('archivo', file);
+    }
+
+    this.activityService.submitActivity(formData).subscribe({
+      next: (res) => {
+        this.isSubmitting.set(false);
+        this.closeSubmitModal();
+        this.notificationService.success(
+          '¡Tarea entregada con éxito! Tu docente la calificará pronto.',
+          'Entrega Enviada'
+        );
+        this.loadStudentData();
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        const msg = err.error?.detail || 'Error al enviar la entrega';
+        this.notificationService.error(msg);
+      },
+    });
+  }
+
+  cancelSubmission(submissionId: number): void {
+    if (!confirm('¿Deseas retirar esta entrega? Podrás volver a enviarla antes de la fecha límite.')) {
+      return;
+    }
+
+    this.activityService.cancelSubmission(submissionId).subscribe({
+      next: () => {
+        this.notificationService.success('Entrega cancelada exitosamente.');
+        this.closeSubmitModal();
+        this.loadStudentData();
+      },
+      error: (err) => {
+        const msg = err.error?.detail || 'No se pudo cancelar la entrega';
+        this.notificationService.error(msg);
+      },
+    });
+  }
+
+  formatDate(dateStr?: string): string {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
   }
 }
