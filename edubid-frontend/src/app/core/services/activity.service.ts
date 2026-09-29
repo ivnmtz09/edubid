@@ -18,19 +18,34 @@ export interface Activity {
   puede_entregar?: boolean;
   esta_vencida?: boolean;
   tiempo_restante?: string;
+  submissions?: Submission[];
+  user_submission?: any;
 }
 
 export interface Submission {
   id: number;
   activity: number;
   activity_nombre?: string;
-  estudiante: number;
+  estudiante: number | { id: number; email: string; first_name: string; last_name: string };
   estudiante_nombre?: string;
   estudiante_email?: string;
+  contenido?: string;
   archivo?: string | null;
-  comentarios?: string;
+  calificacion?: number | null;
+  retroalimentacion?: string | null;
   creado: string;
+  actualizado?: string;
   grade?: any;
+}
+
+export interface GradeSubmissionResponse {
+  mensaje: string;
+  submission_id: number;
+  nota: number;
+  retroalimentacion: string;
+  grade_id: number;
+  coins_ganados: number;
+  wallet_saldo: number;
 }
 
 @Injectable({
@@ -47,10 +62,34 @@ export class ActivityService {
     return this.http.get<Activity[]>(url);
   }
 
+  createActivity(data: FormData | Partial<Activity>): Observable<Activity> {
+    return this.http.post<Activity>(`${this.apiUrl}/activities/`, data);
+  }
+
   getSubmissions(activityId?: number): Observable<Submission[]> {
     const url = activityId
       ? `${this.apiUrl}/submissions/?activity=${activityId}`
       : `${this.apiUrl}/submissions/`;
     return this.http.get<Submission[]>(url);
+  }
+
+  submitActivity(data: FormData): Observable<Submission> {
+    return this.http.post<Submission>(`${this.apiUrl}/submissions/`, data);
+  }
+
+  gradeSubmission(
+    submissionId: number,
+    data: { nota: number; retroalimentacion?: string }
+  ): Observable<GradeSubmissionResponse> {
+    return this.http.patch<GradeSubmissionResponse>(
+      `${this.apiUrl}/submissions/${submissionId}/grade/`,
+      data
+    );
+  }
+
+  cancelSubmission(submissionId: number): Observable<{ detail: string }> {
+    return this.http.delete<{ detail: string }>(
+      `${this.apiUrl}/submissions/${submissionId}/`
+    );
   }
 }

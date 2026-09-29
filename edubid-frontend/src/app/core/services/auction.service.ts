@@ -39,6 +39,17 @@ export interface Auction {
   creado?: string;
 }
 
+export interface CloseAuctionResponse {
+  detail: string;
+  ganador?: {
+    id: number;
+    nombre: string;
+    email: string;
+    monto_pagado: number;
+  };
+  total_participantes?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -52,6 +63,14 @@ export class AuctionService {
 
   getAuction(id: number): Observable<Auction> {
     return this.http.get<Auction>(`${this.apiUrl}/auctions/${id}/`);
+  }
+
+  createAuction(data: Partial<Auction>): Observable<Auction> {
+    return this.http.post<Auction>(`${this.apiUrl}/auctions/`, data);
+  }
+
+  closeAuction(auctionId: number): Observable<CloseAuctionResponse> {
+    return this.http.post<CloseAuctionResponse>(`${this.apiUrl}/auctions/${auctionId}/close/`, {});
   }
 
   createBid(auctionId: number, cantidad: number): Observable<AuctionBid> {
