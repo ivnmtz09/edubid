@@ -17,7 +17,7 @@ import {
   Validators,
   AbstractControl,
 } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { GoogleAuthService } from '../../core/services/google-auth.service';
@@ -37,6 +37,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly authService = inject(AuthService);
   readonly googleAuth = inject(GoogleAuthService);
   readonly router = inject(Router);
+  private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private elementRef = inject(ElementRef);
   readonly themeService = inject(ThemeService);
@@ -139,6 +140,16 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.googleAuth.initialize();
     // Iniciar carrusel de tarjetas del hero
     this.startCarousel();
+
+    // Detectar si se navegó a /login o /register o si viene con ?tab=
+    const currentPath = this.route.snapshot.routeConfig?.path;
+    const tabParam = this.route.snapshot.queryParamMap.get('tab');
+
+    if (currentPath === 'login' || tabParam === 'login') {
+      this.openAuthForms('login');
+    } else if (currentPath === 'register' || tabParam === 'register') {
+      this.openAuthForms('register');
+    }
   }
 
   ngAfterViewInit(): void {

@@ -14,13 +14,13 @@ export const routes: Routes = [
     path: 'login',
     title: 'Iniciar Sesión | EduBid',
     loadComponent: () =>
-      import('./features/auth/components/login/login.component').then(m => m.LoginComponent),
+      import('./features/home/home.component').then(m => m.HomeComponent),
   },
   {
     path: 'register',
     title: 'Registro | EduBid',
     loadComponent: () =>
-      import('./features/auth/components/register/register.component').then(m => m.RegisterComponent),
+      import('./features/home/home.component').then(m => m.HomeComponent),
   },
   {
     path: 'verify-email/:token',

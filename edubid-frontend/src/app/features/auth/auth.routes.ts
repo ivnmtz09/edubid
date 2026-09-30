@@ -3,21 +3,18 @@ import { Routes } from '@angular/router';
 export const AUTH_ROUTES: Routes = [
   {
     path: '',
-    title: 'Iniciar Sesión | EduBid',
-    loadComponent: () =>
-      import('./components/login/login.component').then(m => m.LoginComponent),
+    redirectTo: '/login',
+    pathMatch: 'full',
   },
   {
     path: 'login',
-    title: 'Iniciar Sesión | EduBid',
-    loadComponent: () =>
-      import('./components/login/login.component').then(m => m.LoginComponent),
+    redirectTo: '/login',
+    pathMatch: 'full',
   },
   {
     path: 'register',
-    title: 'Registro | EduBid',
-    loadComponent: () =>
-      import('./components/register/register.component').then(m => m.RegisterComponent),
+    redirectTo: '/register',
+    pathMatch: 'full',
   },
   {
     path: 'verify-email/:token',
