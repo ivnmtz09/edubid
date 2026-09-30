@@ -67,12 +67,15 @@ EduBid incorpora capacidades multi-inquilino (*multi-tenant*) con aislamiento es
                        │     └── Entregas (Submissions) -> Calificaciones (Grades con EduCoins)
                        └── Subastas de Incentivos (Auctions con sistema de pujas y retención)
    ```
-3. **Identidad Visual Dinámica (White-Label)**:
-   - Cada colegio define su Nombre oficial, Código DANE y Logotipo en alta resolución.
-   - Paleta de color primario y secundario inyectada en tiempo de ejecución en el frontend mediante variables CSS (`--brand-primary`, `--brand-accent`).
-   - Módulo de personalización institucional para Rectores y Administradores (`InstitutionBrandingComponent`).
+3. **Identidad Visual Dinámica (White-Label) & Contraste Inteligente**:
+   - Cada colegio define su Nombre oficial, Código DANE y Logotipo en alta resolución (vía URL o archivo local `.jpg`, `.jpeg`, `.png` hasta 2MB con previsualización y persistencia dual en `localStorage` y API).
+   - Paleta de 32 colores predefinidos con nombres en español, incluyendo escala de grises.
+   - Algoritmo de contraste dinámico basado en luminancia YIQ: cuando se seleccionan fondos claros, el texto y elementos de contraste conmutan automáticamente a negro (`#0a0a0a`) para máxima accesibilidad.
+   - Inyección en tiempo de ejecución de variables CSS (`--brand-primary`, `--brand-primary-text`, `--brand-accent`).
+   - Módulo de personalización institucional contraíble tipo acordeón para Rectores y Administradores (`InstitutionBrandingComponent`).
 4. **Gobernanza Institucional**:
    - Regla de unicidad a nivel de base de datos (`UniqueConstraint`) que garantiza un único **Rector** activo por institución.
+   - Aislamiento estricto de navegación en el Sidebar: cada rol visualiza únicamente las rutas y módulos autorizados según las directrices RBAC del backend.
 
 ---
 
@@ -136,8 +139,9 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 - **Identidad de Marca**: Logotipo corporativo (`edubid.png`) y favicon (`edubid.ico`) integrados globalmente
 - **Notificaciones**: Centro de notificaciones in-app interactivo (`InAppNotificationService`) + Toasts reactivos con [ngx-toastr](https://github.com/scttcper/ngx-toastr)
 - **Sincronización Real-Time**: WebSockets con RxJS (`WebSocketService`) para pujas en vivo y notificaciones dinámicas
-- **Resiliencia HTTP**: Interceptor funcional global `errorInterceptor` con captura de códigos 0, 403, 429 y 500
-- **Gestión de Temas**: Modo Claro / Oscuro / Sistema y personalización tenant en vivo (`ThemeService`)
+- **Gestión de Temas**: Modo Claro / Oscuro puro (escala de negros y grises neutros `#0a0a0a`, `#141414`, `#262626` sin matices azules), contraste dinámico YIQ automático para textos en botones (`--brand-primary-text`) y personalización institucional en vivo (`ThemeService`)
+- **Home Landing Interactiva**: Carrusel rotativo de demostración de módulos en tiempo real (Subasta, Billetera, Evaluación) y cuadrícula informativa de 6 características clave
+- **Módulos de Negocio Standalone**: Vistas independientes y lazy-loaded para `activities`, `auctions`, `wallet` y `grades` con exportaciones oficiales a PDF y Excel DANE
 
 ### 🐳 DevOps e Infraestructura
 - **Docker & Docker Compose**: MySQL 8.0 aislado con credenciales parametrizadas mediante `.env`

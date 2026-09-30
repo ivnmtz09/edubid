@@ -1468,6 +1468,14 @@ La migración React → Angular 19+ ha sido completada exitosamente, alcanzando 
    - 23/23 tests unitarios aprobados (`npx ng test --watch=false`).
    - Compilación para producción optimizada (`npx ng build`) en código 0 sin sobrepasar los presupuestos de empaquetado.
 
+12. **Módulos de Negocio Standalone, Contraste Inteligente YIQ y Modo Oscuro Puro**:
+   - Creación y desacoplamiento de vistas lazy-loaded dedicadas: `ActivitiesComponent`, `AuctionsComponent`, `WalletComponent` y `GradesComponent`.
+   - Implementación de modo oscuro puro con base neutra de negros y carbones (`#0a0a0a`, `#141414`, `#262626`), eliminando tintes azulados.
+   - Algoritmo de contraste dinámico YIQ en `ThemeService` para asegurar legibilidad perfecta de botones y badges (`--brand-primary-text` conmutando a negro `#0a0a0a` en tonos claros de la paleta de 32 colores institucionales).
+   - Rediseño de `InstitutionBrandingComponent` con vista contraíble (acordeón), carga local de archivos de logotipo (JPG, JPEG, PNG hasta 2MB) y persistencia reactiva en `localStorage` y backend.
+   - Aislamiento estricto de navegación en `LayoutComponent` respetando las directrices de autorización RBAC del backend.
+   - Rediseño interactivo de `HomeComponent` con carrusel automático de tarjetas (Subasta, Wallet, Evaluación) y cuadrícula informativa de 6 características de la plataforma.
+
 ---
 
 *Plan de acción completado y ejecutado exitosamente en el proyecto EduBid.*

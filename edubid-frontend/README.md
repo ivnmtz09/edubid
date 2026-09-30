@@ -31,12 +31,20 @@ La plataforma implementa un ecosistema educativo gamificado donde las calificaci
 - **🏛️ Jerarquía Académica (Clases -> Grupos -> Unión por Código)**:
   - **Docente**: Crea Aulas (`Classroom`) y dentro de ellas organiza Grupos escolares (`Group`). El sistema genera códigos de unión alfanuméricos únicos de 6 caracteres (ej. `ABC-123`).
   - **Estudiante**: Vista `StudentGroupsComponent` para consultar sus grupos inscritos y modal para ingresar el código de invitación. Al unirse, el sistema le provisiona automáticamente su billetera (`Wallet`) vinculada al grupo y período académico activo.
-- **🎨 White-Labeling & Theming Dinámico (`ThemeService`)**: Soporte para modo Claro / Oscuro / Sistema y personalización en tiempo real inyectando `--brand-primary` y `--brand-accent` en el elemento raíz del DOM según el tenant del colegio logueado.
-- **🔔 Centro de Notificaciones In-App Reactivo (`InAppNotificationService`)**: Campana interactiva en cabecera con contador de notificaciones no leídas (`unreadCount`), distintivo con animación de pulso (`animate-pulse`), popover flotante con marcado como leído, vaciado rápido y redirección fluida a la actividad o subasta respectiva.
-- **⚡ Subastas y Eventos en Vivo por WebSockets (`WebSocketService`)**: Sincronización continua de ofertas, líderes de puja y notificaciones de cierre en tiempo real mediante canales reactivos RxJS y reconexión automática.
-- **🛡️ Resiliencia HTTP e Interceptor Global (`errorInterceptor`)**: Gestión unificada de caídas de red (código 0), límites de peticiones (429), permisos denegados (403) y fallos de servidor (500), normalizando el mensaje legible para Toasts con bypass opcional (`X-Skip-Error-Toast`).
-- **📄 Descarga de Informes Académicos Oficiales**: Exportación directa desde el navegador de reportes de notas en PDF membretado y planillas consolidadas institucionales en formato Excel (`.xlsx`) formato DANE.
-- **📐 Arquitectura de Layout con Scroll Independiente (`LayoutComponent`)**: Barra lateral `aside` fija con navegación adaptada por rol e independencia de desplazamiento vertical respecto a la columna principal (`header`, `main content`, `footer`).
+- **🎨 White-Labeling, Contraste Inteligente & Modo Oscuro Puro (`ThemeService`)**:
+  - Modo Oscuro rediseñado en negros y grises neutros puros (`#0a0a0a`, `#141414`, `#262626`), eliminando tintes azulados (`slate`).
+  - Paleta de 32 colores institucionales con nombres en español, que incluye escala completa de grises (Blanco Puro, Gris Perla, Plata Claro, Grafito Oscuro, Negro Carbón, etc.).
+  - Algoritmo de contraste dinámico basado en luminosidad YIQ: cuando se eligen colores claros, los textos e iconos de botones cambian automáticamente a negro (`#0a0a0a`) para accesibilidad total.
+  - Inyección en tiempo real de variables CSS `--brand-primary`, `--brand-accent` y `--brand-primary-text`.
+- **🏛️ Editor de Identidad Institucional Contraíble (`InstitutionBrandingComponent`)**:
+  - Sección contraíble tipo acordeón con resumen visual para evitar saturar el panel de Rectoría.
+  - Cambio de nombre de la institución reactivo y persistido en `localStorage` y backend.
+  - Carga de archivo de logotipo local nativo (`.jpg`, `.jpeg`, `.png` hasta 2MB) con previsualización inmediata y persistencia en Base64.
+- **🧭 Aislamiento Estricto de Sidebar por Roles (`LayoutComponent`)**:
+  - El sidebar muestra exclusivamente las secciones autorizadas para cada rol en el backend (ej: Rector solo ve Rectoría, Supervisión y Reportes; se ocultan subastas y tareas de aula).
+- **🏠 Home Landing Renovada con Carrusel Interactivo (`HomeComponent`)**:
+  - Carrusel rotativo de tarjetas de muestra (Subasta Activa, Billetera y Evaluación) con temporizador automático de 3s e indicadores manuales.
+  - Cuadrícula informativa de 6 pilares clave de la plataforma y formularios de acceso con modo oscuro integrado.
 - **🛡️ Estandarización Visual e Identidad de Marca**:
   - Reemplazo total de emojis por iconografía vectorial estándar SVG (Flowbite Icons y Heroicons).
   - Integración del logotipo oficial `edubid.png` y favicon `edubid.ico`.
@@ -145,6 +153,10 @@ edubid-frontend/
 | `/classrooms` | `ClassroomsComponent` | `authGuard` + `roleGuard(['docente', 'rector', 'coordinador'])` | Gestión de asignaturas y aulas escolares |
 | `/classrooms/:id` | `ClassroomDetailComponent` | `authGuard` + `roleGuard(['docente', 'rector', 'coordinador'])` | Detalle del aula con grupos, retos y subastas |
 | `/groups` | `StudentGroupsComponent` | `authGuard` + `roleGuard(['estudiante', 'docente', 'rector', 'coordinador'])` | Directorio de grupos inscritos y unión mediante código |
+| `/activities` | `ActivitiesComponent` | `authGuard` | Retos formativos, misiones, entregas de estudiantes y panel de calificación |
+| `/auctions` | `AuctionsComponent` | `authGuard` | Subastas de incentivos en tiempo real con cuenta regresiva viva y centro de pujas |
+| `/wallet` | `WalletComponent` | `authGuard` | Billetera digital de EduCoins con saldos retenidos/disponibles e historial contable |
+| `/grades` | `GradesComponent` | `authGuard` | Planillas de calificaciones, promedios y exportación oficial en PDF y Excel |
 | `/sobre-nosotros` | `AboutComponent` | Público | Información institucional del proyecto EduBid |
 | `/terminos-y-condiciones`| `TermsComponent` | Público | Términos de servicio y privacidad |
 | `**` | `NotFoundComponent` | Público | Vista de página no encontrada (404) |
