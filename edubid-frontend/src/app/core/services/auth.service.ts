@@ -72,6 +72,14 @@ export class AuthService {
     return this.http.post<RegisterResponse>(AUTH_ENDPOINTS.REGISTER, payload);
   }
 
+  verifyEmail(token: string): Observable<{ message: string; user?: any }> {
+    return this.http.get<{ message: string; user?: any }>(AUTH_ENDPOINTS.VERIFY_EMAIL(token));
+  }
+
+  resendVerification(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email });
+  }
+
   logout(): void {
     this.removeStorageItem(STORAGE_KEYS.ACCESS_TOKEN);
     this.removeStorageItem(STORAGE_KEYS.REFRESH_TOKEN);

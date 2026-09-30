@@ -23,6 +23,12 @@ export const routes: Routes = [
       import('./features/auth/components/register/register.component').then(m => m.RegisterComponent),
   },
   {
+    path: 'verify-email/:token',
+    title: 'Verificar Correo | EduBid',
+    loadComponent: () =>
+      import('./features/auth/components/verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
+  },
+  {
     path: 'auth',
     loadChildren: () =>
       import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES),
