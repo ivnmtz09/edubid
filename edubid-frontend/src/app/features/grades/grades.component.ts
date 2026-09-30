@@ -27,7 +27,7 @@ import { NotificationService } from '../../core/services/notification.service';
           </h1>
           <p class="text-sm text-text-muted mt-1">
             {{ isEstudiante()
-              ? 'Consulta tus notas obtenidas en cada reto y los EduCoins acreditados en tu billetera.'
+              ? 'Consulta tus notas obtenidas en cada actividad y los EduCoins acreditados en tu billetera.'
               : 'Supervisa el rendimiento académico de tus grupos y exporta planillas oficiales en PDF y Excel.' }}
           </p>
         </div>

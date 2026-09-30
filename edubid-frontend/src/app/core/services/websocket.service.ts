@@ -66,7 +66,7 @@ export class WebSocketService implements OnDestroy {
       this.socket = new WebSocket(url);
 
       this.socket.onopen = () => {
-        console.log('⚡ [EduBid Real-Time] Conexión WebSocket establecida exitosamente.');
+        console.log('[EduBid Real-Time] Conexión WebSocket establecida exitosamente.');
         this.reconnectAttempts = 0;
       };
 
