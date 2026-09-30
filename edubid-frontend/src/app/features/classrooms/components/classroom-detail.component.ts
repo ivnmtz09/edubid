@@ -78,7 +78,7 @@ import { NotificationService } from '../../../core/services/notification.service
                   <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
-                  <span>+ Nuevo Grupo</span>
+                  <span>Nuevo Grupo</span>
                 </button>
               </div>
             }
@@ -390,7 +390,7 @@ import { NotificationService } from '../../../core/services/notification.service
                     Actividades: {{ selectedGroupForActivities()?.nombre }}
                   </h3>
                   <p class="text-xs text-text-muted">
-                    Asigna retos, proyectos y evaluaciones con recompensas de EduCoins y XP.
+                    Asigna tareas, proyectos, evaluaciones y exámenes con recompensas de EduCoins.
                   </p>
                 </div>
               </div>
@@ -431,7 +431,7 @@ import { NotificationService } from '../../../core/services/notification.service
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    <span>+ Nueva Actividad</span>
+                    <span>Nueva Actividad</span>
                   </button>
                 }
                 <button
@@ -464,7 +464,7 @@ import { NotificationService } from '../../../core/services/notification.service
                   </div>
                   <h4 class="font-bold text-slate-900 dark:text-white text-sm">No hay actividades creadas en este grupo</h4>
                   <p class="text-xs text-text-muted max-w-sm mx-auto">
-                    Publica retos, misiones o proyectos para que los alumnos ganen EduCoins y suban de nivel.
+                    Publica tareas, proyectos o evaluaciones para que los alumnos ganen EduCoins.
                   </p>
                 </div>
               } @else {
@@ -476,14 +476,14 @@ import { NotificationService } from '../../../core/services/notification.service
                           <div class="flex items-center gap-2">
                             <span
                               class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md"
-                              [class.bg-blue-500/10]="act.tipo === 'reto'"
-                              [class.text-blue-600]="act.tipo === 'reto'"
-                              [class.bg-purple-500/10]="act.tipo === 'mision'"
-                              [class.text-purple-600]="act.tipo === 'mision'"
-                              [class.bg-emerald-500/10]="act.tipo === 'proyecto'"
-                              [class.text-emerald-600]="act.tipo === 'proyecto'"
+                              [class.bg-blue-500/10]="act.tipo === 'tarea'"
+                              [class.text-blue-600]="act.tipo === 'tarea'"
+                              [class.bg-purple-500/10]="act.tipo === 'proyecto'"
+                              [class.text-purple-600]="act.tipo === 'proyecto'"
                               [class.bg-amber-500/10]="act.tipo === 'evaluacion'"
                               [class.text-amber-600]="act.tipo === 'evaluacion'"
+                              [class.bg-red-500/10]="act.tipo === 'examen'"
+                              [class.text-red-600]="act.tipo === 'examen'"
                             >
                               {{ act.tipo }}
                             </span>
@@ -506,7 +506,7 @@ import { NotificationService } from '../../../core/services/notification.service
                             +{{ act.valor_educoins }} EC
                           </span>
                           <span class="block text-[11px] font-mono text-text-muted mt-0.5">
-                            +{{ act.puntos_experiencia }} XP
+                            Nota: {{ act.puntos_experiencia }} pts
                           </span>
                         </div>
                       </div>
@@ -578,10 +578,10 @@ import { NotificationService } from '../../../core/services/notification.service
                     [(ngModel)]="activityTipo"
                     class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                   >
-                    <option value="reto">Reto formativo</option>
-                    <option value="mision">Misión especial</option>
-                    <option value="proyecto">Proyecto integrador</option>
-                    <option value="evaluacion">Evaluación diagnóstica</option>
+                    <option value="tarea">Tarea</option>
+                    <option value="proyecto">Proyecto</option>
+                    <option value="evaluacion">Evaluación</option>
+                    <option value="examen">Examen</option>
                   </select>
                 </div>
 
@@ -606,7 +606,7 @@ import { NotificationService } from '../../../core/services/notification.service
                   id="act-name"
                   type="text"
                   [(ngModel)]="activityNombre"
-                  placeholder="Ej: Reto 1 - Análisis de Algoritmos"
+                  placeholder="Ej: Taller 1 - Análisis de Algoritmos"
                   class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted"
                 />
               </div>
@@ -640,7 +640,7 @@ import { NotificationService } from '../../../core/services/notification.service
 
                 <div>
                   <label for="act-xp" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
-                    Puntos de Exp (XP) *
+                    Nota / Puntos base *
                   </label>
                   <input
                     id="act-xp"
@@ -884,7 +884,7 @@ export class ClassroomDetailComponent implements OnInit {
   // Modal Crear Actividad
   showCreateActivityModal = signal(false);
   isSavingActivity = signal(false);
-  activityTipo = signal<string>('reto');
+  activityTipo = signal<string>('tarea');
   activityNombre = signal<string>('');
   activityDescripcion = signal<string>('');
   activityEducoins = signal<number>(100);
@@ -1082,7 +1082,7 @@ export class ClassroomDetailComponent implements OnInit {
   }
 
   openCreateActivityForm(): void {
-    this.activityTipo.set('reto');
+    this.activityTipo.set('tarea');
     this.activityNombre.set('');
     this.activityDescripcion.set('');
     this.activityEducoins.set(100);
