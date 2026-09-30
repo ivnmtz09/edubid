@@ -48,7 +48,7 @@ import { NotificationService } from '../../core/services/notification.service';
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
               </svg>
-              <span>+ Nueva Subasta</span>
+              <span>Nueva Subasta</span>
             </button>
           }
         </div>
@@ -156,8 +156,11 @@ import { NotificationService } from '../../core/services/notification.service';
                       }
                     </span>
 
-                    <span class="text-xs font-mono font-bold text-primary">
-                      ⏱ {{ countdowns()[auc.id] || 'Calculando...' }}
+                    <span class="text-xs font-mono font-bold text-primary flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{{ countdowns()[auc.id] || 'Calculando...' }}</span>
                     </span>
                   </div>
 
@@ -310,6 +313,24 @@ import { NotificationService } from '../../core/services/notification.service';
               <input type="number" [(ngModel)]="bidAmount" [min]="minBidRequired()" class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text font-mono font-bold text-lg focus:ring-2 focus:ring-primary focus:outline-none" />
             </div>
 
+            <!-- Toggle de autorización para que el docente puje por el estudiante si no tiene celular -->
+            <div class="p-3 bg-bg rounded-xl border border-border space-y-1 text-xs">
+              <label class="flex items-start gap-2.5 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  [checked]="proxyPermission()" 
+                  (change)="toggleProxyPermission($event)"
+                  class="mt-0.5 rounded border-border text-primary focus:ring-primary accent-primary cursor-pointer" 
+                />
+                <div>
+                  <span class="font-semibold text-text block">Autorizar puja a mi docente</span>
+                  <span class="text-[11px] text-text-muted leading-tight block">
+                    Permite que tu docente puje en tu nombre en esta subasta si no tienes celular o acceso a tu dispositivo.
+                  </span>
+                </div>
+              </label>
+            </div>
+
             <div class="flex justify-end gap-2 pt-2">
               <button type="button" (click)="showBidModal.set(false)" class="px-3 py-1.5 rounded-xl border border-border hover:bg-bg text-text-muted cursor-pointer text-xs">Cancelar</button>
               <button
@@ -352,6 +373,58 @@ import { NotificationService } from '../../core/services/notification.service';
                 <p class="text-center py-6 text-xs text-text-muted">Aún no se han recibido pujas para esta subasta.</p>
               }
             </div>
+
+            <!-- Sección de Puja Asistida por Estudiante para Docente -->
+            @if (isDocente() && selectedAuction()?.estado === 'active') {
+              <div class="pt-3 border-t border-border space-y-3">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <h4 class="font-bold text-xs text-text">Puja Asistida por Estudiante (Sin dispositivo)</h4>
+                </div>
+
+                @if (estudiantesAutorizados().length > 0) {
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div class="sm:col-span-2">
+                      <select 
+                        [ngModel]="selectedEstudianteProxy()" 
+                        (ngModelChange)="selectedEstudianteProxy.set($event)"
+                        class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs text-text focus:ring-2 focus:ring-primary focus:outline-none"
+                      >
+                        <option [ngValue]="null">Selecciona estudiante autorizado...</option>
+                        @for (est of estudiantesAutorizados(); track est.id) {
+                          <option [ngValue]="est.id">{{ est.first_name }} {{ est.last_name }}</option>
+                        }
+                      </select>
+                    </div>
+                    <div>
+                      <input 
+                        type="number" 
+                        [(ngModel)]="proxyBidAmount" 
+                        [min]="minBidRequired()"
+                        placeholder="Monto EC"
+                        class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs text-text font-mono font-bold focus:ring-2 focus:ring-primary focus:outline-none" 
+                      />
+                    </div>
+                  </div>
+                  <div class="flex justify-end">
+                    <button
+                      type="button"
+                      (click)="submitProxyBid()"
+                      [disabled]="!selectedEstudianteProxy() || proxyBidAmount < minBidRequired() || isSaving()"
+                      class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer transition-colors"
+                    >
+                      {{ isSaving() ? 'Registrando...' : 'Pujar en su nombre' }}
+                    </button>
+                  </div>
+                } @else {
+                  <p class="text-[11px] text-text-muted bg-bg p-2.5 rounded-xl border border-border">
+                    Ningún estudiante ha autorizado puja asistida para esta subasta todavía.
+                  </p>
+                }
+              </div>
+            }
           </div>
         </div>
       }
@@ -385,6 +458,12 @@ export class AuctionsComponent implements OnInit, OnDestroy {
   selectedAuction = signal<Auction | null>(null);
   bids = signal<AuctionBid[]>([]);
   bidAmount = 0;
+
+  // Puja asistida / Proxy Bid
+  proxyPermission = signal<boolean>(false);
+  estudiantesAutorizados = signal<any[]>([]);
+  selectedEstudianteProxy = signal<number | null>(null);
+  proxyBidAmount = 0;
 
   countdowns = signal<Record<number, string>>({});
   private timer: any = null;
@@ -514,6 +593,28 @@ export class AuctionsComponent implements OnInit, OnDestroy {
     const min = this.calculateMinBid(auc);
     this.bidAmount = min;
     this.showBidModal.set(true);
+
+    if (this.userRole() === 'estudiante') {
+      this.auctionService.getPermisoPujaDocente(auc.id).subscribe({
+        next: (res) => this.proxyPermission.set(res?.autorizado ?? false),
+        error: () => this.proxyPermission.set(false)
+      });
+    }
+  }
+
+  toggleProxyPermission(event: Event): void {
+    const auc = this.selectedAuction();
+    if (!auc) return;
+    const checked = (event.target as HTMLInputElement).checked;
+    this.auctionService.autorizarPujaDocente(auc.id, checked).subscribe({
+      next: (res) => {
+        this.proxyPermission.set(res.autorizado);
+        this.notifService.success(res.mensaje);
+      },
+      error: () => {
+        this.notifService.error('Error al actualizar autorización de puja.');
+      }
+    });
   }
 
   calculateMinBid(auc: Auction): number {
@@ -547,10 +648,40 @@ export class AuctionsComponent implements OnInit, OnDestroy {
 
   viewBids(auc: Auction): void {
     this.selectedAuction.set(auc);
+    this.selectedEstudianteProxy.set(null);
+    this.proxyBidAmount = this.calculateMinBid(auc);
+
     this.auctionService.getBids({ auction: auc.id }).subscribe({
       next: (b) => {
         this.bids.set(b || []);
         this.showBidsModal.set(true);
+      }
+    });
+
+    if (this.isDocente()) {
+      this.auctionService.getEstudiantesConPermiso(auc.id).subscribe({
+        next: (ests) => this.estudiantesAutorizados.set(ests || []),
+        error: () => this.estudiantesAutorizados.set([])
+      });
+    }
+  }
+
+  submitProxyBid(): void {
+    const auc = this.selectedAuction();
+    const estId = this.selectedEstudianteProxy();
+    if (!auc || !estId || this.isSaving()) return;
+
+    this.isSaving.set(true);
+    this.auctionService.pujaProxy(auc.id, estId, this.proxyBidAmount).subscribe({
+      next: (res) => {
+        this.isSaving.set(false);
+        this.notifService.success(res.detail || 'Puja asistida registrada con éxito.');
+        this.viewBids(auc);
+        this.loadData();
+      },
+      error: (err) => {
+        this.isSaving.set(false);
+        this.notifService.error(err.error?.detail || 'Error al registrar puja asistida.');
       }
     });
   }

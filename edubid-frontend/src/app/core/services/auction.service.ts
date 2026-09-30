@@ -94,5 +94,24 @@ export class AuctionService {
       cantidad_educoins: cantidad
     });
   }
+
+  autorizarPujaDocente(auctionId: number, autorizado: boolean): Observable<{ autorizado: boolean; mensaje: string }> {
+    return this.http.post<{ autorizado: boolean; mensaje: string }>(`${this.apiUrl}/auctions/${auctionId}/autorizar_puja_docente/`, { autorizado });
+  }
+
+  getPermisoPujaDocente(auctionId: number): Observable<{ autorizado: boolean }> {
+    return this.http.get<{ autorizado: boolean }>(`${this.apiUrl}/auctions/${auctionId}/autorizar_puja_docente/`);
+  }
+
+  getEstudiantesConPermiso(auctionId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/auctions/${auctionId}/permisos_proxy/`);
+  }
+
+  pujaProxy(auctionId: number, estudianteId: number, cantidad: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auctions/${auctionId}/puja_proxy/`, {
+      estudiante_id: estudianteId,
+      cantidad_educoins: cantidad
+    });
+  }
 }
 

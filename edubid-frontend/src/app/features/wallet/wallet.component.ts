@@ -349,6 +349,21 @@ import { GroupService, Group } from '../../core/services/group.service';
                 <span class="text-xs font-mono text-text-muted">{{ displayedWallets().length }} registro(s)</span>
               </div>
 
+              <!-- Banner informativo sobre obtención de EduCoins -->
+              <div class="p-4 rounded-2xl bg-bg border border-border flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div class="text-xs space-y-1">
+                  <p class="font-bold text-text">Asignación transparente de EduCoins</p>
+                  <p class="text-text-muted leading-relaxed">
+                    Los estudiantes obtienen EduCoins exclusivamente al entregar y ser calificados en sus actividades académicas. Las bonificaciones manuales directas están deshabilitadas para garantizar la equidad pedagógica.
+                  </p>
+                </div>
+              </div>
+
               <div class="rounded-2xl border border-border bg-surface overflow-hidden">
                 <div class="overflow-x-auto">
                   <table class="w-full text-xs text-left">
@@ -360,7 +375,6 @@ import { GroupService, Group } from '../../core/services/group.service';
                         <th class="p-3.5 font-mono text-right">Saldo Total</th>
                         <th class="p-3.5 font-mono text-right">Retenido</th>
                         <th class="p-3.5 font-mono text-right">Disponible</th>
-                        <th class="p-3.5 text-center">Acciones</th>
                       </tr>
                     </thead>
                     <tbody class="divide-y divide-border">
@@ -380,23 +394,10 @@ import { GroupService, Group } from '../../core/services/group.service';
                           <td class="p-3.5 font-mono font-bold text-slate-800 dark:text-neutral-200 text-right">{{ w.saldo_educoins }} EC</td>
                           <td class="p-3.5 font-mono text-zinc-400 text-right">{{ w.bloqueado_educoins }} EC</td>
                           <td class="p-3.5 font-mono font-bold text-emerald-500 text-right">{{ w.saldo_disponible }} EC</td>
-                          <td class="p-3.5 text-center">
-                            <button
-                              type="button"
-                              (click)="openDepositModal(w)"
-                              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
-                              title="Bonificar o ajustar EduCoins"
-                            >
-                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                              </svg>
-                              <span>Bonificar</span>
-                            </button>
-                          </td>
                         </tr>
                       } @empty {
                         <tr>
-                          <td colspan="7" class="p-10 text-center text-text-muted space-y-2">
+                          <td colspan="6" class="p-10 text-center text-text-muted space-y-2">
                             <p class="font-medium text-sm">No se encontraron billeteras coincidentes.</p>
                             <p class="text-xs">Los estudiantes inscritos en tus grupos aparecerán aquí con sus saldos actualizados.</p>
                           </td>
@@ -409,72 +410,6 @@ import { GroupService, Group } from '../../core/services/group.service';
             </div>
           </div>
         }
-      }
-
-      <!-- MODAL PARA BONIFICAR / DEPOSITAR EDUCOINS (DOCENTE/ADMIN) -->
-      @if (showDepositModal()) {
-        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" (click)="closeDepositModal()">
-          <div class="w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl p-6 space-y-5" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between pb-3 border-b border-border">
-              <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-base">
-                Bonificar EduCoins
-              </h3>
-              <button type="button" (click)="closeDepositModal()" class="p-1.5 rounded-lg text-text-muted hover:text-text cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
-            </div>
-
-            <div class="p-3 rounded-xl bg-bg border border-border space-y-1 text-xs">
-              <p><span class="font-bold text-text">Estudiante:</span> {{ targetWallet()?.usuario_email }}</p>
-              <p><span class="font-bold text-text">Grupo:</span> {{ targetWallet()?.grupo_nombre }}</p>
-              <p><span class="font-bold text-text">Saldo Disponible Actual:</span> <span class="font-mono text-emerald-500 font-bold">{{ targetWallet()?.saldo_disponible }} EC</span></p>
-            </div>
-
-            <form (ngSubmit)="submitDeposit()" class="space-y-4 text-xs">
-              <div>
-                <label class="block font-semibold text-text-muted mb-1.5">Cantidad de EduCoins a Depositar *</label>
-                <input
-                  type="number"
-                  [(ngModel)]="depositAmount"
-                  name="depositAmount"
-                  min="1"
-                  required
-                  placeholder="Ej: 20"
-                  class="w-full px-3 py-2.5 bg-bg border border-border rounded-xl text-sm font-mono font-bold text-text focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-text-muted mb-1.5">Motivo / Descripción de la Bonificación *</label>
-                <textarea
-                  [(ngModel)]="depositDescription"
-                  name="depositDescription"
-                  rows="2"
-                  required
-                  placeholder="Ej: Reconocimiento por participación destacada en clase..."
-                  class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs text-text focus:ring-2 focus:ring-primary focus:outline-none resize-none"
-                ></textarea>
-              </div>
-
-              <div class="flex justify-end gap-3 pt-3 border-t border-border">
-                <button
-                  type="button"
-                  (click)="closeDepositModal()"
-                  class="px-4 py-2 rounded-xl border border-border text-text-muted hover:bg-bg cursor-pointer font-semibold"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  [disabled]="depositAmount <= 0 || !depositDescription || isSavingDeposit()"
-                  class="px-5 py-2 rounded-xl text-white bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer font-semibold transition-colors"
-                >
-                  {{ isSavingDeposit() ? 'Acreditando...' : 'Acreditar EduCoins' }}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       }
     </div>
   `
@@ -501,13 +436,6 @@ export class WalletComponent implements OnInit {
   filtroClassroomId = signal<number | null>(null);
   filtroGroupId = signal<number | null>(null);
   searchEstudiante = signal<string>('');
-
-  // Estado de Depósito
-  showDepositModal = signal(false);
-  targetWallet = signal<Wallet | null>(null);
-  depositAmount = 10;
-  depositDescription = 'Participación destacada en clase';
-  isSavingDeposit = signal(false);
 
   isLoading = signal(false);
 
@@ -643,39 +571,6 @@ export class WalletComponent implements OnInit {
 
   onGroupFilterChange(grpId: number | null): void {
     this.filtroGroupId.set(grpId);
-  }
-
-  openDepositModal(w: Wallet): void {
-    this.targetWallet.set(w);
-    this.depositAmount = 10;
-    this.depositDescription = 'Reconocimiento pedagógico';
-    this.showDepositModal.set(true);
-  }
-
-  closeDepositModal(): void {
-    this.showDepositModal.set(false);
-    this.targetWallet.set(null);
-  }
-
-  submitDeposit(): void {
-    const w = this.targetWallet();
-    if (!w || this.depositAmount <= 0) return;
-
-    this.isSavingDeposit.set(true);
-    this.walletService.depositar(w.id, this.depositAmount, this.depositDescription).subscribe({
-      next: (updatedW) => {
-        this.isSavingDeposit.set(false);
-        this.notifService.success(`¡Se acreditaron ${this.depositAmount} EduCoins exitosamente!`);
-        this.closeDepositModal();
-
-        // Actualizar en la lista local
-        this.allWallets.update(list => list.map(item => item.id === updatedW.id ? { ...item, ...updatedW } : item));
-      },
-      error: (err) => {
-        this.isSavingDeposit.set(false);
-        this.notifService.error(err.error?.detail || 'Error al acreditar EduCoins.');
-      }
-    });
   }
 
   getBadgeColor(tipo: string): string {
