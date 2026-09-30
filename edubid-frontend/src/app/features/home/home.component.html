@@ -130,195 +130,141 @@
           </p>
         </div>
 
-        <!-- Ilustración Minimalista EduBid Subastas & EduCoins Libre sin marco -->
-        <div class="relative w-full aspect-16/10 flex items-center justify-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 540 300"
-            width="100%"
-            height="100%"
-            class="w-full h-full select-none"
+        <!-- Carrusel de tarjetas flotantes EduBid -->
+        <div class="relative w-full" style="min-height: 280px;">
+          <!-- Indicadores del carrusel -->
+          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+            @for (i of [0, 1, 2]; track i) {
+              <button
+                type="button"
+                (click)="activeCard.set(i)"
+                class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                [class.w-6]="activeCard() === i"
+                [class.w-2]="activeCard() !== i"
+                [class.bg-orange-500]="activeCard() === i"
+                [class.bg-neutral-300]="activeCard() !== i"
+                [class.dark:bg-neutral-600]="activeCard() !== i"
+              ></button>
+            }
+          </div>
+
+          <!-- Tarjeta 0: Subasta Activa (la original central) -->
+          <div
+            class="absolute inset-0 transition-all duration-700 ease-in-out flex items-center justify-center"
+            [class.opacity-100]="activeCard() === 0"
+            [class.opacity-0]="activeCard() !== 0"
+            [class.translate-y-0]="activeCard() === 0"
+            [class.translate-y-4]="activeCard() !== 0"
+            [class.pointer-events-auto]="activeCard() === 0"
+            [class.pointer-events-none]="activeCard() !== 0"
           >
-            <defs>
-              <filter id="neutralShadow" x="-10%" y="-10%" width="120%" height="120%">
-                <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" class="svg-shadow" />
-              </filter>
-              <style>
-                .svg-shadow { flood-opacity: 0.08; }
-                .svg-grid-dots { fill: #94a3b8; opacity: 0.45; }
-                .svg-guide-line { stroke: #cbd5e1; }
-                .svg-card-main { fill: #ffffff; stroke: #e2e8f0; }
-                .svg-card-side { fill: #f8fafc; stroke: #e2e8f0; }
-                .svg-text-primary { fill: #0f172a; }
-                .svg-text-muted { fill: #64748b; }
-                .svg-text-subtle { fill: #94a3b8; }
-                .svg-pedestal-base { fill: #e2e8f0; }
-                .svg-pedestal-top { fill: #cbd5e1; }
-                .svg-gavel-head { fill: #0f172a; }
-                .svg-gavel-handle { stroke: #64748b; }
-                .svg-bar-track { fill: #f1f5f9; }
-                .svg-check-bg { fill: #e2e8f0; }
-                .svg-check-icon { stroke: #0f172a; }
-                .svg-reward-pill { fill: #ffedd5; }
-                .svg-divider { stroke: #e2e8f0; }
+            <div class="bg-surface border border-border rounded-2xl p-6 shadow-lg max-w-xs w-full" style="animation: floatAnim 6s ease-in-out infinite;">
+              <div class="flex items-center gap-2 mb-4">
+                <span class="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
+                <span class="text-[11px] font-bold text-text-muted uppercase tracking-wider">Subasta Activa</span>
+              </div>
+              <!-- Ícono mazo -->
+              <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+                  <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646zM12 9v3m0 0v3m0-3h3m-3 0H9" />
+                  </svg>
+                </div>
+              </div>
+              <h3 class="font-bold text-text text-base mb-1">Exoneración de Taller</h3>
+              <p class="text-xs text-text-muted mb-3">Mayor oferta actual</p>
+              <div class="flex items-baseline gap-1 mb-3">
+                <span class="text-2xl font-black text-text font-mono">350</span>
+                <span class="text-sm font-bold text-orange-500">EduCoins</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-border mb-2">
+                <div class="h-1.5 rounded-full bg-orange-500" style="width: 65%"></div>
+              </div>
+              <p class="text-[11px] text-text-muted">Cierra en 15m 30s</p>
+            </div>
+          </div>
 
-                :host-context(.dark) .svg-shadow,
-                .dark .svg-shadow { flood-opacity: 0.5; }
-                :host-context(.dark) .svg-grid-dots,
-                .dark .svg-grid-dots { fill: #1e293b; opacity: 0.7; }
-                :host-context(.dark) .svg-guide-line,
-                .dark .svg-guide-line { stroke: #1e293b; }
-                :host-context(.dark) .svg-card-main,
-                .dark .svg-card-main { fill: #0f172a; stroke: #1e293b; }
-                :host-context(.dark) .svg-card-side,
-                .dark .svg-card-side { fill: #0b1120; stroke: #1e293b; }
-                :host-context(.dark) .svg-text-primary,
-                .dark .svg-text-primary { fill: #f8fafc; }
-                :host-context(.dark) .svg-text-muted,
-                .dark .svg-text-muted { fill: #64748b; }
-                :host-context(.dark) .svg-text-subtle,
-                .dark .svg-text-subtle { fill: #94a3b8; }
-                :host-context(.dark) .svg-pedestal-base,
-                .dark .svg-pedestal-base { fill: #1e293b; }
-                :host-context(.dark) .svg-pedestal-top,
-                .dark .svg-pedestal-top { fill: #334155; }
-                :host-context(.dark) .svg-gavel-head,
-                .dark .svg-gavel-head { fill: #f8fafc; }
-                :host-context(.dark) .svg-gavel-handle,
-                .dark .svg-gavel-handle { stroke: #94a3b8; }
-                :host-context(.dark) .svg-bar-track,
-                .dark .svg-bar-track { fill: #1e293b; }
-                :host-context(.dark) .svg-check-bg,
-                .dark .svg-check-bg { fill: #1e293b; }
-                :host-context(.dark) .svg-check-icon,
-                .dark .svg-check-icon { stroke: #f8fafc; }
-                :host-context(.dark) .svg-reward-pill,
-                .dark .svg-reward-pill { fill: #1e293b; }
-                :host-context(.dark) .svg-divider,
-                .dark .svg-divider { stroke: #1e293b; }
+          <!-- Tarjeta 1: Billetera EduCoins -->
+          <div
+            class="absolute inset-0 transition-all duration-700 ease-in-out flex items-center justify-center"
+            [class.opacity-100]="activeCard() === 1"
+            [class.opacity-0]="activeCard() !== 1"
+            [class.translate-y-0]="activeCard() === 1"
+            [class.translate-y-4]="activeCard() !== 1"
+            [class.pointer-events-auto]="activeCard() === 1"
+            [class.pointer-events-none]="activeCard() !== 1"
+          >
+            <div class="bg-surface border border-border rounded-2xl p-6 shadow-lg max-w-xs w-full" style="animation: floatAnim 6s ease-in-out infinite; animation-delay: 0.5s;">
+              <div class="flex items-center gap-2 mb-4">
+                <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-[11px] font-bold text-text-muted uppercase tracking-wider">Mi Billetera</span>
+              </div>
+              <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                  <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex items-baseline gap-1 mb-3">
+                <span class="text-2xl font-black text-text font-mono">620</span>
+                <span class="text-sm font-bold text-emerald-500">EC Total</span>
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-xs">
+                  <span class="text-text-muted">Disponible</span>
+                  <span class="font-bold text-emerald-600">420 EC</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                  <span class="text-text-muted">Bloqueado en subasta</span>
+                  <span class="font-bold text-orange-500">200 EC</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                @keyframes floatLeft {
-                  0%, 100% { transform: translate(25px, 65px); }
-                  50% { transform: translate(25px, 58px); }
-                }
-                @keyframes floatRight {
-                  0%, 100% { transform: translate(385px, 140px); }
-                  50% { transform: translate(385px, 147px); }
-                }
-                @keyframes pulseSubasta {
-                  0%, 100% { opacity: 1; transform: scale(1); }
-                  50% { opacity: 0.45; transform: scale(1.25); }
-                }
-                .card-float-left {
-                  animation: floatLeft 6s ease-in-out infinite;
-                }
-                .card-float-right {
-                  animation: floatRight 7s ease-in-out infinite;
-                }
-                .pulse-subasta {
-                  transform-origin: 4px 4px;
-                  animation: pulseSubasta 2s ease-in-out infinite;
-                }
-              </style>
-            </defs>
-
-            <!-- Puntos de cuadrícula neutros de fondo -->
-            <g class="svg-grid-dots">
-              <circle cx="50" cy="50" r="1.5"/><circle cx="90" cy="50" r="1.5"/><circle cx="130" cy="50" r="1.5"/>
-              <circle cx="410" cy="250" r="1.5"/><circle cx="450" cy="250" r="1.5"/><circle cx="490" cy="250" r="1.5"/>
-            </g>
-
-            <!-- Líneas guía de interconexión técnica -->
-            <path d="M 120 100 L 270 140 L 420 100" fill="none" class="svg-guide-line" stroke-width="1" stroke-dasharray="4 4"/>
-
-            <!-- ================= TARJETA CENTRAL: SUBASTA ACTIVA ================= -->
-            <g transform="translate(170, 35)" filter="url(#neutralShadow)">
-              <!-- Contenedor base neutro -->
-              <rect width="200" height="230" rx="10" class="svg-card-main" stroke-width="1.2"/>
-
-              <!-- Cabecera / Estado -->
-              <g transform="translate(16, 18)">
-                <circle cx="4" cy="4" r="3" fill="#ea580c" class="pulse-subasta"/>
-                <text x="14" y="7" font-family="system-ui, sans-serif" font-size="9" font-weight="600" class="svg-text-subtle" letter-spacing="0.5">SUBASTA ACTIVA</text>
-              </g>
-
-              <!-- Visualización Minimalista del Mazo -->
-              <g transform="translate(100, 80)">
-                <!-- Onda concéntrica muy sutil -->
-                <ellipse cx="0" cy="24" rx="28" ry="7" fill="none" stroke="#ea580c" stroke-width="1" opacity="0.3"/>
-
-                <!-- Bloque de resonancia / Pedestal -->
-                <ellipse cx="0" cy="24" rx="18" ry="5" class="svg-pedestal-base"/>
-                <ellipse cx="0" cy="23" rx="14" ry="3.5" class="svg-pedestal-top"/>
-
-                <!-- Mazo lineal en ángulo de reposo -->
-                <g transform="translate(0, 5) rotate(-28)">
-                  <!-- Mango -->
-                  <line x1="0" y1="5" x2="0" y2="34" class="svg-gavel-handle" stroke-width="2.5" stroke-linecap="round"/>
-                  <circle cx="0" cy="35" r="1.8" fill="#ea580c"/>
-                  <!-- Cabeza del mazo -->
-                  <rect x="-14" y="-7" width="28" height="11" rx="2" class="svg-gavel-head"/>
-                  <!-- Acento de marca -->
-                  <rect x="-3" y="-7" width="6" height="11" fill="#ea580c"/>
-                </g>
-              </g>
-
-              <!-- Información de la Puja -->
-              <text x="16" y="142" font-family="system-ui, sans-serif" font-size="11" font-weight="600" class="svg-text-primary">Exoneración de Taller</text>
-              <text x="16" y="157" font-family="system-ui, sans-serif" font-size="8.5" class="svg-text-muted">Mayor oferta actual</text>
-
-              <!-- Cantidad en EduCoins -->
-              <text x="16" y="180" font-family="system-ui, sans-serif" font-size="18" font-weight="800" class="svg-text-primary">350</text>
-              <text x="56" y="180" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#ea580c">EduCoins</text>
-
-              <!-- Barra de progreso mínima -->
-              <rect x="16" y="194" width="168" height="3" rx="1.5" class="svg-bar-track"/>
-              <rect x="16" y="194" width="110" height="3" rx="1.5" fill="#ea580c"/>
-
-              <!-- Pie / Temporizador neutro -->
-              <text x="16" y="212" font-family="system-ui, sans-serif" font-size="8" class="svg-text-muted">Cierra en 15m 30s</text>
-            </g>
-
-            <!-- ================= TARJETA FLOTANTE IZQ: BILLETERA ================= -->
-            <g class="card-float-left" filter="url(#neutralShadow)">
-              <rect width="130" height="85" rx="8" class="svg-card-side" stroke-width="1"/>
-              
-              <!-- Título y Moneda -->
-              <g transform="translate(14, 18)">
-                <circle cx="5" cy="5" r="5" fill="none" stroke="#ea580c" stroke-width="1.2"/>
-                <text x="3.5" y="7.5" font-family="sans-serif" font-size="6" font-weight="800" fill="#ea580c">E</text>
-                <text x="16" y="8" font-family="system-ui, sans-serif" font-size="8.5" font-weight="600" class="svg-text-subtle">Billetera</text>
-              </g>
-
-              <text x="14" y="44" font-family="system-ui, sans-serif" font-size="14" font-weight="700" class="svg-text-primary">620 EC</text>
-              <line x1="14" y1="52" x2="116" y2="52" class="svg-divider" stroke-width="1"/>
-
-              <!-- Desglose técnico de saldos -->
-              <text x="14" y="64" font-family="system-ui, sans-serif" font-size="7.5" class="svg-text-muted">Disp: <tspan class="svg-text-primary" font-weight="600">420 EC</tspan></text>
-              <text x="14" y="75" font-family="system-ui, sans-serif" font-size="7.5" class="svg-text-muted">Bloq: <tspan fill="#ea580c" font-weight="600">200 EC</tspan></text>
-            </g>
-
-            <!-- ================= TARJETA FLOTANTE DER: TAREA CALIFICADA ================= -->
-            <g class="card-float-right" filter="url(#neutralShadow)">
-              <rect width="130" height="85" rx="8" class="svg-card-side" stroke-width="1"/>
-
-              <!-- Icono estado -->
-              <g transform="translate(14, 18)">
-                <circle cx="5" cy="5" r="5" class="svg-check-bg"/>
-                <path d="M 3 5 L 4.5 6.5 L 7.5 3.5" fill="none" class="svg-check-icon" stroke-width="1" stroke-linecap="round"/>
-                <text x="16" y="8" font-family="system-ui, sans-serif" font-size="8.5" font-weight="600" class="svg-text-subtle">Evaluación</text>
-              </g>
-
-              <!-- Calificación académica -->
-              <text x="14" y="43" font-family="system-ui, sans-serif" font-size="8" class="svg-text-muted">Calificación:</text>
-              <text x="64" y="43" font-family="system-ui, sans-serif" font-size="9" font-weight="700" class="svg-text-primary">5.0 / 5.0</text>
-
-              <!-- Asignación de monedas -->
-              <rect x="14" y="52" width="102" height="20" rx="4" class="svg-reward-pill"/>
-              <text x="22" y="65" font-family="system-ui, sans-serif" font-size="8.5" font-weight="700" fill="#ea580c">+80 EduCoins</text>
-            </g>
-          </svg>
+          <!-- Tarjeta 2: Evaluación Calificada -->
+          <div
+            class="absolute inset-0 transition-all duration-700 ease-in-out flex items-center justify-center"
+            [class.opacity-100]="activeCard() === 2"
+            [class.opacity-0]="activeCard() !== 2"
+            [class.translate-y-0]="activeCard() === 2"
+            [class.translate-y-4]="activeCard() !== 2"
+            [class.pointer-events-auto]="activeCard() === 2"
+            [class.pointer-events-none]="activeCard() !== 2"
+          >
+            <div class="bg-surface border border-border rounded-2xl p-6 shadow-lg max-w-xs w-full" style="animation: floatAnim 6s ease-in-out infinite; animation-delay: 1s;">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span class="text-[11px] font-bold text-text-muted uppercase tracking-wider">Evaluación</span>
+              </div>
+              <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                  <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-text-muted">Calificación</span>
+                <span class="text-lg font-black text-text font-mono">5.0 / 5.0</span>
+              </div>
+              <div class="flex items-center gap-2 p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                <svg class="w-4 h-4 text-orange-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-xs font-bold text-orange-600">+80 EduCoins acreditados</span>
+              </div>
+            </div>
+          </div>
         </div>
+
 
         <div>
           <a
@@ -839,6 +785,102 @@
 
     </div>
   </main>
+
+  <!-- Sección de características / cómo funciona -->
+  <section class="mt-16 sm:mt-24 border-t border-border pt-12 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="text-center mb-10">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-600 border border-orange-500/20 mb-3">
+        Cómo funciona EduBid
+      </span>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-neutral-100 tracking-tight">
+        Gamificación real para el aula
+      </h2>
+      <p class="text-sm text-text-muted mt-2 max-w-lg mx-auto leading-relaxed">
+        Una plataforma diseñada para docentes colombianos que quieren motivar a sus estudiantes de forma dinámica y medible.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pb-16">
+      <!-- Feature 1: EduCoins -->
+      <div class="p-5 rounded-2xl border border-border bg-surface hover:border-orange-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-sm mb-1">EduCoins por Desempeño</h3>
+        <p class="text-xs text-text-muted leading-relaxed">
+          Los estudiantes ganan EduCoins automáticamente al ser calificados. El sistema acredita las monedas según la nota obtenida en cada actividad.
+        </p>
+      </div>
+
+      <!-- Feature 2: Subastas -->
+      <div class="p-5 rounded-2xl border border-border bg-surface hover:border-orange-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-sm mb-1">Subastas en Tiempo Real</h3>
+        <p class="text-xs text-text-muted leading-relaxed">
+          El docente crea subastas de incentivos (exoneraciones, beneficios). Los estudiantes pujan con sus EduCoins en tiempo real vía WebSocket.
+        </p>
+      </div>
+
+      <!-- Feature 3: Clases y Grupos -->
+      <div class="p-5 rounded-2xl border border-border bg-surface hover:border-orange-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-sm mb-1">Clases y Grupos Digitales</h3>
+        <p class="text-xs text-text-muted leading-relaxed">
+          Crea asignaturas y grupos con códigos de acceso únicos. Los estudiantes se unen con un código de 6 caracteres. Multi-grupo por asignatura.
+        </p>
+      </div>
+
+      <!-- Feature 4: Identidad institucional -->
+      <div class="p-5 rounded-2xl border border-border bg-surface hover:border-orange-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-sm mb-1">White-Label Institucional</h3>
+        <p class="text-xs text-text-muted leading-relaxed">
+          Cada institución tiene su propia identidad visual: logo, colores primario y secundario que se aplican en toda la plataforma para sus usuarios.
+        </p>
+      </div>
+
+      <!-- Feature 5: Reportes -->
+      <div class="p-5 rounded-2xl border border-border bg-surface hover:border-orange-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-sm mb-1">Reportes PDF y Excel</h3>
+        <p class="text-xs text-text-muted leading-relaxed">
+          Exporta boletines de calificaciones y reportes institucionales en PDF y Excel. Compatibilidad con formato DANE para colegios colombianos.
+        </p>
+      </div>
+
+      <!-- Feature 6: Seguridad -->
+      <div class="p-5 rounded-2xl border border-border bg-surface hover:border-orange-500/30 transition-all group">
+        <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-sm mb-1">RBAC y Multi-Tenant</h3>
+        <p class="text-xs text-text-muted leading-relaxed">
+          Control de acceso por roles: Admin, Rector, Coordinador, Docente y Estudiante. Aislamiento total entre instituciones. JWT + Google OAuth.
+        </p>
+      </div>
+    </div>
+  </section>
+
 
   <!-- MODAL DE TÉRMINOS Y CONDICIONES (Flowbite modal pattern) -->
   @if (showTermsModal()) {

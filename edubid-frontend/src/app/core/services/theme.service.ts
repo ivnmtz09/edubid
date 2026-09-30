@@ -63,9 +63,19 @@ export class ThemeService {
 
     root.style.setProperty('--brand-primary', primary);
     root.style.setProperty('--brand-primary-hover', this.darkenHex(primary));
+    root.style.setProperty('--brand-primary-text', this.isLightColor(primary) ? '#0a0a0a' : '#ffffff');
     root.style.setProperty('--brand-accent', accent);
     root.style.setProperty('--brand-accent-hover', this.darkenHex(accent));
+    root.style.setProperty('--brand-accent-text', this.isLightColor(accent) ? '#0a0a0a' : '#ffffff');
   }
+
+  isLightColor(hex: string): boolean {
+    const rgb = this.hexToRgb(hex);
+    if (!rgb) return false;
+    const yiq = (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+    return yiq >= 160;
+  }
+
 
   private applyTheme(): void {
     if (typeof document !== 'undefined') {

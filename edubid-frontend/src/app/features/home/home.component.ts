@@ -4,6 +4,7 @@ import {
   signal,
   OnInit,
   AfterViewInit,
+  OnDestroy,
   HostListener,
   ElementRef,
   ViewChild,
@@ -31,7 +32,7 @@ import { InteractiveDotsComponent } from '../../shared/components/ui/interactive
   imports: [CommonModule, ReactiveFormsModule, RouterLink, InteractiveDotsComponent],
   templateUrl: './home.component.html',
 })
-export class HomeComponent implements OnInit, AfterViewInit {
+export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   private fb = inject(FormBuilder);
   readonly authService = inject(AuthService);
   readonly googleAuth = inject(GoogleAuthService);
@@ -75,6 +76,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   // Estado para botón de compartir
   shareCopied = signal(false);
+
+  // Carrusel de tarjetas del SVG hero
+  activeCard = signal<number>(0);
+  private carouselInterval: ReturnType<typeof setInterval> | null = null;
 
   async shareSite(): Promise<void> {
     const shareData = {
@@ -124,11 +129,32 @@ export class HomeComponent implements OnInit, AfterViewInit {
     this.loadInstitutions();
     // Pre-inicializar GSI para que esté listo cuando el usuario abra los formularios
     this.googleAuth.initialize();
+    // Iniciar carrusel de tarjetas del hero
+    this.startCarousel();
   }
 
   ngAfterViewInit(): void {
     // Los ViewChild estarán disponibles solo cuando activeTab() muestre el form.
     // La renderización real la dispara openAuthForms() vía renderGoogleButtons().
+  }
+
+  ngOnDestroy(): void {
+    this.stopCarousel();
+  }
+
+  /** Inicia el carrusel rotativo de tarjetas del hero */
+  startCarousel(): void {
+    this.carouselInterval = setInterval(() => {
+      this.activeCard.update(c => (c + 1) % 3);
+    }, 3000);
+  }
+
+  /** Detiene el carrusel y limpia el intervalo */
+  stopCarousel(): void {
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+      this.carouselInterval = null;
+    }
   }
 
   /** Renderiza los botones nativos de Google en ambos contenedores (si existen en el DOM). */
