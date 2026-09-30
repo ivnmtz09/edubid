@@ -122,6 +122,15 @@ def verify_email(request, token):
         logger.info(f"🔍 Intentando verificar email con token: {token}")
         verification_token = EmailVerificationToken.objects.get(token=token)
         
+        # Idempotencia: si el token ya fue usado pero el usuario ya está verificado, retornar éxito
+        if verification_token.is_used and verification_token.user.email_verified:
+            logger.info(f"ℹ️ Token ya fue utilizado previamente pero el usuario ya está verificado: {verification_token.user.email}")
+            return Response({
+                'message': '¡Tu correo electrónico ya ha sido verificado exitosamente!',
+                'already_verified': True,
+                'user': UserProfileSerializer(verification_token.user).data,
+            }, status=status.HTTP_200_OK)
+        
         if not verification_token.is_valid():
             logger.warning(f"⚠️ Token inválido o expirado: {token}")
             return Response({
@@ -198,8 +207,9 @@ def resend_verification_email(request):
         if user.email_verified:
             logger.info(f"ℹ️ Email ya verificado: {email}")
             return Response({
-                'detail': 'Este email ya está verificado.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'message': 'Este correo ya se encuentra verificado. Ya puedes iniciar sesión con tu cuenta.',
+                'already_verified': True,
+            }, status=status.HTTP_200_OK)
         
         # Invalidar tokens anteriores
         tokens_invalidados = EmailVerificationToken.objects.filter(

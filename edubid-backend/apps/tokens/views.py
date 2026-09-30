@@ -155,7 +155,7 @@ class WalletViewSet(viewsets.ModelViewSet):
 
         return qs.select_related("usuario", "grupo", "periodo")
 
-    @action(detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, methods=["get"], url_path="mi-wallet", permission_classes=[permissions.IsAuthenticated])
     def mi_wallet(self, request):
         """Endpoint para que el estudiante vea su billetera activa"""
         user = request.user
@@ -206,10 +206,15 @@ class WalletViewSet(viewsets.ModelViewSet):
                         )
             
             if not wallet:
-                return Response(
-                    {"detail": "No tienes una billetera activa en este momento."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+                return Response({
+                    "id": None,
+                    "saldo_educoins": 0,
+                    "bloqueado_educoins": 0,
+                    "saldo_disponible": 0,
+                    "transacciones": [],
+                    "detail": "Aún no tienes una billetera activa. Únete a una clase para comenzar.",
+                    "sin_wallet": True,
+                }, status=status.HTTP_200_OK)
             
             serializer = self.get_serializer(wallet)
             return Response(serializer.data)
@@ -218,6 +223,11 @@ class WalletViewSet(viewsets.ModelViewSet):
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=False, methods=["get"], url_path="mi_wallet", permission_classes=[permissions.IsAuthenticated])
+    def mi_wallet_alias(self, request):
+        """Alias para soportar llamadas con guion bajo"""
+        return self.mi_wallet(request)
 
     @action(detail=True, methods=["post"], permission_classes=[permissions.IsAdminUser])
     def depositar(self, request, pk=None):
