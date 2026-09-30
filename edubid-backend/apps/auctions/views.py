@@ -9,7 +9,7 @@ import logging
 # Agrega esto al inicio del archivo
 logger = logging.getLogger(__name__)
 
-from .models import Auction, Bid
+from .models import Auction, Bid, StudentAuctionPermission
 from .serializers import (
     AuctionSerializer, 
     AuctionUpdateSerializer,
@@ -178,6 +178,116 @@ class AuctionViewSet(viewsets.ModelViewSet):
             "total_participantes": res.get("total_participantes", 0)
         }, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post', 'get'], permission_classes=[permissions.IsAuthenticated])
+    def autorizar_puja_docente(self, request, pk=None):
+        """El estudiante activa o desactiva el permiso para que el docente puje por su cuenta."""
+        auction = self.get_object()
+        user = request.user
+
+        if user.role != 'estudiante':
+            return Response(
+                {'detail': 'Solo los estudiantes pueden gestionar este permiso.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if not auction.grupo.estudiantes.filter(id=user.id).exists():
+            return Response(
+                {'detail': 'No perteneces al grupo de esta subasta.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if request.method == 'GET':
+            permiso, _ = StudentAuctionPermission.objects.get_or_create(
+                estudiante=user, auction=auction
+            )
+            return Response({'autorizado': permiso.autorizado})
+
+        # POST — toggle del permiso
+        autorizar = request.data.get('autorizado', True)
+        permiso, _ = StudentAuctionPermission.objects.get_or_create(
+            estudiante=user, auction=auction
+        )
+        permiso.autorizado = bool(autorizar)
+        permiso.save()
+        return Response({
+            'autorizado': permiso.autorizado,
+            'mensaje': 'Permiso activado. Tu docente puede pujar por ti.' if permiso.autorizado else 'Permiso desactivado.'
+        })
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, AdminOrDocente])
+    def puja_proxy(self, request, pk=None):
+        """El docente puja en nombre de un estudiante que le ha otorgado permiso."""
+        auction = self.get_object()
+        user = request.user
+
+        if auction.estado != 'active':
+            return Response({'detail': 'Esta subasta ya no está activa.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if auction.fecha_fin < now():
+            return Response({'detail': 'Esta subasta ha expirado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Verificar que el docente es dueño del classroom
+        if user.role == 'docente' and auction.grupo.classroom.docente != user:
+            return Response(
+                {'detail': 'No eres el docente de este grupo.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        estudiante_id = request.data.get('estudiante_id')
+        if not estudiante_id:
+            return Response({'detail': 'Debes especificar el estudiante_id.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from apps.users.models import User as UserModel
+            estudiante = UserModel.objects.get(id=estudiante_id, role='estudiante')
+        except UserModel.DoesNotExist:
+            return Response({'detail': 'Estudiante no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Verificar permiso del estudiante
+        permiso = StudentAuctionPermission.objects.filter(
+            estudiante=estudiante, auction=auction, autorizado=True
+        ).first()
+        if not permiso:
+            return Response(
+                {'detail': f'{estudiante.first_name} {estudiante.last_name} no ha autorizado al docente para pujar por su cuenta.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        cantidad = request.data.get('cantidad_educoins')
+        if not cantidad or int(cantidad) <= 0:
+            return Response({'detail': 'La cantidad debe ser mayor a 0.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear la puja usando BidCreateSerializer con el estudiante como titular
+        data = {
+            'auction': auction.id,
+            'estudiante': estudiante.id,
+            'cantidad_educoins': int(cantidad)
+        }
+        serializer = BidCreateSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            with transaction.atomic():
+                bid = serializer.save(registrado_por=user)  # registrar quién hizo la puja
+            broadcast_bid_update(auction)
+            return Response({'detail': f'Puja de {cantidad} EC realizada por cuenta de {estudiante.first_name} {estudiante.last_name}.'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated, AdminOrDocente])
+    def permisos_proxy(self, request, pk=None):
+        """Lista de estudiantes que han autorizado al docente a pujar en esta subasta."""
+        auction = self.get_object()
+        permisos = StudentAuctionPermission.objects.filter(
+            auction=auction, autorizado=True
+        ).select_related('estudiante')
+        data = [
+            {
+                'id': p.estudiante.id,
+                'email': p.estudiante.email,
+                'first_name': p.estudiante.first_name,
+                'last_name': p.estudiante.last_name,
+            }
+            for p in permisos
+        ]
+        return Response(data)
 
 class BidViewSet(viewsets.ModelViewSet):
     """

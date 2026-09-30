@@ -43,8 +43,8 @@ def notificar_calificacion(sender, instance, created, **kwargs):
             titulo='Nueva calificación recibida',
             mensaje=(
                 f'Has recibido una calificación de {instance.nota} en "{actividad.nombre}". '
-                f'EduCoins ganados: {coins}.'
-            ) if actividad else f'Has recibido una calificación de {instance.nota}. EduCoins ganados: {coins}.',
+                f'EduCoins acreditados: {coins}.'
+            ) if actividad else f'Has recibido una calificación de {instance.nota}. EduCoins acreditados: {coins}.',
             institucion_id=_institucion_de_usuario(instance.student),
             grade_id=instance.id,
             activity_id=actividad.id if actividad else None,
@@ -82,7 +82,7 @@ def notificar_nueva_subasta(sender, instance, created, **kwargs):
                 usuario=estudiante,
                 tipo='subasta_nueva',
                 titulo='Nueva subasta disponible',
-                mensaje=f'¡Nueva subasta en tu grupo! "{instance.titulo}" — Cierra el {fecha_fin_local}. ¡Participa ahora!',
+                mensaje=f'Nueva subasta en tu grupo: "{instance.titulo}" — Cierra el {fecha_fin_local}. Revisa tu billetera en EduBid y participa.',
                 institucion_id=institucion_id or _institucion_de_usuario(estudiante),
                 auction_id=instance.id,
                 metadata={
@@ -349,8 +349,8 @@ def notificar_monedas_recibidas(sender, instance, created, **kwargs):
         Notification.objects.create(
             usuario=wallet.usuario,
             tipo='monedas',
-            titulo='EduCoins recibidas',
-            mensaje=f'Has recibido {instance.cantidad_educoins} EduCoins. {instance.descripcion}',
+            titulo='EduCoins acreditados',
+            mensaje=f'Se han acreditado {instance.cantidad_educoins} EduCoins en tu billetera de EduBid. {instance.descripcion}',
             institucion_id=_institucion_de_usuario(wallet.usuario),
             metadata={
                 'cantidad_educoins': instance.cantidad_educoins,

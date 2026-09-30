@@ -57,3 +57,27 @@ class Bid(BaseModel):
 
     def __str__(self):
         return f"{self.estudiante.email} -> {self.cantidad_educoins} en {self.auction.titulo}"
+
+
+class StudentAuctionPermission(BaseModel):
+    """Permiso que otorga un estudiante al docente para pujar en una subasta por su cuenta."""
+    estudiante = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='permisos_puja'
+    )
+    auction = models.ForeignKey(
+        Auction,
+        on_delete=models.CASCADE,
+        related_name='permisos_docente'
+    )
+    autorizado = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('estudiante', 'auction')
+        verbose_name = 'Permiso de puja por docente'
+        verbose_name_plural = 'Permisos de puja por docente'
+
+    def __str__(self):
+        estado = 'autorizado' if self.autorizado else 'no autorizado'
+        return f'{self.estudiante.email} → {self.auction.titulo} ({estado})'

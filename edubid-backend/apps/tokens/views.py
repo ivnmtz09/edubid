@@ -219,9 +219,11 @@ class WalletViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    @action(detail=True, methods=["post"], permission_classes=[AdminOrDocente])
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAdminUser])
     def depositar(self, request, pk=None):
-        """Endpoint para que el docente agregue monedas"""
+        """Endpoint reservado solo para administradores del sistema.
+        Los docentes NO pueden depositar EduCoins manualmente.
+        Los EduCoins se acreditan exclusivamente al calificar actividades."""
         wallet = self.get_object()
         
         # Verify that the docente owns the classroom this wallet belongs to

@@ -4,10 +4,10 @@ from apps.common.models import BaseModel
 
 class Activity(BaseModel):
     TIPOS = [
-        ('reto', 'Reto'),
-        ('mision', 'Misión'),
+        ('tarea', 'Tarea'),
         ('proyecto', 'Proyecto'),
         ('evaluacion', 'Evaluación'),
+        ('examen', 'Examen'),
     ]
 
     group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name='activities')
