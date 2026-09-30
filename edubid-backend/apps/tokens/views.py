@@ -130,40 +130,80 @@ class WalletViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        qs = Wallet.objects.none()
         if user.role == 'admin':
-            return Wallet.objects.all().select_related("usuario", "grupo", "periodo")
+            qs = Wallet.objects.all()
         elif user.role in ['rector', 'coordinador']:
             if user.institucion_id:
-                return Wallet.objects.filter(
+                qs = Wallet.objects.filter(
                     grupo__classroom__docente__institucion_id=user.institucion_id
-                ).select_related("usuario", "grupo", "periodo")
-            return Wallet.objects.none()
+                )
         elif user.role == 'docente':
-            return Wallet.objects.filter(
+            qs = Wallet.objects.filter(
                 grupo__classroom__docente=user
-            ).select_related("usuario", "grupo", "periodo")
+            )
         elif user.role == "estudiante":
-            return Wallet.objects.filter(usuario=user).select_related("usuario", "grupo", "periodo")
-        return Wallet.objects.none()
+            qs = Wallet.objects.filter(usuario=user)
+
+        # Filtros opcionales por query params
+        grupo_id = self.request.query_params.get('grupo')
+        if grupo_id:
+            qs = qs.filter(grupo_id=grupo_id)
+        classroom_id = self.request.query_params.get('classroom')
+        if classroom_id:
+            qs = qs.filter(grupo__classroom_id=classroom_id)
+
+        return qs.select_related("usuario", "grupo", "periodo")
 
     @action(detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated])
     def mi_wallet(self, request):
         """Endpoint para que el estudiante vea su billetera activa"""
         user = request.user
         
-        # Si es docente, devolver mensaje apropiado
-        if user.role == 'docente':
+        # Si es docente o administrativo, devolver mensaje informativo
+        if user.role in ['docente', 'rector', 'coordinador', 'admin']:
             return Response(
-                {"detail": "Los docentes no tienen billeteras. Solo los estudiantes acumulan Educoins."},
+                {"detail": "Los roles administrativos no tienen billeteras de estudiante. Consulta el listado general de billeteras."},
                 status=status.HTTP_200_OK
             )
         
         try:
-            # Buscar wallet del periodo activo
-            wallet = Wallet.objects.filter(
-                usuario=user,
-                periodo__activo=True
-            ).select_related("usuario", "grupo", "periodo").first()
+            grupo_id = request.query_params.get('grupo')
+            
+            qs = Wallet.objects.filter(usuario=user)
+            if grupo_id:
+                qs = qs.filter(grupo_id=grupo_id)
+                
+            # 1. Buscar wallet del periodo activo
+            wallet = qs.filter(periodo__activo=True).select_related("usuario", "grupo", "periodo").first()
+            
+            # 2. Si no hay con periodo activo, buscar la más reciente
+            if not wallet:
+                wallet = qs.select_related("usuario", "grupo", "periodo").order_by('-periodo__fecha_fin', '-id').first()
+                
+            # 3. Si no existe wallet pero el estudiante está inscrito en un grupo, auto-crearla
+            if not wallet:
+                grupo = None
+                if grupo_id:
+                    grupo = user.estudiante_grupos.filter(id=grupo_id).first()
+                else:
+                    grupo = user.estudiante_grupos.first()
+                    
+                if grupo:
+                    periodo_activo = Period.objects.filter(grupo=grupo, activo=True).first()
+                    if not periodo_activo:
+                        periodo_activo = Period.objects.filter(grupo=grupo).order_by('-fecha_fin').first()
+                    if not periodo_activo:
+                        periodos = Period.crear_periodos_para_grupo(grupo)
+                        periodo_activo = Period.objects.filter(grupo=grupo, activo=True).first() or (periodos[0] if periodos else None)
+                        
+                    if periodo_activo:
+                        wallet, _ = Wallet.objects.get_or_create(
+                            usuario=user,
+                            grupo=grupo,
+                            periodo=periodo_activo,
+                            defaults={'saldo_educoins': 0, 'bloqueado_educoins': 0}
+                        )
             
             if not wallet:
                 return Response(
