@@ -538,6 +538,78 @@ interface NavItem {
         </footer>
 
       </div>
+
+      <!-- ================= MODAL CONFIRMACIÓN CIERRE DE SESIÓN ================= -->
+      @if (showLogoutConfirmModal()) {
+        <div
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200"
+          (click)="cancelLogout()"
+        >
+          <div
+            class="w-full max-w-sm bg-surface border border-border rounded-2xl p-6 shadow-2xl space-y-5 animate-in zoom-in-95 duration-200"
+            (click)="$event.stopPropagation()"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-modal-title"
+          >
+            <div class="flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <div class="space-y-1">
+                <h3 id="logout-modal-title" class="font-bold text-base text-slate-900 dark:text-neutral-100">
+                  ¿Cerrar sesión?
+                </h3>
+                <p class="text-xs text-text-muted leading-relaxed">
+                  Se cerrará tu sesión activa en EduBid y se restablecerán las preferencias visuales del sistema.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-border">
+              <button
+                type="button"
+                (click)="cancelLogout()"
+                class="px-4 py-2 rounded-xl text-xs font-semibold text-text-muted hover:text-text border border-border hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                (click)="confirmLogout()"
+                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 active:scale-95 transition-all cursor-pointer shadow-xs"
+              >
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ================= PANTALLA DE CARGA / LOADING OVERLAY AL CERRAR SESIÓN ================= -->
+      @if (isLoggingOut()) {
+        <div class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg/90 backdrop-blur-md animate-in fade-in duration-200">
+          <div class="flex flex-col items-center justify-center space-y-4 text-center px-4">
+            <div class="relative flex items-center justify-center w-16 h-16">
+              <div class="absolute inset-0 rounded-full border-2 border-border border-t-primary animate-spin"></div>
+              <img src="edubid.png" alt="EduBid" class="w-8 h-8 object-contain rounded-lg" />
+            </div>
+            <div class="space-y-1">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-neutral-100">
+                Cerrando sesión en EduBid...
+              </h3>
+              <p class="text-xs text-text-muted">
+                Restableciendo preferencias y redirigiendo al inicio
+              </p>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
 })
@@ -553,6 +625,8 @@ export class LayoutComponent implements OnInit {
   isMobileDrawerOpen = signal(false);
   isThemeDropdownOpen = signal(false);
   isNotificationsOpen = signal(false);
+  showLogoutConfirmModal = signal(false);
+  isLoggingOut = signal(false);
 
   // Notificaciones In-App
   unreadNotificationsCount = computed(() => this.inAppNotifService.unreadCount());
@@ -819,8 +893,26 @@ export class LayoutComponent implements OnInit {
     }
   }
 
+  promptLogout(): void {
+    this.showLogoutConfirmModal.set(true);
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirmModal.set(false);
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirmModal.set(false);
+    this.isLoggingOut.set(true);
+
+    // Breve pausa deliberada para feedback visual cinematográfico antes del hard refresh
+    setTimeout(() => {
+      this.themeService.resetBrandColors();
+      this.authService.logoutWithRefresh();
+    }, 700);
+  }
+
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/']);
+    this.promptLogout();
   }
 }

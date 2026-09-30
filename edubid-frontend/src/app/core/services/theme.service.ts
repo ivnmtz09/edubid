@@ -47,16 +47,23 @@ export class ThemeService {
     this.cycleTheme();
   }
 
-  injectBrandColors(institution: UserInstitution | null): void {
+  resetBrandColors(): void {
     const root = document.documentElement;
+    root.style.removeProperty('--brand-primary');
+    root.style.removeProperty('--brand-primary-hover');
+    root.style.removeProperty('--brand-primary-text');
+    root.style.removeProperty('--brand-accent');
+    root.style.removeProperty('--brand-accent-hover');
+    root.style.removeProperty('--brand-accent-text');
+  }
 
+  injectBrandColors(institution: UserInstitution | null): void {
     if (!institution?.color_primario) {
-      root.style.removeProperty('--brand-primary');
-      root.style.removeProperty('--brand-primary-hover');
-      root.style.removeProperty('--brand-accent');
-      root.style.removeProperty('--brand-accent-hover');
+      this.resetBrandColors();
       return;
     }
+
+    const root = document.documentElement;
 
     const primary = institution.color_primario || '#ea580c';
     const accent = institution.color_secundario || '#3b82f6';

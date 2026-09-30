@@ -80,13 +80,22 @@ export class AuthService {
     return this.http.post<{ message: string }>(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email });
   }
 
-  logout(): void {
+  logout(hardRefresh = false): void {
     this.removeStorageItem(STORAGE_KEYS.ACCESS_TOKEN);
     this.removeStorageItem(STORAGE_KEYS.REFRESH_TOKEN);
     this.removeStorageItem(STORAGE_KEYS.USER);
     this._user.set(null);
     this._isAuthenticated.set(false);
-    this.router.navigate(['/']);
+    this.themeService.resetBrandColors();
+    if (hardRefresh && typeof window !== 'undefined') {
+      window.location.href = '/';
+    } else {
+      this.router.navigate(['/']);
+    }
+  }
+
+  logoutWithRefresh(): void {
+    this.logout(true);
   }
 
   logoutAndNotify(): void {
