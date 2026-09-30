@@ -104,7 +104,7 @@
               value="estudiante"
               formControlName="role"
               (change)="setRole('estudiante')"
-              class="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+              class="w-4 h-4 text-primary bg-bg border-border focus:ring-primary focus:ring-2 cursor-pointer"
             />
             <label
               for="register-role-estudiante"
@@ -130,7 +130,7 @@
               value="docente"
               formControlName="role"
               (change)="setRole('docente')"
-              class="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer"
+              class="w-4 h-4 text-primary bg-bg border-border focus:ring-primary focus:ring-2 cursor-pointer"
             />
             <label
               for="register-role-docente"
@@ -182,15 +182,15 @@
             <!-- Recuadro del checkbox con palomita naranja tanto en claro como en oscuro -->
             <div
               id="accept-terms-box"
-              class="w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center shadow-xs bg-white dark:bg-slate-900 group-hover:border-orange-500 peer-focus-visible:ring-2 peer-focus-visible:ring-orange-500"
-              [class.border-orange-500]="registerForm.get('accept_terms')?.value"
+              class="w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center shadow-xs bg-white dark:bg-neutral-900 group-hover:border-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary"
+              [class.border-primary]="registerForm.get('accept_terms')?.value"
+              [class.bg-primary]="registerForm.get('accept_terms')?.value"
               [class.border-slate-300]="!registerForm.get('accept_terms')?.value"
-              [class.dark:border-slate-600]="!registerForm.get('accept_terms')?.value"
+              [class.dark:border-neutral-700]="!registerForm.get('accept_terms')?.value"
             >
               @if (registerForm.get('accept_terms')?.value) {
-                <!-- Palomita naranja tanto en modo claro como en modo oscuro -->
                 <svg
-                  class="w-3.5 h-3.5 text-orange-500 dark:text-orange-500 fill-current"
+                  class="w-3.5 h-3.5 text-white fill-current"
                   viewBox="0 0 20 20"
                   aria-hidden="true"
                 >

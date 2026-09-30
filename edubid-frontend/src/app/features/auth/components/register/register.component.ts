@@ -148,9 +148,9 @@ export class RegisterComponent implements OnInit, AfterViewInit {
         }
         if (visualEl) {
           // Resaltado visual temporal
-          visualEl.classList.add('ring-2', 'ring-orange-500');
+          visualEl.classList.add('ring-2', 'ring-primary');
           setTimeout(() => {
-            visualEl.classList.remove('ring-2', 'ring-orange-500');
+            visualEl.classList.remove('ring-2', 'ring-primary');
           }, 2000);
         }
         this.notificationService.warning(
