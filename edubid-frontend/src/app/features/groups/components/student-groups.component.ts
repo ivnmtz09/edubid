@@ -119,19 +119,25 @@ import { NotificationService } from '../../../core/services/notification.service
                       <span>{{ group.estudiantes_count }} compañeros</span>
                     </span>
 
-                    <span class="font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-text-muted">
+                    <span class="font-mono text-[11px] bg-bg px-2 py-0.5 rounded border border-border text-text-muted">
                       Cód: {{ group.codigo }}
                     </span>
                   </div>
                 </div>
 
                 <!-- Botones de Acción -->
-                <div class="mt-5 pt-3 border-t border-border flex items-center justify-between gap-2">
+                <div class="mt-5 pt-3 border-t border-border flex items-center gap-2">
                   <a
-                    routerLink="/dashboard"
-                    class="w-full text-center py-2 px-3 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white transition-colors cursor-pointer"
+                    routerLink="/activities"
+                    class="flex-1 text-center py-2 px-3 rounded-xl text-xs font-semibold bg-bg hover:bg-black/5 dark:hover:bg-white/5 border border-border text-text transition-colors cursor-pointer"
                   >
-                    Ver Actividades y Notas
+                    Tareas
+                  </a>
+                  <a
+                    routerLink="/auctions"
+                    class="flex-1 text-center py-2 px-3 rounded-xl text-xs font-semibold bg-primary hover:bg-primary-hover text-white transition-colors cursor-pointer"
+                  >
+                    Subastas
                   </a>
                 </div>
               </div>
