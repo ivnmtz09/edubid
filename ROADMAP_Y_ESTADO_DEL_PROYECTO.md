@@ -1,0 +1,204 @@
+# 🚀 EduBid — Estado Actual del Proyecto y Hoja de Ruta (Roadmap)
+
+> **Documento Oficial de Arquitectura, Registro de Logros y Próximos Pasos**  
+> *Última actualización:* Septiembre 2026 | *Versión de la plataforma:* 2.4.0 (Angular 19 + Django 5.2)
+
+---
+
+## 📌 1. Resumen Ejecutivo de la Plataforma
+
+**EduBid** es un ecosistema educativo SaaS Multi-Tenant diseñado para transformar la dinámica del aula mediante una microeconomía meritocrática basada en **EduCoins** y **Subastas Académicas formativas**.
+
+```mermaid
+flowchart LR
+    A["Institución (White-Label)"] --> B["Docente"]
+    B --> C["Clases / Asignaturas"]
+    C --> D["Grupos (Código 6 Caracteres)"]
+    D --> E["Actividades Gamificadas"]
+    E -->|Calificación| F["Acreditación Automática de EduCoins"]
+    F --> G["Billetera Estudiante"]
+    G -->|Pujas en Vivo| H["Subastas de Incentivos Académicos"]
+```
+
+---
+
+## ✅ 2. Registro Exhaustivo de lo Implementado
+
+### 🔐 2.1 Autenticación, Sesión y Seguridad (Frontend & Backend)
+1. **Autenticación Híbrida**: JWT (SimpleJWT) con rotación y revocación segura de tokens, combinada con **Google OAuth 2.0**.
+2. **Unificación en Landing Page**:
+   - Integración de los formularios de inicio de sesión y registro directamente en el `HomeComponent`.
+   - Soporte para rutas `/login` y `/register` como alias directos al Home, eliminando duplicidad de código.
+3. **Flujo de Verificación de Correo Resiliente**:
+   - `VerifyEmailComponent` enriquecido con manejo de tokens inválidos o expirados, modal interactivo de reenvío y retroalimentación clara.
+   - Corregidos errores de redirección 404 en el endpoint `/api/users/verify-email/<token>/`.
+4. **Experiencia de Cierre de Sesión (Logout)**:
+   - **Modal de Confirmación**: Al pulsar "Cerrar Sesión", se solicita confirmación explícita al usuario para prevenir desconexiones accidentales.
+   - **Pantalla de Carga (Loading Screen)**: Overlay de pantalla completa con animación orbital, isotipo de EduBid y mensaje informativo (*"Cerrando sesión en EduBid... Restableciendo preferencias y redirigiendo al inicio"*).
+   - **Reseteo Estilístico Completo**: Invocación de `ThemeService.resetBrandColors()` que elimina todas las variables `--brand-*` del DOM.
+   - **Hard-Refresh Automático**: Redirección mediante recarga limpia (`window.location.href = '/'`) que garantiza que los colores institucionales no permanezcan precargados en memoria.
+5. **Corrección de Checkbox de Términos**:
+   - Corrección visual y de contraste en modo claro y modo oscuro para la casilla de aceptación de términos y condiciones en el registro.
+
+---
+
+### 🎨 2.2 Identidad Visual, White-Labeling y UI/UX
+1. **Paleta Institucional Completa**:
+   - Selector cromático en `InstitutionBrandingComponent` con 24 colores principales y degradados predefinidos con nombres en español.
+2. **Contraste Dinámico Inteligente (YIQ Luminance)**:
+   - Cálculo automático de luminancia en tiempo de ejecución: si el color institucional primario es claro, los textos sobre botones y badges conmutan dinámicamente a negro carbón (`#0a0a0a`) para garantizar accesibilidad WCAG AAA.
+3. **Línea Superior del Header (Scroll Indicator)**:
+   - Estilizada con degradado simétrico de **secundario $\rightarrow$ primario $\rightarrow$ secundario**:
+     ```scss
+     linear-gradient(90deg, var(--brand-accent) 0%, var(--brand-primary) 50%, var(--brand-accent) 100%)
+     ```
+4. **Scrollbars Personalizadas**:
+   - Barra de desplazamiento personalizada con degradado institucional activo y soporte multi-navegador.
+5. **Erradicación de Emojis y Redundancias**:
+   - Sustitución de todos los emojis de la interfaz por iconos vectoriales SVG limpios y consistentes.
+   - Eliminación de redundancias en botones (ej: antes decía `+ + Nueva Tarea`, ahora dice `Nueva Actividad` con un único icono `+`).
+
+---
+
+### 📚 2.3 Módulos Académicos y Pedagógicos
+
+#### A. Aulas y Grupos (`/classrooms` y `/groups`)
+* **Detalle de Clase (`ClassroomDetailComponent`)**:
+  - Vista completa con pestañas para Grupos y Estudiantes matriculados.
+  - Generación automática de código de acceso alfanumérico de 6 caracteres por grupo.
+  - Botón de copia al portapapeles con feedback temporal (*¡Copiado!*).
+* **Vista de Estudiantes (`StudentGroupsComponent`)**:
+  - Panel para unirse a grupos ingresando el código proporcionado por el docente.
+  - Visualización del saldo de EduCoins específico por grupo y período.
+
+#### B. Actividades y Tareas (`/activities`)
+* **Tipología sincronizada con el backend**: Reto, Misión, Proyecto y Evaluación.
+* **Sustitución de XP por Calificación Real**: Las actividades evalúan notas (escala 0.0 - 5.0 o 0 - 100) y no "experiencia ficticia".
+* **Acreditación Automática de EduCoins**:
+  - Al calificar una entrega, el backend acredita automáticamente los EduCoins correspondientes a la billetera del estudiante según su calificación.
+* **Entregas para Estudiantes**:
+  - Modal para subir archivos adjuntos o proporcionar enlaces externos (GitHub, Drive, Figma).
+
+#### C. Subastas en Tiempo Real (`/auctions`)
+* **Contador Regresivo en Vivo**: Reloj sincronizado segundo a segundo con el cierre de la subasta.
+* **Centro de Pujas con Retención**:
+  - Validación de saldo disponible en la billetera del estudiante.
+  - Retención temporal de EduCoins (`hold`) al pujar.
+* **Cierre y Liquidación Automática**:
+  - Al cerrar la subasta, se debita definitivamente al ganador y se reembolsa automáticamente a los demás participantes.
+* **Restricción de Pujas Docentes**:
+  - El docente no puede manipular saldos arbitrariamente; únicamente puede registrar una puja en nombre de un estudiante cuando este lo autorice expresamente (por carencia de dispositivo móvil en el aula).
+
+#### D. Billetera Digital (`/wallet`)
+* Desglose claro de **Saldo Total**, **Saldo Bloqueado en Subastas** y **Saldo Disponible**.
+* Historial transaccional inmutable con filtros por tipo:
+  - 🟢 Ganancias (`earn`) por actividades.
+  - 🔴 Gastos (`spend`) por subastas ganadas.
+  - 🟠 Retenciones (`hold`) por pujas activas.
+  - 🔵 Reembolsos (`refund`) por pujas superadas.
+* Vista de supervisión para docentes, coordinadores y rectores para monitorear billeteras de sus alumnos.
+
+#### E. Calificaciones y Reportes Oficiales DANE (`/grades`)
+* Boletín académico para estudiantes con promedio general y desglose de actividades.
+* Generador de reportes para docentes por grupo escolar:
+  - **Exportación a PDF**: Documento formal membretado con logo y colores institucionales.
+  - **Exportación a Excel**: Planilla compatible con el formato estándar del Ministerio de Educación / DANE.
+
+#### F. Módulo de Perfil de Usuario (`/profile`)
+* Componente standalone dedicado con tres pestañas:
+  1. **Información Personal**: Edición de nombre, apellido, teléfono, dirección y biografía/especialidad pedagógica.
+  2. **Seguridad y Contraseña**: Formulario reactivo para cambio de contraseña con visibilidad conmutable y validación de coincidencia.
+  3. **Detalles Institucionales**: Consulta de institución, código DANE, rol oficial y reglas de la economía escolar.
+* Enlace interactivo en la cabecera del layout haciendo clic en el avatar o nombre del usuario.
+
+#### G. Notificaciones Interactivas
+* Al hacer clic en una notificación in-app, el sistema:
+  1. La marca automáticamente como leída en el backend.
+  2. Cierra el menú desplegable.
+  3. **Redirige al usuario al recurso correspondiente**:
+     - Notificación de subasta $\rightarrow$ `/auctions`
+     - Notificación de actividad $\rightarrow$ `/activities`
+     - Notificación de calificación $\rightarrow$ `/grades`
+     - Notificación de EduCoins $\rightarrow$ `/wallet`
+     - Notificación de clase/grupo $\rightarrow$ `/classrooms` o `/groups`
+     - Alerta de seguridad $\rightarrow$ `/profile`
+
+---
+
+## 🛠️ 3. Guía de Integración de Supabase (Para el Compañero de Equipo)
+
+El compañero de equipo tiene a su disposición la guía completa en **`edubid-backend/MIGRACION_SUPABASE.md`**. A continuación se resumen los aspectos clave:
+
+### 3.1 Base de Datos PostgreSQL en Supabase
+1. **Creación del Proyecto**:
+   - Crear proyecto en [supabase.com](https://supabase.com/).
+   - Guardar la contraseña de la base de datos y la región (ej: `us-east-1`).
+2. **Variables de Entorno (`.env`) en `edubid-backend/`**:
+   ```env
+   DB_ENGINE=django.db.backends.postgresql
+   DB_NAME=postgres
+   DB_USER=postgres.[PROJECT_REF]
+   DB_PASSWORD=[TU_PASSWORD]
+   DB_HOST=aws-0-[REGION].pooler.supabase.com
+   DB_PORT=6543
+   DB_SSLMODE=require
+   ```
+3. **Dependencia Python**:
+   ```bash
+   pip install psycopg2-binary
+   ```
+4. **Migración de Datos**:
+   - Aplicar migraciones: `python manage.py migrate`
+   - Opcional: Transferir datos existentes desde MySQL usando `dumpdata` y `loaddata`:
+     ```bash
+     python manage.py dumpdata --natural-foreign --natural-primary -e contenttypes -e auth.Permission --indent 2 > datos.json
+     python manage.py loaddata datos.json
+     ```
+5. **Validación**:
+   - Ejecutar la suite de pruebas del backend:
+     ```bash
+     python manage.py test apps
+     ```
+   - Debe arrojar `Ran 76 tests ... OK`.
+
+### 3.2 Supabase Storage (Propuesta de Almacenamiento de Archivos)
+Para evitar almacenar avatares y archivos de tareas en el disco local del servidor:
+* **Buckets recomendados**:
+  1. `edubid-avatars` (Público): Fotos de perfil de usuarios y logos de colegios.
+  2. `edubid-submissions` (Privado): Archivos de entregas de actividades adjuntadas por estudiantes.
+  3. `edubid-reports` (Privado): Informes PDF y Excel generados.
+* **Integración con Django**:
+  - Utilizar `django-storages` y `boto3` configurando el endpoint S3 de Supabase Storage (`https://[PROJECT_REF].supabase.co/storage/v1/s3`).
+
+---
+
+## 🗺️ 4. Hoja de Ruta Pendiente (Próximos Pasos Prioritarios)
+
+| Módulo / Característica | Estado | Responsable / Notas |
+|-------------------------|--------|---------------------|
+| **Migración a Supabase (PostgreSQL)** | ⏳ Pendiente | Compañero de equipo (ver `MIGRACION_SUPABASE.md`) |
+| **Integración de Supabase Storage (S3)** | ⏳ Planificado | Opcional para centralizar archivos de `media/` |
+| **Notificaciones Interactivas (Redirección)** | ✅ Completado | Implementado en `LayoutComponent` |
+| **Módulo de Perfil (`/profile`)** | ✅ Completado | Componente `ProfileComponent` y rutas operativas |
+| **Regla de No-Bonificación Manual Arbitraria** | 📋 Especificado | Asegurar en backend que docentes/rectores no tengan botón de "Regalar EduCoins"; las monedas solo fluyen por actividades calificadas o pujas autorizadas |
+| **WebSockets Heartbeat & Reconexión** | ⏳ Optimización | Reforzar reconexión automática en redes con pérdida de paquetes |
+| **PWA / Notificaciones Push de Navegador** | 💡 Futuro | Soporte para Service Worker y notificaciones Push fuera del navegador |
+
+---
+
+## 🧪 5. Comandos de Verificación del Sistema
+
+### Backend (Django)
+```bash
+cd edubid-backend
+source .venv/bin/activate
+python manage.py test apps
+python manage.py runserver
+```
+
+### Frontend (Angular 19)
+```bash
+cd edubid-frontend
+npm run build
+npm start
+```

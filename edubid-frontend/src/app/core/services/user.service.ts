@@ -18,4 +18,20 @@ export class UserService {
   updateUser(userId: number, data: Partial<User>): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/${userId}/update/`, data);
   }
+
+  getProfile(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/profile/`);
+  }
+
+  updateProfile(data: any): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/profile/update/`, data);
+  }
+
+  changePassword(data: { old_password: string; new_password: string; confirm_password?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/change-password/`, data);
+  }
+
+  deleteAccount(password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/delete-account/`, { password });
+  }
 }

@@ -6,7 +6,7 @@ import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
 import { InAppNotificationService, InAppNotification } from '../../../core/services/in-app-notification.service';
 import { UserRole } from '../../../core/models/user.model';
 
-export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users' | 'activities' | 'auctions' | 'wallet' | 'grades';
+export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users' | 'activities' | 'auctions' | 'wallet' | 'grades' | 'profile';
 
 interface NavItem {
   label: string;
@@ -168,6 +168,11 @@ interface NavItem {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                       </svg>
                     }
+                    @case ('profile') {
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    }
                   }
                 </span>
                 
@@ -304,7 +309,7 @@ interface NavItem {
                         @for (notif of notificationsList(); track notif.id) {
                           <div
                             (click)="onNotificationClick(notif)"
-                            class="p-3.5 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 transition-colors cursor-pointer flex items-start gap-3"
+                            class="group p-3.5 hover:bg-neutral-100/70 dark:hover:bg-neutral-800/70 transition-all cursor-pointer flex items-start gap-3 border-b border-border/50 last:border-0"
                             [class.bg-primary/5]="!notif.leida"
                           >
                             <!-- Icono SVG según tipo -->
@@ -356,9 +361,13 @@ interface NavItem {
                               <p class="text-xs text-text-muted line-clamp-2 leading-relaxed">
                                 {{ notif.mensaje }}
                               </p>
-                              <span class="text-[10px] text-text-muted font-mono block">
-                                {{ notif.tiempo_transcurrido || formatNotificationDate(notif.creado) }}
-                              </span>
+                              <div class="flex items-center justify-between text-[10px] text-text-muted font-mono pt-0.5">
+                                <span>{{ notif.tiempo_transcurrido || formatNotificationDate(notif.creado) }}</span>
+                                <span class="inline-flex items-center gap-0.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity font-sans font-semibold text-[10px]">
+                                  Ver detalle
+                                  <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         }
@@ -481,18 +490,24 @@ interface NavItem {
 
               <!-- Perfil del Usuario & Rol -->
               <div class="flex items-center gap-2 pl-2 border-l border-border">
-                <div class="w-8 h-8 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-                  {{ userInitials() }}
-                </div>
+                <a
+                  routerLink="/profile"
+                  class="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer group"
+                  title="Ver mi perfil"
+                >
+                  <div class="w-8 h-8 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                    {{ userInitials() }}
+                  </div>
 
-                <div class="hidden sm:flex flex-col text-left">
-                  <span class="text-xs font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[120px]">
-                    {{ userName() }}
-                  </span>
-                  <span class="text-[10px] font-medium text-text-muted capitalize">
-                    {{ userRole() }}
-                  </span>
-                </div>
+                  <div class="hidden sm:flex flex-col text-left">
+                    <span class="text-xs font-bold text-slate-900 dark:text-white leading-tight truncate max-w-[120px] group-hover:text-primary transition-colors">
+                      {{ userName() }}
+                    </span>
+                    <span class="text-[10px] font-medium text-text-muted capitalize">
+                      {{ userRole() }}
+                    </span>
+                  </div>
+                </a>
 
                 <!-- Botón Cerrar Sesión -->
                 <button
@@ -755,6 +770,12 @@ export class LayoutComponent implements OnInit {
       icon: 'grades',
       roles: ['docente', 'estudiante', 'rector', 'coordinador', 'admin'],
     },
+    {
+      label: 'Mi Perfil',
+      route: '/profile',
+      icon: 'profile',
+      roles: ['docente', 'estudiante', 'rector', 'coordinador', 'admin'],
+    },
   ];
 
   filteredNavItems = computed(() => {
@@ -842,14 +863,32 @@ export class LayoutComponent implements OnInit {
       this.inAppNotifService.markAsRead(notif.id).subscribe();
     }
     this.isNotificationsOpen.set(false);
-    if (notif.auction_id) {
-      this.router.navigate(['/dashboard']);
-    } else if (notif.activity_id) {
-      if (this.userRole() === 'docente') {
+
+    // 1. Redirección si la notificación contiene una URL específica en metadata
+    if (notif.metadata?.['url']) {
+      this.router.navigateByUrl(notif.metadata['url']);
+      return;
+    }
+
+    // 2. Redirección contextual según el recurso y tipo de evento
+    if (notif.auction_id || notif.tipo?.includes('subasta')) {
+      this.router.navigate(['/auctions']);
+    } else if (notif.activity_id || notif.tipo === 'actividad') {
+      this.router.navigate(['/activities']);
+    } else if (notif.grade_id || notif.tipo === 'calificacion') {
+      this.router.navigate(['/grades']);
+    } else if (notif.tipo === 'monedas' || notif.tipo === 'wallet' || notif.tipo === 'educoins') {
+      this.router.navigate(['/wallet']);
+    } else if (notif.tipo?.includes('grupo') || notif.tipo?.includes('clase') || notif.tipo === 'novedad_academica') {
+      if (['docente', 'rector', 'coordinador'].includes(this.userRole())) {
         this.router.navigate(['/classrooms']);
       } else {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/groups']);
       }
+    } else if (notif.tipo === 'login_failed' || notif.tipo === 'account_security') {
+      this.router.navigate(['/profile']);
+    } else {
+      this.router.navigate(['/dashboard']);
     }
   }
 

@@ -28,6 +28,7 @@
   - [Paso 2: Configurar y Levantar el Backend (Django + MySQL en Docker)](#paso-2-configurar-y-levantar-el-backend-django--mysql-en-docker)
   - [Paso 3: Configurar y Levantar el Frontend (Angular)](#paso-3-configurar-y-levantar-el-frontend-angular)
 - [API Endpoints y Documentación](#-api-endpoints-y-documentación)
+- [Estado Actual del Proyecto y Roadmap](#-estado-actual-del-proyecto-y-roadmap)
 - [Comandos Útiles](#-comandos-útiles)
 - [Despliegue](#-despliegue)
 - [Documentación Adicional](#-documentación-adicional)
@@ -379,6 +380,22 @@ Navega a **`http://localhost:4200`** en tu navegador. ¡Listo para explorar EduB
 
 ---
 
+## 🚀 Estado Actual del Proyecto y Roadmap
+
+Para consultar el registro técnico detallado de todas las funcionalidades implementadas, arquitectura por capas, y la hoja de ruta de tareas pendientes (incluyendo la migración a Supabase y especificaciones pedagógicas), consulta el documento oficial:
+
+👉 **[ROADMAP_Y_ESTADO_DEL_PROYECTO.md](ROADMAP_Y_ESTADO_DEL_PROYECTO.md)**
+
+### Hitos Recientes Clave:
+* **Identidad Institucional Completa**: Paleta cromática de 24 colores, contraste dinámico YIQ, degradado simétrico superior (`secondary -> primary -> secondary`) y scrollbars institucionales.
+* **Flujo Seguro de Sesión**: Modal de confirmación interactivo, overlay de cierre de sesión cinematográfico, reseteo de variables CSS (`ThemeService.resetBrandColors()`) y hard refresh a Home.
+* **Módulos Académicos**: Aulas con grupos anidados (`Classrooms`), Actividades con notas reales 0-100 y acreditación automática de EduCoins, Subastas en vivo con WebSockets, Billetera digital y Reportes DANE en PDF y Excel.
+* **Notificaciones Interactivas**: Centro in-app con marcado automático y redirección contextual según el recurso (`/auctions`, `/activities`, `/grades`, `/wallet`, `/profile`).
+* **Módulo de Perfil (`/profile`)**: Edición de datos personales, cambio de contraseña seguro y resumen institucional.
+* **Guía de Supabase (PostgreSQL + Storage)**: Documento paso a paso para el despliegue y migración en [edubid-backend/MIGRACION_SUPABASE.md](edubid-backend/MIGRACION_SUPABASE.md).
+
+---
+
 ## 🔧 Comandos Útiles
 
 ### Backend (Django)
@@ -434,6 +451,8 @@ La aplicación SPA en Angular se compila mediante `npm run build`, generando una
 
 ## 📚 Documentación Adicional
 
+- [Estado Actual del Proyecto y Hoja de Ruta (Roadmap)](ROADMAP_Y_ESTADO_DEL_PROYECTO.md)
+- [Guía de Migración de MySQL a Supabase (PostgreSQL + Storage)](edubid-backend/MIGRACION_SUPABASE.md)
 - [Plan de Auditoría Técnica, Resiliencia y Mejoras del MVP](AUDIT_AND_IMPROVEMENT_PLAN.md)
 - [Guía y Arquitectura del Backend Django](edubid-backend/README.md)
 - [Mapeo Completo de Endpoints Backend](edubid-backend/BACKEND_API_MAP.md)

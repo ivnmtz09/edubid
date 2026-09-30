@@ -169,6 +169,24 @@ export const routes: Routes = [
     redirectTo: 'grades',
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        title: 'Mi Perfil | EduBid',
+        loadComponent: () =>
+          import('./features/profile/profile.component').then(m => m.ProfileComponent),
+      },
+    ],
+  },
+  {
+    path: 'perfil',
+    redirectTo: 'profile',
+  },
+  {
     path: 'sobre-nosotros',
     title: 'Sobre Nosotros | EduBid',
     loadComponent: () =>

@@ -211,6 +211,33 @@ Una de las mayores ventajas de Supabase para presentaciones y ferias:
 
 ---
 
+## 📦 Supabase Storage (Almacenamiento de Archivos y Medios)
+
+Además de la base de datos PostgreSQL, Supabase ofrece almacenamiento tipo S3 para archivos estáticos y subidos por usuarios.
+
+### 1. Buckets Recomendados para EduBid:
+* `edubid-avatars`: **Público** — Fotos de perfil y logotipos institucionales (PNG, JPG, SVG, WebP).
+* `edubid-submissions`: **Privado** — Archivos de tareas y entregas adjuntadas por estudiantes (PDF, DOCX, ZIP, imágenes).
+* `edubid-reports`: **Privado** — Informes oficiales generados en PDF y planillas Excel DANE.
+
+### 2. Configuración en Django (`django-storages` opcional):
+Para conectar Django con Supabase Storage como backend de archivos `MEDIA_ROOT`:
+```bash
+pip install django-storages boto3
+```
+En `settings.py`:
+```python
+# Conexión S3-Compatible con Supabase Storage
+AWS_ACCESS_KEY_ID = os.getenv('SUPABASE_S3_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('SUPABASE_S3_SECRET_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('SUPABASE_STORAGE_BUCKET', 'edubid-media')
+AWS_S3_ENDPOINT_URL = f"https://{os.getenv('SUPABASE_PROJECT_REF')}.supabase.co/storage/v1/s3"
+AWS_S3_REGION_NAME = os.getenv('SUPABASE_REGION', 'us-east-1')
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+```
+
+---
+
 ## 🔄 ¿Cómo volver a MySQL si fuera necesario? (Rollback en 1 minuto)
 
 Si por alguna razón necesitas volver a tu base de datos MySQL local:

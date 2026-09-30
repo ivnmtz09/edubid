@@ -4,6 +4,7 @@ export interface UserInstitution {
   color_primario: string;
   color_secundario: string;
   logo: string | null;
+  codigo_dane?: string | null;
 }
 
 export interface UserProfile {
@@ -23,6 +24,8 @@ export interface User {
   avatar: string | null;
   date_joined: string;
   is_active?: boolean;
+  is_verified?: boolean;
+  email_verificado?: boolean;
   profile: UserProfile;
 }
 
