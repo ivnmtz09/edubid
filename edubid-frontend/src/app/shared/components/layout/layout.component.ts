@@ -6,7 +6,7 @@ import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
 import { InAppNotificationService, InAppNotification } from '../../../core/services/in-app-notification.service';
 import { UserRole } from '../../../core/models/user.model';
 
-export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users';
+export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users' | 'activities' | 'auctions' | 'wallet' | 'grades';
 
 interface NavItem {
   label: string;
@@ -27,13 +27,14 @@ interface NavItem {
       @if (isMobileDrawerOpen()) {
         <div
           (click)="closeMobileDrawer()"
-          class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs lg:hidden transition-opacity duration-300"
+          class="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden transition-opacity duration-300"
         ></div>
       }
 
       <!-- ================= ASIDE / SIDEBAR IZQUIERDO (COLUMNA COMPLETA H-SCREEN) ================= -->
       <aside
-        class="fixed lg:static inset-y-0 left-0 z-50 lg:z-20 h-screen bg-surface border-r border-border flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 overflow-y-auto"
+        class="fixed lg:static inset-y-0 left-0 z-50 lg:z-20 h-screen bg-surface flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 overflow-y-auto"
+        style="border-right: 1px solid var(--color-border); border-left: 3px solid var(--brand-primary);"
         [class.w-64]="isDesktopExpanded() || isMobileDrawerOpen()"
         [class.lg:w-20]="!isDesktopExpanded()"
         [class.translate-x-0]="isMobileDrawerOpen()"
@@ -61,7 +62,7 @@ interface NavItem {
             <button
               type="button"
               (click)="closeMobileDrawer()"
-              class="lg:hidden p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              class="lg:hidden p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
               title="Cerrar menú"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +75,7 @@ interface NavItem {
           @if (isDesktopExpanded() || isMobileDrawerOpen()) {
             <div class="px-3 py-2 rounded-xl bg-bg border border-border flex items-center justify-between">
               <div class="flex items-center gap-2 min-w-0">
-                <span class="w-2 h-2 rounded-full bg-orange-600 shrink-0"></span>
+                <span class="w-2 h-2 rounded-full shrink-0" style="background-color: var(--brand-primary);"></span>
                 <span class="text-xs font-bold text-slate-900 dark:text-white capitalize truncate">
                   Rol: {{ userRole() }}
                 </span>
@@ -82,7 +83,7 @@ interface NavItem {
             </div>
           } @else {
             <div class="flex justify-center" [title]="'Rol: ' + userRole()">
-              <div class="w-7 h-7 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center font-bold text-[10px] uppercase">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] uppercase" style="background: color-mix(in srgb, var(--brand-primary) 10%, transparent); color: var(--brand-primary);">
                 {{ userRole().slice(0, 2) }}
               </div>
             </div>
@@ -92,8 +93,9 @@ interface NavItem {
           <button
             type="button"
             (click)="toggleDesktopCollapse()"
-            class="hidden lg:flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            class="hidden lg:flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
             [class.justify-center]="!isDesktopExpanded()"
+            [style.color]="institutionPrimaryColor()"
             [title]="isDesktopExpanded() ? 'Contraer menú lateral' : 'Expandir menú lateral'"
           >
             <svg class="w-5 h-5 shrink-0 transition-transform duration-300" [class.rotate-180]="!isDesktopExpanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,15 +113,15 @@ interface NavItem {
             @for (item of filteredNavItems(); track item.route) {
               <a
                 [routerLink]="item.route"
-                routerLinkActive="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-bold shadow-xs"
+                routerLinkActive="nav-item-active"
                 [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
                 (click)="closeMobileDrawer()"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors group cursor-pointer"
+                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer"
                 [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
                 [title]="item.label"
               >
                 <!-- SVG Icon Rendered Directly (No DomSanitizer Purge) -->
-                <span class="w-5 h-5 shrink-0 flex items-center justify-center text-text-muted group-hover:text-primary transition-colors">
+                <span class="w-5 h-5 shrink-0 flex items-center justify-center text-text-muted group-hover:text-primary transition-colors nav-icon">
                   @switch (item.icon) {
                     @case ('dashboard') {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,6 +148,26 @@ interface NavItem {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                       </svg>
                     }
+                    @case ('activities') {
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      </svg>
+                    }
+                    @case ('auctions') {
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                    }
+                    @case ('wallet') {
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                    }
+                    @case ('grades') {
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    }
                   }
                 </span>
                 
@@ -163,7 +185,7 @@ interface NavItem {
           <!-- Enlace al Inicio Público -->
           <a
             routerLink="/"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-slate-100/60 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
             [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
             title="Página de Inicio de EduBid"
           >
@@ -181,7 +203,7 @@ interface NavItem {
       <div class="flex-1 flex flex-col h-screen min-w-0 overflow-y-auto overflow-x-hidden">
 
         <!-- ================= TOP HEADER (ENCABEZADO FIJO DE CONTENIDO) ================= -->
-        <header class="sticky top-0 z-30 shrink-0 bg-surface/95 backdrop-blur-md border-b border-border h-16 transition-colors duration-200">
+        <header class="sticky top-0 z-30 shrink-0 bg-surface/95 backdrop-blur-md h-16 transition-colors duration-200" style="border-bottom: 2px solid var(--brand-primary);">
           <div class="h-full px-4 sm:px-6 flex items-center justify-between gap-4">
             
             <!-- Lado Izquierdo: Botón Toggle Sidebar (Mobile) + Identidad -->
@@ -189,7 +211,7 @@ interface NavItem {
               <button
                 type="button"
                 (click)="toggleSidebar()"
-                class="lg:hidden p-2 rounded-xl text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                class="lg:hidden p-2 rounded-xl text-text-muted hover:text-text hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                 title="Abrir menú"
                 aria-label="Abrir menú"
               >
@@ -214,7 +236,7 @@ interface NavItem {
                 <button
                   type="button"
                   (click)="toggleNotificationsDropdown($event)"
-                  class="relative p-2 rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs"
+                  class="relative p-2 rounded-xl border border-border bg-surface hover:bg-neutral-100 dark:hover:bg-neutral-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs"
                   [attr.aria-expanded]="isNotificationsOpen()"
                   aria-haspopup="true"
                   title="Centro de Notificaciones"
@@ -235,7 +257,7 @@ interface NavItem {
                 @if (isNotificationsOpen()) {
                   <div class="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-surface shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                     <!-- Cabecera -->
-                    <div class="p-3.5 border-b border-border flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                    <div class="p-3.5 border-b border-border flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-900/50">
                       <div class="flex items-center gap-2">
                         <span class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                           Notificaciones
@@ -270,7 +292,7 @@ interface NavItem {
                         </div>
                       } @else if (notificationsList().length === 0) {
                         <div class="p-8 text-center text-xs text-text-muted space-y-2">
-                          <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-text-muted flex items-center justify-center mx-auto">
+                          <div class="w-9 h-9 rounded-full bg-neutral-100 dark:bg-neutral-800 text-text-muted flex items-center justify-center mx-auto">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
@@ -282,7 +304,7 @@ interface NavItem {
                         @for (notif of notificationsList(); track notif.id) {
                           <div
                             (click)="onNotificationClick(notif)"
-                            class="p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer flex items-start gap-3"
+                            class="p-3.5 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 transition-colors cursor-pointer flex items-start gap-3"
                             [class.bg-orange-500/5]="!notif.leida"
                           >
                             <!-- Icono según tipo -->
@@ -315,7 +337,7 @@ interface NavItem {
                     </div>
 
                     <!-- Pie del Popover -->
-                    <div class="p-2.5 border-t border-border bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between text-[11px]">
+                    <div class="p-2.5 border-t border-border bg-neutral-50/50 dark:bg-neutral-900/50 flex items-center justify-between text-[11px]">
                       <span class="text-text-muted font-mono text-[10px]">EduBid Centro de Avisos</span>
                       @if (notificationsList().length > 0) {
                         <button
@@ -336,7 +358,7 @@ interface NavItem {
                 <button
                   type="button"
                   (click)="toggleThemeDropdown($event)"
-                  class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs"
+                  class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-xl border border-border bg-surface hover:bg-neutral-100 dark:hover:bg-neutral-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs"
                   [attr.aria-expanded]="isThemeDropdownOpen()"
                   aria-haspopup="true"
                   title="Cambiar tema de visualización"
@@ -371,7 +393,7 @@ interface NavItem {
                     <button
                       type="button"
                       (click)="setTheme('light')"
-                      class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer text-left"
                       [class.font-bold]="themeService.mode() === 'light'"
                     >
                       <span class="flex items-center gap-2">
@@ -390,7 +412,7 @@ interface NavItem {
                     <button
                       type="button"
                       (click)="setTheme('dark')"
-                      class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer text-left"
                       [class.font-bold]="themeService.mode() === 'dark'"
                     >
                       <span class="flex items-center gap-2">
@@ -409,7 +431,7 @@ interface NavItem {
                     <button
                       type="button"
                       (click)="setTheme('system')"
-                      class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer text-left"
                       [class.font-bold]="themeService.mode() === 'system'"
                     >
                       <span class="flex items-center gap-2">
@@ -447,7 +469,7 @@ interface NavItem {
                 <button
                   type="button"
                   (click)="logout()"
-                  class="p-2 rounded-xl text-text-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer ml-1"
+                  class="p-2 rounded-xl text-text-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer ml-1"
                   title="Cerrar Sesión"
                   aria-label="Cerrar Sesión"
                 >
@@ -520,12 +542,19 @@ export class LayoutComponent implements OnInit {
     const l = user.last_name?.[0] || '';
     return (f + l).toUpperCase() || 'EB';
   });
+  localInstitutionName = signal<string | null>(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('edubid_institution_name') : null
+  );
+  localInstitutionLogo = signal<string | null>(
+    typeof localStorage !== 'undefined' ? localStorage.getItem('edubid_institution_logo') : null
+  );
+
   sidebarBrandTitle = computed(() => {
     const role = this.userRole();
     if (role === 'admin') {
       return 'EduBid';
     }
-    return this.authService.currentUser()?.profile?.institucion?.nombre || 'EduBid';
+    return this.localInstitutionName() || this.authService.currentUser()?.profile?.institucion?.nombre || 'EduBid';
   });
 
   headerTitle = computed(() => {
@@ -533,11 +562,11 @@ export class LayoutComponent implements OnInit {
     if (role === 'admin') {
       return 'EduBid Admin';
     }
-    return this.authService.currentUser()?.profile?.institucion?.nombre || 'EduBid Plataforma';
+    return this.localInstitutionName() || this.authService.currentUser()?.profile?.institucion?.nombre || 'EduBid Plataforma';
   });
 
   institutionName = computed(() => {
-    return this.authService.currentUser()?.profile?.institucion?.nombre || null;
+    return this.localInstitutionName() || this.authService.currentUser()?.profile?.institucion?.nombre || null;
   });
 
   institutionLogo = computed(() => {
@@ -545,22 +574,35 @@ export class LayoutComponent implements OnInit {
     if (!user || user.role === 'admin') {
       return null;
     }
-    return user.profile?.institucion?.logo || null;
+    return this.localInstitutionLogo() || user.profile?.institucion?.logo || null;
   });
 
-  // Ítems de Navegación según el Rol
+  institutionPrimaryColor = computed(() => {
+    const user = this.authService.currentUser();
+    if (!user || user.role === 'admin') return '#ea580c';
+    return user.profile?.institucion?.color_primario || '#ea580c';
+  });
+
+  institutionSecondaryColor = computed(() => {
+    const user = this.authService.currentUser();
+    if (!user || user.role === 'admin') return '#3b82f6';
+    return user.profile?.institucion?.color_secundario || '#3b82f6';
+  });
+
+  // Ítems de Navegación con Aislamiento Estricto según el Rol del Backend
   navItems: NavItem[] = [
     {
       label: 'Panel Principal',
       route: '/dashboard',
       icon: 'dashboard',
       exact: true,
+      roles: ['docente', 'estudiante', 'admin'],
     },
     {
       label: 'Panel de Rectoría',
       route: '/dashboard/rector',
       icon: 'rector',
-      roles: ['rector'],
+      roles: ['rector', 'admin'],
     },
     {
       label: 'Mis Clases',
@@ -569,16 +611,40 @@ export class LayoutComponent implements OnInit {
       roles: ['docente'],
     },
     {
+      label: 'Supervisión de Clases',
+      route: '/classrooms',
+      icon: 'classrooms',
+      roles: ['rector', 'coordinador', 'admin'],
+    },
+    {
       label: 'Mis Grupos',
       route: '/groups',
       icon: 'groups',
       roles: ['estudiante'],
     },
     {
-      label: 'Supervisión de Clases',
-      route: '/classrooms',
-      icon: 'classrooms',
-      roles: ['rector', 'coordinador'],
+      label: 'Actividades y Retos',
+      route: '/activities',
+      icon: 'activities',
+      roles: ['docente', 'estudiante'],
+    },
+    {
+      label: 'Subastas',
+      route: '/auctions',
+      icon: 'auctions',
+      roles: ['docente', 'estudiante'],
+    },
+    {
+      label: 'Mi Wallet',
+      route: '/wallet',
+      icon: 'wallet',
+      roles: ['estudiante'],
+    },
+    {
+      label: 'Calificaciones y Reportes',
+      route: '/grades',
+      icon: 'grades',
+      roles: ['docente', 'estudiante', 'rector', 'coordinador', 'admin'],
     },
   ];
 
@@ -592,6 +658,21 @@ export class LayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.inAppNotifService.loadUnreadCount().subscribe();
+    // Inyectar colores institucionales al cargar el layout
+    const user = this.authService.currentUser();
+    if (user?.profile?.institucion) {
+      this.themeService.injectBrandColors(user.profile.institucion);
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('edubid:institution-updated', (e: any) => {
+        if (e.detail?.nombre) {
+          this.localInstitutionName.set(e.detail.nombre);
+        }
+        if (e.detail?.logo) {
+          this.localInstitutionLogo.set(e.detail.logo);
+        }
+      });
+    }
   }
 
   // Cerrar dropdown si se hace click fuera
@@ -684,7 +765,7 @@ export class LayoutComponent implements OnInit {
       case 'login_failed':
         return 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20';
       default:
-        return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-border';
+        return 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 border border-border';
     }
   }
 

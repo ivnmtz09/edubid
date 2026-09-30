@@ -231,8 +231,9 @@ export class RectorDashboardComponent implements OnInit {
   userProfile = signal(this.authService.currentUser()?.profile);
   
   institutionName = signal(
+    (typeof localStorage !== 'undefined' && localStorage.getItem('edubid_institution_name')) ||
     this.authService.currentUser()?.profile?.institucion?.nombre ||
-      'Administración Global EduBid'
+    'Administración Global EduBid'
   );
 
   isLoading = signal(true);
@@ -241,6 +242,13 @@ export class RectorDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStats();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('edubid:institution-updated', (e: any) => {
+        if (e.detail?.nombre) {
+          this.institutionName.set(e.detail.nombre);
+        }
+      });
+    }
   }
 
   getCodigoDane(): string {

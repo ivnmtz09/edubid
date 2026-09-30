@@ -91,6 +91,78 @@ export const routes: Routes = [
     redirectTo: 'groups',
   },
   {
+    path: 'activities',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        title: 'Actividades | EduBid',
+        loadComponent: () =>
+          import('./features/activities/activities.component').then(m => m.ActivitiesComponent),
+      },
+    ],
+  },
+  {
+    path: 'actividades',
+    redirectTo: 'activities',
+  },
+  {
+    path: 'auctions',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        title: 'Subastas | EduBid',
+        loadComponent: () =>
+          import('./features/auctions/auctions.component').then(m => m.AuctionsComponent),
+      },
+    ],
+  },
+  {
+    path: 'subastas',
+    redirectTo: 'auctions',
+  },
+  {
+    path: 'wallet',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        title: 'Mi Wallet | EduBid',
+        loadComponent: () =>
+          import('./features/wallet/wallet.component').then(m => m.WalletComponent),
+      },
+    ],
+  },
+  {
+    path: 'billetera',
+    redirectTo: 'wallet',
+  },
+  {
+    path: 'grades',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./shared/components/layout/layout.component').then(m => m.LayoutComponent),
+    children: [
+      {
+        path: '',
+        title: 'Calificaciones | EduBid',
+        loadComponent: () =>
+          import('./features/grades/grades.component').then(m => m.GradesComponent),
+      },
+    ],
+  },
+  {
+    path: 'calificaciones',
+    redirectTo: 'grades',
+  },
+  {
     path: 'sobre-nosotros',
     title: 'Sobre Nosotros | EduBid',
     loadComponent: () =>
