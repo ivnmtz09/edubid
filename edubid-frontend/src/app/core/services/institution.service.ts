@@ -50,7 +50,7 @@ export class InstitutionService {
     return this.http.post<Institution>(this.baseUrl, data);
   }
 
-  updateInstitution(id: number, data: InstitutionUpdateRequest): Observable<Institution> {
+  updateInstitution(id: number, data: InstitutionUpdateRequest | FormData): Observable<Institution> {
     return this.http.patch<Institution>(`${this.baseUrl}${id}/`, data);
   }
 

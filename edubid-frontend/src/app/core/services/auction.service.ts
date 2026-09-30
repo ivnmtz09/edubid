@@ -73,6 +73,21 @@ export class AuctionService {
     return this.http.post<CloseAuctionResponse>(`${this.apiUrl}/auctions/${auctionId}/close/`, {});
   }
 
+  deleteAuction(auctionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/auctions/${auctionId}/`);
+  }
+
+  getBids(params?: { auction?: number }): Observable<AuctionBid[]> {
+    const url = params?.auction
+      ? `${this.apiUrl}/bids/?auction=${params.auction}`
+      : `${this.apiUrl}/bids/`;
+    return this.http.get<AuctionBid[]>(url);
+  }
+
+  getStats(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/auctions/stats/`);
+  }
+
   createBid(auctionId: number, cantidad: number): Observable<AuctionBid> {
     return this.http.post<AuctionBid>(`${this.apiUrl}/bids/`, {
       auction: auctionId,
@@ -80,3 +95,4 @@ export class AuctionService {
     });
   }
 }
+

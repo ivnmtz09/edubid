@@ -31,6 +31,10 @@ export class GradeService {
     return this.http.get<MyGradesResponse>(`${this.apiUrl}/mis-notas/`);
   }
 
+  getGroupReport(groupId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/grupo/${groupId}/reporte/`);
+  }
+
   exportGroupExcel(groupId: number): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/grupo/${groupId}/exportar-excel/`, {
       responseType: 'blob'
@@ -43,4 +47,5 @@ export class GradeService {
     });
   }
 }
+
 

@@ -66,6 +66,14 @@ export class ActivityService {
     return this.http.post<Activity>(`${this.apiUrl}/activities/`, data);
   }
 
+  updateActivity(id: number, data: Partial<Activity>): Observable<Activity> {
+    return this.http.patch<Activity>(`${this.apiUrl}/activities/${id}/`, data);
+  }
+
+  deleteActivity(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/activities/${id}/`);
+  }
+
   getSubmissions(activityId?: number): Observable<Submission[]> {
     const url = activityId
       ? `${this.apiUrl}/submissions/?activity=${activityId}`
