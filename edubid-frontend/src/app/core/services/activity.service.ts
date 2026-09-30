@@ -15,6 +15,8 @@ export interface Activity {
   habilitada: boolean;
   archivo_adjunto?: string | null;
   classroom?: number;
+  group_nombre?: string;
+  creado?: string;
   puede_entregar?: boolean;
   esta_vencida?: boolean;
   tiempo_restante?: string;

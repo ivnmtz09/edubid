@@ -25,6 +25,7 @@ export interface Group {
     descripcion?: string;
   };
   codigo: string;
+  codigo_acceso?: string;
   activo: boolean;
   codigo_generado_en?: string;
   codigo_expira_en?: string;

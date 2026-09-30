@@ -305,7 +305,7 @@ interface NavItem {
                           <div
                             (click)="onNotificationClick(notif)"
                             class="p-3.5 hover:bg-neutral-50 dark:hover:bg-neutral-800/60 transition-colors cursor-pointer flex items-start gap-3"
-                            [class.bg-orange-500/5]="!notif.leida"
+                            [class.bg-primary/5]="!notif.leida"
                           >
                             <!-- Icono según tipo -->
                             <span
@@ -321,7 +321,7 @@ interface NavItem {
                                   {{ notif.titulo }}
                                 </h4>
                                 @if (!notif.leida) {
-                                  <span class="w-2 h-2 rounded-full bg-orange-600 shrink-0" title="No leída"></span>
+                                  <span class="w-2 h-2 rounded-full shrink-0" style="background-color: var(--brand-primary);" title="No leída"></span>
                                 }
                               </div>
                               <p class="text-xs text-text-muted line-clamp-2 leading-relaxed">
@@ -403,7 +403,7 @@ interface NavItem {
                         Claro
                       </span>
                       @if (themeService.mode() === 'light') {
-                        <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
                       }
@@ -422,7 +422,7 @@ interface NavItem {
                         Oscuro
                       </span>
                       @if (themeService.mode() === 'dark') {
-                        <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
                       }
@@ -441,7 +441,7 @@ interface NavItem {
                         Tema del sistema
                       </span>
                       @if (themeService.mode() === 'system') {
-                        <svg class="w-3.5 h-3.5 shrink-0 text-orange-600" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                           <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                         </svg>
                       }
@@ -641,6 +641,12 @@ export class LayoutComponent implements OnInit {
       roles: ['estudiante'],
     },
     {
+      label: 'Billeteras de Alumnos',
+      route: '/wallet',
+      icon: 'wallet',
+      roles: ['docente', 'rector', 'coordinador', 'admin'],
+    },
+    {
       label: 'Calificaciones y Reportes',
       route: '/grades',
       icon: 'grades',
@@ -756,7 +762,7 @@ export class LayoutComponent implements OnInit {
       case 'subasta_nueva':
       case 'subasta_ganada':
       case 'subasta_abierta':
-        return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20';
+        return 'bg-primary/10 text-primary border border-primary/20';
       case 'actividad':
         return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20';
       case 'novedad_academica':

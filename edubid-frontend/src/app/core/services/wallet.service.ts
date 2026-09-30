@@ -33,20 +33,36 @@ export class WalletService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/tokens`;
 
-  getMyWallet(): Observable<Wallet> {
-    return this.http.get<Wallet>(`${this.apiUrl}/wallets/mi-wallet/`);
+  getMyWallet(grupoId?: number): Observable<Wallet> {
+    const query = grupoId ? `?grupo=${grupoId}` : '';
+    return this.http.get<Wallet>(`${this.apiUrl}/wallets/mi-wallet/${query}`);
   }
 
-  getMiWallet(): Observable<Wallet> {
-    return this.getMyWallet();
+  getMiWallet(grupoId?: number): Observable<Wallet> {
+    return this.getMyWallet(grupoId);
   }
 
   getWallet(id: number): Observable<Wallet> {
     return this.http.get<Wallet>(`${this.apiUrl}/wallets/${id}/`);
   }
 
-  getWallets(): Observable<Wallet[]> {
-    return this.http.get<Wallet[]>(`${this.apiUrl}/wallets/`);
+  getWallets(params?: { grupo?: number; classroom?: number }): Observable<Wallet[]> {
+    let query = '';
+    if (params) {
+      const q = new URLSearchParams();
+      if (params.grupo) q.set('grupo', String(params.grupo));
+      if (params.classroom) q.set('classroom', String(params.classroom));
+      const str = q.toString();
+      if (str) query = `?${str}`;
+    }
+    return this.http.get<Wallet[]>(`${this.apiUrl}/wallets/${query}`);
+  }
+
+  depositar(walletId: number, cantidad: number, descripcion: string = 'Bonificación del docente'): Observable<Wallet> {
+    return this.http.post<Wallet>(`${this.apiUrl}/wallets/${walletId}/depositar/`, {
+      cantidad,
+      descripcion
+    });
   }
 
   getTransactions(): Observable<CoinTransaction[]> {
