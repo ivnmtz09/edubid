@@ -55,7 +55,7 @@ import { NotificationService } from '../../../core/services/notification.service
         @if (groups().length === 0) {
           <!-- Estado Vacío -->
           <div class="p-8 sm:p-12 rounded-3xl border border-border bg-surface text-center max-w-2xl mx-auto space-y-4">
-            <div class="w-16 h-16 rounded-2xl bg-orange-500/10 text-orange-600 flex items-center justify-center mx-auto shadow-inner">
+            <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-inner">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -87,7 +87,7 @@ import { NotificationService } from '../../../core/services/notification.service
                 <div>
                   <!-- Encabezado de la Tarjeta del Grupo -->
                   <div class="flex items-start justify-between gap-3 mb-3">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                       </svg>
@@ -157,7 +157,7 @@ import { NotificationService } from '../../../core/services/notification.service
             <!-- Modal Header -->
             <div class="flex items-center justify-between p-4 sm:p-5 border-b border-border">
               <div class="flex items-center gap-2.5">
-                <span class="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                   </svg>
@@ -190,15 +190,15 @@ import { NotificationService } from '../../../core/services/notification.service
                   formControlName="code"
                   placeholder="EJ: B7X9Q2"
                   maxlength="10"
-                  class="w-full text-center text-xl sm:text-2xl font-mono tracking-widest uppercase px-4 py-3 border-2 border-border rounded-xl focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 bg-bg text-slate-900 dark:text-white transition-all outline-none"
+                  class="w-full text-center text-xl sm:text-2xl font-mono tracking-widest uppercase px-4 py-3 border-2 border-border rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/20 bg-bg text-slate-900 dark:text-white transition-all outline-none"
                 />
                 <p class="text-xs text-text-muted mt-2 text-center">
                   Ingresa el código único de 6 caracteres que te dio tu profesor.
                 </p>
               </div>
 
-              <div class="p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-xs text-orange-900 dark:text-orange-200 flex items-center gap-2.5">
-                <svg class="w-4 h-4 shrink-0 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-text flex items-center gap-2.5">
+                <svg class="w-4 h-4 shrink-0 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>Al unirte, tu billetera de EduCoins se activará para este periodo.</span>
