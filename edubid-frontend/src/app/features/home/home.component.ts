@@ -71,6 +71,14 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   emailNotVerified = signal(false);
   notVerifiedEmail = signal('');
 
+  // Panel de verificación de email post-registro
+  registeredEmailPending = signal<string | null>(null);
+  isResendingVerification = signal(false);
+  resendVerificationSuccess = signal<string | null>(null);
+  resendVerificationError = signal<string | null>(null);
+  resendCooldown = signal(0);
+  private resendTimer: any = null;
+
   // Datos
   institutions = signal<PublicInstitution[]>([]);
 
@@ -140,6 +148,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopCarousel();
+    if (this.resendTimer) {
+      clearInterval(this.resendTimer);
+    }
   }
 
   /** Inicia el carrusel rotativo de tarjetas del hero */
@@ -217,6 +228,48 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.errorMessage.set(null);
     this.successMessage.set(null);
     this.emailNotVerified.set(false);
+    this.resendVerificationSuccess.set(null);
+    this.resendVerificationError.set(null);
+  }
+
+  resendRegistrationVerification(): void {
+    const email = (this.registeredEmailPending() || this.notVerifiedEmail() || this.loginForm.get('email')?.value || '').trim();
+    if (!email) return;
+
+    this.isResendingVerification.set(true);
+    this.resendVerificationSuccess.set(null);
+    this.resendVerificationError.set(null);
+
+    this.authService.resendVerification(email).subscribe({
+      next: (res) => {
+        this.isResendingVerification.set(false);
+        this.resendVerificationSuccess.set(res.message || 'Se ha reenviado el enlace. Revisa tu bandeja de entrada o spam.');
+        this.startResendCooldown();
+      },
+      error: (err) => {
+        this.isResendingVerification.set(false);
+        this.resendVerificationError.set(err.error?.detail || err.error?.message || 'Error al reenviar el correo de verificación.');
+      },
+    });
+  }
+
+  private startResendCooldown(seconds = 60): void {
+    this.resendCooldown.set(seconds);
+    if (this.resendTimer) clearInterval(this.resendTimer);
+    this.resendTimer = setInterval(() => {
+      this.resendCooldown.update((c) => {
+        if (c <= 1) {
+          clearInterval(this.resendTimer);
+          return 0;
+        }
+        return c - 1;
+      });
+    }, 1000);
+  }
+
+  dismissRegistrationPending(): void {
+    this.registeredEmailPending.set(null);
+    this.switchTab('login');
   }
 
   // Manejo de Rol de Registro
@@ -336,10 +389,7 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
           this.isLoading.set(false);
           this.loginForm.patchValue({ email: val.email });
           if (res.verification_required) {
-            this.successMessage.set(
-              '¡Registro exitoso! Por favor verifica tu correo electrónico antes de iniciar sesión.'
-            );
-            this.switchTab('login');
+            this.registeredEmailPending.set(val.email);
           } else {
             this.successMessage.set(
               '¡Registro exitoso! Ya puedes iniciar sesión con tu cuenta.'

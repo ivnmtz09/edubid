@@ -184,7 +184,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     }).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/email-sent']);
+        this.router.navigate(['/email-sent'], { state: { email: formValue.email } });
       },
       error: (err) => {
         this.isLoading.set(false);

@@ -170,45 +170,49 @@
         }
       </div>
 
-      <div class="flex items-start gap-2 mt-4">
-        <label class="flex items-start gap-2.5 cursor-pointer select-none group w-full">
-          <div class="relative flex items-center justify-center mt-0.5 shrink-0">
-            <input 
-              id="accept_terms" 
-              type="checkbox" 
-              formControlName="accept_terms" 
-              class="peer sr-only" 
-            />
-            <!-- Recuadro del checkbox con palomita naranja tanto en claro como en oscuro -->
-            <div
-              id="accept-terms-box"
-              class="w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center shadow-xs bg-white dark:bg-neutral-900 group-hover:border-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary"
-              [class.border-primary]="registerForm.get('accept_terms')?.value"
-              [class.bg-primary]="registerForm.get('accept_terms')?.value"
-              [class.border-slate-300]="!registerForm.get('accept_terms')?.value"
-              [class.dark:border-neutral-700]="!registerForm.get('accept_terms')?.value"
-            >
-              @if (registerForm.get('accept_terms')?.value) {
-                <svg
-                  class="w-3.5 h-3.5 text-white fill-current"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              }
-            </div>
+      <div class="flex items-start gap-2.5 mt-4 select-none">
+        <div class="relative flex items-center justify-center mt-0.5 shrink-0 w-5 h-5">
+          <input 
+            id="accept_terms" 
+            type="checkbox" 
+            formControlName="accept_terms" 
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+          />
+          <div
+            id="accept-terms-box"
+            class="w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center shadow-xs pointer-events-none"
+            [class.border-primary]="registerForm.get('accept_terms')?.value"
+            [class.bg-primary]="registerForm.get('accept_terms')?.value"
+            [class.border-neutral-400]="!registerForm.get('accept_terms')?.value"
+            [class.dark:border-neutral-500]="!registerForm.get('accept_terms')?.value"
+            [class.bg-neutral-100]="!registerForm.get('accept_terms')?.value"
+            [class.dark:bg-neutral-800]="!registerForm.get('accept_terms')?.value"
+          >
+            @if (registerForm.get('accept_terms')?.value) {
+              <svg
+                class="w-3.5 h-3.5 text-white"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+            }
           </div>
-          <span class="text-sm text-text">
-            Acepto los
-            <button type="button" (click)="openTermsModal(); $event.stopPropagation()" class="text-primary hover:underline font-medium cursor-pointer">
-              términos y condiciones
-            </button>
-          </span>
+        </div>
+        <label for="accept_terms" class="text-sm text-text cursor-pointer leading-tight pt-0.5">
+          Acepto los
+          <button
+            type="button"
+            (click)="openTermsModal(); $event.preventDefault(); $event.stopPropagation()"
+            class="text-primary hover:underline font-medium cursor-pointer ml-0.5"
+          >
+            términos y condiciones
+          </button>
         </label>
       </div>
 
