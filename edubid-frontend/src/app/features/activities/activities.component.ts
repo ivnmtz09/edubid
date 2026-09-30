@@ -14,177 +14,476 @@ import { NotificationService } from '../../core/services/notification.service';
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
-      <!-- Encabezado -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface border border-border text-text-muted mb-2">
-            <span>{{ isDocente() ? 'Gestión Pedagógica' : 'Mis Tareas' }}</span>
-            <span>•</span>
-            <span class="font-mono text-slate-900 dark:text-neutral-100">Actividades</span>
-          </div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-neutral-100 tracking-tight">
-            {{ isDocente() ? 'Gestor de Actividades y Retos' : 'Mis Misiones y Evaluaciones' }}
-          </h1>
-          <p class="text-sm text-text-muted mt-1">
-            {{ isDocente() 
-              ? 'Publica retos pedagógicos, revisa entregas de estudiantes y califica acreditando EduCoins.' 
-              : 'Completa tus actividades a tiempo para ganar EduCoins y subir de nivel en tus clases.' }}
-          </p>
-        </div>
-
-        @if (isDocente()) {
-          <div class="flex items-center gap-3">
+      
+      <!-- ==================== VISTA DETALLADA COMPLETA IN-PAGE ==================== -->
+      @if (selectedActivity()) {
+        <div class="space-y-6">
+          <!-- Barra Superior / Breadcrumb de Retorno -->
+          <div class="flex items-center justify-between gap-4 border-b border-border pb-4">
             <button
               type="button"
-              (click)="openCreateModal()"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+              (click)="backToList()"
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface border border-border text-text-muted hover:text-text hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
             >
-              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              <span>+ Nueva Actividad</span>
+              <span>Volver a la lista de actividades</span>
             </button>
-          </div>
-        }
-      </div>
 
-      <!-- Filtros para Docente (Cascada: Clase -> Grupo) -->
-      @if (isDocente()) {
-        <div class="p-4 rounded-2xl border border-border bg-surface flex flex-wrap items-center gap-4">
-          <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-semibold text-text-muted mb-1">Filtrar por Asignatura</label>
-            <select
-              [ngModel]="selectedClassroomId()"
-              (ngModelChange)="onClassroomSelect($event)"
-              class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs font-medium text-text focus:ring-2 focus:ring-primary focus:outline-none"
-            >
-              <option [ngValue]="null">Todas las asignaturas</option>
-              @for (c of classrooms(); track c.id) {
-                <option [ngValue]="c.id">{{ c.nombre }}</option>
+            <div class="flex items-center gap-2 text-xs font-mono text-text-muted">
+              <span>ID: #{{ selectedActivity()?.id }}</span>
+            </div>
+          </div>
+
+          <!-- Cabecera Principal de la Actividad -->
+          <div class="p-6 sm:p-8 rounded-3xl border border-border bg-surface space-y-6 shadow-xs">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
+              <div class="space-y-3 flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full" [ngClass]="getTipoBadge(selectedActivity()!.tipo)">
+                    {{ selectedActivity()!.tipo }}
+                  </span>
+
+                  <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-border" [ngClass]="isVencida(selectedActivity()!.fecha_entrega) ? 'text-red-500' : 'text-emerald-500'">
+                    {{ isVencida(selectedActivity()!.fecha_entrega) ? 'Plazo Vencido' : getTimeRemaining(selectedActivity()!.fecha_entrega) }}
+                  </span>
+
+                  @if (selectedActivity()?.group_nombre) {
+                    <span class="text-xs text-text-muted font-medium">
+                      Grupo: <strong class="text-text">{{ selectedActivity()?.group_nombre }}</strong>
+                    </span>
+                  }
+                </div>
+
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-neutral-100 tracking-tight leading-tight">
+                  {{ selectedActivity()!.nombre }}
+                </h1>
+
+                <div class="flex flex-wrap items-center gap-4 text-xs text-text-muted pt-1">
+                  <span class="flex items-center gap-1 font-mono">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Límite: {{ formatDate(selectedActivity()!.fecha_entrega) }}</span>
+                  </span>
+                  <span>•</span>
+                  <span>Creado: {{ formatDate(selectedActivity()?.creado) }}</span>
+                </div>
+              </div>
+
+              <!-- Recompensas Destacadas -->
+              <div class="flex sm:flex-col gap-3 shrink-0">
+                <div class="p-4 rounded-2xl bg-bg border border-border flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold text-sm">
+                    🪙
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-semibold text-text-muted uppercase tracking-wider block">Recompensa</span>
+                    <span class="text-lg font-black font-mono text-amber-500">+{{ selectedActivity()!.valor_educoins }} EC</span>
+                  </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-bg border border-border flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                    ⭐
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-semibold text-text-muted uppercase tracking-wider block">Experiencia</span>
+                    <span class="text-lg font-black font-mono text-primary">+{{ selectedActivity()!.puntos_experiencia }} XP</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Instrucciones Detalladas -->
+            <div class="pt-6 border-t border-border space-y-3">
+              <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider">
+                Instrucciones y Requisitos de la Actividad
+              </h3>
+              <div class="p-5 rounded-2xl bg-bg border border-border text-sm text-text leading-relaxed whitespace-pre-line">
+                {{ selectedActivity()!.descripcion || 'El docente no ha especificado instrucciones adicionales para esta actividad.' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== SECCIÓN PARA ESTUDIANTES (ENTREGA Y ESTADO) ==================== -->
+          @if (!isDocente()) {
+            <div class="p-6 sm:p-8 rounded-3xl border border-border bg-surface space-y-6">
+              <div class="flex items-center justify-between border-b border-border pb-4">
+                <h3 class="font-bold text-lg text-slate-900 dark:text-neutral-100 flex items-center gap-2">
+                  <span>Mi Entrega</span>
+                  @if (mySubmission()) {
+                    @if (mySubmission()?.calificacion !== null && mySubmission()?.calificacion !== undefined) {
+                      <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                        Calificada ({{ mySubmission()?.calificacion }}/100)
+                      </span>
+                    } @else {
+                      <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                        Entregada (En revisión)
+                      </span>
+                    }
+                  } @else {
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-neutral-100 dark:bg-neutral-800 text-text-muted border border-border">
+                      Pendiente de entrega
+                    </span>
+                  }
+                </h3>
+              </div>
+
+              <!-- Si ya entregó -->
+              @if (mySubmission()) {
+                <div class="space-y-4">
+                  <!-- Tarjeta de Calificación y Feedback si ya fue calificada -->
+                  @if (mySubmission()?.calificacion !== null && mySubmission()?.calificacion !== undefined) {
+                    <div class="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                          Evaluación del Docente
+                        </span>
+                        <span class="text-xl font-black font-mono text-emerald-500">
+                          {{ mySubmission()?.calificacion }}/100
+                        </span>
+                      </div>
+                      <p class="text-xs text-text leading-relaxed">
+                        {{ mySubmission()?.retroalimentacion || '¡Buen trabajo! Actividad evaluada satisfactoriamente.' }}
+                      </p>
+                      <div class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold pt-1">
+                        🪙 EduCoins acreditados en tu billetera.
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Detalle de lo que envió -->
+                  <div class="p-5 rounded-2xl bg-bg border border-border space-y-3 text-xs">
+                    <div class="flex items-center justify-between text-text-muted">
+                      <span>Fecha de envío:</span>
+                      <span class="font-mono text-text font-medium">{{ formatDate(mySubmission()!.creado) }}</span>
+                    </div>
+
+                    @if (mySubmission()?.contenido) {
+                      <div>
+                        <span class="font-bold text-text-muted block mb-1">Respuesta enviada:</span>
+                        <div class="p-3 rounded-xl bg-surface border border-border text-text whitespace-pre-line">
+                          {{ mySubmission()!.contenido }}
+                        </div>
+                      </div>
+                    }
+
+                    @if (mySubmission()?.archivo) {
+                      <div class="pt-2">
+                        <span class="font-bold text-text-muted block mb-1">Archivo adjunto:</span>
+                        <a
+                          [href]="mySubmission()!.archivo"
+                          target="_blank"
+                          class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-surface border border-border text-primary hover:underline font-semibold"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <span>Descargar archivo adjunto</span>
+                        </a>
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <!-- Formulario In-Page para Enviar la Tarea -->
+                @if (isVencida(selectedActivity()!.fecha_entrega)) {
+                  <div class="p-6 rounded-2xl bg-red-500/5 border border-red-500/20 text-center space-y-2">
+                    <p class="text-sm font-bold text-red-500">El plazo límite para esta actividad ha concluido.</p>
+                    <p class="text-xs text-text-muted">No es posible registrar nuevas entregas para actividades vencidas.</p>
+                  </div>
+                } @else {
+                  <form (ngSubmit)="submitWorkInPage()" class="space-y-4 text-xs">
+                    <div>
+                      <label class="block font-semibold text-text-muted mb-1.5">Tu Respuesta o Desarrollo Escrito</label>
+                      <textarea
+                        rows="4"
+                        [(ngModel)]="submitContenido"
+                        name="submitContenido"
+                        placeholder="Escribe tu desarrollo, enlace a documento en la nube o explicación..."
+                        class="w-full px-4 py-3 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none resize-none leading-relaxed"
+                      ></textarea>
+                    </div>
+
+                    <div>
+                      <label class="block font-semibold text-text-muted mb-1.5">Archivo Adjunto (Opcional)</label>
+                      <input
+                        type="file"
+                        (change)="onFileSelected($event)"
+                        class="w-full text-text-muted file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                      />
+                    </div>
+
+                    <div class="flex justify-end pt-3">
+                      <button
+                        type="submit"
+                        [disabled]="(!submitContenido && !selectedFile) || isSaving()"
+                        class="px-6 py-2.5 rounded-xl text-white bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer font-semibold shadow-xs transition-all hover:scale-[1.02]"
+                      >
+                        {{ isSaving() ? 'Enviando Entrega...' : 'Registrar Entrega Oficial' }}
+                      </button>
+                    </div>
+                  </form>
+                }
               }
-            </select>
-          </div>
+            </div>
+          }
 
-          <div class="flex-1 min-w-[200px]">
-            <label class="block text-xs font-semibold text-text-muted mb-1">Filtrar por Grupo</label>
-            <select
-              [ngModel]="selectedGroupId()"
-              (ngModelChange)="onGroupSelect($event)"
-              class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs font-medium text-text focus:ring-2 focus:ring-primary focus:outline-none"
-            >
-              <option [ngValue]="null">Todos los grupos</option>
-              @for (g of filteredGroups(); track g.id) {
-                <option [ngValue]="g.id">{{ g.nombre }} ({{ g.codigo }})</option>
-              }
-            </select>
-          </div>
-        </div>
-      }
+          <!-- ==================== SECCIÓN PARA DOCENTES (TABLA DE ENTREGAS Y CALIFICACIÓN) ==================== -->
+          @if (isDocente()) {
+            <div class="p-6 sm:p-8 rounded-3xl border border-border bg-surface space-y-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+                <div>
+                  <h3 class="font-bold text-lg text-slate-900 dark:text-neutral-100">
+                    Entregas de Estudiantes
+                  </h3>
+                  <p class="text-xs text-text-muted mt-0.5">
+                    {{ submissions().length }} entrega(s) registrada(s) para esta actividad.
+                  </p>
+                </div>
 
-      <!-- Indicador de Carga -->
-      @if (isLoading()) {
-        <div class="flex justify-center items-center py-20">
-          <svg class="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24" fill="none">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-          </svg>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    (click)="deleteActivity(selectedActivity()!)"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-500 hover:bg-red-500/10 border border-red-500/20 transition-colors cursor-pointer"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>Eliminar Actividad</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tabla de Entregas -->
+              <div class="rounded-2xl border border-border bg-surface overflow-hidden">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs text-left">
+                    <thead class="bg-bg border-b border-border text-text-muted font-semibold">
+                      <tr>
+                        <th class="p-3.5">Estudiante</th>
+                        <th class="p-3.5">Fecha de Entrega</th>
+                        <th class="p-3.5">Respuesta / Archivo</th>
+                        <th class="p-3.5 font-mono text-center">Calificación</th>
+                        <th class="p-3.5 text-center">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-border">
+                      @for (sub of submissions(); track sub.id) {
+                        <tr class="hover:bg-neutral-500/5 transition-colors">
+                          <td class="p-3.5 font-medium text-text">
+                            <div>
+                              <p class="font-bold">{{ sub.estudiante_nombre || 'Estudiante' }}</p>
+                              <p class="text-[11px] text-text-muted font-normal">{{ sub.estudiante_email }}</p>
+                            </div>
+                          </td>
+                          <td class="p-3.5 text-text-muted font-mono">{{ formatDate(sub.creado) }}</td>
+                          <td class="p-3.5 text-text-muted">
+                            <div class="max-w-xs space-y-1">
+                              @if (sub.contenido) {
+                                <p class="text-text line-clamp-1">{{ sub.contenido }}</p>
+                              }
+                              @if (sub.archivo) {
+                                <a [href]="sub.archivo" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-semibold">
+                                  <span>📎 Ver archivo adjunto</span>
+                                </a>
+                              }
+                            </div>
+                          </td>
+                          <td class="p-3.5 text-center font-mono font-bold">
+                            @if (sub.calificacion !== null && sub.calificacion !== undefined) {
+                              <span class="text-emerald-500">{{ sub.calificacion }}/100</span>
+                            } @else {
+                              <span class="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-text-muted text-[10px] font-normal border border-border">
+                                Pendiente
+                              </span>
+                            }
+                          </td>
+                          <td class="p-3.5 text-center">
+                            <button
+                              type="button"
+                              (click)="openGradeModal(sub)"
+                              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                            >
+                              <span>{{ sub.calificacion !== null && sub.calificacion !== undefined ? 'Re-calificar' : 'Calificar' }}</span>
+                            </button>
+                          </td>
+                        </tr>
+                      } @empty {
+                        <tr>
+                          <td colspan="5" class="p-8 text-center text-text-muted">
+                            No hay entregas registradas para esta actividad todavía.
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          }
         </div>
       } @else {
-        <!-- Grid de Actividades -->
-        @if (activities().length === 0) {
-          <div class="text-center py-16 space-y-4 rounded-3xl border border-dashed border-border bg-surface/50 p-8">
-            <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto text-primary">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
+
+        <!-- ==================== VISTA LISTA / GRID DE ACTIVIDADES ==================== -->
+        <!-- Encabezado de la página -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface border border-border text-text-muted mb-2">
+              <span>{{ isDocente() ? 'Gestión Pedagógica' : 'Mis Tareas' }}</span>
+              <span>•</span>
+              <span class="font-mono text-slate-900 dark:text-neutral-100">Actividades</span>
             </div>
-            <div>
-              <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-lg">No hay actividades disponibles</h3>
-              <p class="text-xs text-text-muted mt-1 max-w-sm mx-auto">
-                {{ isDocente() 
-                  ? 'Crea tu primer reto formativo para asignar puntos de experiencia y EduCoins.' 
-                  : 'Estás al día con tus entregas académicas. ¡Buen trabajo!' }}
-              </p>
-            </div>
-            @if (isDocente()) {
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-neutral-100 tracking-tight">
+              {{ isDocente() ? 'Gestor de Actividades y Retos' : 'Mis Misiones y Evaluaciones' }}
+            </h1>
+            <p class="text-sm text-text-muted mt-1">
+              {{ isDocente() 
+                ? 'Publica retos pedagógicos, revisa entregas de estudiantes y califica acreditando EduCoins.' 
+                : 'Completa tus actividades a tiempo para ganar EduCoins y subir de nivel en tus clases.' }}
+            </p>
+          </div>
+
+          @if (isDocente()) {
+            <div class="flex items-center gap-3">
               <button
                 type="button"
                 (click)="openCreateModal()"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs cursor-pointer"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
               >
-                + Crear Primera Actividad
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>+ Nueva Actividad</span>
               </button>
-            }
+            </div>
+          }
+        </div>
+
+        <!-- Filtros para Docente (Cascada: Asignatura -> Grupo) -->
+        @if (isDocente()) {
+          <div class="p-4 rounded-2xl border border-border bg-surface flex flex-wrap items-center gap-4">
+            <div class="flex-1 min-w-[200px]">
+              <label class="block text-xs font-semibold text-text-muted mb-1">Filtrar por Asignatura</label>
+              <select
+                [ngModel]="selectedClassroomId()"
+                (ngModelChange)="onClassroomSelect($event)"
+                class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs font-medium text-text focus:ring-2 focus:ring-primary focus:outline-none"
+              >
+                <option [ngValue]="null">Todas las asignaturas</option>
+                @for (c of classrooms(); track c.id) {
+                  <option [ngValue]="c.id">{{ c.nombre }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="flex-1 min-w-[200px]">
+              <label class="block text-xs font-semibold text-text-muted mb-1">Filtrar por Grupo</label>
+              <select
+                [ngModel]="selectedGroupId()"
+                (ngModelChange)="onGroupSelect($event)"
+                class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs font-medium text-text focus:ring-2 focus:ring-primary focus:outline-none"
+              >
+                <option [ngValue]="null">Todos los grupos</option>
+                @for (g of filteredGroups(); track g.id) {
+                  <option [ngValue]="g.id">{{ g.nombre }} ({{ g.codigo }})</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
+        <!-- Indicador de Carga -->
+        @if (isLoading()) {
+          <div class="flex justify-center items-center py-20">
+            <svg class="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
           </div>
         } @else {
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (act of activities(); track act.id) {
-              <div class="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between hover:border-primary/40 transition-all hover:shadow-md space-y-4">
-                <div>
-                  <div class="flex items-center justify-between gap-2 mb-3">
-                    <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full" [ngClass]="getTipoBadge(act.tipo)">
-                      {{ act.tipo }}
-                    </span>
-
-                    <span class="text-xs font-mono font-bold" [ngClass]="isVencida(act.fecha_entrega) ? 'text-red-500' : 'text-emerald-500'">
-                      {{ getTimeRemaining(act.fecha_entrega) }}
-                    </span>
-                  </div>
-
-                  <h3 class="text-base font-bold text-slate-900 dark:text-neutral-100 line-clamp-1">
-                    {{ act.nombre }}
-                  </h3>
-
-                  @if (act.descripcion) {
-                    <p class="text-xs text-text-muted mt-1 line-clamp-2 leading-relaxed">
-                      {{ act.descripcion }}
-                    </p>
-                  }
-
-                  <div class="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs font-mono">
-                    <span class="flex items-center gap-1 font-bold text-amber-500">
-                      🪙 +{{ act.valor_educoins }} EC
-                    </span>
-                    <span class="text-text-muted">
-                      +{{ act.puntos_experiencia }} XP
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Acciones según rol -->
-                <div class="pt-3 border-t border-border flex items-center justify-between gap-2">
-                  @if (isDocente()) {
-                    <button
-                      type="button"
-                      (click)="viewSubmissions(act)"
-                      class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-bg hover:bg-black/5 dark:hover:bg-white/5 border border-border text-text transition-colors text-center cursor-pointer"
-                    >
-                      Entregas
-                    </button>
-                    <button
-                      type="button"
-                      (click)="deleteActivity(act)"
-                      class="p-2 rounded-xl text-text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
-                      title="Eliminar actividad"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  } @else {
-                    <button
-                      type="button"
-                      (click)="openSubmitModal(act)"
-                      [disabled]="isVencida(act.fecha_entrega)"
-                      class="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 transition-all text-center cursor-pointer"
-                    >
-                      {{ isVencida(act.fecha_entrega) ? 'Vencida' : 'Realizar Entrega' }}
-                    </button>
-                  }
-                </div>
+          <!-- Grid de Actividades -->
+          @if (activities().length === 0) {
+            <div class="text-center py-16 space-y-4 rounded-3xl border border-dashed border-border bg-surface/50 p-8">
+              <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto text-primary">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
               </div>
-            }
-          </div>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-lg">No hay actividades disponibles</h3>
+                <p class="text-xs text-text-muted mt-1 max-w-sm mx-auto">
+                  {{ isDocente() 
+                    ? 'Crea tu primer reto formativo para asignar puntos de experiencia y EduCoins.' 
+                    : 'Estás al día con tus entregas académicas. ¡Buen trabajo!' }}
+                </p>
+              </div>
+              @if (isDocente()) {
+                <button
+                  type="button"
+                  (click)="openCreateModal()"
+                  class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs cursor-pointer"
+                >
+                  + Crear Primera Actividad
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              @for (act of activities(); track act.id) {
+                <div
+                  (click)="selectActivity(act)"
+                  class="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between hover:border-primary/40 transition-all hover:shadow-md space-y-4 cursor-pointer group"
+                >
+                  <div>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                      <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full" [ngClass]="getTipoBadge(act.tipo)">
+                        {{ act.tipo }}
+                      </span>
+
+                      <span class="text-xs font-mono font-bold" [ngClass]="isVencida(act.fecha_entrega) ? 'text-red-500' : 'text-emerald-500'">
+                        {{ getTimeRemaining(act.fecha_entrega) }}
+                      </span>
+                    </div>
+
+                    <h3 class="text-base font-bold text-slate-900 dark:text-neutral-100 line-clamp-1 group-hover:text-primary transition-colors">
+                      {{ act.nombre }}
+                    </h3>
+
+                    @if (act.descripcion) {
+                      <p class="text-xs text-text-muted mt-1 line-clamp-2 leading-relaxed">
+                        {{ act.descripcion }}
+                      </p>
+                    }
+
+                    <div class="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs font-mono">
+                      <span class="flex items-center gap-1 font-bold text-amber-500">
+                        🪙 +{{ act.valor_educoins }} EC
+                      </span>
+                      <span class="text-text-muted">
+                        +{{ act.puntos_experiencia }} XP
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Botón de apertura rápida de la vista in-page -->
+                  <div class="pt-3 border-t border-border flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      (click)="selectActivity(act); $event.stopPropagation()"
+                      class="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-bg hover:bg-black/5 dark:hover:bg-white/5 border border-border text-text transition-colors text-center cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <span>{{ isDocente() ? 'Ver Detalle & Entregas' : 'Ver Instrucciones & Entregar' }}</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
         }
       }
 
@@ -228,7 +527,7 @@ import { NotificationService } from '../../core/services/notification.service';
 
               <div>
                 <label class="block font-semibold text-text-muted mb-1">Nombre de la Actividad *</label>
-                <input type="text" formControlName="nombre" placeholder="Ej: Reto de Álgebra Lineal" class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none" />
+                <input type="text" formControlName="nombre" placeholder="Ej: Taller Práctico de Genética" class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none" />
               </div>
 
               <div>
@@ -248,8 +547,8 @@ import { NotificationService } from '../../core/services/notification.service';
               </div>
 
               <div class="flex justify-end gap-3 pt-3 border-t border-border">
-                <button type="button" (click)="closeCreateModal()" class="px-4 py-2 rounded-xl border border-border hover:bg-bg text-text-muted cursor-pointer">Cancelar</button>
-                <button type="submit" [disabled]="activityForm.invalid || isSaving()" class="px-5 py-2 rounded-xl text-white bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer font-semibold">
+                <button type="button" (click)="closeCreateModal()" class="px-4 py-2 rounded-xl border border-border hover:bg-bg text-text-muted cursor-pointer font-semibold">Cancelar</button>
+                <button type="submit" [disabled]="activityForm.invalid || isSaving()" class="px-5 py-2 rounded-xl text-white bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer font-semibold transition-colors">
                   {{ isSaving() ? 'Guardando...' : 'Publicar Actividad' }}
                 </button>
               </div>
@@ -258,103 +557,31 @@ import { NotificationService } from '../../core/services/notification.service';
         </div>
       }
 
-      <!-- MODAL VER ENTREGAS (DOCENTE) -->
-      @if (showSubmissionsModal()) {
-        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto" (click)="showSubmissionsModal.set(false)">
-          <div class="relative w-full max-w-2xl bg-surface border border-border rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4 max-h-[85vh] flex flex-col" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between pb-3 border-b border-border">
-              <div>
-                <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-base">Entregas de Estudiantes</h3>
-                <p class="text-xs text-text-muted">{{ viewingActivity()?.nombre }}</p>
-              </div>
-              <button type="button" (click)="showSubmissionsModal.set(false)" class="p-1 rounded-lg text-text-muted hover:text-text cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
-            </div>
-
-            <div class="overflow-y-auto flex-1 space-y-3">
-              @for (sub of submissions(); track sub.id) {
-                <div class="p-3.5 rounded-xl border border-border bg-bg/50 flex items-center justify-between gap-3">
-                  <div>
-                    <h4 class="font-bold text-xs text-text">{{ sub.estudiante_nombre || 'Estudiante' }}</h4>
-                    <p class="text-[11px] text-text-muted">{{ sub.estudiante_email }}</p>
-                    <span class="text-[10px] font-mono text-text-muted block mt-1">Entregado: {{ formatDate(sub.creado) }}</span>
-                  </div>
-
-                  <div class="flex items-center gap-3">
-                    @if (sub.calificacion !== null && sub.calificacion !== undefined) {
-                      <div class="text-right">
-                        <span class="text-xs font-bold text-emerald-500 font-mono">{{ sub.calificacion }}/100</span>
-                        <span class="text-[10px] text-text-muted block">Calificado</span>
-                      </div>
-                    } @else {
-                      <button
-                        type="button"
-                        (click)="openGradeModal(sub)"
-                        class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-primary hover:bg-primary-hover transition cursor-pointer"
-                      >
-                        Calificar
-                      </button>
-                    }
-                  </div>
-                </div>
-              } @empty {
-                <div class="text-center py-8 text-xs text-text-muted">
-                  No hay entregas registradas para esta actividad todavía.
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- MODAL CALIFICAR SUBMISSION -->
+      <!-- MODAL CALIFICAR SUBMISSION (DOCENTE) -->
       @if (showGradeModal()) {
         <div class="fixed inset-0 z-60 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4" (click)="showGradeModal.set(false)">
           <div class="relative w-full max-w-sm bg-surface border border-border rounded-2xl shadow-2xl p-5 space-y-4" (click)="$event.stopPropagation()">
-            <h3 class="font-bold text-sm text-text">Calificar Entrega</h3>
+            <div class="flex items-center justify-between border-b border-border pb-2">
+              <h3 class="font-bold text-sm text-text">Calificar Entrega</h3>
+              <button type="button" (click)="showGradeModal.set(false)" class="p-1 rounded-lg text-text-muted hover:text-text cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            
+            <p class="text-xs text-text-muted">Estudiante: <strong class="text-text">{{ selectedSubmission()?.estudiante_nombre || selectedSubmission()?.estudiante_email }}</strong></p>
+
             <div class="space-y-3 text-xs">
               <div>
-                <label class="block font-semibold text-text-muted mb-1">Calificación (0 a 100) *</label>
+                <label class="block font-semibold text-text-muted mb-1">Nota (0 a 100) *</label>
                 <input type="number" min="0" max="100" [(ngModel)]="gradeNota" class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text font-mono font-bold focus:ring-2 focus:ring-primary focus:outline-none" />
               </div>
               <div>
-                <label class="block font-semibold text-text-muted mb-1">Retroalimentación</label>
+                <label class="block font-semibold text-text-muted mb-1">Retroalimentación / Comentario</label>
                 <textarea rows="2" [(ngModel)]="gradeComentario" placeholder="Comentarios del docente..." class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none resize-none"></textarea>
               </div>
-              <div class="flex justify-end gap-2 pt-2">
-                <button type="button" (click)="showGradeModal.set(false)" class="px-3 py-1.5 rounded-xl border border-border hover:bg-bg text-text-muted cursor-pointer">Cancelar</button>
-                <button type="button" (click)="submitGrade()" [disabled]="isSaving()" class="px-4 py-1.5 rounded-xl text-white bg-primary hover:bg-primary-hover cursor-pointer font-semibold">Guardar y Acreditar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- MODAL ENTREGAR TAREA (ESTUDIANTE) -->
-      @if (showSubmitModal()) {
-        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" (click)="showSubmitModal.set(false)">
-          <div class="relative w-full max-w-md bg-surface border border-border rounded-2xl shadow-2xl p-6 space-y-4" (click)="$event.stopPropagation()">
-            <div class="flex items-center justify-between pb-3 border-b border-border">
-              <h3 class="font-bold text-sm text-text">Entregar Actividad</h3>
-              <button type="button" (click)="showSubmitModal.set(false)" class="p-1 rounded-lg text-text-muted hover:text-text cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
-            </div>
-            <div class="space-y-3 text-xs">
-              <div>
-                <label class="block font-semibold text-text-muted mb-1">Descripción o respuesta</label>
-                <textarea rows="3" [(ngModel)]="submitContenido" placeholder="Escribe aquí tu respuesta o detalles..." class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none resize-none"></textarea>
-              </div>
-              <div>
-                <label class="block font-semibold text-text-muted mb-1">Subir Archivo (opcional)</label>
-                <input type="file" (change)="onFileSelected($event)" class="w-full text-text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer" />
-              </div>
-              <div class="flex justify-end gap-2 pt-3 border-t border-border">
-                <button type="button" (click)="showSubmitModal.set(false)" class="px-3 py-1.5 rounded-xl border border-border hover:bg-bg text-text-muted cursor-pointer">Cancelar</button>
-                <button type="button" (click)="submitWork()" [disabled]="isSaving()" class="px-4 py-1.5 rounded-xl text-white bg-primary hover:bg-primary-hover cursor-pointer font-semibold">
-                  {{ isSaving() ? 'Enviando...' : 'Enviar Entrega' }}
-                </button>
+              <div class="flex justify-end gap-2 pt-2 border-t border-border">
+                <button type="button" (click)="showGradeModal.set(false)" class="px-3 py-1.5 rounded-xl border border-border hover:bg-bg text-text-muted cursor-pointer font-semibold">Cancelar</button>
+                <button type="button" (click)="submitGrade()" [disabled]="isSaving()" class="px-4 py-1.5 rounded-xl text-white bg-primary hover:bg-primary-hover cursor-pointer font-semibold transition-colors">Guardar y Acreditar</button>
               </div>
             </div>
           </div>
@@ -382,14 +609,15 @@ export class ActivitiesComponent implements OnInit {
   selectedClassroomId = signal<number | null>(null);
   selectedGroupId = signal<number | null>(null);
 
+  // Estado para Vista In-Page Detallada
+  selectedActivity = signal<Activity | null>(null);
+  mySubmission = signal<Submission | null>(null);
+
   isLoading = signal(false);
   isSaving = signal(false);
   showCreateModal = signal(false);
-  showSubmissionsModal = signal(false);
   showGradeModal = signal(false);
-  showSubmitModal = signal(false);
 
-  viewingActivity = signal<Activity | null>(null);
   selectedSubmission = signal<Submission | null>(null);
 
   gradeNota = 100;
@@ -438,6 +666,39 @@ export class ActivitiesComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
+    });
+  }
+
+  selectActivity(act: Activity): void {
+    this.selectedActivity.set(act);
+    this.submitContenido = '';
+    this.selectedFile = null;
+    this.loadActivityDetails(act.id);
+  }
+
+  backToList(): void {
+    this.selectedActivity.set(null);
+    this.submissions.set([]);
+    this.mySubmission.set(null);
+  }
+
+  loadActivityDetails(activityId: number): void {
+    this.activityService.getSubmissions(activityId).subscribe({
+      next: (subs: Submission[]) => {
+        const list = subs || [];
+        this.submissions.set(list);
+
+        if (!this.isDocente()) {
+          // Para estudiante: buscar su propia entrega
+          const currentUserId = this.authService.currentUser()?.id;
+          const userSub = list.find(s => s.estudiante === currentUserId) || list[0] || null;
+          this.mySubmission.set(userSub);
+        }
+      },
+      error: () => {
+        this.submissions.set([]);
+        this.mySubmission.set(null);
+      }
     });
   }
 
@@ -493,30 +754,23 @@ export class ActivitiesComponent implements OnInit {
   }
 
   deleteActivity(act: Activity): void {
-    if (!confirm(`¿Eliminar la actividad "${act.nombre}"?`)) return;
+    if (!confirm(`¿Eliminar la actividad "${act.nombre}"? Esta acción no se puede deshacer.`)) return;
     this.activityService.deleteActivity(act.id).subscribe({
       next: () => {
         this.notifService.success('Actividad eliminada.');
+        if (this.selectedActivity()?.id === act.id) {
+          this.backToList();
+        }
         this.loadActivities();
       },
       error: () => this.notifService.error('Error al eliminar la actividad.')
     });
   }
 
-  viewSubmissions(act: Activity): void {
-    this.viewingActivity.set(act);
-    this.activityService.getSubmissions(act.id).subscribe({
-      next: (subs) => {
-        this.submissions.set(subs || []);
-        this.showSubmissionsModal.set(true);
-      }
-    });
-  }
-
   openGradeModal(sub: Submission): void {
     this.selectedSubmission.set(sub);
-    this.gradeNota = 100;
-    this.gradeComentario = '';
+    this.gradeNota = sub.calificacion !== null && sub.calificacion !== undefined ? Number(sub.calificacion) : 100;
+    this.gradeComentario = sub.retroalimentacion || '';
     this.showGradeModal.set(true);
   }
 
@@ -528,9 +782,9 @@ export class ActivitiesComponent implements OnInit {
       next: (res) => {
         this.isSaving.set(false);
         this.showGradeModal.set(false);
-        this.notifService.success(`¡Calificado con éxito! +${res.coins_ganados} EduCoins acreditados.`);
-        if (this.viewingActivity()) {
-          this.viewSubmissions(this.viewingActivity()!);
+        this.notifService.success(`¡Calificado con éxito! +${res.coins_ganados || 0} EduCoins acreditados.`);
+        if (this.selectedActivity()) {
+          this.loadActivityDetails(this.selectedActivity()!.id);
         }
       },
       error: (err) => {
@@ -540,13 +794,6 @@ export class ActivitiesComponent implements OnInit {
     });
   }
 
-  openSubmitModal(act: Activity): void {
-    this.viewingActivity.set(act);
-    this.submitContenido = '';
-    this.selectedFile = null;
-    this.showSubmitModal.set(true);
-  }
-
   onFileSelected(event: any): void {
     const file = event.target.files?.[0];
     if (file) {
@@ -554,8 +801,8 @@ export class ActivitiesComponent implements OnInit {
     }
   }
 
-  submitWork(): void {
-    const act = this.viewingActivity();
+  submitWorkInPage(): void {
+    const act = this.selectedActivity();
     if (!act || this.isSaving()) return;
     this.isSaving.set(true);
     const fd = new FormData();
@@ -566,8 +813,8 @@ export class ActivitiesComponent implements OnInit {
     this.activityService.submitActivity(fd).subscribe({
       next: () => {
         this.isSaving.set(false);
-        this.showSubmitModal.set(false);
-        this.notifService.success('¡Actividad enviada con éxito!');
+        this.notifService.success('¡Actividad entregada con éxito!');
+        this.loadActivityDetails(act.id);
         this.loadActivities();
       },
       error: (err) => {
@@ -584,7 +831,7 @@ export class ActivitiesComponent implements OnInit {
       proyecto: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20',
       evaluacion: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
     };
-    return map[tipo] || 'bg-neutral-100 text-text-muted';
+    return map[tipo] || 'bg-neutral-100 text-text-muted border border-border';
   }
 
   getTimeRemaining(fecha: string): string {
@@ -593,8 +840,8 @@ export class ActivitiesComponent implements OnInit {
     const d = Math.floor(diff / 86400000);
     const h = Math.floor((diff % 86400000) / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
-    if (d > 0) return `${d}d ${h}h`;
-    if (h > 0) return `${h}h ${m}m`;
+    if (d > 0) return `${d}d ${h}h restantes`;
+    if (h > 0) return `${h}h ${m}m restantes`;
     return `${m}m restantes`;
   }
 
@@ -602,7 +849,8 @@ export class ActivitiesComponent implements OnInit {
     return new Date(fecha).getTime() < Date.now();
   }
 
-  formatDate(dateStr: string): string {
+  formatDate(dateStr?: string): string {
+    if (!dateStr) return 'N/A';
     try {
       return new Date(dateStr).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
     } catch {
