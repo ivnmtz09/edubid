@@ -76,7 +76,7 @@ class ActivityAndSubmissionTests(TestCase):
 
         self.actividad_a = Activity.objects.create(
             group=self.group_a,
-            tipo="reto",
+            tipo="tarea",
             nombre="Reto de Recursión",
             descripcion="Resolver problema de Torres de Hanói",
             valor_educoins=50,
@@ -92,7 +92,7 @@ class ActivityAndSubmissionTests(TestCase):
         self.client.force_authenticate(user=self.docente_a)
         data = {
             "group": self.group_a.id,
-            "tipo": "mision",
+            "tipo": "tarea",
             "nombre": "Misión Decoradores",
             "descripcion": "Implementar decorador de caching",
             "valor_educoins": 80,
@@ -109,7 +109,7 @@ class ActivityAndSubmissionTests(TestCase):
         self.client.force_authenticate(user=self.docente_a)
         data = {
             "group": self.group_b.id,
-            "tipo": "reto",
+            "tipo": "proyecto",
             "nombre": "Actividad Infiltrada",
             "fecha_entrega": (timezone.now() + timedelta(days=1)).isoformat()
         }
@@ -177,7 +177,7 @@ class ActivityAndSubmissionTests(TestCase):
         """No se permite entregar actividades cuya fecha límite ya expiró."""
         actividad_vencida = Activity.objects.create(
             group=self.group_a,
-            tipo="reto",
+            tipo="tarea",
             nombre="Reto Expirado",
             valor_educoins=30,
             puntos_experiencia=10,

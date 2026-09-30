@@ -14,7 +14,7 @@ def notificar_email_verificado(user):
         institucion=_institucion(user),
         tipo='email_verificado',
         titulo='Email verificado exitosamente',
-        mensaje=f'Tu correo electrónico {user.email} ha sido verificado. ¡Bienvenido a Educoin!',
+        mensaje=f'Tu correo electrónico {user.email} ha sido verificado. ¡Bienvenido a EduBid!',
         metadata={
             'email': user.email,
             'nombre_completo': f'{user.first_name} {user.last_name}'
@@ -56,8 +56,8 @@ def notificar_registro_exitoso(user, is_google=False):
         usuario=user,
         institucion=_institucion(user),
         tipo='general',
-        titulo='¡Bienvenido a Educoin!',
-        mensaje=f'Tu cuenta ha sido creada exitosamente mediante {metodo}. ¡Comienza tu aventura de aprendizaje ahora!',
+        titulo='¡Bienvenido a EduBid!',
+        mensaje=f'Tu cuenta ha sido creada exitosamente mediante {metodo}. Te damos la bienvenida a la plataforma EduBid.',
         metadata={
             'metodo_registro': metodo,
             'email': user.email,
