@@ -278,10 +278,10 @@ if USE_S3:
         'SUPABASE_S3_ENDPOINT_URL',
         default='https://gowmeguvuignrlqakewx.supabase.co/storage/v1/s3'
     )
-    SUPABASE_CUSTOM_DOMAIN = config(
+    SUPABASE_CUSTOM_DOMAIN = str(config(
         'SUPABASE_S3_CUSTOM_DOMAIN',
         default=f"gowmeguvuignrlqakewx.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
-    )
+    )).replace('https://', '').replace('http://', '').strip('/')
     AWS_S3_CUSTOM_DOMAIN = SUPABASE_CUSTOM_DOMAIN
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_FILE_OVERWRITE = False
@@ -314,7 +314,8 @@ if USE_S3:
 else:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # ─────────────────────────────────────────────
 # Configuración de usuarios y REST
