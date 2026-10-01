@@ -176,23 +176,52 @@ else:
 # ─────────────────────────────────────────────
 # Base de datos
 # ─────────────────────────────────────────────
-db_engine = config('DB_ENGINE', default='django.db.backends.mysql')
-db_host = config('DB_HOST', default='localhost')
+DB_ENGINE_CONFIG = config('DB_ENGINE', default='django.db.backends.postgresql')
 
-db_options = {}
-if 'mysql' in db_engine:
-    db_options['charset'] = 'utf8mb4'
-elif 'postgresql' in db_engine or 'supabase' in db_host:
-    db_options['sslmode'] = config('DB_SSLMODE', default='require')
+if 'postgresql' in DB_ENGINE_CONFIG or 'postgres' in DB_ENGINE_CONFIG:
+    # Determinar si psycopg2 funciona en el entorno.
+    # En Windows con Python 3.14, Smart App Control (WDAC) puede bloquear DLLs C (.pyd).
+    # django_pg8000 (100% Python puro) sirve como fallback seguro e idéntico para local.
+    use_pg8000 = False
+    try:
+        import psycopg2  # noqa: F401
+    except Exception:
+        use_pg8000 = True
+
+    if use_pg8000:
+        db_engine = 'django_pg8000'
+        ssl_mode = config('DB_SSLMODE', default='require')
+        db_options = {'ssl_context': True} if ssl_mode in ('require', 'verify-full', 'verify-ca', True) else {}
+    else:
+        db_engine = 'django.db.backends.postgresql'
+        ssl_mode = config('DB_SSLMODE', default='require')
+        db_options = {'sslmode': ssl_mode} if ssl_mode else {}
+
+    default_port = '5432'
+    default_name = 'postgres'
+    default_user = 'postgres'
+
+elif 'mysql' in DB_ENGINE_CONFIG:
+    db_engine = 'django.db.backends.mysql'
+    db_options = {'charset': 'utf8mb4'}
+    default_port = '3306'
+    default_name = 'edubid_db'
+    default_user = 'root'
+else:
+    db_engine = DB_ENGINE_CONFIG
+    db_options = {}
+    default_port = '5432'
+    default_name = 'postgres'
+    default_user = 'postgres'
 
 DATABASES = {
     'default': {
         'ENGINE': db_engine,
-        'NAME': config('DB_NAME', default='postgres'),
-        'USER': config('DB_USER', default='postgres'),
+        'NAME': config('DB_NAME', default=default_name),
+        'USER': config('DB_USER', default=default_user),
         'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': db_host,
-        'PORT': config('DB_PORT', default='6543' if 'postgresql' in db_engine else '3306'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default=default_port),
         'OPTIONS': db_options,
     }
 }
