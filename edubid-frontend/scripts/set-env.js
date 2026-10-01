@@ -81,7 +81,7 @@ const devApiUrl = normalizeApiUrl(rawDevApiUrl);
 
 const rawProdApiUrl = getProdVar(
   ['PRODUCTION_API_URL', 'PROD_API_URL', 'API_URL_PROD', 'VITE_PRODUCTION_API_URL'],
-  'https://edubid-backend-production.up.railway.app/api'
+  'https://edubid.up.railway.app/api'
 );
 const prodApiUrl = normalizeApiUrl(rawProdApiUrl);
 
