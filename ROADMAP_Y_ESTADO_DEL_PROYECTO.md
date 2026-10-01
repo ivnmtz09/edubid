@@ -81,6 +81,9 @@ flowchart LR
 
 #### C. Subastas en Tiempo Real (`/auctions`)
 * **Contador Regresivo en Vivo**: Reloj sincronizado segundo a segundo con el cierre de la subasta.
+* **Doble Sincronización en Tiempo Real**:
+  - WebSockets activos vía `/ws/auctions/`.
+  - Sondeo silencioso de respaldo cada 6 segundos (`AuctionsComponent`) que sincroniza automáticamente la puja más alta, el número de ofertas y el saldo disponible del estudiante sin requerir recargar la página.
 * **Centro de Pujas con Retención**:
   - Validación de saldo disponible en la billetera del estudiante.
   - Retención temporal de EduCoins (`hold`) al pujar.
@@ -100,9 +103,11 @@ flowchart LR
 
 #### E. Calificaciones y Reportes Oficiales DANE (`/grades`)
 * Boletín académico para estudiantes con promedio general y desglose de actividades.
-* Generador de reportes para docentes por grupo escolar:
-  - **Exportación a PDF**: Documento formal membretado con logo y colores institucionales.
-  - **Exportación a Excel**: Planilla compatible con el formato estándar del Ministerio de Educación / DANE.
+* Generador de reportes consolidados para docentes, directivos y rectores por grupo escolar:
+  - **Exportación a PDF**: Documento formal membretado con logo y colores institucionales, ajuste milimétrico a 540 pt útiles y saneamiento de títulos (eliminada redundancia *"Grupo Grupo"*).
+  - **Exportación a Excel**: Planilla `.xlsx` (`openpyxl`) compatible con el formato estándar del Ministerio de Educación / DANE, formateo numérico homogéneo y anchos de columnas adaptativos.
+  - **Blindaje de Tipos Numéricos**: Casteo explícito a `float` en promedios y agregaciones para prevenir incompatibilidades con `decimal.Decimal` provenientes de la base de datos.
+  - **Permisos Institucionales Flexibles**: Soporte de descarga para Administradores, Docentes de la asignatura, Rectores y Coordinadores de la institución educativa.
 
 #### F. Módulo de Perfil de Usuario (`/profile`)
 * Componente standalone dedicado con tres pestañas:
@@ -111,17 +116,16 @@ flowchart LR
   3. **Detalles Institucionales**: Consulta de institución, código DANE, rol oficial y reglas de la economía escolar.
 * Enlace interactivo en la cabecera del layout haciendo clic en el avatar o nombre del usuario.
 
-#### G. Notificaciones Interactivas
-* Al hacer clic en una notificación in-app, el sistema:
-  1. La marca automáticamente como leída en el backend.
-  2. Cierra el menú desplegable.
-  3. **Redirige al usuario al recurso correspondiente**:
-     - Notificación de subasta $\rightarrow$ `/auctions`
-     - Notificación de actividad $\rightarrow$ `/activities`
-     - Notificación de calificación $\rightarrow$ `/grades`
-     - Notificación de EduCoins $\rightarrow$ `/wallet`
-     - Notificación de clase/grupo $\rightarrow$ `/classrooms` o `/groups`
-     - Alerta de seguridad $\rightarrow$ `/profile`
+#### G. Notificaciones Interactivas y Dinamismo en Tiempo Real
+* **Generación Automática por Eventos**: Señales automáticas en Django para calificaciones, actividades asignadas, pujas de subasta superadas, victorias en subastas y recargas de EduCoins.
+* **Sondeo en Segundo Plano (Background Polling)**:
+  - Ciclo de actualización cada 10 segundos en `InAppNotificationService`.
+  - Supresión de toasts de error mediante header `X-Skip-Error-Toast` durante micro-cortes de red.
+* **Alertas Emergentes Contextuales**:
+  - Detección precisa de nuevas notificaciones incluso partiendo de 0 no leídas mediante la bandera `hasLoadedInitial`.
+  - Animación de rebote (`animate-bounce`) en la campana del header y toast informativo flotante (`🔔 Titulo: Mensaje`).
+* **Navegación Contextual al Clic**:
+  - Al hacer clic en una notificación in-app, el sistema la marca como leída y redirige inmediatamente al recurso correspondiente (`/auctions`, `/activities`, `/grades`, `/wallet`, `/classrooms`, `/groups`, `/profile`).
 
 ---
 
