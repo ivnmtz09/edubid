@@ -134,7 +134,7 @@ class GradeViewSet(viewsets.ModelViewSet):
                 "student_id": est.id,
                 "student_name": f"{est.first_name} {est.last_name}".strip() or est.email,
                 "student_email": est.email,
-                "promedio_nota": round(promedio, 2),
+                "promedio_nota": round(float(promedio), 2),
                 "total_educoins": saldo,
                 "total_actividades": grades.count(),
                 "detalles": detalles,

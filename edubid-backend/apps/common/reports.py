@@ -78,9 +78,9 @@ def generar_excel_reporte_grupo(grupo, data_estudiantes):
     total_actividades = 0
 
     for idx, est in enumerate(data_estudiantes, start=6):
-        promedio = est.get("promedio_nota", 0.0)
-        coins = est.get("total_educoins", 0)
-        acts = est.get("total_actividades", 0)
+        promedio = float(est.get("promedio_nota", 0.0) or 0.0)
+        coins = int(est.get("total_educoins", 0) or 0)
+        acts = int(est.get("total_actividades", 0) or 0)
 
         suma_notas += promedio
         suma_coins += coins
@@ -89,7 +89,7 @@ def generar_excel_reporte_grupo(grupo, data_estudiantes):
         row_data = [
             est.get("student_name", "Estudiante"),
             est.get("student_email", ""),
-            promedio,
+            round(promedio, 2),
             coins,
             acts
         ]
@@ -198,7 +198,8 @@ def generar_pdf_reporte_grupo(grupo, data_estudiantes):
     # Encabezado
     elements.append(Paragraph("EduBid — Plataforma de Economía Gamificada", subtitulo_style))
     elements.append(Spacer(1, 4))
-    elements.append(Paragraph(f"Reporte de Aula: Grupo {grupo.nombre}", titulo_style))
+    grupo_display = grupo.nombre if (grupo.nombre and grupo.nombre.lower().startswith("grupo")) else f"Grupo {grupo.nombre}"
+    elements.append(Paragraph(f"Reporte de Aula: {grupo_display}", titulo_style))
     
     aula_nombre = grupo.classroom.nombre if grupo.classroom else "Sin Asignatura"
     if grupo.classroom and grupo.classroom.docente:
@@ -232,9 +233,9 @@ def generar_pdf_reporte_grupo(grupo, data_estudiantes):
     total_acts = 0
 
     for est in data_estudiantes:
-        promedio = est.get("promedio_nota", 0.0)
-        coins = est.get("total_educoins", 0)
-        acts = est.get("total_actividades", 0)
+        promedio = float(est.get("promedio_nota", 0.0) or 0.0)
+        coins = int(est.get("total_educoins", 0) or 0)
+        acts = int(est.get("total_actividades", 0) or 0)
 
         suma_notas += promedio
         suma_coins += coins
@@ -243,7 +244,7 @@ def generar_pdf_reporte_grupo(grupo, data_estudiantes):
         table_data.append([
             Paragraph(est.get("student_name", "Estudiante"), cell_style),
             Paragraph(est.get("student_email", ""), cell_style),
-            Paragraph(str(promedio), ParagraphStyle('CenterC', parent=cell_style, alignment=1)),
+            Paragraph(str(round(promedio, 2)), ParagraphStyle('CenterC', parent=cell_style, alignment=1)),
             Paragraph(str(coins), ParagraphStyle('CenterC', parent=cell_style, alignment=1)),
             Paragraph(str(acts), ParagraphStyle('CenterC', parent=cell_style, alignment=1))
         ])
