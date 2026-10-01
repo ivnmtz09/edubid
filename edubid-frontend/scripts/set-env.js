@@ -63,10 +63,19 @@ function getProdVar(keys, fallback = '') {
   return findValue([prodEnv, localEnv, process.env, exampleEnv], keys) || fallback;
 }
 
-// Normalizar URLs asegurando /api
-function normalizeApiUrl(url) {
-  if (!url) return '';
-  const cleanUrl = url.replace(/\/+$/, '');
+// Normalizar URLs asegurando validez y sufijo /api
+function normalizeApiUrl(url, fallback = '') {
+  if (!url || typeof url !== 'string') return fallback;
+  
+  // Extraer URL válida http:// o https:// incluso si vino texto mezclado o saltos de línea
+  const match = url.match(/https?:\/\/[^\s'"`<>]+/);
+  let cleanUrl = match ? match[0] : url.trim().replace(/[\r\n].*$/s, '');
+
+  if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+    cleanUrl = fallback;
+  }
+
+  cleanUrl = cleanUrl.replace(/\/+$/, '');
   if (!cleanUrl.endsWith('/api') && !cleanUrl.includes('/api/')) {
     return `${cleanUrl}/api`;
   }
@@ -77,18 +86,18 @@ const rawDevApiUrl = getDevVar(
   ['API_BASE_URL', 'API_URL', 'VITE_API_BASE_URL'],
   'http://localhost:8000/api'
 );
-const devApiUrl = normalizeApiUrl(rawDevApiUrl);
+const devApiUrl = normalizeApiUrl(rawDevApiUrl, 'http://localhost:8000/api');
 
 const rawProdApiUrl = getProdVar(
   ['PRODUCTION_API_URL', 'PROD_API_URL', 'API_URL_PROD', 'VITE_PRODUCTION_API_URL'],
   'https://edubid.up.railway.app/api'
 );
-const prodApiUrl = normalizeApiUrl(rawProdApiUrl);
+const prodApiUrl = normalizeApiUrl(rawProdApiUrl, 'https://edubid.up.railway.app/api');
 
 const googleClientId = getDevVar(
   ['GOOGLE_CLIENT_ID', 'VITE_GOOGLE_CLIENT_ID'],
   ''
-);
+).trim().replace(/[\r\n].*$/s, '');
 
 // Garantizar existencia del directorio src/environments
 if (!fs.existsSync(envDir)) {
