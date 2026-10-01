@@ -7,7 +7,8 @@
 [![Frontend: Angular 19+](https://img.shields.io/badge/Frontend-Angular%2019%2B-DD0031?style=flat-square&logo=angular)](https://angular.dev/)
 [![Styles: Tailwind CSS 4](https://img.shields.io/badge/Styles-Tailwind%204.x-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![UI: Flowbite](https://img.shields.io/badge/UI-Flowbite-1C64F2?style=flat-square&logo=flowbite)](https://flowbite.com/)
-[![Database: MySQL 8.0](https://img.shields.io/badge/Database-MySQL%208.0-orange?style=flat-square&logo=mysql)](https://www.mysql.com/)
+[![Database: PostgreSQL / Supabase](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20Supabase-336791?style=flat-square&logo=postgresql)](https://supabase.com/)
+[![Database Compat: MySQL](https://img.shields.io/badge/Compat-MySQL%208.0-orange?style=flat-square&logo=mysql)](https://www.mysql.com/)
 [![Auth: SimpleJWT + Google](https://img.shields.io/badge/Auth-JWT%20%2B%20OAuth2-purple?style=flat-square)](https://jwt.io/)
 [![Multi--Tenant: White--Label](https://img.shields.io/badge/Architecture-SaaS%20White--Label-blueviolet?style=flat-square)](#-arquitectura-saas-multi-tenant--white-labeling)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
@@ -25,7 +26,7 @@
 - [Guía de Instalación y Puesta en Marcha](#-guía-de-instalación-y-puesta-en-marcha)
   - [Prerrequisitos](#prerrequisitos)
   - [Paso 1: Clonar el Repositorio](#paso-1-clonar-el-repositorio)
-  - [Paso 2: Configurar y Levantar el Backend (Django + MySQL en Docker)](#paso-2-configurar-y-levantar-el-backend-django--mysql-en-docker)
+  - [Paso 2: Configurar y Levantar el Backend (Django + Supabase / MySQL)](#paso-2-configurar-y-levantar-el-backend-django--supabase--mysql)
   - [Paso 3: Configurar y Levantar el Frontend (Angular)](#paso-3-configurar-y-levantar-el-frontend-angular)
 - [API Endpoints y Documentación](#-api-endpoints-y-documentación)
 - [Estado Actual del Proyecto y Roadmap](#-estado-actual-del-proyecto-y-roadmap)
@@ -241,7 +242,7 @@ cd edubid
 
 ---
 
-### Paso 2: Configurar y Levantar el Backend (Django + MySQL en Docker)
+### Paso 2: Configurar y Levantar el Backend (Django + Supabase / MySQL)
 
 #### 2.1 Configurar variables de entorno del backend
 
@@ -251,36 +252,45 @@ Copia la plantilla `.env.example` en la carpeta `edubid-backend/`:
 cp edubid-backend/.env.example edubid-backend/.env
 ```
 
-Edita `edubid-backend/.env` con tus preferencias locales. Por defecto, incluye los valores listos para trabajar con el contenedor de Docker:
+Edita `edubid-backend/.env` según tu base de datos preferida:
 
+##### Opción A: Supabase (PostgreSQL en la Nube — Recomendado)
 ```env
 SECRET_KEY=django-insecure-clave-desarrollo-edubid
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# Credenciales consumidas tanto por Django como por docker-compose.yml
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=postgres
+DB_USER=postgres.[TU_PROJECT_REF]
+DB_PASSWORD=[TU_PASSWORD_DE_SUPABASE]
+DB_HOST=aws-0-us-east-1.pooler.supabase.com
+DB_PORT=5432
+DB_SSLMODE=require
+
+FRONTEND_URL=http://localhost:4200
+CORS_ALLOWED_ORIGINS=http://localhost:4200,http://127.0.0.1:4200,http://localhost:5173
+```
+*(No requiere levantar contenedores Docker en tu máquina local).*
+
+##### Opción B: MySQL en Docker Compose (Local)
+Si prefieres usar MySQL en contenedor local:
+```bash
+cd edubid-backend
+docker compose up -d
+docker ps
+```
+Configura en `.env`:
+```env
+DB_ENGINE=django.db.backends.mysql
 DB_NAME=edubid_db
 DB_USER=edubid_user
 DB_PASSWORD=edubid_password
 DB_HOST=127.0.0.1
 DB_PORT=3306
-
-FRONTEND_URL=http://localhost:4200
-CORS_ALLOWED_ORIGINS=http://localhost:4200,http://127.0.0.1:4200,http://localhost:5173
 ```
 
-#### 2.2 Levantar la Base de Datos con Docker Compose
-
-El archivo `docker-compose.yml` utiliza de forma segura las variables de entorno de tu archivo `.env`:
-
-```bash
-cd edubid-backend
-docker compose up -d
-# Verifica que el contenedor esté corriendo
-docker ps
-```
-
-#### 2.3 Preparar el Entorno Virtual de Python e Instalar Dependencias
+#### 2.2 Preparar el Entorno Virtual de Python e Instalar Dependencias
 
 ```bash
 # Crear entorno virtual
@@ -296,14 +306,14 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 2.4 Aplicar Migraciones y Crear Superusuario
+#### 2.3 Aplicar Migraciones y Crear Superusuario
 
 ```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-#### 2.5 Iniciar el Servidor Backend
+#### 2.4 Iniciar el Servidor Backend
 
 ```bash
 python manage.py runserver

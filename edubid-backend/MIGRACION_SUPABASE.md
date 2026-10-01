@@ -1,8 +1,8 @@
 # 🐘 Guía de Migración de MySQL a Supabase (PostgreSQL) — EduBid Backend
 
-> **Tiempo estimado de ejecución:** 5 a 10 minutos  
-> **Nivel de dificultad:** Muy bajo (3/10) — No requiere modificar modelos, vistas, controladores ni código de Angular.  
-> **Compatibilidad:** 100% nativa con Django REST Framework y Django ORM.
+> **ESTADO ACTUAL:** ✅ **MIGRACIÓN COMPLETADA Y EN PRODUCCIÓN**  
+> El clúster de Supabase ya se encuentra configurado, las 37 tablas del modelo relacional han sido migradas exitosamente y los 76 tests de Django pasan al 100%.  
+> Este documento se conserva como manual de referencia técnica, administración del Table Editor y guía de rollback o transferencia de datos.
 
 ---
 

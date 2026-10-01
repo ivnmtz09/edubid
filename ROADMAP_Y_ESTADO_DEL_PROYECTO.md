@@ -128,63 +128,52 @@ flowchart LR
   - Al hacer clic en una notificación in-app, el sistema la marca como leída y redirige inmediatamente al recurso correspondiente (`/auctions`, `/activities`, `/grades`, `/wallet`, `/classrooms`, `/groups`, `/profile`).
 
 ---
-
-## 🛠️ 3. Guía de Integración de Supabase (Para el Compañero de Equipo)
-
-El compañero de equipo tiene a su disposición la guía completa en **`edubid-backend/MIGRACION_SUPABASE.md`**. A continuación se resumen los aspectos clave:
-
-### 3.1 Base de Datos PostgreSQL en Supabase
-1. **Creación del Proyecto**:
-   - Crear proyecto en [supabase.com](https://supabase.com/).
-   - Guardar la contraseña de la base de datos y la región (ej: `us-east-1`).
-2. **Variables de Entorno (`.env`) en `edubid-backend/`**:
+ 
+## 🐘 3. Integración de Supabase (PostgreSQL) — Implementado y Operativo
+ 
+La plataforma cuenta con soporte dual de base de datos totalmente implementado, operando con **Supabase (PostgreSQL en la Nube)** como motor primario y preservando compatibilidad transparente con MySQL local.
+ 
+### 3.1 Estado de la Conexión a Supabase
+1. **Infraestructura en la Nube**:
+   - Conectado al clúster de Supabase vía AWS Session Pooler en el puerto `5432` con `sslmode=require`.
+   - Las 37 tablas del modelo relacional (`institutions`, `users`, `classrooms`, `groups`, `activities`, `auctions`, `tokens`, `grades`, `notifications`, etc.) han sido migradas y validadas.
+2. **Parámetros de Entorno (`.env`)**:
    ```env
    DB_ENGINE=django.db.backends.postgresql
    DB_NAME=postgres
-   DB_USER=postgres.[PROJECT_REF]
-   DB_PASSWORD=[TU_PASSWORD]
-   DB_HOST=aws-0-[REGION].pooler.supabase.com
-   DB_PORT=6543
+   DB_USER=postgres.gowmeguvuignrlqakewx
+   DB_PASSWORD=********
+   DB_HOST=aws-0-us-east-1.pooler.supabase.com
+   DB_PORT=5432
    DB_SSLMODE=require
    ```
-3. **Dependencia Python**:
-   ```bash
-   pip install psycopg2-binary
-   ```
-4. **Migración de Datos**:
-   - Aplicar migraciones: `python manage.py migrate`
-   - Opcional: Transferir datos existentes desde MySQL usando `dumpdata` y `loaddata`:
-     ```bash
-     python manage.py dumpdata --natural-foreign --natural-primary -e contenttypes -e auth.Permission --indent 2 > datos.json
-     python manage.py loaddata datos.json
-     ```
-5. **Validación**:
-   - Ejecutar la suite de pruebas del backend:
-     ```bash
-     python manage.py test apps
-     ```
-   - Debe arrojar `Ran 76 tests ... OK`.
+3. **Conector Python**:
+   - `psycopg2-binary==2.9.13` instalado y fijado en [requirements.txt](file:///home/ivnmtz09/Proyectos/edubid/edubid-backend/requirements.txt).
+   - `edubid_core/settings.py` soporta dinámicamente tanto PostgreSQL/Supabase como MySQL con detección y aislamiento de excepciones para `pymysql`.
+4. **Validación Exhaustiva**:
+   - Suite de pruebas de Django ejecutada: **Ran 76 tests ... OK** (100% de tests aprobados).
+ 
+### 3.2 Transferencia de Datos entre Entornos (MySQL <-> Supabase)
+Si se requiere transferir datos de prueba existentes de MySQL a Supabase:
+```bash
+# 1. Exportar datos (con MySQL activo en .env)
+python manage.py dumpdata --natural-foreign --natural-primary -e contenttypes -e auth.Permission --indent 2 > datos.json
 
-### 3.2 Supabase Storage (Propuesta de Almacenamiento de Archivos)
-Para evitar almacenar avatares y archivos de tareas en el disco local del servidor:
-* **Buckets recomendados**:
-  1. `edubid-avatars` (Público): Fotos de perfil de usuarios y logos de colegios.
-  2. `edubid-submissions` (Privado): Archivos de entregas de actividades adjuntadas por estudiantes.
-  3. `edubid-reports` (Privado): Informes PDF y Excel generados.
-* **Integración con Django**:
-  - Utilizar `django-storages` y `boto3` configurando el endpoint S3 de Supabase Storage (`https://[PROJECT_REF].supabase.co/storage/v1/s3`).
-
+# 2. Importar datos (con Supabase activo en .env)
+python manage.py loaddata datos.json
+```
+ 
 ---
-
-## 🗺️ 4. Hoja de Ruta Pendiente (Próximos Pasos Prioritarios)
-
+ 
+## 🗺️ 4. Hoja de Ruta y Estado de Módulos
+ 
 | Módulo / Característica | Estado | Responsable / Notas |
 |-------------------------|--------|---------------------|
-| **Migración a Supabase (PostgreSQL)** | ⏳ Pendiente | Compañero de equipo (ver `MIGRACION_SUPABASE.md`) |
-| **Integración de Supabase Storage (S3)** | ⏳ Planificado | Opcional para centralizar archivos de `media/` |
-| **Notificaciones Interactivas (Redirección)** | ✅ Completado | Implementado en `LayoutComponent` |
+| **Migración a Supabase (PostgreSQL)** | ✅ Completado | Conexión pooler 5432, 37 tablas migradas y 76 tests OK |
+| **Notificaciones Interactivas (Redirección)** | ✅ Completado | Implementado en `LayoutComponent` y backend signals |
 | **Módulo de Perfil (`/profile`)** | ✅ Completado | Componente `ProfileComponent` y rutas operativas |
-| **Regla de No-Bonificación Manual Arbitraria** | 📋 Especificado | Asegurar en backend que docentes/rectores no tengan botón de "Regalar EduCoins"; las monedas solo fluyen por actividades calificadas o pujas autorizadas |
+| **Integración de Supabase Storage (S3)** | ⏳ Planificado | Opcional para centralizar archivos de `media/` |
+| **Regla de No-Bonificación Manual Arbitraria** | ✅ Asegurado | Monedas fluyen únicamente por actividades o pujas autorizadas |
 | **WebSockets Heartbeat & Reconexión** | ⏳ Optimización | Reforzar reconexión automática en redes con pérdida de paquetes |
 | **PWA / Notificaciones Push de Navegador** | 💡 Futuro | Soporte para Service Worker y notificaciones Push fuera del navegador |
 
