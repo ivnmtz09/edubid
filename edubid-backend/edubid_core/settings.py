@@ -32,7 +32,9 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.railway.ap
 # ─────────────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
+    'https://*.up.railway.app',
     'https://*.netlify.app',
+    'https://*.vercel.app',
     'http://localhost:4200',
     'http://127.0.0.1:4200',
     'http://localhost:5173',
@@ -111,6 +113,14 @@ CORS_ALLOWED_ORIGINS = [
         default='http://localhost:4200,http://127.0.0.1:4200,http://localhost:5173,http://127.0.0.1:5173'
     ).split(',')
     if origin.strip()
+]
+
+# Permitir automáticamente cualquier frontend desplegado en Railway (.up.railway.app o .railway.app), Vercel o Netlify
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/.*\.up\.railway\.app$",
+    r"^https:\/\/.*\.railway\.app$",
+    r"^https:\/\/.*\.netlify\.app$",
+    r"^https:\/\/.*\.vercel\.app$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
