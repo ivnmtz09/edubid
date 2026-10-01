@@ -9,6 +9,11 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { ThemeService } from '../../../../core/services/theme.service';
 import { User } from '../../../../core/models/user.model';
 
+export interface Color {
+  hex: string;
+  nombre: string;
+}
+
 export interface BrandingPalette {
   name: string;
   primary: string;
@@ -59,6 +64,8 @@ export class AdminDashboardComponent implements OnInit {
   editColorPrimario = signal<string>('#ea580c');
   editColorSecundario = signal<string>('#3b82f6');
   editLogo = signal<string>('');
+  editSelectedFile: File | null = null;
+  editLogoPreview = signal<string | null>(null);
   isSaving = signal<boolean>(false);
 
   // Modal y formulario de creación de nueva institución
@@ -70,10 +77,56 @@ export class AdminDashboardComponent implements OnInit {
   newColorPrimario = signal<string>('#ea580c');
   newColorSecundario = signal<string>('#3b82f6');
   newLogo = signal<string>('');
+  newSelectedFile: File | null = null;
+  newLogoPreview = signal<string | null>(null);
 
-  // Modal de confirmación de eliminación
+  // Modal de confirmación de eliminación de institución
   showDeleteConfirmModal = signal<boolean>(false);
   isDeleting = signal<boolean>(false);
+
+  // Modal y estado para edición de usuario (Rol, Institución, Estado)
+  showEditUserModal = signal<boolean>(false);
+  isSavingUser = signal<boolean>(false);
+  editingUser = signal<User | null>(null);
+  editUserRole = signal<string>('estudiante');
+  editUserInstitutionId = signal<number | null>(null);
+  editUserIsActive = signal<boolean>(true);
+  editUserFirstName = signal<string>('');
+  editUserLastName = signal<string>('');
+
+  // Paleta de 24 colores armónicos con nombres amigables (idéntica a la vista de rector)
+  coloresDisponibles: Color[] = [
+    // Naranjados y Rojos
+    { hex: '#ea580c', nombre: 'Naranja EduBid' },
+    { hex: '#dc2626', nombre: 'Rojo Fuego' },
+    { hex: '#ef4444', nombre: 'Rojo Coral' },
+    { hex: '#f97316', nombre: 'Naranja Vivo' },
+    // Amarillos y Tierra
+    { hex: '#d97706', nombre: 'Ámbar Dorado' },
+    { hex: '#f59e0b', nombre: 'Amarillo Sol' },
+    { hex: '#92400e', nombre: 'Café Oscuro' },
+    { hex: '#78350f', nombre: 'Marrón Tierra' },
+    // Verdes
+    { hex: '#16a34a', nombre: 'Verde Naturaleza' },
+    { hex: '#059669', nombre: 'Esmeralda' },
+    { hex: '#0d9488', nombre: 'Verde Azulado' },
+    { hex: '#10b981', nombre: 'Menta' },
+    // Azules y Cianes
+    { hex: '#2563eb', nombre: 'Azul Royal' },
+    { hex: '#3b82f6', nombre: 'Azul Clásico' },
+    { hex: '#0891b2', nombre: 'Cian Océano' },
+    { hex: '#06b6d4', nombre: 'Celeste' },
+    // Morados y Rosas
+    { hex: '#7c3aed', nombre: 'Violeta Prestigio' },
+    { hex: '#9333ea', nombre: 'Púrpura' },
+    { hex: '#a855f7', nombre: 'Lavanda' },
+    { hex: '#ec4899', nombre: 'Rosa Fucsia' },
+    // Oscuros y Especiales
+    { hex: '#374151', nombre: 'Gris Pizarra' },
+    { hex: '#1f2937', nombre: 'Grafito' },
+    { hex: '#065f46', nombre: 'Bosque Profundo' },
+    { hex: '#7f1d1d', nombre: 'Burdeos' },
+  ];
 
   // Paletas predefinidas para Branding
   palettes: BrandingPalette[] = [
@@ -263,6 +316,25 @@ export class AdminDashboardComponent implements OnInit {
     this.editColorPrimario.set(inst.color_primario || '#ea580c');
     this.editColorSecundario.set(inst.color_secundario || '#3b82f6');
     this.editLogo.set(inst.logo || '');
+    this.editSelectedFile = null;
+    this.editLogoPreview.set(null);
+  }
+
+  // --- Helpers de color y paletas ---
+  getNombreColor(hex: string): string {
+    if (!hex) return 'Personalizado';
+    return this.coloresDisponibles.find(c => c.hex.toLowerCase() === hex.toLowerCase())?.nombre || 'Personalizado';
+  }
+
+  isLightColor(hex: string): boolean {
+    if (!hex) return false;
+    const clean = hex.replace('#', '');
+    if (clean.length !== 6) return false;
+    const r = parseInt(clean.slice(0, 2), 16);
+    const g = parseInt(clean.slice(2, 4), 16);
+    const b = parseInt(clean.slice(4, 6), 16);
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq >= 160;
   }
 
   applyPalette(palette: BrandingPalette): void {
@@ -279,6 +351,104 @@ export class AdminDashboardComponent implements OnInit {
     this.newColorSecundario.set(palette.secondary);
   }
 
+  isNewCurrentPalette(palette: BrandingPalette): boolean {
+    return this.newColorPrimario() === palette.primary && this.newColorSecundario() === palette.secondary;
+  }
+
+  seleccionarEditPrimario(hex: string): void {
+    this.editColorPrimario.set(hex);
+  }
+
+  seleccionarEditSecundario(hex: string): void {
+    this.editColorSecundario.set(hex);
+  }
+
+  seleccionarNewPrimario(hex: string): void {
+    this.newColorPrimario.set(hex);
+  }
+
+  seleccionarNewSecundario(hex: string): void {
+    this.newColorSecundario.set(hex);
+  }
+
+  // --- Gestión de archivos de logo (Edición y Creación) ---
+  onEditLogoSelected(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      this.notificationService.error('Formato no válido. Selecciona un archivo JPG, JPEG o PNG.', 'Archivo');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      this.notificationService.error('El archivo excede el tamaño máximo de 2MB.', 'Archivo');
+      return;
+    }
+
+    this.editSelectedFile = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.editLogoPreview.set(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeEditLogo(): void {
+    this.editSelectedFile = null;
+    this.editLogoPreview.set(null);
+    this.editLogo.set('');
+  }
+
+  onNewLogoSelected(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      this.notificationService.error('Formato no válido. Selecciona un archivo JPG, JPEG o PNG.', 'Archivo');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      this.notificationService.error('El archivo excede el tamaño máximo de 2MB.', 'Archivo');
+      return;
+    }
+
+    this.newSelectedFile = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.newLogoPreview.set(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeNewLogo(): void {
+    this.newSelectedFile = null;
+    this.newLogoPreview.set(null);
+    this.newLogo.set('');
+  }
+
+  onInstLogoError(event: Event, inst: Institution): void {
+    const img = event.target as HTMLElement;
+    if (img) {
+      img.style.display = 'none';
+      const parent = img.parentElement;
+      if (parent && !parent.querySelector('.inst-err-fallback')) {
+        const div = document.createElement('div');
+        div.className = img.classList.contains('w-14')
+          ? 'w-14 h-14 rounded-2xl flex items-center justify-center font-extrabold text-xl text-white shrink-0 shadow-xs inst-err-fallback'
+          : 'w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white shrink-0 shadow-xs inst-err-fallback';
+        div.style.backgroundColor = inst.color_primario || '#ea580c';
+        div.innerText = (inst.nombre || 'ED').slice(0, 2).toUpperCase();
+        parent.insertBefore(div, img);
+      }
+    }
+  }
+
   saveInstitutionChanges(): void {
     const inst = this.selectedInstitution();
     if (!inst) return;
@@ -290,18 +460,25 @@ export class AdminDashboardComponent implements OnInit {
 
     this.isSaving.set(true);
 
-    const payload: InstitutionUpdateRequest = {
-      nombre: this.editNombre().trim(),
-      codigo_dane: this.editCodigoDane().trim() || null,
-      activo: this.editActivo(),
-      color_primario: this.editColorPrimario(),
-      color_secundario: this.editColorSecundario(),
-      logo: this.editLogo().trim() || null
-    };
+    const formData = new FormData();
+    formData.append('nombre', this.editNombre().trim());
+    if (this.editCodigoDane().trim()) {
+      formData.append('codigo_dane', this.editCodigoDane().trim());
+    }
+    formData.append('activo', String(this.editActivo()));
+    formData.append('color_primario', this.editColorPrimario());
+    formData.append('color_secundario', this.editColorSecundario());
 
-    this.institutionService.updateInstitution(inst.id, payload).subscribe({
+    if (this.editSelectedFile) {
+      formData.append('logo', this.editSelectedFile);
+    } else if (!this.editLogoPreview() && !this.editLogo()) {
+      formData.append('logo', '');
+    }
+
+    this.institutionService.updateInstitution(inst.id, formData).subscribe({
       next: (updated) => {
         this.isSaving.set(false);
+        this.editSelectedFile = null;
         this.notificationService.success(`Institución "${updated.nombre}" actualizada con éxito.`);
         
         // Actualizar la lista local reactivamente
@@ -311,7 +488,8 @@ export class AdminDashboardComponent implements OnInit {
       error: (err) => {
         this.isSaving.set(false);
         console.error(err);
-        this.notificationService.error('Error al guardar los cambios de la institución.', 'Error');
+        const detail = err.error?.detail || err.error?.codigo_dane?.[0] || 'Error al guardar los cambios de la institución.';
+        this.notificationService.error(detail, 'Error');
       }
     });
   }
@@ -325,11 +503,15 @@ export class AdminDashboardComponent implements OnInit {
     this.newColorPrimario.set('#ea580c');
     this.newColorSecundario.set('#3b82f6');
     this.newLogo.set('');
+    this.newSelectedFile = null;
+    this.newLogoPreview.set(null);
     this.showCreateModal.set(true);
   }
 
   closeCreateModal(): void {
     this.showCreateModal.set(false);
+    this.newSelectedFile = null;
+    this.newLogoPreview.set(null);
   }
 
   submitCreateInstitution(): void {
@@ -340,18 +522,26 @@ export class AdminDashboardComponent implements OnInit {
 
     this.isCreating.set(true);
 
-    const payload: InstitutionCreateRequest = {
-      nombre: this.newNombre().trim(),
-      codigo_dane: this.newCodigoDane().trim() || null,
-      activo: this.newActivo(),
-      color_primario: this.newColorPrimario(),
-      color_secundario: this.newColorSecundario(),
-      logo: this.newLogo().trim() || null
-    };
+    const formData = new FormData();
+    formData.append('nombre', this.newNombre().trim());
+    if (this.newCodigoDane().trim()) {
+      formData.append('codigo_dane', this.newCodigoDane().trim());
+    }
+    formData.append('activo', String(this.newActivo()));
+    formData.append('color_primario', this.newColorPrimario());
+    formData.append('color_secundario', this.newColorSecundario());
 
-    this.institutionService.createInstitution(payload).subscribe({
+    if (this.newSelectedFile) {
+      formData.append('logo', this.newSelectedFile);
+    } else if (this.newLogo().trim()) {
+      formData.append('logo', this.newLogo().trim());
+    }
+
+    this.institutionService.createInstitution(formData).subscribe({
       next: (created) => {
         this.isCreating.set(false);
+        this.newSelectedFile = null;
+        this.newLogoPreview.set(null);
         this.showCreateModal.set(false);
         this.notificationService.success(`Institución "${created.nombre}" creada con éxito.`);
         
@@ -362,7 +552,96 @@ export class AdminDashboardComponent implements OnInit {
       error: (err) => {
         this.isCreating.set(false);
         console.error(err);
-        this.notificationService.error('Error al registrar la institución en el sistema.', 'Error');
+        const detail = err.error?.detail || err.error?.codigo_dane?.[0] || 'Error al registrar la institución en el sistema.';
+        this.notificationService.error(detail, 'Error');
+      }
+    });
+  }
+
+  // ================= GESTIÓN DE ROLES Y USUARIOS =================
+
+  openEditUserModal(user: User): void {
+    this.editingUser.set(user);
+    this.editUserRole.set(user.role);
+    this.editUserInstitutionId.set(user.profile?.institucion?.id ?? null);
+    this.editUserIsActive.set(user.is_active !== false);
+    this.editUserFirstName.set(user.first_name || '');
+    this.editUserLastName.set(user.last_name || '');
+    this.showEditUserModal.set(true);
+  }
+
+  closeEditUserModal(): void {
+    this.showEditUserModal.set(false);
+    this.editingUser.set(null);
+  }
+
+  onRoleChange(newRole: string): void {
+    this.editUserRole.set(newRole);
+    if (newRole === 'admin') {
+      this.editUserInstitutionId.set(null);
+    }
+  }
+
+  onInstitutionChange(val: any): void {
+    if (!val || val === 'null' || val === 'undefined') {
+      this.editUserInstitutionId.set(null);
+    } else {
+      this.editUserInstitutionId.set(Number(val));
+    }
+  }
+
+  saveUserChanges(): void {
+    const user = this.editingUser();
+    if (!user) return;
+
+    this.isSavingUser.set(true);
+
+    const payload: any = {
+      first_name: this.editUserFirstName().trim(),
+      last_name: this.editUserLastName().trim(),
+      role: this.editUserRole(),
+      is_active: this.editUserIsActive(),
+      institucion_id: this.editUserRole() === 'admin' ? null : this.editUserInstitutionId()
+    };
+
+    this.userService.updateUser(user.id, payload).subscribe({
+      next: (res) => {
+        this.isSavingUser.set(false);
+        this.showEditUserModal.set(false);
+        this.notificationService.success(`Usuario ${user.email} actualizado exitosamente.`);
+
+        const updatedUser = res?.user || res;
+        this.users.update(list => list.map(u => {
+          if (u.id === user.id) {
+            const inst = this.institutions().find(i => i.id === this.editUserInstitutionId());
+            return {
+              ...u,
+              ...updatedUser,
+              first_name: this.editUserFirstName().trim(),
+              last_name: this.editUserLastName().trim(),
+              role: this.editUserRole() as any,
+              is_active: this.editUserIsActive(),
+              profile: {
+                ...u.profile,
+                institucion: this.editUserRole() === 'admin' ? null : (inst ? {
+                  id: inst.id,
+                  nombre: inst.nombre,
+                  color_primario: inst.color_primario,
+                  color_secundario: inst.color_secundario,
+                  logo: inst.logo ?? null,
+                  codigo_dane: inst.codigo_dane
+                } : null)
+              }
+            };
+          }
+          return u;
+        }));
+      },
+      error: (err) => {
+        this.isSavingUser.set(false);
+        console.error(err);
+        const detail = err.error?.detail || err.error?.institucion?.[0] || 'Error al actualizar el usuario.';
+        this.notificationService.error(detail, 'Error');
       }
     });
   }

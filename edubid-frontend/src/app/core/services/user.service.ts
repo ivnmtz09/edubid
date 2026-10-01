@@ -15,8 +15,8 @@ export class UserService {
     return this.http.get<User[]>(`${this.apiUrl}/list/`);
   }
 
-  updateUser(userId: number, data: Partial<User>): Observable<User> {
-    return this.http.patch<User>(`${this.apiUrl}/${userId}/update/`, data);
+  updateUser(userId: number, data: any): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${userId}/update/`, data);
   }
 
   getProfile(): Observable<any> {

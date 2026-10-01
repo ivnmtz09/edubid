@@ -600,6 +600,8 @@ export class InstitutionBrandingComponent implements OnInit {
 
     if (this.selectedFile) {
       formData.append('logo', this.selectedFile);
+    } else if (!this.logoPreview() && !this.logo) {
+      formData.append('logo', '');
     }
 
     this.institutionService.updateInstitution(this.institutionId, formData).subscribe({
@@ -610,6 +612,11 @@ export class InstitutionBrandingComponent implements OnInit {
         // Guardar nombre y logo localmente para persistencia garantizada
         if (typeof localStorage !== 'undefined') {
           localStorage.setItem('edubid_institution_name', this.nombre.trim());
+          if (res.logo) {
+            localStorage.setItem('edubid_institution_logo', res.logo);
+          } else if (!this.logoPreview() && !this.logo) {
+            localStorage.removeItem('edubid_institution_logo');
+          }
         }
 
         // Actualizar sesión actual
@@ -620,6 +627,8 @@ export class InstitutionBrandingComponent implements OnInit {
           user.profile.institucion.color_secundario = this.colorSecundario;
           if (res.logo) {
             user.profile.institucion.logo = res.logo;
+          } else if (!this.logoPreview() && !this.logo) {
+            user.profile.institucion.logo = null;
           }
         }
 

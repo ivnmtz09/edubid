@@ -226,7 +226,7 @@
                   <div class="flex items-center gap-3 min-w-0">
                     <!-- Logo / Avatar de la Institución -->
                     @if (inst.logo) {
-                      <img [src]="inst.logo" (error)="$event.target.style.display='none'" [alt]="inst.nombre" class="w-10 h-10 rounded-xl object-contain border border-border shrink-0 bg-bg p-0.5" />
+                      <img [src]="inst.logo" (error)="onInstLogoError($event, inst)" [alt]="inst.nombre" class="w-10 h-10 rounded-xl object-contain border border-border shrink-0 bg-bg p-0.5" />
                     } @else {
                       <div
                         class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white shrink-0 shadow-xs"
@@ -366,12 +366,13 @@
                 <th scope="col" class="px-5 py-3.5 font-semibold">Institución</th>
                 <th scope="col" class="px-5 py-3.5 font-semibold">Estado</th>
                 <th scope="col" class="px-5 py-3.5 font-semibold">Fecha Registro</th>
+                <th scope="col" class="px-5 py-3.5 font-semibold text-right">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border">
               @if (isLoading()) {
                 <tr>
-                  <td colspan="5" class="px-5 py-10 text-center text-text-muted">
+                  <td colspan="6" class="px-5 py-10 text-center text-text-muted">
                     <div class="flex flex-col items-center justify-center gap-2">
                       <svg class="animate-spin h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -383,7 +384,7 @@
                 </tr>
               } @else if (filteredUsers().length === 0) {
                 <tr>
-                  <td colspan="5" class="px-5 py-10 text-center text-text-muted">
+                  <td colspan="6" class="px-5 py-10 text-center text-text-muted">
                     <div class="flex flex-col items-center justify-center gap-2">
                       <svg class="w-8 h-8 text-text-muted/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -453,6 +454,21 @@
                     <td class="px-5 py-3.5 text-text-muted font-mono text-[11px]">
                       {{ formatDate(u.date_joined) }}
                     </td>
+
+                    <!-- Acciones -->
+                    <td class="px-5 py-3.5 text-right">
+                      <button
+                        type="button"
+                        (click)="openEditUserModal(u)"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-bg border border-border hover:border-primary hover:text-primary transition-all cursor-pointer shadow-2xs"
+                        title="Editar rol e institución del usuario"
+                      >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>Editar</span>
+                      </button>
+                    </td>
                   </tr>
                 }
               }
@@ -516,7 +532,7 @@
 
             <!-- Logo de la Institución -->
             @if (currentInst.logo) {
-              <img [src]="currentInst.logo" (error)="$event.target.style.display='none'" [alt]="currentInst.nombre" class="w-14 h-14 rounded-2xl object-contain border border-border bg-bg p-1 shrink-0 shadow-xs" />
+              <img [src]="currentInst.logo" (error)="onInstLogoError($event, currentInst)" [alt]="currentInst.nombre" class="w-14 h-14 rounded-2xl object-contain border border-border bg-bg p-1 shrink-0 shadow-xs" />
             } @else {
               <div
                 class="w-14 h-14 rounded-2xl flex items-center justify-center font-extrabold text-xl text-white shrink-0 shadow-xs"
@@ -736,23 +752,71 @@
                     </label>
                   </div>
 
-                  <!-- URL del Logotipo -->
-                  <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-text-muted">URL del Logotipo Institucional</label>
-                    <input
-                      type="url"
-                      [ngModel]="editLogo()"
-                      (ngModelChange)="editLogo.set($event)"
-                      name="editLogo"
-                      class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text"
-                      placeholder="https://ejemplo.com/logo-colegio.png"
-                    />
-                    <p class="text-[11px] text-text-muted">Se mostrará en la cabecera del panel de los docentes y estudiantes de esta institución.</p>
+                  <!-- Logotipo Institucional (Subida de archivo + Vista previa + URL opcional) -->
+                  <div class="space-y-3 p-4 rounded-xl bg-bg border border-border">
+                    <label class="text-xs font-semibold text-text-muted block">Logotipo Institucional</label>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                      <!-- Cuadro de Vista Previa -->
+                      <div class="w-16 h-16 rounded-xl border border-border bg-surface flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                        @if (editLogoPreview() || editLogo()) {
+                          <img [src]="editLogoPreview() || editLogo()" alt="Logo Institucional" class="w-full h-full object-contain p-1" />
+                        } @else {
+                          <div
+                            class="w-full h-full flex items-center justify-center font-black text-lg"
+                            [style.background]="editColorPrimario()"
+                            [style.color]="isLightColor(editColorPrimario()) ? '#0a0a0a' : '#ffffff'"
+                          >
+                            {{ (editNombre() ? editNombre()[0] : 'E').toUpperCase() }}
+                          </div>
+                        }
+                      </div>
+
+                      <div class="space-y-2 flex-1">
+                        <div class="flex items-center gap-2">
+                          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary text-white hover:bg-primary-hover transition-colors cursor-pointer shadow-2xs">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <span>Subir Imagen</span>
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg"
+                              (change)="onEditLogoSelected($event)"
+                              class="sr-only"
+                            />
+                          </label>
+
+                          @if (editLogoPreview() || editLogo() || editSelectedFile) {
+                            <button
+                              type="button"
+                              (click)="removeEditLogo()"
+                              class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-red-300 dark:border-red-900/60 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                            >
+                              Quitar
+                            </button>
+                          }
+                        </div>
+                        <p class="text-[11px] text-text-muted">Formatos: PNG, JPG o JPEG (máx. 2MB). Se almacenará en Supabase S3.</p>
+                      </div>
+                    </div>
+
+                    <!-- URL alternativa opcional -->
+                    <div class="pt-2 border-t border-border/60">
+                      <label class="text-[11px] font-medium text-text-muted">O ingresa una URL directa:</label>
+                      <input
+                        type="url"
+                        [ngModel]="editLogo()"
+                        (ngModelChange)="editLogo.set($event)"
+                        name="editLogo"
+                        class="w-full mt-1 px-3 py-1.5 bg-surface border border-border rounded-lg text-xs focus:ring-2 focus:ring-primary text-text font-mono"
+                        placeholder="https://ejemplo.com/logo-colegio.png"
+                      />
+                    </div>
                   </div>
 
-                  <!-- Paletas Sugeridas -->
+                  <!-- Paletas Predefinidas -->
                   <div class="space-y-2.5 pt-2">
-                    <label class="text-xs font-semibold text-text-muted">Paletas Predefinidas</label>
+                    <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Paletas Sugeridas</label>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                       @for (p of palettes; track p.name) {
                         <button
@@ -777,61 +841,85 @@
                     </div>
                   </div>
 
-                  <!-- Colores Personalizados (Hex + ColorPicker) -->
-                  <div class="space-y-2.5 pt-2">
-                    <label class="text-xs font-semibold text-text-muted">Colores Personalizados</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      
-                      <!-- Color Primario -->
-                      <div class="p-3 rounded-xl bg-bg border border-border flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                          <input
-                            type="color"
-                            [ngModel]="editColorPrimario()"
-                            (ngModelChange)="editColorPrimario.set($event)"
-                            name="editColorPrimarioPicker"
-                            class="w-9 h-9 p-0.5 rounded-lg border border-border bg-surface cursor-pointer"
-                          />
-                          <div>
-                            <span class="text-xs font-bold text-slate-900 dark:text-white block">Primario</span>
-                            <span class="text-[10px] text-text-muted">Botones y destacados</span>
-                          </div>
-                        </div>
-                        <input
-                          type="text"
-                          [ngModel]="editColorPrimario()"
-                          (ngModelChange)="editColorPrimario.set($event)"
-                          name="editColorPrimarioHex"
-                          maxlength="7"
-                          class="w-24 px-2 py-1 text-xs font-mono rounded-lg border border-border bg-surface text-center"
-                        />
+                  <!-- Selector 24 Colores - Color Principal -->
+                  <div class="space-y-3 pt-2">
+                    <div class="flex items-center justify-between">
+                      <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Principal</label>
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-5 h-5 rounded-md border border-border shadow-xs shrink-0"
+                          [style.background]="editColorPrimario()"
+                        ></div>
+                        <span class="text-xs font-semibold" [style.color]="editColorPrimario()">
+                          {{ getNombreColor(editColorPrimario()) }}
+                        </span>
                       </div>
+                    </div>
+                    <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+                      @for (color of coloresDisponibles; track color.hex) {
+                        <button
+                          type="button"
+                          (click)="seleccionarEditPrimario(color.hex)"
+                          class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                          [style.background]="color.hex"
+                          [class.scale-110]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.shadow-lg]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.ring-2]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.ring-white]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.ring-offset-1]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                          [title]="color.nombre"
+                        >
+                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                            {{ color.nombre }}
+                          </span>
+                          @if (editColorPrimario().toLowerCase() === color.hex.toLowerCase()) {
+                            <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            </svg>
+                          }
+                        </button>
+                      }
+                    </div>
+                  </div>
 
-                      <!-- Color Secundario -->
-                      <div class="p-3 rounded-xl bg-bg border border-border flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                          <input
-                            type="color"
-                            [ngModel]="editColorSecundario()"
-                            (ngModelChange)="editColorSecundario.set($event)"
-                            name="editColorSecundarioPicker"
-                            class="w-9 h-9 p-0.5 rounded-lg border border-border bg-surface cursor-pointer"
-                          />
-                          <div>
-                            <span class="text-xs font-bold text-slate-900 dark:text-white block">Secundario</span>
-                            <span class="text-[10px] text-text-muted">Acentos y bordes</span>
-                          </div>
-                        </div>
-                        <input
-                          type="text"
-                          [ngModel]="editColorSecundario()"
-                          (ngModelChange)="editColorSecundario.set($event)"
-                          name="editColorSecundarioHex"
-                          maxlength="7"
-                          class="w-24 px-2 py-1 text-xs font-mono rounded-lg border border-border bg-surface text-center"
-                        />
+                  <!-- Selector 24 Colores - Color Secundario -->
+                  <div class="space-y-3 pt-2">
+                    <div class="flex items-center justify-between">
+                      <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Secundario</label>
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="w-5 h-5 rounded-md border border-border shadow-xs shrink-0"
+                          [style.background]="editColorSecundario()"
+                        ></div>
+                        <span class="text-xs font-semibold" [style.color]="editColorSecundario()">
+                          {{ getNombreColor(editColorSecundario()) }}
+                        </span>
                       </div>
-
+                    </div>
+                    <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+                      @for (color of coloresDisponibles; track color.hex) {
+                        <button
+                          type="button"
+                          (click)="seleccionarEditSecundario(color.hex)"
+                          class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                          [style.background]="color.hex"
+                          [class.scale-110]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.shadow-lg]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.ring-2]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.ring-white]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.ring-offset-1]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                          [title]="color.nombre"
+                        >
+                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                            {{ color.nombre }}
+                          </span>
+                          @if (editColorSecundario().toLowerCase() === color.hex.toLowerCase()) {
+                            <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            </svg>
+                          }
+                        </button>
+                      }
                     </div>
                   </div>
 
@@ -898,12 +986,13 @@
                   <!-- Barra Superior Simulada -->
                   <div class="flex items-center justify-between pb-3 border-b border-border">
                     <div class="flex items-center gap-2 min-w-0">
-                      @if (editLogo()) {
-                        <img [src]="editLogo()" alt="Preview" class="w-6 h-6 rounded-md object-contain" />
+                      @if (editLogoPreview() || editLogo()) {
+                        <img [src]="editLogoPreview() || editLogo()" alt="Preview" class="w-6 h-6 rounded-md object-contain" />
                       } @else {
                         <div
-                          class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-[10px] text-white"
+                          class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-[10px]"
                           [style.backgroundColor]="editColorPrimario()"
+                          [style.color]="isLightColor(editColorPrimario()) ? '#0a0a0a' : '#ffffff'"
                         >
                           {{ editNombre().slice(0, 2).toUpperCase() || 'EB' }}
                         </div>
@@ -913,7 +1002,7 @@
                       </span>
                     </div>
 
-                    <span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold text-white" [style.backgroundColor]="editColorSecundario()">
+                    <span class="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold" [style.backgroundColor]="editColorSecundario()" [style.color]="isLightColor(editColorSecundario()) ? '#0a0a0a' : '#ffffff'">
                       PRO
                     </span>
                   </div>
@@ -922,8 +1011,9 @@
                   <div class="space-y-2">
                     <button
                       type="button"
-                      class="w-full py-2 rounded-lg text-xs font-bold text-white shadow-xs transition-opacity"
+                      class="w-full py-2 rounded-lg text-xs font-bold shadow-xs transition-opacity"
                       [style.backgroundColor]="editColorPrimario()"
+                      [style.color]="isLightColor(editColorPrimario()) ? '#0a0a0a' : '#ffffff'"
                     >
                       Botón Principal Primario
                     </button>
@@ -950,14 +1040,14 @@
                   </div>
 
                   <!-- Paleta Activa Resumen -->
-                  <div class="pt-2 flex items-center justify-between text-[10px] font-mono text-text-muted border-t border-border">
-                    <span class="flex items-center gap-1">
-                      <span class="w-2.5 h-2.5 rounded-full" [style.backgroundColor]="editColorPrimario()"></span>
-                      {{ editColorPrimario() }}
+                  <div class="pt-2 flex items-center justify-between text-[10px] text-text-muted border-t border-border">
+                    <span class="flex items-center gap-1 font-medium truncate">
+                      <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.backgroundColor]="editColorPrimario()"></span>
+                      {{ getNombreColor(editColorPrimario()) }}
                     </span>
-                    <span class="flex items-center gap-1">
-                      <span class="w-2.5 h-2.5 rounded-full" [style.backgroundColor]="editColorSecundario()"></span>
-                      {{ editColorSecundario() }}
+                    <span class="flex items-center gap-1 font-medium truncate">
+                      <span class="w-2.5 h-2.5 rounded-full shrink-0" [style.backgroundColor]="editColorSecundario()"></span>
+                      {{ getNombreColor(editColorSecundario()) }}
                     </span>
                   </div>
 
@@ -1027,12 +1117,13 @@
                       <th scope="col" class="px-5 py-3.5 font-semibold">Correo Electrónico</th>
                       <th scope="col" class="px-5 py-3.5 font-semibold">Estado</th>
                       <th scope="col" class="px-5 py-3.5 font-semibold">Fecha Registro</th>
+                      <th scope="col" class="px-5 py-3.5 font-semibold text-right">Acciones</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-border">
                     @if (filteredInstitutionMembers().length === 0) {
                       <tr>
-                        <td colspan="5" class="px-5 py-10 text-center text-text-muted">
+                        <td colspan="6" class="px-5 py-10 text-center text-text-muted">
                           <div class="flex flex-col items-center justify-center gap-2">
                             <svg class="w-8 h-8 text-text-muted/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -1083,6 +1174,21 @@
                           <td class="px-5 py-3.5 text-text-muted font-mono text-[11px]">
                             {{ formatDate(member.date_joined) }}
                           </td>
+
+                          <!-- Acciones -->
+                          <td class="px-5 py-3.5 text-right">
+                            <button
+                              type="button"
+                              (click)="openEditUserModal(member)"
+                              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-bg border border-border hover:border-primary hover:text-primary transition-all cursor-pointer shadow-2xs"
+                              title="Editar rol e institución del usuario"
+                            >
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                              <span>Editar</span>
+                            </button>
+                          </td>
                         </tr>
                       }
                     }
@@ -1102,8 +1208,8 @@
   <!-- MODAL: REGISTRAR NUEVA INSTITUCIÓN                                       -->
   <!-- ========================================================================= -->
   @if (showCreateModal()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div class="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl space-y-5 animate-in zoom-in-95 duration-200">
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+      <div class="w-full max-w-2xl rounded-2xl border border-border bg-surface p-6 shadow-xl space-y-5 animate-in zoom-in-95 duration-200 my-8">
         
         <!-- Cabecera del Modal -->
         <div class="flex items-center justify-between pb-3 border-b border-border">
@@ -1113,14 +1219,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </span>
-            <h3 class="font-bold text-slate-900 dark:text-white text-base">
-              Registrar Nueva Institución
-            </h3>
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white text-base">
+                Registrar Nueva Institución
+              </h3>
+              <p class="text-xs text-text-muted">Crea una institución desde cero con su identidad visual institucional.</p>
+            </div>
           </div>
           <button
             type="button"
             (click)="closeCreateModal()"
-            class="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            class="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1129,22 +1238,23 @@
         </div>
 
         <!-- Formulario -->
-        <form (ngSubmit)="submitCreateInstitution()" class="space-y-4">
+        <form (ngSubmit)="submitCreateInstitution()" class="space-y-5">
           
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-text-muted">Nombre de la Institución *</label>
-            <input
-              type="text"
-              [ngModel]="newNombre()"
-              (ngModelChange)="newNombre.set($event)"
-              name="newNombre"
-              required
-              class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text font-medium"
-              placeholder="Ej: Colegio Mayor de Cundinamarca"
-            />
-          </div>
-
+          <!-- Datos Básicos -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5 sm:col-span-2">
+              <label class="text-xs font-semibold text-text-muted">Nombre de la Institución *</label>
+              <input
+                type="text"
+                [ngModel]="newNombre()"
+                (ngModelChange)="newNombre.set($event)"
+                name="newNombre"
+                required
+                class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text font-medium"
+                placeholder="Ej: Colegio Mayor de Cundinamarca"
+              />
+            </div>
+
             <div class="space-y-1.5">
               <label class="text-xs font-semibold text-text-muted">Código DANE (Opcional)</label>
               <input
@@ -1165,42 +1275,212 @@
                 name="newActivo"
                 class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text cursor-pointer"
               >
-                <option [ngValue]="true">Activa (Operativa)</option>
+                <option [ngValue]="true">Activa (Operativa inmediatamente)</option>
                 <option [ngValue]="false">Inactiva (En configuración)</option>
               </select>
             </div>
           </div>
 
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-text-muted">URL del Logotipo (Opcional)</label>
-            <input
-              type="url"
-              [ngModel]="newLogo()"
-              (ngModelChange)="newLogo.set($event)"
-              name="newLogo"
-              class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text"
-              placeholder="https://ejemplo.com/logo.png"
-            />
+          <!-- Logotipo Institucional (Subida de archivo + Vista previa) -->
+          <div class="space-y-3 p-4 rounded-xl bg-bg border border-border">
+            <label class="text-xs font-semibold text-text-muted block">Logotipo Institucional (Opcional)</label>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div class="w-14 h-14 rounded-xl border border-border bg-surface flex items-center justify-center overflow-hidden shrink-0 shadow-2xs">
+                @if (newLogoPreview() || newLogo()) {
+                  <img [src]="newLogoPreview() || newLogo()" alt="Preview" class="w-full h-full object-contain p-1" />
+                } @else {
+                  <div
+                    class="w-full h-full flex items-center justify-center font-black text-base"
+                    [style.background]="newColorPrimario()"
+                    [style.color]="isLightColor(newColorPrimario()) ? '#0a0a0a' : '#ffffff'"
+                  >
+                    {{ (newNombre() ? newNombre()[0] : 'N').toUpperCase() }}
+                  </div>
+                }
+              </div>
+
+              <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-2">
+                  <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary text-white hover:bg-primary-hover transition-colors cursor-pointer shadow-2xs">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Subir Imagen</span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg"
+                      (change)="onNewLogoSelected($event)"
+                      class="sr-only"
+                    />
+                  </label>
+
+                  @if (newLogoPreview() || newLogo() || newSelectedFile) {
+                    <button
+                      type="button"
+                      (click)="removeNewLogo()"
+                      class="px-3 py-1.5 rounded-xl text-xs font-semibold border border-red-300 dark:border-red-900/60 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer"
+                    >
+                      Quitar
+                    </button>
+                  }
+                </div>
+                <p class="text-[11px] text-text-muted">Formatos: PNG o JPG (máx. 2MB). Se almacenará en Supabase S3.</p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-border/60">
+              <label class="text-[11px] font-medium text-text-muted">O URL directa del logo:</label>
+              <input
+                type="url"
+                [ngModel]="newLogo()"
+                (ngModelChange)="newLogo.set($event)"
+                name="newLogo"
+                class="w-full mt-1 px-3 py-1.5 bg-surface border border-border rounded-lg text-xs focus:ring-2 focus:ring-primary text-text font-mono"
+                placeholder="https://ejemplo.com/logo.png"
+              />
+            </div>
           </div>
 
-          <!-- Paletas Rápidas -->
+          <!-- Paletas Sugeridas -->
           <div class="space-y-2 pt-1">
-            <label class="text-xs font-semibold text-text-muted">Seleccionar Paleta Inicial</label>
-            <div class="grid grid-cols-3 gap-2">
-              @for (p of palettes.slice(0, 3); track p.name) {
+            <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Paletas Sugeridas</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              @for (p of palettes; track p.name) {
                 <button
                   type="button"
                   (click)="applyPaletteToNew(p)"
-                  class="p-2 rounded-xl border border-border bg-bg hover:border-primary/50 flex flex-col items-center gap-1 cursor-pointer transition-all text-center"
+                  class="p-2 rounded-xl border transition-all cursor-pointer hover:scale-[1.02] flex flex-col items-center gap-1 text-center"
+                  [class.border-primary]="isNewCurrentPalette(p)"
+                  [class.ring-2]="isNewCurrentPalette(p)"
+                  [class.ring-primary/20]="isNewCurrentPalette(p)"
+                  [class.border-border]="!isNewCurrentPalette(p)"
+                  [class.bg-bg]="true"
                 >
-                  <div class="flex h-3.5 w-full rounded overflow-hidden">
+                  <div class="flex h-4 w-full rounded overflow-hidden shadow-xs">
                     <div class="flex-1" [style.backgroundColor]="p.primary"></div>
                     <div class="flex-1" [style.backgroundColor]="p.secondary"></div>
                   </div>
-                  <span class="text-[9px] font-semibold text-text-muted truncate w-full">{{ p.name }}</span>
+                  <span class="text-[10px] font-semibold truncate w-full" [class.text-primary]="isNewCurrentPalette(p)" [class.text-text-muted]="!isNewCurrentPalette(p)">
+                    {{ p.name }}
+                  </span>
                 </button>
               }
             </div>
+          </div>
+
+          <!-- Selector 24 Colores - Color Primario -->
+          <div class="space-y-2.5 pt-1">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Principal</label>
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-4 h-4 rounded-md border border-border shadow-xs shrink-0"
+                  [style.background]="newColorPrimario()"
+                ></div>
+                <span class="text-xs font-semibold" [style.color]="newColorPrimario()">
+                  {{ getNombreColor(newColorPrimario()) }}
+                </span>
+              </div>
+            </div>
+            <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+              @for (color of coloresDisponibles; track color.hex) {
+                <button
+                  type="button"
+                  (click)="seleccionarNewPrimario(color.hex)"
+                  class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                  [style.background]="color.hex"
+                  [class.scale-110]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.shadow-lg]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.ring-2]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.ring-white]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.ring-offset-1]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                  [title]="color.nombre"
+                >
+                  <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    {{ color.nombre }}
+                  </span>
+                  @if (newColorPrimario().toLowerCase() === color.hex.toLowerCase()) {
+                    <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Selector 24 Colores - Color Secundario -->
+          <div class="space-y-2.5 pt-1">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Secundario</label>
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-4 h-4 rounded-md border border-border shadow-xs shrink-0"
+                  [style.background]="newColorSecundario()"
+                ></div>
+                <span class="text-xs font-semibold" [style.color]="newColorSecundario()">
+                  {{ getNombreColor(newColorSecundario()) }}
+                </span>
+              </div>
+            </div>
+            <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+              @for (color of coloresDisponibles; track color.hex) {
+                <button
+                  type="button"
+                  (click)="seleccionarNewSecundario(color.hex)"
+                  class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                  [style.background]="color.hex"
+                  [class.scale-110]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.shadow-lg]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.ring-2]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.ring-white]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.ring-offset-1]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                  [title]="color.nombre"
+                >
+                  <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    {{ color.nombre }}
+                  </span>
+                  @if (newColorSecundario().toLowerCase() === color.hex.toLowerCase()) {
+                    <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Vista Previa de la Nueva Marca -->
+          <div class="p-3 rounded-xl bg-bg border border-border flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center font-bold text-xs"
+                [style.background]="newColorPrimario()"
+                [style.color]="isLightColor(newColorPrimario()) ? '#0a0a0a' : '#ffffff'"
+              >
+                @if (newLogoPreview() || newLogo()) {
+                  <img [src]="newLogoPreview() || newLogo()" alt="Logo" class="w-full h-full object-contain p-0.5" />
+                } @else {
+                  {{ (newNombre() ? newNombre()[0] : 'N').toUpperCase() }}
+                }
+              </div>
+              <div class="min-w-0">
+                <span class="text-xs font-bold block truncate text-slate-900 dark:text-white">
+                  {{ newNombre() || 'Nombre de la Institución' }}
+                </span>
+                <span class="text-[10px] text-text-muted truncate">
+                  {{ getNombreColor(newColorPrimario()) }} + {{ getNombreColor(newColorSecundario()) }}
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs shrink-0"
+              [style.background]="newColorPrimario()"
+              [style.color]="isLightColor(newColorPrimario()) ? '#0a0a0a' : '#ffffff'"
+            >
+              Botón Demo
+            </button>
           </div>
 
           <!-- Botones Modal -->
@@ -1216,7 +1496,7 @@
             <button
               type="submit"
               [disabled]="isCreating() || !newNombre().trim()"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all cursor-pointer disabled:opacity-50"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all cursor-pointer disabled:opacity-50"
             >
               @if (isCreating()) {
                 <svg class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
@@ -1231,7 +1511,6 @@
           </div>
 
         </form>
-
       </div>
     </div>
   }
@@ -1288,6 +1567,169 @@
           </button>
         </div>
 
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: EDITAR USUARIO (ROL, INSTITUCIÓN, ESTADO)                          -->
+  <!-- ========================================================================= -->
+  @if (showEditUserModal() && editingUser()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div class="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl space-y-5 animate-in zoom-in-95 duration-200">
+        
+        <!-- Cabecera del Modal -->
+        <div class="flex items-center justify-between pb-3 border-b border-border">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-sm flex items-center justify-center shrink-0">
+              {{ getUserInitials(editingUser()!) }}
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white text-base">
+                Editar Usuario
+              </h3>
+              <p class="text-xs text-text-muted font-mono">
+                {{ editingUser()?.email }}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="closeEditUserModal()"
+            class="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Formulario de Edición -->
+        <form (ngSubmit)="saveUserChanges()" class="space-y-4">
+          
+          <!-- Nombre y Apellidos -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-text-muted">Nombre</label>
+              <input
+                type="text"
+                [ngModel]="editUserFirstName()"
+                (ngModelChange)="editUserFirstName.set($event)"
+                name="editUserFirstName"
+                class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text font-medium"
+                placeholder="Nombre"
+              />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-semibold text-text-muted">Apellido</label>
+              <input
+                type="text"
+                [ngModel]="editUserLastName()"
+                (ngModelChange)="editUserLastName.set($event)"
+                name="editUserLastName"
+                class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text font-medium"
+                placeholder="Apellido"
+              />
+            </div>
+          </div>
+
+          <!-- Selección de Rol -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-text-muted">Rol en la Plataforma *</label>
+            <select
+              [ngModel]="editUserRole()"
+              (ngModelChange)="onRoleChange($event)"
+              name="editUserRole"
+              required
+              class="w-full px-3 py-2.5 bg-bg border border-border rounded-xl text-xs font-semibold focus:ring-2 focus:ring-primary text-text cursor-pointer"
+            >
+              <option value="estudiante">Estudiante</option>
+              <option value="docente">Docente</option>
+              <option value="coordinador">Coordinador</option>
+              <option value="rector">Rector</option>
+              <option value="admin">Administrador Global (SuperAdmin)</option>
+            </select>
+            @if (editUserRole() === 'admin') {
+              <p class="text-[11px] text-purple-600 dark:text-purple-400">
+                Los Administradores Globales operan en todo el SaaS y no pertenecen a ninguna institución específica.
+              </p>
+            }
+            @if (editUserRole() === 'rector') {
+              <p class="text-[11px] text-amber-600 dark:text-amber-400">
+                Cada institución puede tener como máximo un Rector asignado.
+              </p>
+            }
+          </div>
+
+          <!-- Asignación de Institución -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-text-muted">Institución Asignada</label>
+            @if (editUserRole() === 'admin') {
+              <div class="p-2.5 rounded-xl bg-bg border border-border text-xs text-text-muted italic">
+                No aplica (SuperAdmin Global SaaS)
+              </div>
+            } @else {
+              <select
+                [ngModel]="editUserInstitutionId()"
+                (ngModelChange)="onInstitutionChange($event)"
+                name="editUserInstitutionId"
+                class="w-full px-3 py-2.5 bg-bg border border-border rounded-xl text-xs focus:ring-2 focus:ring-primary text-text cursor-pointer"
+              >
+                <option [ngValue]="null">-- Sin institución asignada --</option>
+                @for (inst of institutions(); track inst.id) {
+                  <option [ngValue]="inst.id">
+                    {{ inst.nombre }} {{ inst.activo ? '' : '(Inactiva)' }}
+                  </option>
+                }
+              </select>
+            }
+          </div>
+
+          <!-- Estado Activo / Inactivo -->
+          <div class="p-3.5 rounded-xl bg-bg border border-border flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-slate-900 dark:text-white block">Cuenta Activa</span>
+              <span class="text-[11px] text-text-muted">Los usuarios inactivos no pueden acceder a la plataforma.</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [ngModel]="editUserIsActive()"
+                (ngModelChange)="editUserIsActive.set($event)"
+                name="editUserIsActive"
+                class="sr-only peer"
+              />
+              <div class="w-11 h-6 bg-slate-300 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="pt-4 border-t border-border flex items-center justify-end gap-3">
+            <button
+              type="button"
+              (click)="closeEditUserModal()"
+              class="px-4 py-2 rounded-xl text-xs font-semibold text-text-muted hover:text-text border border-border hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="isSavingUser()"
+              class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all cursor-pointer disabled:opacity-50"
+            >
+              @if (isSavingUser()) {
+                <svg class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span>Guardando...</span>
+              } @else {
+                <span>Guardar Cambios</span>
+              }
+            </button>
+          </div>
+
+        </form>
       </div>
     </div>
   }

@@ -51,7 +51,7 @@ export class InstitutionService {
     return this.http.get<Institution>(`${this.baseUrl}${id}/`);
   }
 
-  createInstitution(data: InstitutionCreateRequest): Observable<Institution> {
+  createInstitution(data: InstitutionCreateRequest | FormData): Observable<Institution> {
     return this.http.post<Institution>(this.baseUrl, data);
   }
 

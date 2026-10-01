@@ -839,19 +839,54 @@ def api_update_user(request, user_id):
     elif req_user.role in ['rector', 'coordinador']:
         if not req_user.institucion_id or user_to_update.institucion_id != req_user.institucion_id:
             return Response({"detail": "No tienes permiso para actualizar a este usuario"}, status=status.HTTP_403_FORBIDDEN)
+        if request.data.get("role") == 'admin':
+            return Response({"detail": "No tienes permiso para asignar el rol de administrador"}, status=status.HTTP_403_FORBIDDEN)
     else:
         return Response({"detail": "No tienes permiso para actualizar usuarios"}, status=status.HTTP_403_FORBIDDEN)
 
-    # Actualizar campos básicos del usuario
-    user_to_update.first_name = request.data.get("first_name", user_to_update.first_name)
-    user_to_update.last_name = request.data.get("last_name", user_to_update.last_name)
-    user_to_update.email = request.data.get("email", user_to_update.email)
-    user_to_update.role = request.data.get("role", user_to_update.role)
-    user_to_update.is_active = request.data.get("is_active", user_to_update.is_active)
+    # Actualizar campos básicos del usuario si están presentes
+    if "first_name" in request.data:
+        user_to_update.first_name = request.data.get("first_name", user_to_update.first_name)
+    if "last_name" in request.data:
+        user_to_update.last_name = request.data.get("last_name", user_to_update.last_name)
+    if "email" in request.data:
+        user_to_update.email = request.data.get("email", user_to_update.email)
+    if "role" in request.data:
+        user_to_update.role = request.data.get("role", user_to_update.role)
+    if "is_active" in request.data:
+        val = request.data.get("is_active")
+        if isinstance(val, str):
+            user_to_update.is_active = val.lower() in ('true', '1')
+        else:
+            user_to_update.is_active = bool(val)
+
+    if "avatar" in request.FILES:
+        user_to_update.avatar = request.FILES["avatar"]
+
+    # Asignación de institución (solo superadmin)
+    if req_user.role == 'admin' and ('institucion_id' in request.data or 'institucion' in request.data):
+        raw_inst_id = request.data.get('institucion_id') if 'institucion_id' in request.data else request.data.get('institucion')
+        if raw_inst_id in ('', None, 0, 'null', 'None'):
+            user_to_update.institucion = None
+        else:
+            from apps.institutions.models import Institution
+            try:
+                user_to_update.institucion = Institution.objects.get(id=int(raw_inst_id))
+            except (Institution.DoesNotExist, ValueError):
+                return Response({"detail": "La institución especificada no existe"}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Ejecutar validaciones del modelo antes de guardar
+    try:
+        user_to_update.full_clean()
+    except Exception as e:
+        if hasattr(e, 'message_dict'):
+            return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     user_to_update.save()
 
     # Actualizar perfil si hay datos
-    if 'profile' in request.data:
+    if 'profile' in request.data and isinstance(request.data['profile'], dict):
         profile_data = request.data['profile']
         profile_serializer = ProfileSerializer(user_to_update.profile, data=profile_data, partial=True)
         if profile_serializer.is_valid():
@@ -861,7 +896,7 @@ def api_update_user(request, user_id):
     
     return Response({
         "message": "Usuario actualizado exitosamente",
-        "user": UserProfileSerializer(user_to_update).data
+        "user": UserProfileSerializer(user_to_update, context={'request': request}).data
     }, status=status.HTTP_200_OK)
 
 

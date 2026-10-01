@@ -19,10 +19,10 @@ class InstitutionMiniSerializer(serializers.Serializer):
         request = self.context.get('request')
         try:
             url = obj.logo.url
-            if request:
-                return request.build_absolute_uri(url)
             if url.startswith('http://') or url.startswith('https://'):
                 return url
+            if request:
+                return request.build_absolute_uri(url)
             return f"https://edubid.up.railway.app{url}"
         except Exception:
             return None

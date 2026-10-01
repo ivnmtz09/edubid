@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'apps.institutions',
     'apps.common',
     'apps.notifications',
+    'storages',
 ]
 
 SITE_ID = 1
@@ -261,14 +262,59 @@ USE_I18N = True
 USE_TZ = True
 
 # ─────────────────────────────────────────────
-# Archivos estáticos
+# Archivos estáticos y Media (Local o Supabase S3)
 # ─────────────────────────────────────────────
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+USE_S3 = config('USE_S3', default=False, cast=bool)
+
+if USE_S3:
+    AWS_ACCESS_KEY_ID = config('SUPABASE_S3_ACCESS_KEY_ID', default='')
+    AWS_SECRET_ACCESS_KEY = config('SUPABASE_S3_SECRET_ACCESS_KEY', default='')
+    AWS_STORAGE_BUCKET_NAME = config('SUPABASE_S3_BUCKET_NAME', default='edubid-media')
+    AWS_S3_REGION_NAME = config('SUPABASE_S3_REGION_NAME', default='us-east-1')
+    AWS_S3_ENDPOINT_URL = config(
+        'SUPABASE_S3_ENDPOINT_URL',
+        default='https://gowmeguvuignrlqakewx.supabase.co/storage/v1/s3'
+    )
+    SUPABASE_CUSTOM_DOMAIN = config(
+        'SUPABASE_S3_CUSTOM_DOMAIN',
+        default=f"gowmeguvuignrlqakewx.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
+    )
+    AWS_S3_CUSTOM_DOMAIN = SUPABASE_CUSTOM_DOMAIN
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_ADDRESSING_STYLE = 'path'
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "access_key": AWS_ACCESS_KEY_ID,
+                "secret_key": AWS_SECRET_ACCESS_KEY,
+                "bucket_name": AWS_STORAGE_BUCKET_NAME,
+                "region_name": AWS_S3_REGION_NAME,
+                "endpoint_url": AWS_S3_ENDPOINT_URL,
+                "custom_domain": AWS_S3_CUSTOM_DOMAIN,
+                "signature_version": AWS_S3_SIGNATURE_VERSION,
+                "file_overwrite": AWS_S3_FILE_OVERWRITE,
+                "default_acl": AWS_DEFAULT_ACL,
+                "querystring_auth": AWS_QUERYSTRING_AUTH,
+                "addressing_style": AWS_S3_ADDRESSING_STYLE,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # ─────────────────────────────────────────────
 # Configuración de usuarios y REST

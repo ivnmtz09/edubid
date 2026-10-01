@@ -49,6 +49,13 @@ interface NavItem {
             <a routerLink="/dashboard" class="flex items-center gap-2.5 min-w-0 group" (click)="closeMobileDrawer()">
               @if (institutionLogo()) {
                 <img [src]="institutionLogo()" (error)="onLogoError($event)" alt="Escudo de la Institución" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
+              } @else if (userRole() !== 'admin' && institutionName()) {
+                <div
+                  class="w-8 h-8 rounded-md flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs"
+                  [style.backgroundColor]="institutionPrimaryColor()"
+                >
+                  {{ (institutionName()?.[0] || 'E').toUpperCase() }}
+                </div>
               } @else {
                 <img src="/edubid.png" alt="EduBid Logo" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
               }
@@ -227,7 +234,18 @@ interface NavItem {
               </button>
 
               <div class="flex items-center gap-2.5 min-w-0">
-                <img [src]="institutionLogo() || '/edubid.png'" (error)="onLogoError($event)" alt="Logo" class="w-7 h-7 rounded-lg object-contain shrink-0" />
+                @if (institutionLogo()) {
+                  <img [src]="institutionLogo()" (error)="onLogoError($event)" alt="Logo Institución" class="w-7 h-7 rounded-lg object-contain shrink-0" />
+                } @else if (userRole() !== 'admin' && institutionName()) {
+                  <div
+                    class="w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs"
+                    [style.backgroundColor]="institutionPrimaryColor()"
+                  >
+                    {{ (institutionName()?.[0] || 'E').toUpperCase() }}
+                  </div>
+                } @else {
+                  <img src="/edubid.png" alt="EduBid Logo" class="w-7 h-7 rounded-lg object-contain shrink-0" />
+                }
                 <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                   {{ headerTitle() }}
                 </span>
@@ -706,8 +724,23 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   onLogoError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    if (img && !img.src.endsWith('/edubid.png')) {
-      img.src = '/edubid.png';
+    if (img) {
+      if (this.userRole() !== 'admin' && this.institutionName()) {
+        img.style.display = 'none';
+        const parent = img.parentElement;
+        if (parent && !parent.querySelector('.inst-fallback-avatar')) {
+          const avatar = document.createElement('div');
+          const isLarge = img.classList.contains('w-8');
+          avatar.className = isLarge
+            ? 'w-8 h-8 rounded-md flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs inst-fallback-avatar'
+            : 'w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs inst-fallback-avatar';
+          avatar.style.backgroundColor = this.institutionPrimaryColor();
+          avatar.innerText = (this.institutionName()?.[0] || 'E').toUpperCase();
+          parent.insertBefore(avatar, img);
+        }
+      } else if (!img.src.endsWith('/edubid.png')) {
+        img.src = '/edubid.png';
+      }
     }
   }
 
