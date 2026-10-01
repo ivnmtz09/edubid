@@ -31,7 +31,7 @@
 /* === Brand colors via Tailwind === */
 @theme {
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-mono: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --color-primary: var(--brand-primary);
   --color-primary-hover: var(--brand-primary-hover);
   --color-primary-text: var(--brand-primary-text);
@@ -48,16 +48,21 @@
 body {
   font-family: var(--font-sans);
   @apply bg-bg text-text antialiased min-h-screen transition-colors duration-300;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Números, cantidades, códigos con fuente monoespaciada profesional */
+/* Cifras, métricas y balances: tipografía limpia, académica y proporcional sin aspecto arcade o de código */
 .font-mono,
 .tabular-nums {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Para fragmentos de código o depuración si se requieren */
+.font-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 /* Transiciones suaves globales */
@@ -129,11 +134,11 @@ svg {
 }
 
 .bento-stat-value {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 1.875rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
 

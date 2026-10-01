@@ -1,5 +1,8 @@
 import logging
-from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.exceptions import (
+    ValidationError as DjangoValidationError,
+    ObjectDoesNotExist,
+)
 from django.db import IntegrityError
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
@@ -67,6 +70,26 @@ def custom_exception_handler(exc, context):
                 "error_type": "validation_error"
             },
             status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if isinstance(exc, ObjectDoesNotExist):
+        logger.warning("ObjectDoesNotExist en %s: %s", view_name_str, exc)
+        # Si ocurre durante validación de tokens o autenticación, retornar 401 para que frontend limpie tokens
+        if "token" in view_name_str.lower() or "auth" in view_name_str.lower():
+            return Response(
+                {
+                    "detail": "Token no válido o usuario no encontrado.",
+                    "code": "token_not_valid",
+                    "error_type": "authentication_error"
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        return Response(
+            {
+                "detail": "El recurso solicitado no fue encontrado.",
+                "error_type": "not_found"
+            },
+            status=status.HTTP_404_NOT_FOUND
         )
 
     # Excepción crítica no controlada (HTTP 500)

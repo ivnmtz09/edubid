@@ -219,10 +219,16 @@ class WalletViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(wallet)
             return Response(serializer.data)
         except Exception as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            logger.warning("Error resolviendo billetera para %s: %s", getattr(user, 'email', 'desconocido'), e)
+            return Response({
+                "id": None,
+                "saldo_educoins": 0,
+                "bloqueado_educoins": 0,
+                "saldo_disponible": 0,
+                "transacciones": [],
+                "detail": "Aún no tienes una billetera activa. Únete a una clase para comenzar.",
+                "sin_wallet": True,
+            }, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="mi_wallet", permission_classes=[permissions.IsAuthenticated])
     def mi_wallet_alias(self, request):

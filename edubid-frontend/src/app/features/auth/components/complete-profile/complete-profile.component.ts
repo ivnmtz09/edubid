@@ -14,7 +14,7 @@ import { InstitutionService, Institution } from '../../../../core/services/insti
 import { AUTH_ENDPOINTS } from '../../../../core/constants/api.constants';
 import { environment } from '../../../../../environments/environment';
 
-type OnboardingRole = 'estudiante' | 'docente' | 'coordinador';
+type OnboardingRole = 'estudiante' | 'docente';
 
 interface RoleOption {
   value: OnboardingRole;
@@ -85,7 +85,7 @@ interface RoleOption {
             <h2 class="text-lg font-bold text-slate-900 dark:text-neutral-100 mb-1">¿Cuál es tu rol en la institución?</h2>
             <p class="text-xs text-text-muted mb-6">Selecciona el rol que mejor te describe. Esto determinará qué funciones tendrás disponibles.</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-xl mx-auto">
               @for (role of roles; track role.value) {
                 <button
                   type="button"
@@ -273,12 +273,6 @@ export class CompleteProfileComponent implements OnInit {
       description: 'Creo actividades, califico y gestiono subastas para mis grupos.',
       icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01',
     },
-    {
-      value: 'coordinador',
-      label: 'Coordinador',
-      description: 'Superviso docentes, estudiantes y el rendimiento institucional.',
-      icon: 'M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2',
-    },
   ];
 
   ngOnInit(): void {
@@ -348,7 +342,7 @@ export class CompleteProfileComponent implements OnInit {
       institucion_id: this.selectedInstitution()!.id,
     };
 
-    const apiUrl = `${environment.apiUrl}/users/profile/`;
+    const apiUrl = AUTH_ENDPOINTS.PROFILE_UPDATE;
     this.http.patch<{ message: string; user: any }>(apiUrl, payload).subscribe({
       next: (res) => {
         this.isSubmitting.set(false);
