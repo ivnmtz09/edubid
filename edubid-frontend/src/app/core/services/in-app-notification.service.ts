@@ -111,7 +111,7 @@ export class InAppNotificationService {
         // Mostrar toast emergente en tiempo real
         const newest = this.notifications().find((n) => !n.leida);
         if (newest) {
-          this.toastr.info(newest.mensaje, `🔔 ${newest.titulo}`);
+          this.toastr.info(newest.mensaje, newest.titulo);
         }
       }
     } else {

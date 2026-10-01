@@ -286,11 +286,13 @@ import { Subscription } from 'rxjs';
                         @if (task.user_submission) {
                           @if (task.user_submission.calificacion !== null) {
                             <span class="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                              ✓ Calificada: {{ task.user_submission.calificacion }}/100
+                              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              Calificada: {{ task.user_submission.calificacion }}/100
                             </span>
                           } @else {
                             <span class="text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
-                              ⏳ Entregada (Por calificar)
+                              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              Entregada (Por calificar)
                             </span>
                           }
                         } @else if (task.esta_vencida) {

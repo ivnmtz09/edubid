@@ -29,6 +29,18 @@ export const routes: Routes = [
       import('./features/auth/components/verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
   },
   {
+    path: 'forgot-password',
+    title: 'Recuperar Contraseña | EduBid',
+    loadComponent: () =>
+      import('./features/auth/components/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+  },
+  {
+    path: 'reset-password/:uidb64/:token',
+    title: 'Nueva Contraseña | EduBid',
+    loadComponent: () =>
+      import('./features/auth/components/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+  },
+  {
     path: 'auth',
     loadChildren: () =>
       import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES),

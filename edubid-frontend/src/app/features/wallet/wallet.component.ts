@@ -232,7 +232,10 @@ import { GroupService, Group } from '../../core/services/group.service';
                     [class.text-zinc-400]="filtroTipo() === 'hold'"
                     [class.text-text-muted]="filtroTipo() !== 'hold'"
                   >
-                    Retenciones (🔒)
+                    <span class="inline-flex items-center gap-1">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                      Retenciones
+                    </span>
                   </button>
                   <button
                     type="button"
@@ -252,8 +255,24 @@ import { GroupService, Group } from '../../core/services/group.service';
                 @for (tx of filteredTransactions(); track tx.id) {
                   <div class="p-4 flex items-center justify-between gap-4 hover:bg-neutral-500/5 transition-colors">
                     <div class="flex items-center gap-3 min-w-0">
-                      <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0" [ngClass]="getBadgeColor(tx.tipo)">
-                        {{ getTipoIcon(tx.tipo) }}
+                      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" [ngClass]="getBadgeColor(tx.tipo)">
+                        @switch (tx.tipo) {
+                          @case ('earn') {
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                          }
+                          @case ('spend') {
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                          }
+                          @case ('hold') {
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                          }
+                          @case ('refund') {
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                          }
+                          @default {
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
+                          }
+                        }
                       </div>
                       <div class="min-w-0">
                         <p class="font-medium text-xs text-text truncate">{{ tx.descripcion }}</p>
@@ -587,9 +606,9 @@ export class WalletComponent implements OnInit {
     switch (tipo) {
       case 'earn': return '+';
       case 'spend': return '-';
-      case 'hold': return '🔒';
+      case 'hold': return '⏸';
       case 'refund': return '↩';
-      default: return '•';
+      default: return '·';
     }
   }
 

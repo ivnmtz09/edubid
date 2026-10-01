@@ -38,6 +38,11 @@ export class InstitutionService {
   private http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/institutions/`;
 
+  /** Endpoint público — no requiere autenticación (usado en onboarding) */
+  getPublicInstitutions(): Observable<Institution[]> {
+    return this.http.get<Institution[]>(`${this.baseUrl.replace('/institutions/', '/institutions/public/')}`);
+  }
+
   getInstitutions(): Observable<Institution[]> {
     return this.http.get<Institution[]>(this.baseUrl);
   }

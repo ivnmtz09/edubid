@@ -432,6 +432,22 @@ def api_update_profile(request):
     user.first_name = request.data.get("first_name", user.first_name)
     user.last_name = request.data.get("last_name", user.last_name)
 
+    # ── Rol (solo editable durante el primer onboarding Google, sin institución asignada) ──
+    new_role = request.data.get('role')
+    if new_role is not None:
+        VALID_ROLES = [r[0] for r in user.ROLE_CHOICES if r[0] not in ('admin', 'rector')]
+        if new_role not in VALID_ROLES:
+            return Response({
+                "detail": f"Rol inválido. Opciones permitidas: {', '.join(VALID_ROLES)}.",
+                "errors": {"role": ["Rol no válido."]}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if user.institucion_id is not None and user.role != new_role:
+            return Response({
+                "detail": "No puedes cambiar tu rol una vez que ya tienes institución asignada.",
+                "errors": {"role": ["Cambio de rol no permitido después del onboarding."]}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        user.role = new_role
+
     # ── Institución (solo escritura única) ──
     institucion_id = request.data.get('institucion_id') or request.data.get('institucion')
     if institucion_id is not None:

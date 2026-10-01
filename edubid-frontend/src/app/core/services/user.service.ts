@@ -28,7 +28,17 @@ export class UserService {
   }
 
   changePassword(data: { old_password: string; new_password: string; confirm_password?: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/change-password/`, data);
+    return this.http.patch<any>(`${this.apiUrl}/change-password/`, data);
+  }
+
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/password-reset/`, { email });
+  }
+
+  confirmPasswordReset(uidb64: string, token: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/password-reset-confirm/${uidb64}/${token}/`, {
+      new_password: newPassword
+    });
   }
 
   deleteAccount(password: string): Observable<any> {

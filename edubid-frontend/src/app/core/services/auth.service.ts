@@ -123,6 +123,14 @@ export class AuthService {
     );
   }
 
+  /** Actualiza el usuario en memoria y localStorage (usado tras onboarding Google) */
+  updateCurrentUser(updatedUser: User): void {
+    this._user.set(updatedUser);
+    this.storeUser(updatedUser);
+    const brand = updatedUser.role === 'admin' ? null : (updatedUser.profile?.institucion ?? null);
+    this.themeService.injectBrandColors(brand);
+  }
+
   getToken(): string | null {
     return this.getStorageItem(STORAGE_KEYS.ACCESS_TOKEN);
   }
