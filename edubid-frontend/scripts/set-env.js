@@ -94,10 +94,15 @@ const rawProdApiUrl = getProdVar(
 );
 const prodApiUrl = normalizeApiUrl(rawProdApiUrl, 'https://edubid.up.railway.app/api');
 
-const googleClientId = getDevVar(
+const defaultGoogleClientId = '53222182943-t35g82corp9kqfhomkkmu9epljlsij4p.apps.googleusercontent.com';
+let rawGoogleClientId = getDevVar(
   ['GOOGLE_CLIENT_ID', 'VITE_GOOGLE_CLIENT_ID'],
-  ''
+  defaultGoogleClientId
 ).trim().replace(/[\r\n].*$/s, '');
+
+const googleClientId = (!rawGoogleClientId || rawGoogleClientId.startsWith('TU_'))
+  ? defaultGoogleClientId
+  : rawGoogleClientId;
 
 // Garantizar existencia del directorio src/environments
 if (!fs.existsSync(envDir)) {
