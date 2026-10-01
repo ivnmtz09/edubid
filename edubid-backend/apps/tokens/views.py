@@ -1,3 +1,4 @@
+import logging
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,6 +7,8 @@ from django.db import transaction
 from .models import Period, Wallet, CoinTransaction
 from .serializers import PeriodSerializer, WalletSerializer, CoinTransactionSerializer
 from apps.users.permissions import AdminOrDocente
+
+logger = logging.getLogger(__name__)
 
 
 class PeriodViewSet(viewsets.ModelViewSet):
@@ -184,10 +187,12 @@ class WalletViewSet(viewsets.ModelViewSet):
             # 3. Si no existe wallet pero el estudiante está inscrito en un grupo, auto-crearla
             if not wallet:
                 grupo = None
-                if grupo_id:
-                    grupo = user.estudiante_grupos.filter(id=grupo_id).first()
-                else:
-                    grupo = user.estudiante_grupos.first()
+                grupos_rel = getattr(user, 'grupos_estudiante', None)
+                if grupos_rel is not None:
+                    if grupo_id:
+                        grupo = grupos_rel.filter(id=grupo_id).first()
+                    else:
+                        grupo = grupos_rel.first()
                     
                 if grupo:
                     periodo_activo = Period.objects.filter(grupo=grupo, activo=True).first()

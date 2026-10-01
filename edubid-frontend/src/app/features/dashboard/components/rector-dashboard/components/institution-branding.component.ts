@@ -600,8 +600,6 @@ export class InstitutionBrandingComponent implements OnInit {
 
     if (this.selectedFile) {
       formData.append('logo', this.selectedFile);
-    } else if (this.logo) {
-      formData.append('logo', this.logo);
     }
 
     this.institutionService.updateInstitution(this.institutionId, formData).subscribe({

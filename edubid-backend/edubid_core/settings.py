@@ -115,7 +115,6 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-# Para el admin de Django
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -126,6 +125,7 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-skip-error-toast',
 ]
 
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
