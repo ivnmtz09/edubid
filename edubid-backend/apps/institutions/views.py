@@ -35,7 +35,7 @@ class InstitutionViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.role == 'admin':
             return Institution.objects.all()
-        if user.role == 'rector':
+        if user.role in ('rector', 'coordinador', 'docente'):
             return Institution.objects.filter(id=user.institucion_id)
         return Institution.objects.none()
 

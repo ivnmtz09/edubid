@@ -39,10 +39,11 @@ def generar_excel_reporte_grupo(grupo, data_estudiantes):
 
     ws.merge_cells("A2:E2")
     aula_nombre = grupo.classroom.nombre if grupo.classroom else "Sin Asignatura"
-    docente_nombre = (
-        f"{grupo.classroom.docente.first_name} {grupo.classroom.docente.last_name}"
-        if grupo.classroom and grupo.classroom.docente else "Docente"
-    )
+    if grupo.classroom and grupo.classroom.docente:
+        name_str = f"{grupo.classroom.docente.first_name} {grupo.classroom.docente.last_name}".strip()
+        docente_nombre = name_str if name_str else grupo.classroom.docente.email
+    else:
+        docente_nombre = "Docente"
     ws["A2"] = f"Grupo: {grupo.nombre} | Asignatura: {aula_nombre} | Docente: {docente_nombre}"
     ws["A2"].font = subtitle_font
 
@@ -200,10 +201,11 @@ def generar_pdf_reporte_grupo(grupo, data_estudiantes):
     elements.append(Paragraph(f"Reporte de Aula: Grupo {grupo.nombre}", titulo_style))
     
     aula_nombre = grupo.classroom.nombre if grupo.classroom else "Sin Asignatura"
-    docente_nombre = (
-        f"{grupo.classroom.docente.first_name} {grupo.classroom.docente.last_name}"
-        if grupo.classroom and grupo.classroom.docente else "Docente"
-    )
+    if grupo.classroom and grupo.classroom.docente:
+        name_str = f"{grupo.classroom.docente.first_name} {grupo.classroom.docente.last_name}".strip()
+        docente_nombre = name_str if name_str else grupo.classroom.docente.email
+    else:
+        docente_nombre = "Docente"
     info_header = (
         f"<b>Asignatura:</b> {aula_nombre} &nbsp;&nbsp;|&nbsp;&nbsp; "
         f"<b>Docente:</b> {docente_nombre} &nbsp;&nbsp;|&nbsp;&nbsp; "

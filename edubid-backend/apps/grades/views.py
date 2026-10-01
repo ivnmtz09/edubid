@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from apps.groups.models import Group
 from apps.tokens.models import Wallet
 from apps.activities.models import Activity
-from apps.users.permissions import AdminOrDocente
+from apps.users.permissions import AdminOrDocente, IsInstitutionStaffOrDocente
 from apps.common.reports import generar_excel_reporte_grupo, generar_pdf_reporte_grupo
 from .models import Grade
 from .serializers import GradeSerializer, GradeCreateSerializer
@@ -86,11 +86,18 @@ class GradeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Verificar que el docente tenga acceso a este grupo
-        if request.user.role == "docente":
-            if not group.classroom or group.classroom.docente != request.user:
+        # Verificar permisos por rol
+        user = request.user
+        if user.role == "docente":
+            if not group.classroom or group.classroom.docente != user:
                 return None, Response(
                     {"detail": "No tienes permiso para ver este grupo."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        elif user.role in ["rector", "coordinador"]:
+            if group.classroom and group.classroom.docente and user.institucion_id and group.classroom.docente.institucion_id != user.institucion_id:
+                return None, Response(
+                    {"detail": "No tienes permiso para acceder a grupos de otra institución."},
                     status=status.HTTP_403_FORBIDDEN
                 )
 
@@ -108,7 +115,6 @@ class GradeViewSet(viewsets.ModelViewSet):
             wallet = Wallet.objects.filter(
                 usuario=est,
                 grupo=group,
-                periodo__activo=True
             ).first()
             
             saldo = wallet.saldo_educoins if wallet else 0
@@ -137,7 +143,7 @@ class GradeViewSet(viewsets.ModelViewSet):
         return (group, data), None
 
     @action(detail=False, methods=["get"], url_path="grupo/(?P<group_id>[^/.]+)/reporte", 
-            permission_classes=[AdminOrDocente])
+            permission_classes=[IsInstitutionStaffOrDocente])
     def group_report(self, request, group_id=None):
         """
         Genera un reporte completo de notas y educoins por grupo en JSON.
@@ -154,7 +160,7 @@ class GradeViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=False, methods=["get"], url_path="grupo/(?P<group_id>[^/.]+)/exportar-excel",
-            permission_classes=[AdminOrDocente])
+            permission_classes=[IsInstitutionStaffOrDocente])
     def export_group_excel(self, request, group_id=None):
         """
         Exporta el reporte consolidado de notas y EduCoins del grupo en formato Excel (.xlsx).
@@ -173,7 +179,7 @@ class GradeViewSet(viewsets.ModelViewSet):
         return response
 
     @action(detail=False, methods=["get"], url_path="grupo/(?P<group_id>[^/.]+)/exportar-pdf",
-            permission_classes=[AdminOrDocente])
+            permission_classes=[IsInstitutionStaffOrDocente])
     def export_group_pdf(self, request, group_id=None):
         """
         Exporta el reporte consolidado de notas y EduCoins del grupo en formato PDF.
