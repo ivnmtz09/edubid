@@ -6,9 +6,9 @@
     "config:env": "node scripts/set-env.js",
     "postinstall": "node scripts/set-env.js",
     "prestart": "node scripts/set-env.js",
-    "start": "ng serve",
+    "start": "cross-env NG_DISABLE_VERSION_CHECK=1 ng serve",
     "prebuild": "node scripts/set-env.js",
-    "build": "ng build",
+    "build": "cross-env NG_DISABLE_VERSION_CHECK=1 ng build",
     "start:prod": "serve -s dist/edubid-frontend/browser -l $PORT",
     "prewatch": "node scripts/set-env.js",
     "watch": "ng build --watch --configuration development",
@@ -22,7 +22,6 @@
     "npm": ">=10.0.0"
   },
   "dependencies": {
-    "serve": "^14.2.4",
     "@abacritt/angularx-social-login": "^2.6.0",
     "@angular/animations": "^22.1.4",
     "@angular/common": "^22.1.0",
@@ -36,6 +35,7 @@
     "flowbite": "^4.0.2",
     "ngx-toastr": "^20.0.5",
     "rxjs": "~7.8.0",
+    "serve": "^14.2.4",
     "tslib": "^2.3.0",
     "zone.js": "^0.16.2"
   },
@@ -45,6 +45,7 @@
     "@angular/compiler-cli": "^22.1.0",
     "@tailwindcss/postcss": "^4.3.3",
     "autoprefixer": "^10.5.4",
+    "cross-env": "^10.1.0",
     "jsdom": "^28.0.0",
     "postcss": "^8.5.26",
     "prettier": "^3.8.1",
