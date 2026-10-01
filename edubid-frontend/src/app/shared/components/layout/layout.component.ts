@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, HostListener, ElementRef, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, HostListener, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -252,7 +252,10 @@ interface NavItem {
 
                   <!-- Badge de No Leídas -->
                   @if (unreadNotificationsCount() > 0) {
-                    <span class="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-extrabold text-white ring-2 ring-surface animate-pulse">
+                    <span
+                      class="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-extrabold text-white ring-2 ring-surface animate-pulse transition-all"
+                      [class.animate-bounce]="inAppNotifService.hasNewNotificationAnimation()"
+                    >
                       {{ unreadNotificationsCount() > 99 ? '99+' : unreadNotificationsCount() }}
                     </span>
                   }
@@ -628,7 +631,7 @@ interface NavItem {
     </div>
   `,
 })
-export class LayoutComponent implements OnInit {
+export class LayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   readonly themeService = inject(ThemeService);
   readonly inAppNotifService = inject(InAppNotificationService);
@@ -787,7 +790,9 @@ export class LayoutComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.inAppNotifService.loadUnreadCount().subscribe();
+    // Iniciar polling dinámico en segundo plano para notificaciones en tiempo real
+    this.inAppNotifService.startPolling(10000);
+
     // Inyectar colores institucionales al cargar el layout
     const user = this.authService.currentUser();
     if (user?.profile?.institucion) {
@@ -803,6 +808,10 @@ export class LayoutComponent implements OnInit {
         }
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.inAppNotifService.stopPolling();
   }
 
   // Cerrar dropdown si se hace click fuera

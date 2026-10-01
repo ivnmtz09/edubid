@@ -1,7 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, Subscription, interval, tap, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { NotificationService } from './notification.service';
 
 export interface InAppNotification {
   id: number;
@@ -29,20 +30,27 @@ export interface NotificationStats {
 })
 export class InAppNotificationService {
   private http = inject(HttpClient);
+  private toastr = inject(NotificationService);
   private apiUrl = `${environment.apiUrl}/notifications`;
 
   notifications = signal<InAppNotification[]>([]);
   unreadCount = signal<number>(0);
   isLoading = signal<boolean>(false);
+  hasNewNotificationAnimation = signal<boolean>(false);
 
-  loadNotifications(): Observable<any> {
-    this.isLoading.set(true);
+  private pollingSub: Subscription | null = null;
+  private previousUnreadCount = 0;
+
+  loadNotifications(showLoading = true): Observable<any> {
+    if (showLoading) {
+      this.isLoading.set(true);
+    }
     return this.http.get<any>(`${this.apiUrl}/`).pipe(
       tap((res) => {
         const items: InAppNotification[] = Array.isArray(res) ? res : res?.results || [];
         this.notifications.set(items);
         const unread = items.filter((n) => !n.leida).length;
-        this.unreadCount.set(unread);
+        this.updateUnreadCount(unread);
         this.isLoading.set(false);
       }),
       catchError((err) => {
@@ -56,11 +64,51 @@ export class InAppNotificationService {
     return this.http.get<NotificationStats>(`${this.apiUrl}/estadisticas/`).pipe(
       tap((stats) => {
         if (stats && typeof stats.no_leidas === 'number') {
-          this.unreadCount.set(stats.no_leidas);
+          this.updateUnreadCount(stats.no_leidas);
         }
       }),
       catchError(() => of(null))
     );
+  }
+
+  startPolling(intervalMs = 12000): void {
+    this.stopPolling();
+    // Carga inicial inmediata
+    this.refreshAllSilently();
+
+    // Polling periódico cada 12 segundos
+    this.pollingSub = interval(intervalMs).subscribe(() => {
+      this.refreshAllSilently();
+    });
+  }
+
+  stopPolling(): void {
+    if (this.pollingSub) {
+      this.pollingSub.unsubscribe();
+      this.pollingSub = null;
+    }
+  }
+
+  private refreshAllSilently(): void {
+    this.loadNotifications(false).subscribe();
+  }
+
+  private updateUnreadCount(newCount: number): void {
+    const prev = this.unreadCount();
+    this.unreadCount.set(newCount);
+
+    // Si aumentaron las notificaciones no leídas de forma dinámica
+    if (newCount > prev && prev > 0) {
+      this.hasNewNotificationAnimation.set(true);
+      setTimeout(() => this.hasNewNotificationAnimation.set(false), 3000);
+
+      // Mostrar toast emergente en tiempo real
+      const newest = this.notifications().find((n) => !n.leida);
+      if (newest) {
+        this.toastr.info(newest.mensaje, `🔔 ${newest.titulo}`);
+      }
+    }
+    this.previousUnreadCount = newCount;
   }
 
   markAsRead(id: number): Observable<any> {
@@ -92,3 +140,4 @@ export class InAppNotificationService {
     );
   }
 }
+
