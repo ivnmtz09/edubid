@@ -37,7 +37,7 @@ import { Subscription } from 'rxjs';
 
             <!-- Icono EduBid Centrado -->
             <img
-              src="edubid.png"
+              src="/edubid.png"
               alt="EduBid"
               class="w-10 h-10 object-contain rounded-lg transition-transform duration-300 group-hover:scale-105"
             />

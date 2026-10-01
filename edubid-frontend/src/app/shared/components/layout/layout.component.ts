@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
 import { InAppNotificationService, InAppNotification } from '../../../core/services/in-app-notification.service';
 import { UserRole } from '../../../core/models/user.model';
+import { environment } from '../../../../environments/environment';
 
 export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users' | 'activities' | 'auctions' | 'wallet' | 'grades' | 'profile';
 
@@ -47,9 +48,9 @@ interface NavItem {
           <div class="flex items-center justify-between h-12 px-1">
             <a routerLink="/dashboard" class="flex items-center gap-2.5 min-w-0 group" (click)="closeMobileDrawer()">
               @if (institutionLogo()) {
-                <img [src]="institutionLogo()" alt="Escudo de la Institución" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
+                <img [src]="institutionLogo()" (error)="onLogoError($event)" alt="Escudo de la Institución" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
               } @else {
-                <img src="edubid.png" alt="EduBid Logo" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
+                <img src="/edubid.png" alt="EduBid Logo" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
               }
               @if (isDesktopExpanded() || isMobileDrawerOpen()) {
                 <span class="font-extrabold text-base tracking-tight text-primary truncate">
@@ -226,7 +227,7 @@ interface NavItem {
               </button>
 
               <div class="flex items-center gap-2.5 min-w-0">
-                <img [src]="institutionLogo() || 'edubid.png'" alt="Logo" class="w-7 h-7 rounded-lg object-contain shrink-0" />
+                <img [src]="institutionLogo() || '/edubid.png'" (error)="onLogoError($event)" alt="Logo" class="w-7 h-7 rounded-lg object-contain shrink-0" />
                 <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
                   {{ headerTitle() }}
                 </span>
@@ -615,7 +616,7 @@ interface NavItem {
           <div class="flex flex-col items-center justify-center space-y-4 text-center px-4">
             <div class="relative flex items-center justify-center w-16 h-16">
               <div class="absolute inset-0 rounded-full border-2 border-border border-t-primary animate-spin"></div>
-              <img src="edubid.png" alt="EduBid" class="w-8 h-8 object-contain rounded-lg" />
+              <img src="/edubid.png" alt="EduBid" class="w-8 h-8 object-contain rounded-lg" />
             </div>
             <div class="space-y-1">
               <h3 class="text-sm font-bold text-slate-900 dark:text-neutral-100">
@@ -695,8 +696,20 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (!user || user.role === 'admin') {
       return null;
     }
-    return this.localInstitutionLogo() || user.profile?.institucion?.logo || null;
+    let logo = this.localInstitutionLogo() || user.profile?.institucion?.logo || null;
+    if (logo && logo.startsWith('/media/')) {
+      const apiBase = (environment.apiUrl || '').replace(/\/api\/?$/, '');
+      logo = `${apiBase}${logo}`;
+    }
+    return logo;
   });
+
+  onLogoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img && !img.src.endsWith('/edubid.png')) {
+      img.src = '/edubid.png';
+    }
+  }
 
   institutionPrimaryColor = computed(() => {
     const user = this.authService.currentUser();

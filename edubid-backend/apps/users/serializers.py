@@ -11,7 +11,21 @@ class InstitutionMiniSerializer(serializers.Serializer):
     nombre = serializers.CharField(read_only=True)
     color_primario = serializers.CharField(read_only=True)
     color_secundario = serializers.CharField(read_only=True)
-    logo = serializers.ImageField(read_only=True)
+    logo = serializers.SerializerMethodField()
+
+    def get_logo(self, obj):
+        if not obj.logo:
+            return None
+        request = self.context.get('request')
+        try:
+            url = obj.logo.url
+            if request:
+                return request.build_absolute_uri(url)
+            if url.startswith('http://') or url.startswith('https://'):
+                return url
+            return f"https://edubid.up.railway.app{url}"
+        except Exception:
+            return None
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -84,7 +98,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         if user and user.role == 'admin':
             return None
         if user and user.institucion_id:
-            return InstitutionMiniSerializer(user.institucion).data
+            return InstitutionMiniSerializer(user.institucion, context=self.context).data
         return None
 
 

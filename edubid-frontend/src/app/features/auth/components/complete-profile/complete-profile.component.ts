@@ -179,7 +179,7 @@ interface RoleOption {
                   >
                     <!-- Logo o color swatch -->
                     @if (inst.logo) {
-                      <img [src]="inst.logo" [alt]="inst.nombre" class="w-10 h-10 rounded-xl object-contain bg-white border border-border shrink-0"/>
+                      <img [src]="inst.logo" (error)="$event.target.style.display='none'" [alt]="inst.nombre" class="w-10 h-10 rounded-xl object-contain bg-white border border-border shrink-0"/>
                     } @else {
                       <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 font-bold text-white text-sm" [style.background]="inst.color_primario">
                         {{ inst.nombre.charAt(0).toUpperCase() }}

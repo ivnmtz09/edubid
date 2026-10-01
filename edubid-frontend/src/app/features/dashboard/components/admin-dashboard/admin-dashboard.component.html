@@ -226,7 +226,7 @@
                   <div class="flex items-center gap-3 min-w-0">
                     <!-- Logo / Avatar de la Institución -->
                     @if (inst.logo) {
-                      <img [src]="inst.logo" [alt]="inst.nombre" class="w-10 h-10 rounded-xl object-contain border border-border shrink-0 bg-bg p-0.5" />
+                      <img [src]="inst.logo" (error)="$event.target.style.display='none'" [alt]="inst.nombre" class="w-10 h-10 rounded-xl object-contain border border-border shrink-0 bg-bg p-0.5" />
                     } @else {
                       <div
                         class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white shrink-0 shadow-xs"
@@ -516,7 +516,7 @@
 
             <!-- Logo de la Institución -->
             @if (currentInst.logo) {
-              <img [src]="currentInst.logo" [alt]="currentInst.nombre" class="w-14 h-14 rounded-2xl object-contain border border-border bg-bg p-1 shrink-0 shadow-xs" />
+              <img [src]="currentInst.logo" (error)="$event.target.style.display='none'" [alt]="currentInst.nombre" class="w-14 h-14 rounded-2xl object-contain border border-border bg-bg p-1 shrink-0 shadow-xs" />
             } @else {
               <div
                 class="w-14 h-14 rounded-2xl flex items-center justify-center font-extrabold text-xl text-white shrink-0 shadow-xs"
