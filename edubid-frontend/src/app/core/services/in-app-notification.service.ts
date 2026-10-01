@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subscription, interval, tap, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from './notification.service';
@@ -40,12 +40,17 @@ export class InAppNotificationService {
 
   private pollingSub: Subscription | null = null;
   private previousUnreadCount = 0;
+  private hasLoadedInitial = false;
 
-  loadNotifications(showLoading = true): Observable<any> {
+  loadNotifications(showLoading = true, isSilent = false): Observable<any> {
     if (showLoading) {
       this.isLoading.set(true);
     }
-    return this.http.get<any>(`${this.apiUrl}/`).pipe(
+    let headers = new HttpHeaders();
+    if (isSilent) {
+      headers = headers.set('X-Skip-Error-Toast', 'true');
+    }
+    return this.http.get<any>(`${this.apiUrl}/`, { headers }).pipe(
       tap((res) => {
         const items: InAppNotification[] = Array.isArray(res) ? res : res?.results || [];
         this.notifications.set(items);
@@ -71,12 +76,12 @@ export class InAppNotificationService {
     );
   }
 
-  startPolling(intervalMs = 12000): void {
+  startPolling(intervalMs = 10000): void {
     this.stopPolling();
     // Carga inicial inmediata
     this.refreshAllSilently();
 
-    // Polling periódico cada 12 segundos
+    // Polling periódico cada 10 segundos
     this.pollingSub = interval(intervalMs).subscribe(() => {
       this.refreshAllSilently();
     });
@@ -90,23 +95,27 @@ export class InAppNotificationService {
   }
 
   private refreshAllSilently(): void {
-    this.loadNotifications(false).subscribe();
+    this.loadNotifications(false, true).subscribe();
   }
 
   private updateUnreadCount(newCount: number): void {
     const prev = this.unreadCount();
     this.unreadCount.set(newCount);
 
-    // Si aumentaron las notificaciones no leídas de forma dinámica
-    if (newCount > prev && prev > 0) {
-      this.hasNewNotificationAnimation.set(true);
-      setTimeout(() => this.hasNewNotificationAnimation.set(false), 3000);
+    // Si aumentaron las notificaciones no leídas después de la carga inicial
+    if (this.hasLoadedInitial) {
+      if (newCount > prev) {
+        this.hasNewNotificationAnimation.set(true);
+        setTimeout(() => this.hasNewNotificationAnimation.set(false), 3500);
 
-      // Mostrar toast emergente en tiempo real
-      const newest = this.notifications().find((n) => !n.leida);
-      if (newest) {
-        this.toastr.info(newest.mensaje, `🔔 ${newest.titulo}`);
+        // Mostrar toast emergente en tiempo real
+        const newest = this.notifications().find((n) => !n.leida);
+        if (newest) {
+          this.toastr.info(newest.mensaje, `🔔 ${newest.titulo}`);
+        }
       }
+    } else {
+      this.hasLoadedInitial = true;
     }
     this.previousUnreadCount = newCount;
   }
