@@ -492,6 +492,7 @@ export class AuctionsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.timer) clearInterval(this.timer);
+    if (this.auctionPollTimer) clearInterval(this.auctionPollTimer);
   }
 
   loadData(): void {
@@ -514,6 +515,7 @@ export class AuctionsComponent implements OnInit, OnDestroy {
 
   startTimer(): void {
     this.timer = setInterval(() => {
+      // Sincronizar contador de tiempo restante
       const updated: Record<number, string> = {};
       this.auctions().forEach(a => {
         if (a.estado === 'active' && a.fecha_fin) {
@@ -532,6 +534,32 @@ export class AuctionsComponent implements OnInit, OnDestroy {
       });
       this.countdowns.set(updated);
     }, 1000);
+
+    // Polling silencioso cada 6 segundos para actualizar la mayor oferta y pujas de otros usuarios
+    if (!this.auctionPollTimer) {
+      this.auctionPollTimer = setInterval(() => {
+        this.refreshAuctionsSilently();
+      }, 6000);
+    }
+  }
+
+  private auctionPollTimer: any = null;
+
+  private refreshAuctionsSilently(): void {
+    this.auctionService.getAuctions().subscribe({
+      next: (res) => {
+        if (res) {
+          this.auctions.set(res);
+        }
+      }
+    });
+    if (!this.isDocente()) {
+      this.walletService.getMyWallet().subscribe({
+        next: (w) => {
+          if (w) this.studentWallet.set(w);
+        }
+      });
+    }
   }
 
   openCreateModal(): void {
