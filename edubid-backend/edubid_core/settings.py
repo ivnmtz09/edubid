@@ -3,10 +3,12 @@ from datetime import timedelta
 from decouple import config, Csv
 import os
 import sys
-import pymysql
-
-# Configurar pymysql como driver de MySQL
-pymysql.install_as_MySQLdb()
+# Configurar pymysql como driver de MySQL si está disponible
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+except Exception:
+    pass
 
 # ─────────────────────────────────────────────
 # BASE DIR & ENV
@@ -174,17 +176,24 @@ else:
 # ─────────────────────────────────────────────
 # Base de datos
 # ─────────────────────────────────────────────
+db_engine = config('DB_ENGINE', default='django.db.backends.mysql')
+db_host = config('DB_HOST', default='localhost')
+
+db_options = {}
+if 'mysql' in db_engine:
+    db_options['charset'] = 'utf8mb4'
+elif 'postgresql' in db_engine or 'supabase' in db_host:
+    db_options['sslmode'] = config('DB_SSLMODE', default='require')
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='3306'),
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        }
+        'ENGINE': db_engine,
+        'NAME': config('DB_NAME', default='postgres'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': db_host,
+        'PORT': config('DB_PORT', default='6543' if 'postgresql' in db_engine else '3306'),
+        'OPTIONS': db_options,
     }
 }
 
