@@ -64,7 +64,24 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/components/rector-dashboard/rector-dashboard.component').then(m => m.RectorDashboardComponent),
       },
+      {
+        path: 'institutions/new',
+        title: 'Nueva Institución | EduBid',
+        canActivate: [roleGuard(['admin'])],
+        loadComponent: () =>
+          import('./features/dashboard/components/admin-dashboard/create-institution.component').then(
+            m => m.CreateInstitutionComponent
+          ),
+      },
     ],
+  },
+  {
+    path: 'instituciones/nueva',
+    redirectTo: 'dashboard/institutions/new',
+  },
+  {
+    path: 'institutions/new',
+    redirectTo: 'dashboard/institutions/new',
   },
   {
     path: 'classrooms',
