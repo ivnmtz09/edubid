@@ -814,26 +814,32 @@
                     </div>
                   </div>
 
-                  <!-- Paletas Predefinidas -->
-                  <div class="space-y-2.5 pt-2">
-                    <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Paletas Sugeridas</label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <!-- Paletas Sugeridas (Acceso Rápido) -->
+                  <div class="space-y-3 pt-1">
+                    <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">
+                      Combinaciones Sugeridas
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                       @for (p of palettes; track p.name) {
                         <button
                           type="button"
                           (click)="applyPalette(p)"
-                          class="flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all cursor-pointer hover:scale-[1.02]"
+                          class="flex flex-col items-center gap-2 p-2.5 rounded-xl border transition-all cursor-pointer hover:scale-[1.02]"
                           [class.border-primary]="isCurrentPalette(p)"
-                          [class.ring-2]="isCurrentPalette(p)"
-                          [class.ring-primary/20]="isCurrentPalette(p)"
+                          [class.ring-1]="isCurrentPalette(p)"
+                          [class.ring-primary]="isCurrentPalette(p)"
                           [class.border-border]="!isCurrentPalette(p)"
-                          [class.bg-bg]="true"
+                          [class.bg-bg]="!isCurrentPalette(p)"
                         >
-                          <div class="flex h-5 w-full rounded-md overflow-hidden shadow-xs">
+                          <div class="flex h-5 w-full rounded-md overflow-hidden shadow-2xs border border-border/50">
                             <div class="flex-1" [style.backgroundColor]="p.primary"></div>
                             <div class="flex-1" [style.backgroundColor]="p.secondary"></div>
                           </div>
-                          <span class="text-[10px] font-semibold" [class.text-primary]="isCurrentPalette(p)" [class.text-text-muted]="!isCurrentPalette(p)">
+                          <span
+                            class="text-[11px] font-medium"
+                            [class.text-primary]="isCurrentPalette(p)"
+                            [class.text-text-muted]="!isCurrentPalette(p)"
+                          >
                             {{ p.name }}
                           </span>
                         </button>
@@ -841,40 +847,56 @@
                     </div>
                   </div>
 
-                  <!-- Selector 24 Colores - Color Principal -->
+                  <!-- Selector de Color Principal (Con Grises + Colores y Contraste Dinámico) -->
                   <div class="space-y-3 pt-2">
                     <div class="flex items-center justify-between">
-                      <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Principal</label>
+                      <div class="flex items-center gap-2">
+                        <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">
+                          Color Principal
+                        </label>
+                        @if (isLightColor(editColorPrimario())) {
+                          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                            Color Claro: Letras automáticas en Negro
+                          </span>
+                        }
+                      </div>
                       <div class="flex items-center gap-2">
                         <div
-                          class="w-5 h-5 rounded-md border border-border shadow-xs shrink-0"
+                          class="w-5 h-5 rounded-md border border-border shadow-2xs flex-shrink-0"
                           [style.background]="editColorPrimario()"
                         ></div>
-                        <span class="text-xs font-semibold" [style.color]="editColorPrimario()">
+                        <span class="text-xs font-bold" [style.color]="editColorPrimario()">
                           {{ getNombreColor(editColorPrimario()) }}
                         </span>
                       </div>
                     </div>
-                    <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+
+                    <!-- Grilla de Colores con contraste inteligente en checkmark (33 colores) -->
+                    <div class="grid grid-cols-6 sm:grid-cols-10 gap-1.5 p-3 bg-bg rounded-xl border border-border">
                       @for (color of coloresDisponibles; track color.hex) {
                         <button
                           type="button"
                           (click)="seleccionarEditPrimario(color.hex)"
-                          class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                          class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group border border-border/60"
                           [style.background]="color.hex"
                           [class.scale-110]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                          [class.shadow-lg]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.shadow-md]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
                           [class.ring-2]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                          [class.ring-white]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                          [class.ring-offset-1]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                          [title]="color.nombre"
+                          [class.ring-primary]="editColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                          [title]="color.nombre + ' (' + color.hex + ')'"
                         >
-                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 shadow-md">
                             {{ color.nombre }}
                           </span>
                           @if (editColorPrimario().toLowerCase() === color.hex.toLowerCase()) {
-                            <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            <svg
+                              class="w-3.5 h-3.5 absolute inset-0 m-auto drop-shadow-xs"
+                              [style.color]="isLightColor(color.hex) ? '#0a0a0a' : '#ffffff'"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"/>
                             </svg>
                           }
                         </button>
@@ -882,44 +904,93 @@
                     </div>
                   </div>
 
-                  <!-- Selector 24 Colores - Color Secundario -->
+                  <!-- Selector de Color Secundario (Con Grises + Colores y Contraste Dinámico) -->
                   <div class="space-y-3 pt-2">
                     <div class="flex items-center justify-between">
-                      <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Secundario</label>
+                      <div class="flex items-center gap-2">
+                        <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">
+                          Color Secundario / Acento
+                        </label>
+                        @if (isLightColor(editColorSecundario())) {
+                          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                            Color Claro: Letras automáticas en Negro
+                          </span>
+                        }
+                      </div>
                       <div class="flex items-center gap-2">
                         <div
-                          class="w-5 h-5 rounded-md border border-border shadow-xs shrink-0"
+                          class="w-5 h-5 rounded-md border border-border shadow-2xs flex-shrink-0"
                           [style.background]="editColorSecundario()"
                         ></div>
-                        <span class="text-xs font-semibold" [style.color]="editColorSecundario()">
+                        <span class="text-xs font-bold" [style.color]="editColorSecundario()">
                           {{ getNombreColor(editColorSecundario()) }}
                         </span>
                       </div>
                     </div>
-                    <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+
+                    <div class="grid grid-cols-6 sm:grid-cols-10 gap-1.5 p-3 bg-bg rounded-xl border border-border">
                       @for (color of coloresDisponibles; track color.hex) {
                         <button
                           type="button"
                           (click)="seleccionarEditSecundario(color.hex)"
-                          class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                          class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group border border-border/60"
                           [style.background]="color.hex"
                           [class.scale-110]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                          [class.shadow-lg]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                          [class.shadow-md]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
                           [class.ring-2]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                          [class.ring-white]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                          [class.ring-offset-1]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                          [title]="color.nombre"
+                          [class.ring-primary]="editColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                          [title]="color.nombre + ' (' + color.hex + ')'"
                         >
-                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 shadow-md">
                             {{ color.nombre }}
                           </span>
                           @if (editColorSecundario().toLowerCase() === color.hex.toLowerCase()) {
-                            <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                            <svg
+                              class="w-3.5 h-3.5 absolute inset-0 m-auto drop-shadow-xs"
+                              [style.color]="isLightColor(color.hex) ? '#0a0a0a' : '#ffffff'"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"/>
                             </svg>
                           }
                         </button>
                       }
+                    </div>
+                  </div>
+
+                  <!-- Vista Previa de Contraste en Botones (Idéntica a Rector) -->
+                  <div class="rounded-xl border border-border bg-bg p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                      <p class="text-xs font-semibold text-text-muted">Vista previa de contraste en botones</p>
+                      <span class="text-[11px] text-text-muted font-mono">
+                        Texto: {{ isLightColor(editColorPrimario()) ? 'Oscuro (#0A0A0A)' : 'Blanco (#FFFFFF)' }}
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-3 flex-wrap">
+                      <button
+                        type="button"
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs border border-black/10 dark:border-white/10"
+                        [style.background]="editColorPrimario()"
+                        [style.color]="isLightColor(editColorPrimario()) ? '#0a0a0a' : '#ffffff'"
+                      >
+                        Botón Principal
+                      </button>
+                      <button
+                        type="button"
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs border border-black/10 dark:border-white/10"
+                        [style.background]="editColorSecundario()"
+                        [style.color]="isLightColor(editColorSecundario()) ? '#0a0a0a' : '#ffffff'"
+                      >
+                        Botón Secundario
+                      </button>
+                      <div class="flex items-center gap-2 text-xs text-text-muted">
+                        <span class="font-medium">{{ getNombreColor(editColorPrimario()) }}</span>
+                        <span>+</span>
+                        <span class="font-medium">{{ getNombreColor(editColorSecundario()) }}</span>
+                      </div>
                     </div>
                   </div>
 
@@ -1341,26 +1412,26 @@
             </div>
           </div>
 
-          <!-- Paletas Sugeridas -->
+          <!-- Paletas Sugeridas (Acceso Rápido) -->
           <div class="space-y-2 pt-1">
-            <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Paletas Sugeridas</label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Combinaciones Sugeridas</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               @for (p of palettes; track p.name) {
                 <button
                   type="button"
                   (click)="applyPaletteToNew(p)"
-                  class="p-2 rounded-xl border transition-all cursor-pointer hover:scale-[1.02] flex flex-col items-center gap-1 text-center"
+                  class="p-2 rounded-xl border transition-all cursor-pointer hover:scale-[1.02] flex flex-col items-center gap-1.5 text-center"
                   [class.border-primary]="isNewCurrentPalette(p)"
-                  [class.ring-2]="isNewCurrentPalette(p)"
-                  [class.ring-primary/20]="isNewCurrentPalette(p)"
+                  [class.ring-1]="isNewCurrentPalette(p)"
+                  [class.ring-primary]="isNewCurrentPalette(p)"
                   [class.border-border]="!isNewCurrentPalette(p)"
-                  [class.bg-bg]="true"
+                  [class.bg-bg]="!isNewCurrentPalette(p)"
                 >
-                  <div class="flex h-4 w-full rounded overflow-hidden shadow-xs">
+                  <div class="flex h-4 w-full rounded overflow-hidden shadow-2xs border border-border/50">
                     <div class="flex-1" [style.backgroundColor]="p.primary"></div>
                     <div class="flex-1" [style.backgroundColor]="p.secondary"></div>
                   </div>
-                  <span class="text-[10px] font-semibold truncate w-full" [class.text-primary]="isNewCurrentPalette(p)" [class.text-text-muted]="!isNewCurrentPalette(p)">
+                  <span class="text-[10px] font-medium truncate w-full" [class.text-primary]="isNewCurrentPalette(p)" [class.text-text-muted]="!isNewCurrentPalette(p)">
                     {{ p.name }}
                   </span>
                 </button>
@@ -1368,10 +1439,17 @@
             </div>
           </div>
 
-          <!-- Selector 24 Colores - Color Primario -->
+          <!-- Selector de Color Principal (33 Colores + Grises y Contraste Dinámico) -->
           <div class="space-y-2.5 pt-1">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Principal</label>
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Principal</label>
+                @if (isLightColor(newColorPrimario())) {
+                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                    Color Claro: Letras en Negro
+                  </span>
+                }
+              </div>
               <div class="flex items-center gap-2">
                 <div
                   class="w-4 h-4 rounded-md border border-border shadow-xs shrink-0"
@@ -1382,26 +1460,31 @@
                 </span>
               </div>
             </div>
-            <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+            <div class="grid grid-cols-6 sm:grid-cols-10 gap-1.5 p-3 bg-bg rounded-xl border border-border">
               @for (color of coloresDisponibles; track color.hex) {
                 <button
                   type="button"
                   (click)="seleccionarNewPrimario(color.hex)"
-                  class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                  class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group border border-border/60"
                   [style.background]="color.hex"
                   [class.scale-110]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                  [class.shadow-lg]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.shadow-md]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
                   [class.ring-2]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                  [class.ring-white]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                  [class.ring-offset-1]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
-                  [title]="color.nombre"
+                  [class.ring-primary]="newColorPrimario().toLowerCase() === color.hex.toLowerCase()"
+                  [title]="color.nombre + ' (' + color.hex + ')'"
                 >
-                  <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 shadow-md">
                     {{ color.nombre }}
                   </span>
                   @if (newColorPrimario().toLowerCase() === color.hex.toLowerCase()) {
-                    <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    <svg
+                      class="w-3.5 h-3.5 absolute inset-0 m-auto drop-shadow-xs"
+                      [style.color]="isLightColor(color.hex) ? '#0a0a0a' : '#ffffff'"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"/>
                     </svg>
                   }
                 </button>
@@ -1409,10 +1492,17 @@
             </div>
           </div>
 
-          <!-- Selector 24 Colores - Color Secundario -->
+          <!-- Selector de Color Secundario (33 Colores + Grises y Contraste Dinámico) -->
           <div class="space-y-2.5 pt-1">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Secundario</label>
+              <div class="flex items-center gap-2">
+                <label class="text-xs font-semibold text-text-muted uppercase tracking-wide">Color Secundario</label>
+                @if (isLightColor(newColorSecundario())) {
+                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                    Color Claro: Letras en Negro
+                  </span>
+                }
+              </div>
               <div class="flex items-center gap-2">
                 <div
                   class="w-4 h-4 rounded-md border border-border shadow-xs shrink-0"
@@ -1423,26 +1513,31 @@
                 </span>
               </div>
             </div>
-            <div class="grid grid-cols-8 gap-1.5 p-3 bg-bg rounded-xl border border-border">
+            <div class="grid grid-cols-6 sm:grid-cols-10 gap-1.5 p-3 bg-bg rounded-xl border border-border">
               @for (color of coloresDisponibles; track color.hex) {
                 <button
                   type="button"
                   (click)="seleccionarNewSecundario(color.hex)"
-                  class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group"
+                  class="relative w-full aspect-square rounded-lg transition-all duration-150 focus:outline-none cursor-pointer group border border-border/60"
                   [style.background]="color.hex"
                   [class.scale-110]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                  [class.shadow-lg]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                  [class.shadow-md]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
                   [class.ring-2]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                  [class.ring-white]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                  [class.ring-offset-1]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
-                  [title]="color.nombre"
+                  [class.ring-primary]="newColorSecundario().toLowerCase() === color.hex.toLowerCase()"
+                  [title]="color.nombre + ' (' + color.hex + ')'"
                 >
-                  <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  <span class="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 text-white text-[9px] font-medium px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 shadow-md">
                     {{ color.nombre }}
                   </span>
                   @if (newColorSecundario().toLowerCase() === color.hex.toLowerCase()) {
-                    <svg class="w-3 h-3 text-white absolute inset-0 m-auto drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    <svg
+                      class="w-3.5 h-3.5 absolute inset-0 m-auto drop-shadow-xs"
+                      [style.color]="isLightColor(color.hex) ? '#0a0a0a' : '#ffffff'"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5" d="M5 13l4 4L19 7"/>
                     </svg>
                   }
                 </button>
@@ -1450,10 +1545,10 @@
             </div>
           </div>
 
-          <!-- Vista Previa de la Nueva Marca -->
-          <div class="p-3 rounded-xl bg-bg border border-border flex items-center justify-between gap-3">
+          <!-- Vista Previa de la Nueva Marca y Contraste -->
+          <div class="p-3.5 rounded-xl bg-bg border border-border flex items-center justify-between gap-3">
             <div class="flex items-center gap-2.5 min-w-0">
-              <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center font-bold text-xs"
+              <div class="w-9 h-9 rounded-lg overflow-hidden shrink-0 flex items-center justify-center font-bold text-xs shadow-2xs border border-border/50"
                 [style.background]="newColorPrimario()"
                 [style.color]="isLightColor(newColorPrimario()) ? '#0a0a0a' : '#ffffff'"
               >
@@ -1467,7 +1562,7 @@
                 <span class="text-xs font-bold block truncate text-slate-900 dark:text-white">
                   {{ newNombre() || 'Nombre de la Institución' }}
                 </span>
-                <span class="text-[10px] text-text-muted truncate">
+                <span class="text-[10px] text-text-muted truncate block">
                   {{ getNombreColor(newColorPrimario()) }} + {{ getNombreColor(newColorSecundario()) }}
                 </span>
               </div>
@@ -1475,7 +1570,7 @@
 
             <button
               type="button"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs shrink-0"
+              class="px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs shrink-0 border border-black/10 dark:border-white/10"
               [style.background]="newColorPrimario()"
               [style.color]="isLightColor(newColorPrimario()) ? '#0a0a0a' : '#ffffff'"
             >

@@ -94,48 +94,64 @@ export class AdminDashboardComponent implements OnInit {
   editUserFirstName = signal<string>('');
   editUserLastName = signal<string>('');
 
-  // Paleta de 24 colores armónicos con nombres amigables (idéntica a la vista de rector)
+  // Paleta completa de 33 colores armónicos con escala de grises y nombres descriptivos (idéntica a la vista de rector)
   coloresDisponibles: Color[] = [
-    // Naranjados y Rojos
+    // ──────── Escala de Grises y Neutros ────────
+    { hex: '#ffffff', nombre: 'Blanco Puro' },
+    { hex: '#f4f4f5', nombre: 'Gris Perla' },
+    { hex: '#d4d4d8', nombre: 'Plata Claro' },
+    { hex: '#9ca3af', nombre: 'Plata Medio' },
+    { hex: '#71717a', nombre: 'Gris Zinc' },
+    { hex: '#3f3f46', nombre: 'Grafito Oscuro' },
+    { hex: '#18181b', nombre: 'Negro Carbón' },
+    { hex: '#09090b', nombre: 'Negro Profundo' },
+
+    // ──────── Naranjados y Rojos ────────
     { hex: '#ea580c', nombre: 'Naranja EduBid' },
+    { hex: '#f97316', nombre: 'Naranja Vivo' },
     { hex: '#dc2626', nombre: 'Rojo Fuego' },
     { hex: '#ef4444', nombre: 'Rojo Coral' },
-    { hex: '#f97316', nombre: 'Naranja Vivo' },
-    // Amarillos y Tierra
+    { hex: '#b91c1c', nombre: 'Rojo Carmesí' },
+    { hex: '#7f1d1d', nombre: 'Burdeos' },
+
+    // ──────── Amarillos y Tierra ────────
     { hex: '#d97706', nombre: 'Ámbar Dorado' },
     { hex: '#f59e0b', nombre: 'Amarillo Sol' },
+    { hex: '#eab308', nombre: 'Oro Brillante' },
     { hex: '#92400e', nombre: 'Café Oscuro' },
     { hex: '#78350f', nombre: 'Marrón Tierra' },
-    // Verdes
+
+    // ──────── Verdes ────────
     { hex: '#16a34a', nombre: 'Verde Naturaleza' },
     { hex: '#059669', nombre: 'Esmeralda' },
     { hex: '#0d9488', nombre: 'Verde Azulado' },
     { hex: '#10b981', nombre: 'Menta' },
-    // Azules y Cianes
+    { hex: '#065f46', nombre: 'Bosque Profundo' },
+
+    // ──────── Azules y Cianes ────────
     { hex: '#2563eb', nombre: 'Azul Royal' },
     { hex: '#3b82f6', nombre: 'Azul Clásico' },
     { hex: '#0891b2', nombre: 'Cian Océano' },
     { hex: '#06b6d4', nombre: 'Celeste' },
-    // Morados y Rosas
+    { hex: '#1e40af', nombre: 'Azul Marino' },
+
+    // ──────── Morados y Rosas ────────
     { hex: '#7c3aed', nombre: 'Violeta Prestigio' },
     { hex: '#9333ea', nombre: 'Púrpura' },
     { hex: '#a855f7', nombre: 'Lavanda' },
     { hex: '#ec4899', nombre: 'Rosa Fucsia' },
-    // Oscuros y Especiales
-    { hex: '#374151', nombre: 'Gris Pizarra' },
-    { hex: '#1f2937', nombre: 'Grafito' },
-    { hex: '#065f46', nombre: 'Bosque Profundo' },
-    { hex: '#7f1d1d', nombre: 'Burdeos' },
   ];
 
-  // Paletas predefinidas para Branding
+  // Paletas sugeridas idénticas a la vista de rector
   palettes: BrandingPalette[] = [
     { name: 'EduBid Clásico', primary: '#ea580c', secondary: '#3b82f6' },
-    { name: 'Océano', primary: '#0891b2', secondary: '#4f46e5' },
-    { name: 'Naturaleza', primary: '#059669', secondary: '#d97706' },
-    { name: 'Prestigio', primary: '#7c3aed', secondary: '#ec4899' },
-    { name: 'Corporativo', primary: '#2563eb', secondary: '#059669' },
-    { name: 'Carmesí', primary: '#dc2626', secondary: '#4f46e5' },
+    { name: 'Monocromo Minimalista', primary: '#18181b', secondary: '#71717a' },
+    { name: 'Plata & Grafito', primary: '#ffffff', secondary: '#3f3f46' },
+    { name: 'Esmeralda', primary: '#059669', secondary: '#10b981' },
+    { name: 'Prestigio', primary: '#7c3aed', secondary: '#a855f7' },
+    { name: 'Océano', primary: '#2563eb', secondary: '#06b6d4' },
+    { name: 'Rubí', primary: '#dc2626', secondary: '#f97316' },
+    { name: 'Dorado', primary: '#d97706', secondary: '#f59e0b' },
   ];
 
   // ================= COMPUTED PROPERTIES =================
