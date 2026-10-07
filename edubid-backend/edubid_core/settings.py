@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'apps.institutions',
     'apps.common',
     'apps.notifications',
+    'apps.ai_assistant',
     'storages',
 ]
 
@@ -398,3 +399,11 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# ─────────────────────────────────────────────
+# CONFIGURACIÓN EDUBID IA (OpenRouter)
+# ─────────────────────────────────────────────
+OPENROUTER_API_KEY = config('OPENROUTER_API_KEY', default='')
+OPENROUTER_MODEL = config('OPENROUTER_MODEL', default='openai/gpt-4o')
+OPENROUTER_FALLBACK_MODEL = config('OPENROUTER_FALLBACK_MODEL', default='openai/gpt-4o-mini')
+OPENROUTER_MAX_TOKENS = config('OPENROUTER_MAX_TOKENS', default=1500, cast=int)
