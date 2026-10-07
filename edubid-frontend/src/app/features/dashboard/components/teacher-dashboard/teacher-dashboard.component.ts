@@ -10,6 +10,7 @@ import { ActivityService, Submission } from '../../../../core/services/activity.
 import { AuctionService, Auction } from '../../../../core/services/auction.service';
 import { WebSocketService } from '../../../../core/services/websocket.service';
 import { AiAssistantService } from '../../../../core/services/ai-assistant.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -598,6 +599,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   private auctionService = inject(AuctionService);
   private wsService = inject(WebSocketService);
   private aiAssistantService = inject(AiAssistantService);
+  private confirmService = inject(ConfirmDialogService);
   private wsSub = new Subscription();
 
   isLoading = signal<boolean>(true);
@@ -867,12 +869,18 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  closeAuction(auction: Auction): void {
+  async closeAuction(auction: Auction): Promise<void> {
     if (this.closingAuctionId() !== null) return;
 
-    if (!confirm(`¿Deseas cerrar la subasta "${auction.titulo}" ahora y declarar al ganador?`)) {
-      return;
-    }
+    const confirmed = await this.confirmService.confirm({
+      title: 'Finalizar Subasta de Incentivo',
+      message: `¿Deseas cerrar la subasta "${auction.titulo}" ahora y declarar al ganador? Se debitarán los EduCoins correspondientes.`,
+      confirmText: 'Cerrar y Declarar Ganador',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      icon: 'auction',
+    });
+    if (!confirmed) return;
 
     this.closingAuctionId.set(auction.id);
     this.auctionService.closeAuction(auction.id).subscribe({

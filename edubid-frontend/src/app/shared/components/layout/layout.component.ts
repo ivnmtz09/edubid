@@ -9,6 +9,7 @@ import { UserRole } from '../../../core/models/user.model';
 import { environment } from '../../../../environments/environment';
 import { AiAssistantComponent } from '../ai-assistant/ai-assistant.component';
 import { ReportModalComponent } from '../report-modal/report-modal.component';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 
 export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users' | 'activities' | 'auctions' | 'wallet' | 'grades' | 'profile';
 
@@ -23,7 +24,7 @@ interface NavItem {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AiAssistantComponent, ReportModalComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AiAssistantComponent, ReportModalComponent, ConfirmModalComponent],
   template: `
     <div class="h-screen w-screen overflow-hidden bg-bg text-text flex transition-colors duration-200">
       
@@ -738,6 +739,9 @@ interface NavItem {
         [isOpen]="isReportModalOpen()"
         (close)="isReportModalOpen.set(false)"
       />
+
+      <!-- ================= DIÁLOGO DE CONFIRMACIÓN NATIVO DE LA WEB ================= -->
+      <app-confirm-modal />
 
     </div>
   `,

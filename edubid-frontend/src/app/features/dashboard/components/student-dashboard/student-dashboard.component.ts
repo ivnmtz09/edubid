@@ -9,6 +9,7 @@ import { GradeService } from '../../../../core/services/grade.service';
 import { AuctionService, Auction } from '../../../../core/services/auction.service';
 import { ActivityService, Activity } from '../../../../core/services/activity.service';
 import { WebSocketService } from '../../../../core/services/websocket.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -558,6 +559,7 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   private auctionService = inject(AuctionService);
   private activityService = inject(ActivityService);
   private wsService = inject(WebSocketService);
+  private confirmService = inject(ConfirmDialogService);
   private wsSub = new Subscription();
 
   isLoading = signal<boolean>(true);
@@ -786,12 +788,18 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  cancelSubmission(submissionId: number): void {
+  async cancelSubmission(submissionId: number): Promise<void> {
     if (this.isCancelling()) return;
 
-    if (!confirm('¿Deseas retirar esta entrega? Podrás volver a enviarla antes de la fecha límite.')) {
-      return;
-    }
+    const confirmed = await this.confirmService.confirm({
+      title: 'Retirar Entrega de Tarea',
+      message: '¿Deseas retirar esta entrega? Podrás volver a enviarla con correcciones antes de la fecha límite.',
+      confirmText: 'Retirar Entrega',
+      cancelText: 'Volver',
+      type: 'warning',
+      icon: 'trash',
+    });
+    if (!confirmed) return;
 
     this.isCancelling.set(true);
     this.activityService.cancelSubmission(submissionId).subscribe({

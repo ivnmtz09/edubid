@@ -9,6 +9,7 @@ import { GroupService, Group } from '../../core/services/group.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-activities',
@@ -683,6 +684,7 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
   private aiService = inject(AiAssistantService);
+  private confirmService = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
   private aiSub?: Subscription;
 
@@ -924,13 +926,19 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     });
   }
 
-  cancelMySubmission(): void {
+  async cancelMySubmission(): Promise<void> {
     const sub = this.mySubmission();
     if (!sub) return;
 
-    if (!confirm('¿Estás seguro de anular esta entrega? Se eliminará el envío actual para que puedas subir una nueva respuesta o archivo antes del plazo límite.')) {
-      return;
-    }
+    const confirmed = await this.confirmService.confirm({
+      title: 'Anular Entrega de Actividad',
+      message: '¿Estás seguro de anular esta entrega? Se eliminará el envío actual para que puedas corregir tu respuesta o subir un archivo nuevo antes del plazo límite.',
+      confirmText: 'Anular Entrega',
+      cancelText: 'Volver',
+      type: 'warning',
+      icon: 'trash',
+    });
+    if (!confirmed) return;
 
     this.isSaving.set(true);
     this.activityService.cancelSubmission(sub.id).subscribe({
@@ -952,8 +960,17 @@ export class ActivitiesComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteActivity(act: Activity): void {
-    if (!confirm(`¿Eliminar la actividad "${act.nombre}"? Esta acción no se puede deshacer.`)) return;
+  async deleteActivity(act: Activity): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Eliminar Actividad Pedagógica',
+      message: `¿Deseas eliminar la actividad "${act.nombre}"? Esta acción no se puede deshacer y eliminará las entregas asociadas.`,
+      confirmText: 'Eliminar Definitivamente',
+      cancelText: 'Cancelar',
+      type: 'danger',
+      icon: 'trash',
+    });
+    if (!confirmed) return;
+
     this.activityService.deleteActivity(act.id).subscribe({
       next: () => {
         this.notifService.success('Actividad eliminada.');

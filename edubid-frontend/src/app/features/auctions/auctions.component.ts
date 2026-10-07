@@ -7,6 +7,7 @@ import { WalletService, Wallet } from '../../core/services/wallet.service';
 import { GroupService, Group } from '../../core/services/group.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-auctions',
@@ -437,6 +438,7 @@ export class AuctionsComponent implements OnInit, OnDestroy {
   private groupService = inject(GroupService);
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
+  private confirmService = inject(ConfirmDialogService);
   private fb = inject(FormBuilder);
 
   userRole = computed(() => this.authService.currentUser()?.role || 'estudiante');
@@ -605,8 +607,17 @@ export class AuctionsComponent implements OnInit, OnDestroy {
     });
   }
 
-  closeAuction(auc: Auction): void {
-    if (!confirm(`¿Cerrar la subasta "${auc.titulo}" ahora? El ganador será cobrado y se reembolsará a los demás participantes.`)) return;
+  async closeAuction(auc: Auction): Promise<void> {
+    const confirmed = await this.confirmService.confirm({
+      title: 'Cerrar Subasta de Incentivo',
+      message: `¿Deseas cerrar la subasta "${auc.titulo}" ahora? El ganador será cobrado en EduCoins y se reembolsará el saldo a los demás participantes.`,
+      confirmText: 'Cerrar Subasta',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      icon: 'auction',
+    });
+    if (!confirmed) return;
+
     this.auctionService.closeAuction(auc.id).subscribe({
       next: (res) => {
         this.notifService.success(res.detail || 'Subasta cerrada y saldos liquidados.');
