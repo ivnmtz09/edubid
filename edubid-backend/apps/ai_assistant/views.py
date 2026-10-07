@@ -82,26 +82,27 @@ class AiSuggestionsView(APIView):
 
         suggestions_by_role = {
             'docente': [
-                "Genera una rúbrica de 4 niveles para evaluar una exposición de ciencias.",
-                "Sugiéreme 3 ideas de recompensas para subastas de EduCoins en mi clase.",
-                "Crea un taller de 5 preguntas reflexivas sobre comprensión lectora.",
-                "¿Cómo puedo motivar a estudiantes con bajo rendimiento académico?",
+                "¿Cuántos grupos o asignaturas tengo actualmente?",
+                "¿Qué estudiantes tengo en mis grupos y qué saldo de EduCoins tienen?",
+                "¿Qué actividades tengo activas y cuáles tienen entregas pendientes?",
+                "Crea una tarea con 50 EduCoins de recompensa para la próxima semana.",
+                "Crea una subasta de '1 punto extra en examen' por 20 EduCoins.",
             ],
             'coordinador': [
+                "Dame un resumen consolidado de los grupos, docentes y aulas de la institución.",
+                "¿Cuáles asignaturas tienen mayor cantidad de actividades en curso?",
                 "Redacta una guía para el acompañamiento y retroalimentación pedagógica en aula.",
                 "Estrategias para mediar un conflicto de convivencia escolar entre estudiantes.",
-                "Estructura para una reunión de comité de evaluación y promoción.",
-                "¿Cómo optimizar el seguimiento a los planes de mejoramiento de área?",
             ],
             'rector': [
+                "Genera el informe ejecutivo consolidado de la institución en EduBid.",
+                "¿Cuántos estudiantes y docentes activos tenemos en la plataforma?",
                 "Estrategias para fortalecer el clima escolar y la motivación docente este período.",
-                "Estructura de un informe ejecutivo sobre indicadores de rendimiento académico.",
-                "Ideas para articular las subastas y gamificación de EduBid en el PEI.",
-                "Recomendaciones para liderar una jornada pedagógica institucional efectiva.",
+                "Recomendaciones para articular la economía de EduCoins en el PEI.",
             ],
             'admin': [
+                "Dame un resumen general del estado y actividad de la plataforma.",
                 "¿Cuáles son las buenas prácticas para configurar las instituciones en EduBid?",
-                "Recomendaciones de seguridad y gestión de roles en la plataforma.",
             ]
         }
 
