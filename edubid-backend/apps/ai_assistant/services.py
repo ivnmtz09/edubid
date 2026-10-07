@@ -104,6 +104,7 @@ def send_chat_completion(messages: list, user, context: str = None) -> dict:
         try:
             # Bucle del Agente (hasta 3 rondas de herramientas por consulta)
             current_messages = list(formatted_messages)
+            executed_tools = []
             
             for iteration in range(3):
                 payload = {
@@ -148,6 +149,7 @@ def send_chat_completion(messages: list, user, context: str = None) -> dict:
                             fn_args = {}
 
                         logger.info("Agente ejecutando herramienta: %s con argumentos: %s", fn_name, fn_args)
+                        executed_tools.append(fn_name)
                         tool_result = dispatch_tool(fn_name, fn_args, user)
 
                         current_messages.append({
@@ -165,7 +167,8 @@ def send_chat_completion(messages: list, user, context: str = None) -> dict:
                     return {
                         "content": final_content,
                         "model": model,
-                        "usage": data.get("usage", {})
+                        "usage": data.get("usage", {}),
+                        "executed_tools": executed_tools
                     }
 
         except Exception as e:

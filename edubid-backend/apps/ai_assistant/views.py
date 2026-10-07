@@ -55,6 +55,7 @@ class ChatAiView(APIView):
                 "role": "assistant",
                 "content": result["content"],
                 "model": result.get("model", ""),
+                "executed_tools": result.get("executed_tools", []),
                 "author": "EDUBID IA"
             }, status=status.HTTP_200_OK)
 

@@ -1,8 +1,10 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ClassroomService, Classroom } from '../../../core/services/classroom.service';
+import { AiAssistantService } from '../../../core/services/ai-assistant.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -352,11 +354,13 @@ import { NotificationService } from '../../../core/services/notification.service
     </div>
   `,
 })
-export class ClassroomsComponent implements OnInit {
+export class ClassroomsComponent implements OnInit, OnDestroy {
   private classroomService = inject(ClassroomService);
+  private aiAssistantService = inject(AiAssistantService);
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
+  private aiSub?: Subscription;
 
   classrooms = signal<Classroom[]>([]);
   isLoading = signal(true);
@@ -389,6 +393,26 @@ export class ClassroomsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadClassrooms();
+    this.initAiSync();
+  }
+
+  ngOnDestroy(): void {
+    this.aiSub?.unsubscribe();
+  }
+
+  private initAiSync(): void {
+    this.aiSub = this.aiAssistantService.actionCompleted$.subscribe((event) => {
+      const isClassroomEvent = event.tools.some((t) =>
+        t.includes('classroom') || t.includes('group')
+      );
+      if (isClassroomEvent) {
+        this.loadClassrooms();
+        this.notificationService.info(
+          'Tus clases y grupos han sido actualizados en pantalla en tiempo real.',
+          'EDUBID IA'
+        );
+      }
+    });
   }
 
   loadClassrooms(): void {

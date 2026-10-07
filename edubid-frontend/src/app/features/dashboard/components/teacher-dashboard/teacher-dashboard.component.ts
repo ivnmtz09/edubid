@@ -9,6 +9,7 @@ import { ClassroomService, Classroom } from '../../../../core/services/classroom
 import { ActivityService, Submission } from '../../../../core/services/activity.service';
 import { AuctionService, Auction } from '../../../../core/services/auction.service';
 import { WebSocketService } from '../../../../core/services/websocket.service';
+import { AiAssistantService } from '../../../../core/services/ai-assistant.service';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -596,6 +597,7 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   private activityService = inject(ActivityService);
   private auctionService = inject(AuctionService);
   private wsService = inject(WebSocketService);
+  private aiAssistantService = inject(AiAssistantService);
   private wsSub = new Subscription();
 
   isLoading = signal<boolean>(true);
@@ -709,6 +711,13 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
             'Subasta Finalizada'
           );
         }
+      })
+    );
+
+    // 3. Sincronización en vivo con acciones ejecutadas por EDUBID IA
+    this.wsSub.add(
+      this.aiAssistantService.actionCompleted$.subscribe(() => {
+        this.loadTeacherData();
       })
     );
   }

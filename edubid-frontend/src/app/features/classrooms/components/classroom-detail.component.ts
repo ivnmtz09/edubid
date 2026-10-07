@@ -1,13 +1,15 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ClassroomService, Classroom, ClassroomGroup } from '../../../core/services/classroom.service';
 import { GroupService, Group, GroupStudent } from '../../../core/services/group.service';
 import { ActivityService, Activity } from '../../../core/services/activity.service';
 import { GradeService } from '../../../core/services/grade.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AiAssistantService } from '../../../core/services/ai-assistant.service';
 
 @Component({
   selector: 'app-classroom-detail',
@@ -986,6 +988,9 @@ export class ClassroomDetailComponent implements OnInit {
     descripcion: [''],
   });
 
+  private aiAssistantService = inject(AiAssistantService);
+  private aiSub?: Subscription;
+
   userRole = computed(() => this.authService.currentUser()?.role || 'estudiante');
   canManage = computed(() => ['docente', 'admin'].includes(this.userRole()));
 
@@ -997,6 +1002,24 @@ export class ClassroomDetailComponent implements OnInit {
         this.loadClassroomDetail(+id);
       }
     });
+
+    this.aiSub = this.aiAssistantService.actionCompleted$.subscribe((event) => {
+      const isGroupAction = event.tools.some((t) =>
+        t.includes('classroom') || t.includes('group') || t.includes('activity')
+      );
+      const currentId = this.classroomId();
+      if (isGroupAction && currentId) {
+        this.loadClassroomDetail(currentId);
+        this.notificationService.info(
+          'La información del aula y sus grupos fue actualizada en tiempo real.',
+          'EDUBID IA'
+        );
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.aiSub?.unsubscribe();
   }
 
   loadClassroomDetail(id: number): void {

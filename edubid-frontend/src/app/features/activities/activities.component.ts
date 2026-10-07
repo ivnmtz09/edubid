@@ -1,12 +1,14 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ActivityService, Activity, Submission } from '../../core/services/activity.service';
 import { ClassroomService, Classroom } from '../../core/services/classroom.service';
 import { GroupService, Group } from '../../core/services/group.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { AiAssistantService } from '../../core/services/ai-assistant.service';
 
 @Component({
   selector: 'app-activities',
@@ -674,13 +676,15 @@ import { NotificationService } from '../../core/services/notification.service';
     </div>
   `
 })
-export class ActivitiesComponent implements OnInit {
+export class ActivitiesComponent implements OnInit, OnDestroy {
   private activityService = inject(ActivityService);
   private classroomService = inject(ClassroomService);
   private groupService = inject(GroupService);
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
+  private aiService = inject(AiAssistantService);
   private fb = inject(FormBuilder);
+  private aiSub?: Subscription;
 
   userRole = computed(() => this.authService.currentUser()?.role || 'estudiante');
   isDocente = computed(() => ['docente', 'admin', 'rector', 'coordinador'].includes(this.userRole()));
@@ -792,6 +796,26 @@ export class ActivitiesComponent implements OnInit {
       });
     }
     this.loadActivities();
+    this.initAiSync();
+  }
+
+  ngOnDestroy(): void {
+    this.aiSub?.unsubscribe();
+  }
+
+  private initAiSync(): void {
+    this.aiSub = this.aiService.actionCompleted$.subscribe((event) => {
+      const isActEvent = event.tools.some((t) =>
+        t.includes('activity') || t.includes('grade') || t.includes('submission')
+      );
+      if (isActEvent) {
+        this.loadActivities();
+        this.notifService.info(
+          'Actividades actualizadas automáticamente por EDUBID IA.',
+          'EDUBID IA'
+        );
+      }
+    });
   }
 
   loadActivities(): void {
