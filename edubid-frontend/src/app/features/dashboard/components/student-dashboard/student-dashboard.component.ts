@@ -489,7 +489,7 @@ import { Subscription } from 'rxjs';
                       rows="4"
                       [(ngModel)]="submissionText"
                       placeholder="Escribe tu respuesta, o pega el enlace a tu repositorio o documento de Google Drive..."
-                      class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted leading-relaxed"
+                      class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
                     ></textarea>
                   </div>
 

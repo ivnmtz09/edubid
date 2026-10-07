@@ -4,9 +4,11 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
 import { InAppNotificationService, InAppNotification } from '../../../core/services/in-app-notification.service';
+import { SoundService } from '../../../core/services/sound.service';
 import { UserRole } from '../../../core/models/user.model';
 import { environment } from '../../../../environments/environment';
 import { AiAssistantComponent } from '../ai-assistant/ai-assistant.component';
+import { ReportModalComponent } from '../report-modal/report-modal.component';
 
 export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users' | 'activities' | 'auctions' | 'wallet' | 'grades' | 'profile';
 
@@ -21,7 +23,7 @@ interface NavItem {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AiAssistantComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AiAssistantComponent, ReportModalComponent],
   template: `
     <div class="h-screen w-screen overflow-hidden bg-bg text-text flex transition-colors duration-200">
       
@@ -194,8 +196,26 @@ interface NavItem {
           </nav>
         </div>
 
-        <!-- Pie del Sidebar: Ver Sitio -->
+        <!-- Pie del Sidebar: Reportar problema + Ver Sitio -->
         <div class="p-3 border-t border-border space-y-1">
+          <!-- Botón de Reportar Problema situado en la parte inferior del Aside -->
+          <button
+            type="button"
+            (click)="openReportModal()"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-500/10 transition-colors group cursor-pointer"
+            [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
+            title="Reportar problema o enviar sugerencia a soporte"
+          >
+            <span class="w-5 h-5 shrink-0 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </span>
+            @if (isDesktopExpanded() || isMobileDrawerOpen()) {
+              <span class="truncate">Reportar problema</span>
+            }
+          </button>
+
           <!-- Enlace al Inicio Público -->
           <a
             routerLink="/"
@@ -281,9 +301,9 @@ interface NavItem {
                   }
                 </button>
 
-                <!-- Menú Desplegable Flotante de Notificaciones -->
+                <!-- Menú Desplegable Flotante de Notificaciones (Responsivo en pantallas móviles y escritorio) -->
                 @if (isNotificationsOpen()) {
-                  <div class="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-border bg-surface shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                  <div class="fixed inset-x-2 sm:absolute sm:inset-x-auto sm:right-0 top-16 sm:top-auto sm:mt-2 w-auto sm:w-96 max-h-[82dvh] rounded-2xl border border-border bg-surface shadow-2xl z-50 overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150">
                     <!-- Cabecera -->
                     <div class="p-3.5 border-b border-border flex items-center justify-between bg-neutral-50/50 dark:bg-neutral-900/50">
                       <div class="flex items-center gap-2">
@@ -297,15 +317,38 @@ interface NavItem {
                         }
                       </div>
 
-                      @if (unreadNotificationsCount() > 0) {
+                      <div class="flex items-center gap-2">
+                        <!-- Conmutador de Sonido de Notificaciones -->
                         <button
                           type="button"
-                          (click)="markAllNotificationsAsRead()"
-                          class="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                          (click)="toggleSound($event)"
+                          [title]="soundService.isMuted() ? 'Activar sonido de notificaciones' : 'Silenciar sonido de notificaciones'"
+                          class="p-1 rounded-lg text-text-muted hover:text-text hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
                         >
-                          Marcar leídas
+                          @if (soundService.isMuted()) {
+                            <svg class="w-3.5 h-3.5 text-rose-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                              <line x1="23" y1="9" x2="17" y2="15" />
+                              <line x1="17" y1="9" x2="23" y2="15" />
+                            </svg>
+                          } @else {
+                            <svg class="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                            </svg>
+                          }
                         </button>
-                      }
+
+                        @if (unreadNotificationsCount() > 0) {
+                          <button
+                            type="button"
+                            (click)="markAllNotificationsAsRead()"
+                            class="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                          >
+                            Marcar leídas
+                          </button>
+                        }
+                      </div>
                     </div>
 
                     <!-- Lista de Notificaciones -->
@@ -511,12 +554,15 @@ interface NavItem {
                 }
               </div>
 
-              <!-- Perfil del Usuario & Rol -->
-              <div class="flex items-center gap-2 pl-2 border-l border-border">
-                <a
-                  routerLink="/profile"
-                  class="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer group"
-                  title="Ver mi perfil"
+              <!-- Dropdown de Perfil del Usuario (Mi Perfil + Cerrar Sesión) -->
+              <div id="layout-profile-dropdown-container" class="relative pl-1 sm:pl-2 border-l border-border">
+                <button
+                  type="button"
+                  (click)="toggleProfileDropdown($event)"
+                  class="flex items-center gap-2 p-1 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer group"
+                  [attr.aria-expanded]="isProfileDropdownOpen()"
+                  aria-haspopup="true"
+                  title="Menú de perfil"
                 >
                   <div class="w-8 h-8 rounded-full bg-primary text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
                     {{ userInitials() }}
@@ -530,20 +576,55 @@ interface NavItem {
                       {{ userRole() }}
                     </span>
                   </div>
-                </a>
 
-                <!-- Botón Cerrar Sesión -->
-                <button
-                  type="button"
-                  (click)="logout()"
-                  class="p-2 rounded-xl text-text-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer ml-1"
-                  title="Cerrar Sesión"
-                  aria-label="Cerrar Sesión"
-                >
-                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  <svg class="w-3.5 h-3.5 text-text-muted transition-transform duration-200 hidden sm:block" [class.rotate-180]="isProfileDropdownOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
+
+                <!-- Menú Desplegable Flotante de Perfil -->
+                @if (isProfileDropdownOpen()) {
+                  <div class="absolute right-0 mt-2 w-56 rounded-2xl border border-border bg-surface shadow-2xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    <!-- Resumen del Usuario -->
+                    <div class="px-4 py-2 border-b border-border">
+                      <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ userName() }}</p>
+                      <p class="text-[11px] text-text-muted truncate">{{ userEmail() }}</p>
+                      <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-primary/10 text-primary">
+                        {{ userRole() }}
+                      </span>
+                    </div>
+
+                    <!-- Enlace a Mi Perfil -->
+                    <div class="p-1">
+                      <a
+                        routerLink="/profile"
+                        (click)="isProfileDropdownOpen.set(false)"
+                        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-text hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+                      >
+                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>Mi Perfil</span>
+                      </a>
+                    </div>
+
+                    <div class="border-t border-border my-1"></div>
+
+                    <!-- Botón Cerrar Sesión -->
+                    <div class="p-1">
+                      <button
+                        type="button"
+                        (click)="onDropdownLogout()"
+                        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer text-left"
+                      >
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Cerrar Sesión</span>
+                      </button>
+                    </div>
+                  </div>
+                }
               </div>
 
             </div>
@@ -652,6 +733,12 @@ interface NavItem {
       <!-- ================= ASISTENTE INTELIGENTE EDUBID IA ================= -->
       <app-ai-assistant />
 
+      <!-- ================= MODAL DE REPORTES A SOPORTE ================= -->
+      <app-report-modal
+        [isOpen]="isReportModalOpen()"
+        (close)="isReportModalOpen.set(false)"
+      />
+
     </div>
   `,
 })
@@ -659,6 +746,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   readonly themeService = inject(ThemeService);
   readonly inAppNotifService = inject(InAppNotificationService);
+  readonly soundService = inject(SoundService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
 
@@ -667,6 +755,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
   isMobileDrawerOpen = signal(false);
   isThemeDropdownOpen = signal(false);
   isNotificationsOpen = signal(false);
+  isProfileDropdownOpen = signal(false);
+  isReportModalOpen = signal(false);
   showLogoutConfirmModal = signal(false);
   isLoggingOut = signal(false);
 
@@ -676,6 +766,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   // Datos reactivos del usuario
   userRole = computed(() => this.authService.currentUser()?.role || 'estudiante');
+  userEmail = computed(() => this.authService.currentUser()?.email || '');
   userName = computed(() => {
     const user = this.authService.currentUser();
     return user ? `${user.first_name} ${user.last_name}`.trim() || user.email : 'Usuario';
@@ -865,7 +956,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.inAppNotifService.stopPolling();
   }
 
-  // Cerrar dropdown si se hace click fuera
+  // Cerrar dropdowns si se hace click fuera
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -874,6 +965,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
     }
     if (!this.elementRef.nativeElement.querySelector('#layout-notifications-dropdown-container')?.contains(target)) {
       this.isNotificationsOpen.set(false);
+    }
+    if (!this.elementRef.nativeElement.querySelector('#layout-profile-dropdown-container')?.contains(target)) {
+      this.isProfileDropdownOpen.set(false);
     }
   }
 
@@ -893,9 +987,17 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.isMobileDrawerOpen.set(false);
   }
 
+  openReportModal(): void {
+    this.isReportModalOpen.set(true);
+    if (this.isMobileDrawerOpen()) {
+      this.closeMobileDrawer();
+    }
+  }
+
   toggleThemeDropdown(event?: Event): void {
     event?.stopPropagation();
     this.isNotificationsOpen.set(false);
+    this.isProfileDropdownOpen.set(false);
     this.isThemeDropdownOpen.update((open) => !open);
   }
 
@@ -907,11 +1009,29 @@ export class LayoutComponent implements OnInit, OnDestroy {
   toggleNotificationsDropdown(event?: Event): void {
     event?.stopPropagation();
     this.isThemeDropdownOpen.set(false);
+    this.isProfileDropdownOpen.set(false);
     const nextState = !this.isNotificationsOpen();
     this.isNotificationsOpen.set(nextState);
     if (nextState) {
       this.inAppNotifService.loadNotifications().subscribe();
     }
+  }
+
+  toggleProfileDropdown(event?: Event): void {
+    event?.stopPropagation();
+    this.isThemeDropdownOpen.set(false);
+    this.isNotificationsOpen.set(false);
+    this.isProfileDropdownOpen.update((open) => !open);
+  }
+
+  onDropdownLogout(): void {
+    this.isProfileDropdownOpen.set(false);
+    this.logout();
+  }
+
+  toggleSound(event: Event): void {
+    event.stopPropagation();
+    this.soundService.toggleMute();
   }
 
   markAllNotificationsAsRead(): void {

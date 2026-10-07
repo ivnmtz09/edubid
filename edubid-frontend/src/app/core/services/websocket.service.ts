@@ -75,7 +75,7 @@ export class WebSocketService implements OnDestroy {
           const data = JSON.parse(event.data);
           this.messageSubject$.next(data);
         } catch (e) {
-          console.warn('⚠️ [EduBid Real-Time] Error al parsear mensaje WebSocket:', e);
+          console.warn('[EduBid Real-Time] Error al parsear mensaje WebSocket:', e);
         }
       };
 
@@ -86,11 +86,11 @@ export class WebSocketService implements OnDestroy {
       };
 
       this.socket.onerror = (error) => {
-        console.warn('⚠️ [EduBid Real-Time] Advertencia en WebSocket (reintentando...):', error);
+        console.warn('[EduBid Real-Time] Advertencia en WebSocket (reintentando...):', error);
         this.socket?.close();
       };
     } catch (err) {
-      console.warn('⚠️ [EduBid Real-Time] Error iniciando WebSocket:', err);
+      console.warn('[EduBid Real-Time] Error iniciando WebSocket:', err);
       this.scheduleReconnect();
     }
   }

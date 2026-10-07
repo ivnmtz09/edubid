@@ -18,6 +18,8 @@
   --color-text: #0f172a;
   --color-text-muted: #64748b;
   --color-border: #e2e8f0;
+  --color-placeholder: #94a3b8; /* Slate-400 */
+  --opacity-placeholder: 0.72;
 }
 
 .dark {
@@ -26,6 +28,24 @@
   --color-text: #f5f5f5;         /* Blanco suave */
   --color-text-muted: #a1a1aa;   /* Gris zinc neutro */
   --color-border: #262626;       /* Borde oscuro sin azul */
+  --color-placeholder: #71717a; /* Zinc-500 */
+  --opacity-placeholder: 0.65;
+}
+
+/* === Estandarización global de placeholders === */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: var(--color-placeholder) !important;
+  opacity: var(--opacity-placeholder) !important;
+  font-weight: 400 !important;
+  user-select: none;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+  opacity: calc(var(--opacity-placeholder) * 0.75) !important;
 }
 
 /* === Brand colors via Tailwind === */
@@ -308,3 +328,38 @@ svg {
     }
   }
 }
+
+/* ===================================================
+   OPTIMIZACIONES MÓVILES (iOS, Safari, Android)
+   =================================================== */
+
+/* Prevenir zoom automático forzado en iOS Safari cuando los inputs tienen font-size < 16px */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Soporte de Safe Area Insets para dispositivos con muescas/islas/barra de inicio inferior */
+.safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+}
+
+.safe-area-top {
+  padding-top: max(1rem, env(safe-area-inset-top, 1rem));
+}
+
+.safe-float-bottom {
+  bottom: max(1rem, env(safe-area-inset-bottom, 1rem)) !important;
+}
+
+/* Área táctil mínima recomendada para dispositivos táctiles móviles (Apple HIG / Material) */
+@media (pointer: coarse) {
+  button:not(.compact-btn),
+  a:not(.compact-link) {
+    min-height: 44px;
+  }
+}
+

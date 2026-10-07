@@ -606,8 +606,8 @@ export class WalletComponent implements OnInit {
     switch (tipo) {
       case 'earn': return '+';
       case 'spend': return '-';
-      case 'hold': return '⏸';
-      case 'refund': return '↩';
+      case 'hold': return '||';
+      case 'refund': return '<-';
       default: return '·';
     }
   }

@@ -15,47 +15,28 @@ import {
   AiAssistantService,
   AiChatMessage,
 } from '../../../core/services/ai-assistant.service';
+import { BotAvatarComponent } from './bot-avatar.component';
 
 @Component({
   selector: 'app-ai-assistant',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BotAvatarComponent],
   template: `
     @if (canAccess()) {
-      <!-- CONTENEDOR FLOTANTE -->
-      <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      <!-- CONTENEDOR FLOTANTE CON SAFE-AREA RESPONSIVO MÓVIL -->
+      <div class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end [bottom:max(1rem,env(safe-area-inset-bottom,1rem))]">
         
         <!-- ================= VENTANA DEL CHATBOT ================= -->
         @if (isOpen()) {
           <div
-            class="mb-3 w-[92vw] sm:w-[420px] h-[580px] max-h-[82vh] bg-surface/95 backdrop-blur-md rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 origin-bottom-right"
+            class="mb-3 w-[calc(100vw-2rem)] sm:w-[420px] h-[580px] max-h-[78dvh] bg-surface/95 backdrop-blur-md rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden transition-all duration-300 animate-in fade-in zoom-in-95 origin-bottom-right"
           >
             <!-- CABECERA -->
             <div
               class="px-4 py-3.5 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-border flex items-center justify-between shrink-0"
             >
-              <div class="flex items-center gap-3">
-                <!-- Avatar Bot con indicador de estado -->
-                <div class="relative">
-                  <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-orange-400 text-white flex items-center justify-center shadow-md shadow-primary/20"
-                  >
-                    <!-- Icono Bot SVG -->
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect width="18" height="12" x="3" y="8" rx="2" />
-                      <path d="M12 2v6" />
-                      <path d="M9 14h.01" />
-                      <path d="M15 14h.01" />
-                      <path d="M7 20v2" />
-                      <path d="M17 20v2" />
-                    </svg>
-                  </div>
-                  <span
-                    class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-surface rounded-full animate-pulse"
-                    title="En línea"
-                  ></span>
-                </div>
-
+              <div class="flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" title="En línea"></span>
                 <div>
                   <div class="flex items-center gap-1.5">
                     <h3 class="font-bold text-sm text-text leading-tight tracking-tight">EDUBID IA</h3>
@@ -119,7 +100,7 @@ import {
                         <path d="M15 14h.01" />
                       </svg>
                     </div>
-                    <h4 class="font-bold text-text text-base">¡Hola, {{ userName() }}! 👋</h4>
+                    <h4 class="font-bold text-text text-base">¡Hola, {{ userName() }}!</h4>
                     <p class="text-xs text-text-muted leading-relaxed">
                       Soy **EDUBID IA**, tu asistente inteligente con GPT-4o. Estoy listo para ayudarte con rúbricas, planeaciones de clase, ideas para subastas con EduCoins, convivencia y gestión educativa.
                     </p>
@@ -137,7 +118,11 @@ import {
                           (click)="sendSuggestion(sugg)"
                           class="w-full text-left p-2.5 rounded-xl bg-surface hover:bg-primary/10 border border-border hover:border-primary/40 text-xs text-text transition-all duration-150 flex items-start gap-2 group"
                         >
-                          <span class="text-primary mt-0.5 group-hover:scale-110 transition-transform">✨</span>
+                          <span class="w-3.5 h-3.5 text-primary mt-0.5 group-hover:scale-110 transition-transform shrink-0 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
+                            </svg>
+                          </span>
                           <span class="flex-1">{{ sugg }}</span>
                         </button>
                       }
@@ -252,45 +237,11 @@ import {
           </div>
         }
 
-        <!-- ================= BOTÓN FLOTANTE (TRIGGER) ================= -->
-        <button
-          type="button"
-          (click)="toggleChat()"
-          class="group relative flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-primary to-orange-500 text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200"
-          [attr.aria-expanded]="isOpen()"
-          aria-label="Abrir EDUBID IA"
-        >
-          <!-- Efecto resplandor / pulse -->
-          <span
-            class="absolute -inset-0.5 rounded-full bg-gradient-to-r from-primary to-orange-400 opacity-60 blur-xs group-hover:opacity-100 transition-opacity animate-pulse"
-          ></span>
-
-          <!-- Contenido del botón -->
-          <div class="relative flex items-center gap-2.5">
-            <!-- Icono Bot -->
-            <div class="w-6 h-6 flex items-center justify-center">
-              @if (isOpen()) {
-                <svg class="w-5 h-5 transition-transform duration-200 group-hover:rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              } @else {
-                <svg class="w-5 h-5 transition-transform duration-200 group-hover:scale-110" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect width="18" height="12" x="3" y="8" rx="2" />
-                  <path d="M12 2v6" />
-                  <path d="M9 14h.01" />
-                  <path d="M15 14h.01" />
-                  <path d="M7 20v2" />
-                  <path d="M17 20v2" />
-                </svg>
-              }
-            </div>
-
-            <span class="font-bold text-xs tracking-wide uppercase pr-0.5">
-              EDUBID IA
-            </span>
-          </div>
-        </button>
+        <!-- ================= BOTÓN FLOTANTE CON AVATAR INTERACTIVO ================= -->
+        <app-bot-avatar
+          [isOpen]="isOpen()"
+          (avatarClick)="toggleChat()"
+        />
 
       </div>
     }
@@ -443,7 +394,7 @@ export class AiAssistantComponent implements OnInit, AfterViewChecked {
           'Lo siento, ocurrió un error al conectar con EDUBID IA. Por favor intenta de nuevo.';
         const errorMsg: AiChatMessage = {
           role: 'assistant',
-          content: `⚠️ **Error:** ${errorDetail}`,
+          content: `**Error:** ${errorDetail}`,
           timestamp: new Date(),
         };
         this.messages.update((msgs) => [...msgs, errorMsg]);

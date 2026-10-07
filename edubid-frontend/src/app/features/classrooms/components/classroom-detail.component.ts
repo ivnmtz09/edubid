@@ -312,7 +312,7 @@ import { NotificationService } from '../../../core/services/notification.service
                   type="text"
                   formControlName="nombre"
                   placeholder="Ej: Décimo A, Grupo 10-01, etc."
-                  class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted"
+                  class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 @if (groupForm.get('nombre')?.touched && groupForm.get('nombre')?.hasError('required')) {
                   <p class="text-red-500 text-xs mt-1">El nombre del grupo es obligatorio</p>
@@ -328,7 +328,7 @@ import { NotificationService } from '../../../core/services/notification.service
                   rows="3"
                   formControlName="descripcion"
                   placeholder="Horario, jornada, observaciones..."
-                  class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted leading-relaxed"
+                  class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
                 ></textarea>
               </div>
 
@@ -584,17 +584,59 @@ import { NotificationService } from '../../../core/services/notification.service
                     <option value="examen">Examen</option>
                   </select>
                 </div>
+              </div>
 
-                <div>
-                  <label for="act-deadline" class="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider mb-1.5">
-                    Fecha Límite *
+              <!-- Plazo Máximo de Entrega (Fecha + Hora en intervalos de 30m) -->
+              <div class="p-4 rounded-2xl bg-neutral-50/70 dark:bg-neutral-900/50 border border-border space-y-3">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                    Plazo Máximo de Entrega *
                   </label>
-                  <input
-                    id="act-deadline"
-                    type="datetime-local"
-                    [(ngModel)]="activityFechaEntrega"
-                    class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                  />
+                  <span class="text-[11px] text-text-muted font-medium">Intervalos de 30 minutos</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <!-- Fecha (Día) -->
+                  <div>
+                    <label class="block text-[11px] font-semibold text-text-muted mb-1">Día límite *</label>
+                    <input
+                      type="date"
+                      [ngModel]="activityDueDate()"
+                      (ngModelChange)="activityDueDate.set($event)"
+                      class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                    />
+                  </div>
+
+                  <!-- Hora límite fija cada 30 min -->
+                  <div>
+                    <label class="block text-[11px] font-semibold text-text-muted mb-1">Hora límite *</label>
+                    <select
+                      [ngModel]="activityDueTime()"
+                      (ngModelChange)="activityDueTime.set($event)"
+                      class="w-full px-3 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer font-mono"
+                    >
+                      @for (opt of timeIntervalOptions; track opt.value) {
+                        <option [value]="opt.value">{{ opt.label }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Botones de atajo rápido de hora -->
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider mr-1">Rápido:</span>
+                  @for (preset of quickTimePresets; track preset.value) {
+                    <button
+                      type="button"
+                      (click)="activityDueTime.set(preset.value)"
+                      class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer"
+                      [ngClass]="activityDueTime() === preset.value
+                        ? 'bg-primary text-white border-primary shadow-xs'
+                        : 'bg-surface hover:bg-neutral-100 dark:hover:bg-neutral-800 text-text border-border'"
+                    >
+                      {{ preset.label }}
+                    </button>
+                  }
                 </div>
               </div>
 
@@ -607,7 +649,7 @@ import { NotificationService } from '../../../core/services/notification.service
                   type="text"
                   [(ngModel)]="activityNombre"
                   placeholder="Ej: Taller 1 - Análisis de Algoritmos"
-                  class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted"
+                  class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -620,7 +662,7 @@ import { NotificationService } from '../../../core/services/notification.service
                   rows="3"
                   [(ngModel)]="activityDescripcion"
                   placeholder="Describe la consigna, recursos requeridos o directrices de entrega..."
-                  class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted leading-relaxed"
+                  class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
                 ></textarea>
               </div>
 
@@ -664,7 +706,7 @@ import { NotificationService } from '../../../core/services/notification.service
                 <button
                   type="button"
                   (click)="onSubmitCreateActivity()"
-                  [disabled]="isSavingActivity() || !activityNombre().trim() || !activityFechaEntrega()"
+                  [disabled]="isSavingActivity() || !activityNombre().trim() || !activityDueDate()"
                   class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   @if (isSavingActivity()) {
@@ -889,7 +931,55 @@ export class ClassroomDetailComponent implements OnInit {
   activityDescripcion = signal<string>('');
   activityEducoins = signal<number>(100);
   activityXP = signal<number>(10);
-  activityFechaEntrega = signal<string>('');
+  activityDueDate = signal<string>('');
+  activityDueTime = signal<string>('23:59');
+
+  readonly timeIntervalOptions = [
+    { value: '06:00', label: '06:00 AM' },
+    { value: '06:30', label: '06:30 AM' },
+    { value: '07:00', label: '07:00 AM' },
+    { value: '07:30', label: '07:30 AM' },
+    { value: '08:00', label: '08:00 AM (Inicio jornada)' },
+    { value: '08:30', label: '08:30 AM' },
+    { value: '09:00', label: '09:00 AM' },
+    { value: '09:30', label: '09:30 AM' },
+    { value: '10:00', label: '10:00 AM' },
+    { value: '10:30', label: '10:30 AM' },
+    { value: '11:00', label: '11:00 AM' },
+    { value: '11:30', label: '11:30 AM' },
+    { value: '12:00', label: '12:00 PM (Mediodía)' },
+    { value: '12:30', label: '12:30 PM' },
+    { value: '13:00', label: '01:00 PM' },
+    { value: '13:30', label: '01:30 PM' },
+    { value: '14:00', label: '02:00 PM' },
+    { value: '14:30', label: '02:30 PM' },
+    { value: '15:00', label: '03:00 PM' },
+    { value: '15:30', label: '03:30 PM' },
+    { value: '16:00', label: '04:00 PM' },
+    { value: '16:30', label: '04:30 PM' },
+    { value: '17:00', label: '05:00 PM' },
+    { value: '17:30', label: '05:30 PM' },
+    { value: '18:00', label: '06:00 PM (Fin de la tarde)' },
+    { value: '18:30', label: '06:30 PM' },
+    { value: '19:00', label: '07:00 PM' },
+    { value: '19:30', label: '07:30 PM' },
+    { value: '20:00', label: '08:00 PM' },
+    { value: '20:30', label: '08:30 PM' },
+    { value: '21:00', label: '09:00 PM' },
+    { value: '21:30', label: '09:30 PM' },
+    { value: '22:00', label: '10:00 PM' },
+    { value: '22:30', label: '10:30 PM' },
+    { value: '23:00', label: '11:00 PM' },
+    { value: '23:30', label: '11:30 PM' },
+    { value: '23:59', label: '11:59 PM (Fin del día)' },
+  ];
+
+  readonly quickTimePresets = [
+    { value: '23:59', label: '23:59 (Fin de día)' },
+    { value: '18:00', label: '18:00 (Tarde)' },
+    { value: '12:00', label: '12:00 (Mediodía)' },
+    { value: '08:00', label: '08:00 (Mañana)' },
+  ];
 
   groupForm: FormGroup = this.fb.group({
     nombre: ['', [Validators.required]],
@@ -1090,8 +1180,8 @@ export class ClassroomDetailComponent implements OnInit {
 
     const inAWeek = new Date();
     inAWeek.setDate(inAWeek.getDate() + 7);
-    inAWeek.setMinutes(inAWeek.getMinutes() - inAWeek.getTimezoneOffset());
-    this.activityFechaEntrega.set(inAWeek.toISOString().slice(0, 16));
+    this.activityDueDate.set(inAWeek.toISOString().slice(0, 10));
+    this.activityDueTime.set('23:59');
 
     this.showCreateActivityModal.set(true);
   }
@@ -1103,12 +1193,16 @@ export class ClassroomDetailComponent implements OnInit {
   onSubmitCreateActivity(): void {
     if (this.isSavingActivity()) return;
     const grp = this.selectedGroupForActivities();
-    if (!grp || !this.activityNombre().trim() || !this.activityFechaEntrega()) {
+    if (!grp || !this.activityNombre().trim() || !this.activityDueDate()) {
       this.notificationService.error('Ingresa el nombre y fecha de entrega de la actividad.');
       return;
     }
 
     this.isSavingActivity.set(true);
+    const datePart = this.activityDueDate();
+    const timePart = this.activityDueTime() || '23:59';
+    const isoDateTime = new Date(`${datePart}T${timePart}:00`).toISOString();
+
     const payload = {
       group: grp.id,
       tipo: this.activityTipo(),
@@ -1116,7 +1210,7 @@ export class ClassroomDetailComponent implements OnInit {
       descripcion: this.activityDescripcion().trim(),
       valor_educoins: this.activityEducoins(),
       puntos_experiencia: this.activityXP(),
-      fecha_entrega: new Date(this.activityFechaEntrega()).toISOString(),
+      fecha_entrega: isoDateTime,
       habilitada: true,
     };
 

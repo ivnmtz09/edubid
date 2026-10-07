@@ -189,6 +189,36 @@ import { NotificationService } from '../../core/services/notification.service';
                         </a>
                       </div>
                     }
+
+                    <!-- Opción de anular entrega si no está calificada y no está vencida -->
+                    @if ((mySubmission()?.calificacion === null || mySubmission()?.calificacion === undefined) && !isVencida(selectedActivity()!.fecha_entrega)) {
+                      <div class="mt-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="space-y-0.5">
+                          <p class="font-bold text-slate-900 dark:text-neutral-100 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            ¿Te equivocaste de archivo o desarrollo?
+                          </p>
+                          <p class="text-[11px] text-text-muted">
+                            Puedes anular esta entrega para subir una nueva versión antes del vencimiento.
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          (click)="cancelMySubmission()"
+                          [disabled]="isSaving()"
+                          class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-surface hover:bg-rose-500/10 border border-rose-500/30 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                          title="Anular entrega actual para volver a subir"
+                        >
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span>Anular Entrega</span>
+                        </button>
+                      </div>
+                    }
                   </div>
                 </div>
               } @else {
@@ -517,19 +547,65 @@ import { NotificationService } from '../../core/services/notification.service';
                 </select>
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="block font-semibold text-text-muted mb-1">Tipo de Actividad *</label>
-                  <select formControlName="tipo" class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none">
-                    <option value="tarea">Tarea</option>
-                    <option value="proyecto">Proyecto</option>
-                    <option value="evaluacion">Evaluación</option>
-                    <option value="examen">Examen</option>
-                  </select>
+              <div>
+                <label class="block font-semibold text-text-muted mb-1">Tipo de Actividad *</label>
+                <select formControlName="tipo" class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none">
+                  <option value="tarea">Tarea</option>
+                  <option value="proyecto">Proyecto</option>
+                  <option value="evaluacion">Evaluación</option>
+                  <option value="examen">Examen</option>
+                </select>
+              </div>
+
+              <!-- Plazo Máximo de Entrega (Fecha + Hora en intervalos de 30m) -->
+              <div class="p-4 rounded-2xl bg-neutral-50/70 dark:bg-neutral-900/50 border border-border space-y-3">
+                <div class="flex items-center justify-between">
+                  <label class="block text-xs font-bold text-text uppercase tracking-wider">
+                    Plazo Máximo de Entrega *
+                  </label>
+                  <span class="text-[11px] text-text-muted font-medium">Intervalos de 30 minutos</span>
                 </div>
-                <div>
-                  <label class="block font-semibold text-text-muted mb-1">Fecha Límite *</label>
-                  <input type="datetime-local" formControlName="fecha_entrega" class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none" />
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <!-- Fecha (Día) -->
+                  <div>
+                    <label class="block text-[11px] font-semibold text-text-muted mb-1">Día límite *</label>
+                    <input
+                      type="date"
+                      formControlName="fecha_entrega_date"
+                      class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none text-xs sm:text-sm cursor-pointer"
+                    />
+                  </div>
+
+                  <!-- Hora límite en intervalos de 30 minutos -->
+                  <div>
+                    <label class="block text-[11px] font-semibold text-text-muted mb-1">Hora límite *</label>
+                    <select
+                      formControlName="fecha_entrega_time"
+                      class="w-full px-3 py-2 bg-bg border border-border rounded-xl text-text focus:ring-2 focus:ring-primary focus:outline-none text-xs sm:text-sm cursor-pointer font-mono"
+                    >
+                      @for (opt of timeIntervalOptions; track opt.value) {
+                        <option [value]="opt.value">{{ opt.label }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Botones de atajo rápido de hora -->
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider mr-1">Rápido:</span>
+                  @for (preset of quickTimePresets; track preset.value) {
+                    <button
+                      type="button"
+                      (click)="setActivityDueTime(preset.value)"
+                      class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all cursor-pointer"
+                      [ngClass]="activityForm.get('fecha_entrega_time')?.value === preset.value
+                        ? 'bg-primary text-white border-primary shadow-xs'
+                        : 'bg-surface hover:bg-neutral-100 dark:hover:bg-neutral-800 text-text border-border'"
+                    >
+                      {{ preset.label }}
+                    </button>
+                  }
                 </div>
               </div>
 
@@ -639,12 +715,64 @@ export class ActivitiesComponent implements OnInit {
     return this.groups().filter(g => g.classroom === cid);
   });
 
+  readonly timeIntervalOptions = [
+    { value: '06:00', label: '06:00 AM' },
+    { value: '06:30', label: '06:30 AM' },
+    { value: '07:00', label: '07:00 AM' },
+    { value: '07:30', label: '07:30 AM' },
+    { value: '08:00', label: '08:00 AM (Inicio jornada)' },
+    { value: '08:30', label: '08:30 AM' },
+    { value: '09:00', label: '09:00 AM' },
+    { value: '09:30', label: '09:30 AM' },
+    { value: '10:00', label: '10:00 AM' },
+    { value: '10:30', label: '10:30 AM' },
+    { value: '11:00', label: '11:00 AM' },
+    { value: '11:30', label: '11:30 AM' },
+    { value: '12:00', label: '12:00 PM (Mediodía)' },
+    { value: '12:30', label: '12:30 PM' },
+    { value: '13:00', label: '01:00 PM' },
+    { value: '13:30', label: '01:30 PM' },
+    { value: '14:00', label: '02:00 PM' },
+    { value: '14:30', label: '02:30 PM' },
+    { value: '15:00', label: '03:00 PM' },
+    { value: '15:30', label: '03:30 PM' },
+    { value: '16:00', label: '04:00 PM' },
+    { value: '16:30', label: '04:30 PM' },
+    { value: '17:00', label: '05:00 PM' },
+    { value: '17:30', label: '05:30 PM' },
+    { value: '18:00', label: '06:00 PM (Fin de la tarde)' },
+    { value: '18:30', label: '06:30 PM' },
+    { value: '19:00', label: '07:00 PM' },
+    { value: '19:30', label: '07:30 PM' },
+    { value: '20:00', label: '08:00 PM' },
+    { value: '20:30', label: '08:30 PM' },
+    { value: '21:00', label: '09:00 PM' },
+    { value: '21:30', label: '09:30 PM' },
+    { value: '22:00', label: '10:00 PM' },
+    { value: '22:30', label: '10:30 PM' },
+    { value: '23:00', label: '11:00 PM' },
+    { value: '23:30', label: '11:30 PM' },
+    { value: '23:59', label: '11:59 PM (Fin del día)' },
+  ];
+
+  readonly quickTimePresets = [
+    { value: '23:59', label: '23:59 (Fin de día)' },
+    { value: '18:00', label: '18:00 (Tarde)' },
+    { value: '12:00', label: '12:00 (Mediodía)' },
+    { value: '08:00', label: '08:00 (Mañana)' },
+  ];
+
+  setActivityDueTime(time: string): void {
+    this.activityForm.patchValue({ fecha_entrega_time: time });
+  }
+
   activityForm: FormGroup = this.fb.group({
     group: ['', Validators.required],
     tipo: ['tarea', Validators.required],
     nombre: ['', Validators.required],
     descripcion: [''],
-    fecha_entrega: ['', Validators.required],
+    fecha_entrega_date: ['', Validators.required],
+    fecha_entrega_time: ['23:59', Validators.required],
     valor_educoins: [100, [Validators.required, Validators.min(1)]],
     puntos_experiencia: [10, [Validators.required, Validators.min(1)]],
   });
@@ -722,11 +850,14 @@ export class ActivitiesComponent implements OnInit {
   }
 
   openCreateModal(): void {
+    const inAWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     this.activityForm.reset({
       group: this.selectedGroupId() || '',
       tipo: 'tarea',
       nombre: '',
       descripcion: '',
+      fecha_entrega_date: inAWeek.toISOString().slice(0, 10),
+      fecha_entrega_time: '23:59',
       valor_educoins: 100,
       puntos_experiencia: 10
     });
@@ -741,10 +872,18 @@ export class ActivitiesComponent implements OnInit {
     if (this.activityForm.invalid || this.isSaving()) return;
     this.isSaving.set(true);
     const val = this.activityForm.value;
+    const datePart = val.fecha_entrega_date;
+    const timePart = val.fecha_entrega_time || '23:59';
+    const isoDateTime = new Date(`${datePart}T${timePart}:00`).toISOString();
+
     const payload = {
-      ...val,
       group: Number(val.group),
-      fecha_entrega: new Date(val.fecha_entrega).toISOString(),
+      tipo: val.tipo,
+      nombre: val.nombre,
+      descripcion: val.descripcion,
+      valor_educoins: val.valor_educoins,
+      puntos_experiencia: val.puntos_experiencia,
+      fecha_entrega: isoDateTime,
       habilitada: true
     };
     this.activityService.createActivity(payload).subscribe({
@@ -757,6 +896,34 @@ export class ActivitiesComponent implements OnInit {
       error: (err) => {
         this.isSaving.set(false);
         this.notifService.error(err.error?.detail || 'Error al crear la actividad.');
+      }
+    });
+  }
+
+  cancelMySubmission(): void {
+    const sub = this.mySubmission();
+    if (!sub) return;
+
+    if (!confirm('¿Estás seguro de anular esta entrega? Se eliminará el envío actual para que puedas subir una nueva respuesta o archivo antes del plazo límite.')) {
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.activityService.cancelSubmission(sub.id).subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.mySubmission.set(null);
+        this.submitContenido = '';
+        this.selectedFile = null;
+        this.notifService.success('Entrega anulada. Ya puedes subir una nueva versión.');
+        if (this.selectedActivity()) {
+          this.loadActivityDetails(this.selectedActivity()!.id);
+        }
+      },
+      error: (err) => {
+        this.isSaving.set(false);
+        const msg = err?.error?.detail || err?.error?.error || 'No se pudo anular la entrega.';
+        this.notifService.error(msg);
       }
     });
   }

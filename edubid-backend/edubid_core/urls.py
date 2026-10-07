@@ -26,6 +26,7 @@ urlpatterns = [
     path('api/notifications/', include('apps.notifications.urls')),
     path('api/', include('apps.institutions.urls')),
     path('api/ai/', include('apps.ai_assistant.urls')),
+    path('api/reports/', include('apps.reports.urls')),
 ]
 
 from django.views.static import serve

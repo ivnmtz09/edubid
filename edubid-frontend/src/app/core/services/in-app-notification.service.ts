@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subscription, interval, tap, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from './notification.service';
+import { SoundService } from './sound.service';
 
 export interface InAppNotification {
   id: number;
@@ -31,6 +32,7 @@ export interface NotificationStats {
 export class InAppNotificationService {
   private http = inject(HttpClient);
   private toastr = inject(NotificationService);
+  private soundService = inject(SoundService);
   private apiUrl = `${environment.apiUrl}/notifications`;
 
   notifications = signal<InAppNotification[]>([]);
@@ -105,6 +107,7 @@ export class InAppNotificationService {
     // Si aumentaron las notificaciones no leídas después de la carga inicial
     if (this.hasLoadedInitial) {
       if (newCount > prev) {
+        this.soundService.playNotification();
         this.hasNewNotificationAnimation.set(true);
         setTimeout(() => this.hasNewNotificationAnimation.set(false), 3500);
 

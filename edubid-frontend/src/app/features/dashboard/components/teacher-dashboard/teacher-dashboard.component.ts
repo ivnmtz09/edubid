@@ -402,7 +402,7 @@ import { WebSocketService } from '../../../../core/services/websocket.service';
                     rows="3"
                     [(ngModel)]="reviewFeedback"
                     placeholder="Excelente trabajo resolviendo la actividad, tus aportes fueron clave..."
-                    class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted leading-relaxed"
+                    class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
                   ></textarea>
                 </div>
               </div>
@@ -480,7 +480,7 @@ import { WebSocketService } from '../../../../core/services/websocket.service';
                   type="text"
                   [(ngModel)]="auctionTitle"
                   placeholder="Ej: +1.0 Punto extra en evaluación final, Escoger equipo..."
-                  class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted"
+                  class="w-full px-4 py-2.5 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -493,7 +493,7 @@ import { WebSocketService } from '../../../../core/services/websocket.service';
                   rows="2"
                   [(ngModel)]="auctionDescription"
                   placeholder="Detalles sobre las condiciones de uso de este incentivo..."
-                  class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-text-muted leading-relaxed"
+                  class="w-full px-4 py-2 text-sm border border-border rounded-xl bg-bg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
                 ></textarea>
               </div>
 

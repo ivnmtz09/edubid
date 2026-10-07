@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'apps.common',
     'apps.notifications',
     'apps.ai_assistant',
+    'apps.reports',
     'storages',
 ]
 
