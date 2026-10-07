@@ -650,7 +650,7 @@ EduBid integra un Agente Autónomo con GPT-4o vía OpenRouter que ejecuta herram
 
 #### `POST /api/ai/chat/`
 - **Permisos:** `IsAuthenticated` (Roles autorizados: `docente`, `coordinador`, `rector`, `admin`).
-- **Descripción:** Envía un historial de conversación al agente. El agente evalúa si requiere consultar la base de datos o ejecutar una acción (crear actividades, consultar grupos/estudiantes, calificar entregas, crear subastas, otorgar EduCoins) mediante *Tool Calling* y genera la respuesta consolidada.
+- **Descripción:** Envía un historial de conversación al agente. El agente evalúa si requiere consultar la base de datos o ejecutar una acción (crear clases y grupos escolares, crear actividades, consultar grupos/estudiantes, calificar entregas, crear subastas, otorgar EduCoins) mediante *Tool Calling* y genera la respuesta consolidada.
 - **Request Body:**
 ```json
 {
@@ -679,6 +679,7 @@ EduBid integra un Agente Autónomo con GPT-4o vía OpenRouter que ejecuta herram
 {
   "role": "docente",
   "suggestions": [
+    "Crea la clase de Desarrollo Móvil y crea 2 grupos A1 y B1.",
     "¿Cuántos grupos o asignaturas tengo actualmente?",
     "¿Qué estudiantes tengo en mis grupos y qué saldo de EduCoins tienen?",
     "¿Qué actividades tengo activas y cuáles tienen entregas pendientes?",

@@ -2,6 +2,7 @@ import logging
 from datetime import timedelta
 from decimal import Decimal
 from django.utils import timezone
+from django.db import transaction
 from django.db.models import Count, Q
 
 from apps.classrooms.models import Classroom
@@ -19,11 +20,117 @@ AI_TOOLS_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_my_classrooms_and_groups",
-            "description": "Consulta las asignaturas (aulas/classrooms) y grupos que tiene a cargo el docente o la institución. Muestra nombres, códigos de acceso y cantidad de estudiantes.",
+            "description": "Consulta las asignaturas (aulas/classrooms/clases) y grupos que tiene a cargo el docente o la institución. Muestra nombres, códigos de acceso y cantidad de estudiantes.",
             "parameters": {
                 "type": "object",
                 "properties": {},
                 "required": []
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_classroom",
+            "description": "Crea una nueva clase o asignatura (Classroom/Aula) para el docente en la plataforma.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "nombre": {
+                        "type": "string",
+                        "description": "Nombre de la clase o asignatura (ej: 'Desarrollo Móvil', 'Física 11°')."
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "description": "Descripción opcional de la clase o asignatura."
+                    }
+                },
+                "required": ["nombre"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_group",
+            "description": "Crea un nuevo grupo escolar dentro de una clase o asignatura existente. El sistema le generará automáticamente un código de unión único y sus 3 períodos de cortes.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "classroom_id": {
+                        "type": "integer",
+                        "description": "ID numérico de la clase o asignatura donde se creará el grupo."
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "description": "Nombre del grupo (ej: 'A1', 'B1', 'Grupo 10-A')."
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "description": "Descripción opcional del grupo."
+                    }
+                },
+                "required": ["classroom_id", "nombre"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_classroom_with_groups",
+            "description": "Crea una clase o asignatura y uno o varios grupos escolares asociados en una sola operación (ej: clase 'Desarrollo Móvil' con grupos ['A1', 'B1']).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "nombre_asignatura": {
+                        "type": "string",
+                        "description": "Nombre de la asignatura o clase (ej: 'Desarrollo Móvil')."
+                    },
+                    "descripcion_asignatura": {
+                        "type": "string",
+                        "description": "Descripción opcional de la clase."
+                    },
+                    "nombres_grupos": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Lista con los nombres de los grupos a crear (ej: ['A1', 'B1'])."
+                    }
+                },
+                "required": ["nombre_asignatura", "nombres_grupos"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_classroom",
+            "description": "Elimina una asignatura o clase creada por el docente.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "classroom_id": {
+                        "type": "integer",
+                        "description": "ID de la clase a eliminar."
+                    }
+                },
+                "required": ["classroom_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_group",
+            "description": "Elimina un grupo escolar de una clase o asignatura.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "grupo_id": {
+                        "type": "integer",
+                        "description": "ID del grupo a eliminar."
+                    }
+                },
+                "required": ["grupo_id"]
             }
         }
     },
@@ -281,6 +388,191 @@ def execute_get_my_classrooms_and_groups(user, args):
         "total_grupos": total_grupos,
         "total_estudiantes_impactados": len(total_estudiantes_unicos),
         "asignaturas": data
+    }
+
+
+def execute_create_classroom(user, args):
+    """Crea una nueva clase o asignatura para el docente."""
+    if user.role not in ['docente', 'admin', 'rector', 'coordinador']:
+        return {"error": "Solo docentes o directivos tienen permisos para crear clases."}
+
+    nombre = args.get('nombre', '').strip()
+    if not nombre:
+        return {"error": "El nombre de la clase es obligatorio."}
+
+    descripcion = args.get('descripcion', '').strip()
+
+    docente = user
+    docente_id = args.get('docente_id')
+    if docente_id and user.role in ['admin', 'rector', 'coordinador']:
+        try:
+            docente = User.objects.get(id=docente_id, role='docente')
+        except User.DoesNotExist:
+            return {"error": f"No se encontró un docente con ID {docente_id}."}
+
+    classroom = Classroom.objects.create(
+        nombre=nombre,
+        descripcion=descripcion or None,
+        docente=docente
+    )
+
+    return {
+        "status": "success",
+        "classroom_id": classroom.id,
+        "nombre": classroom.nombre,
+        "descripcion": classroom.descripcion or "",
+        "docente": f"{docente.first_name} {docente.last_name}".strip() or docente.email,
+        "mensaje": f"Clase '{classroom.nombre}' creada exitosamente con ID {classroom.id}."
+    }
+
+
+def execute_create_group(user, args):
+    """Crea un grupo dentro de una clase existente."""
+    if user.role not in ['docente', 'admin', 'rector', 'coordinador']:
+        return {"error": "Solo docentes o directivos pueden crear grupos."}
+
+    classroom_id = args.get('classroom_id')
+    nombre = args.get('nombre', '').strip()
+    descripcion = args.get('descripcion', '').strip()
+
+    if not classroom_id:
+        return {"error": "Debes especificar el ID de la clase (classroom_id)."}
+    if not nombre:
+        return {"error": "El nombre del grupo es obligatorio."}
+
+    try:
+        classroom = Classroom.objects.get(id=classroom_id)
+    except Classroom.DoesNotExist:
+        return {"error": f"No existe la clase con ID {classroom_id}."}
+
+    if user.role == 'docente' and classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para agregar grupos a una clase que no te pertenece."}
+
+    if Group.objects.filter(classroom=classroom, nombre__iexact=nombre, activo=True).exists():
+        return {"error": f"Ya existe un grupo activo con el nombre '{nombre}' en la clase '{classroom.nombre}'."}
+
+    grupo = Group.objects.create(
+        classroom=classroom,
+        nombre=nombre,
+        descripcion=descripcion or None,
+        activo=True
+    )
+
+    return {
+        "status": "success",
+        "grupo_id": grupo.id,
+        "grupo_nombre": grupo.nombre,
+        "classroom_id": classroom.id,
+        "classroom_nombre": classroom.nombre,
+        "codigo_acceso": grupo.codigo,
+        "mensaje": f"Grupo '{grupo.nombre}' creado exitosamente en '{classroom.nombre}' con código de acceso {grupo.codigo}."
+    }
+
+
+def execute_create_classroom_with_groups(user, args):
+    """Crea una clase y sus grupos en una sola transacción atómica."""
+    if user.role not in ['docente', 'admin', 'rector', 'coordinador']:
+        return {"error": "Solo docentes o directivos tienen permisos para crear clases y grupos."}
+
+    nombre_asignatura = args.get('nombre_asignatura', '').strip()
+    descripcion_asignatura = args.get('descripcion_asignatura', '').strip()
+    nombres_grupos = args.get('nombres_grupos', [])
+
+    if not nombre_asignatura:
+        return {"error": "El nombre de la asignatura/clase es obligatorio."}
+
+    if not nombres_grupos or not isinstance(nombres_grupos, list):
+        return {"error": "Debes proporcionar una lista con al menos un nombre de grupo en 'nombres_grupos'."}
+
+    docente = user
+    docente_id = args.get('docente_id')
+    if docente_id and user.role in ['admin', 'rector', 'coordinador']:
+        try:
+            docente = User.objects.get(id=docente_id, role='docente')
+        except User.DoesNotExist:
+            return {"error": f"No se encontró un docente con ID {docente_id}."}
+
+    with transaction.atomic():
+        classroom = Classroom.objects.create(
+            nombre=nombre_asignatura,
+            descripcion=descripcion_asignatura or None,
+            docente=docente
+        )
+
+        grupos_creados = []
+        for g_nombre in nombres_grupos:
+            g_nombre_clean = str(g_nombre).strip()
+            if not g_nombre_clean:
+                continue
+            grupo = Group.objects.create(
+                classroom=classroom,
+                nombre=g_nombre_clean,
+                activo=True
+            )
+            grupos_creados.append({
+                "id": grupo.id,
+                "nombre": grupo.nombre,
+                "codigo_acceso": grupo.codigo
+            })
+
+    detalles_grupos = ", ".join([f"{g['nombre']} (Código: {g['codigo_acceso']})" for g in grupos_creados])
+    return {
+        "status": "success",
+        "classroom_id": classroom.id,
+        "classroom_nombre": classroom.nombre,
+        "docente": f"{docente.first_name} {docente.last_name}".strip() or docente.email,
+        "total_grupos_creados": len(grupos_creados),
+        "grupos": grupos_creados,
+        "mensaje": f"Se ha creado exitosamente la clase '{classroom.nombre}' con {len(grupos_creados)} grupos: {detalles_grupos}."
+    }
+
+
+def execute_delete_classroom(user, args):
+    """Elimina una clase del docente."""
+    classroom_id = args.get('classroom_id')
+    if not classroom_id:
+        return {"error": "Debes especificar el classroom_id a eliminar."}
+
+    try:
+        classroom = Classroom.objects.get(id=classroom_id)
+    except Classroom.DoesNotExist:
+        return {"error": f"No existe la clase con ID {classroom_id}."}
+
+    if user.role == 'docente' and classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para eliminar esta clase porque no eres su docente titular."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para eliminar clases."}
+
+    nombre = classroom.nombre
+    classroom.delete()
+    return {
+        "status": "success",
+        "mensaje": f"La clase '{nombre}' y todos sus grupos asociados han sido eliminados correctamente."
+    }
+
+
+def execute_delete_group(user, args):
+    """Elimina un grupo de una clase."""
+    grupo_id = args.get('grupo_id')
+    if not grupo_id:
+        return {"error": "Debes especificar el grupo_id a eliminar."}
+
+    try:
+        grupo = Group.objects.get(id=grupo_id)
+    except Group.DoesNotExist:
+        return {"error": f"No existe el grupo con ID {grupo_id}."}
+
+    if user.role == 'docente' and grupo.classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para eliminar este grupo."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para eliminar grupos."}
+
+    nombre = grupo.nombre
+    classroom_nombre = grupo.classroom.nombre
+    grupo.delete()
+    return {
+        "status": "success",
+        "mensaje": f"El grupo '{nombre}' de la clase '{classroom_nombre}' ha sido eliminado correctamente."
     }
 
 
@@ -648,6 +940,11 @@ def execute_get_institution_summary(user, args):
 
 TOOL_HANDLERS = {
     "get_my_classrooms_and_groups": execute_get_my_classrooms_and_groups,
+    "create_classroom": execute_create_classroom,
+    "create_group": execute_create_group,
+    "create_classroom_with_groups": execute_create_classroom_with_groups,
+    "delete_classroom": execute_delete_classroom,
+    "delete_group": execute_delete_group,
     "get_classroom_students": execute_get_classroom_students,
     "get_activities": execute_get_activities,
     "create_activity": execute_create_activity,

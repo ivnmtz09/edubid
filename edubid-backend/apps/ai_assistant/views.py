@@ -82,6 +82,7 @@ class AiSuggestionsView(APIView):
 
         suggestions_by_role = {
             'docente': [
+                "Crea la clase de Desarrollo Móvil con los grupos A1 y B1.",
                 "¿Cuántos grupos o asignaturas tengo actualmente?",
                 "¿Qué estudiantes tengo en mis grupos y qué saldo de EduCoins tienen?",
                 "¿Qué actividades tengo activas y cuáles tienen entregas pendientes?",
