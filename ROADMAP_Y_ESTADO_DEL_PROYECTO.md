@@ -1,7 +1,7 @@
 # 🚀 EduBid — Estado Actual del Proyecto y Hoja de Ruta (Roadmap)
 
 > **Documento Oficial de Arquitectura, Registro de Logros y Próximos Pasos**  
-> *Última actualización:* Septiembre 2026 | *Versión de la plataforma:* 2.4.0 (Angular 19 + Django 5.2)
+> *Última actualización:* Octubre 2026 | *Versión de la plataforma:* 2.5.0 (Angular 19 + Django 5.2)
 
 ---
 
@@ -128,6 +128,33 @@ flowchart LR
   - Al hacer clic en una notificación in-app, el sistema la marca como leída y redirige inmediatamente al recurso correspondiente (`/auctions`, `/activities`, `/grades`, `/wallet`, `/classrooms`, `/groups`, `/profile`).
 
 ---
+
+### 🤖 2.4 EDUBID IA — Agente Autónomo Copiloto (Google AI Studio Gemini + CRUD Total)
+1. **Migración a Google AI Studio (Gemini)**:
+   - Motor principal basado en **`gemini-3.5-flash`** con tiempo de respuesta ultra-rápido (~1s).
+   - Respaldo automático (*Fallback*) escalonado a **`gemini-3.8-flash`** y OpenRouter (`openai/gpt-4o`) para garantizar 100% de disponibilidad ante cuotas o límites de tasa.
+   - Orquestación multi-turno con soporte para `thought_signature` en las llamadas a herramientas.
+2. **Capacidades de Acción Total (21 Herramientas en Base de Datos)**:
+   - **Clases y Aulas**: Consultar (`get_my_classrooms_and_groups`), crear individual (`create_classroom`), crear clase con grupos en una sola transacción (`create_classroom_with_groups`), editar nombre/descripción (`update_classroom`) y eliminar (`delete_classroom`).
+   - **Grupos Escolares**: Crear grupo con código de 6 caracteres y 3 periodos (`create_group`), editar grupo (`update_group`) y eliminar (`delete_group`).
+   - **Estudiantes**: Consultar matrícula por grupo con correos y saldo de EduCoins en tiempo real (`get_classroom_students`).
+   - **Actividades Pedagógicas**: Consultar (`get_activities`), crear tareas/proyectos/evaluaciones con EduCoins (`create_activity`), editar (`update_activity`) y eliminar (`delete_activity`).
+   - **Calificaciones**: Consultar entregas pendientes (`get_submissions_to_grade`) y calificar de 0.0 a 5.0 con feedback formativo y abono automático de monedas a los aprobados (`grade_submission`).
+   - **Subastas Pedagógicas**: Consultar (`get_auctions`), crear incentivos (`create_auction`), cerrar subasta activa liquidando al ganador y liberando fondos retenidos (`close_auction`), y cancelar/eliminar devolviendo monedas (`delete_auction`).
+   - **Economía de Aula**: Abonar EduCoins directamente a cualquier estudiante por mérito o participación (`award_educoins`).
+   - **Directivos**: Consolidado institucional para Rectoría y Coordinación (`get_institution_summary`).
+3. **Plataforma 100% Dinámica en Tiempo Real (Cero F5)**:
+   - Emisión del evento reactivo `actionCompleted$` en `AiAssistantService`.
+   - Sincronización automática de datos en pantalla para **Clases**, **Detalle de Clase**, **Actividades**, **Dashboard Docente** y **Subastas** al ejecutarse cualquier tool del agente.
+4. **Respuestas Limpias y Pedagógicas (Sin IDs Técnicos)**:
+   - Supresión de identificadores numéricos de base de datos (`ID: 4`, `ID: 5`, etc.) en las respuestas al usuario.
+   - Lenguaje claro, conciso y natural enfocado en la experiencia pedagógica.
+5. **Erradicación de Alertas Nativas de Navegador (`confirm()`)**:
+   - Sustitución de todos los `confirm()` del navegador por `ConfirmDialogService` y modales visuales accesibles con los colores institucionales del colegio.
+6. **Insignia Dinámica en Frontend**:
+   - El widget de chat refleja automáticamente el modelo activo (`Gemini 3.5 Flash`) de forma reactiva.
+
+---
  
 ## 🐘 3. Integración de Supabase (PostgreSQL) — Implementado y Operativo
  
@@ -170,6 +197,10 @@ python manage.py loaddata datos.json
 | Módulo / Característica | Estado | Responsable / Notas |
 |-------------------------|--------|---------------------|
 | **Migración a Supabase (PostgreSQL)** | ✅ Completado | Conexión pooler 5432, 37 tablas migradas y 76 tests OK |
+| **EDUBID IA (Google Gemini AI Studio)** | ✅ Completado | Motor `gemini-3.5-flash` con fallback a `gemini-3.8-flash` y OpenRouter |
+| **CRUD Total Autónomo de EDUBID IA** | ✅ Completado | 21 tools para gestión de aulas, grupos, tareas, subastas y notas sin IDs técnicos |
+| **Sincronización Reactiva en Tiempo Real** | ✅ Completado | Bus `actionCompleted$` actualiza UI sin recarga de página (cero F5) |
+| **Erradicación de Alertas confirm() Nativas** | ✅ Completado | Reemplazadas por `ConfirmDialogService` y modales visuales con tema |
 | **Notificaciones Interactivas (Redirección)** | ✅ Completado | Implementado en `LayoutComponent` y backend signals |
 | **Módulo de Perfil (`/profile`)** | ✅ Completado | Componente `ProfileComponent` y rutas operativas |
 | **Integración de Supabase Storage (S3)** | ⏳ Planificado | Opcional para centralizar archivos de `media/` |

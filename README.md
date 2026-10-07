@@ -120,15 +120,17 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 - **🎯 Sistema de Subastas Estratégicas**: Participación en pujas con validación inmediata de saldo y retención temporal inteligente.
 - **📚 Entregas y Retroalimentación**: Envío de actividades con archivos adjuntos y consulta de rúbricas y notas.
 
-### 🤖 EDUBID IA — Agente Inteligente Autónomo (OpenRouter GPT-4o)
-- **🧠 Copiloto Pedagógico y de Gestión con Tool Calling**: Agente inteligente con conexión directa a la base de datos de EduBid en tiempo real. No solo dialoga, sino que ejecuta acciones y consultas operativas según el rol del usuario.
-- **📚 Consultas Operativas en Vivo**: Docentes y directivos pueden consultar cuántas asignaturas o grupos tienen a cargo, códigos de acceso de unión, listado de alumnos inscritos y sus saldos de EduCoins.
-- **📝 Creación Automatizada de Actividades**: Permite crear tareas, proyectos o evaluaciones dictándole los requerimientos al chatbot con fecha límite y recompensa en EduCoins.
+### 🤖 EDUBID IA — Agente Inteligente Autónomo (Google AI Studio Gemini + CRUD Total)
+- **🧠 Copiloto Pedagógico y de Gestión con Tool Calling**: Agente autónomo con conexión directa a la base de datos de EduBid en tiempo real impulsado por **Google Gemini** (`gemini-3.5-flash` / `gemini-3.8-flash`) con respaldo escalonado en OpenRouter (`openai/gpt-4o`). No solo dialoga, sino que ejecuta acciones operativas y de base de datos completas.
+- **⚡ 21 Herramientas Autónomas (CRUD Completo)**: Permite consultar, crear, modificar y eliminar clases, salones, actividades pedagógicas y subastas de incentivos en una sola interacción conversacional.
+- **📚 Consultas Operativas y Estudiantes**: Docentes y directivos pueden consultar asignaturas, grupos activos, códigos de acceso de unión de 6 caracteres y listados de alumnos matriculados con sus saldos de EduCoins en tiempo real.
+- **📝 Creación y Gestión Total de Actividades**: Diseña, publica, edita o elimina tareas, proyectos o evaluaciones con fechas de entrega y recompensas en EduCoins.
 - **📊 Revisión y Calificación Asistida**: Consulta entregas de estudiantes y califica con nota numérica (0.0 a 5.0) y retroalimentación pedagógica, acreditando los EduCoins automáticamente a la billetera al aprobar.
-- **🔨 Creación de Subastas Educativas**: Apertura inmediata de subastas de incentivos pedagógicos en los grupos del aula.
+- **🔨 Gestión Total de Subastas Educativas**: Apertura inmediata de subastas de incentivos, cierre anticipado liquidando al ganador y liberando fondos retenidos, o cancelación con reembolso automático de monedas.
 - **🪙 Asignación Directa de EduCoins por Mérito**: Permite premiar la participación, puntualidad o esfuerzo de los estudiantes en tiempo real con transacciones contables en su `Wallet`.
 - **🏛️ Reportes Directivos Consolidados**: Genera resúmenes ejecutivos para Rectores y Coordinadores con estadísticas globales de la institución.
-- **💬 Widget Flotante y Chatbot Interactivo**: Botón flotante animado en la esquina inferior derecha con icono de robot 🤖, chips de sugerencias rápidas contextualizadas por rol, formato Markdown enriquecido y botón de copiado rápido al portapapeles.
+- **🔄 Sincronización Reactiva en Tiempo Real (Cero F5)**: Bus de eventos reactivo `actionCompleted$` en frontend que actualiza automáticamente la pantalla (Aulas, Actividades, Dashboard y Subastas) cada vez que el agente ejecuta herramientas.
+- **💬 Widget Flotante y Chatbot Interactivo**: Botón flotante animado con avatar reactivo, badge dinámico del modelo activo (`Gemini 3.5 Flash`), chips de sugerencias rápidas contextualizadas por rol, formato Markdown enriquecido y respuestas pedagógicas limpias sin identificadores técnicos de base de datos.
 
 ---
 
@@ -136,7 +138,7 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 
 ### 🔧 Backend
 - **Framework**: [Django 5.2.6](https://www.djangoproject.com/) con [Django REST Framework 3.16](https://www.django-rest-framework.org/)
-- **Inteligencia Artificial**: [OpenRouter API](https://openrouter.ai/) con OpenAI GPT-4o y GPT-4o-mini (bucle de agentes con Tool Calling en tiempo real)
+- **Inteligencia Artificial**: [Google AI Studio (Gemini API)](https://ai.google.dev/) con `gemini-3.5-flash` y `gemini-3.8-flash`, orquestación multi-turno con Tool Calling en tiempo real y fallback a [OpenRouter API](https://openrouter.ai/)
 - **Tiempo Real (WebSockets)**: [Django Channels 4.x](https://channels.readthedocs.io/) con servidor ASGI [Daphne](https://github.com/django/daphne)
 - **Base de Datos**: [PostgreSQL en Supabase](https://supabase.com/) (producción) y [MySQL 8.0](https://www.mysql.com/) con driver [PyMySQL](https://pymysql.readthedocs.io/)
 - **Almacenamiento Multimedia**: [Supabase Storage S3](https://supabase.com/storage) con `django-storages` y `boto3`
@@ -399,7 +401,7 @@ Navega a **`http://localhost:4200`** en tu navegador. ¡Listo para explorar EduB
 | **Subastas** | `/auctions/` | Creación de subastas, registro de pujas y cierre con cobro |
 | **Notificaciones** | `/notifications/` | Alertas del sistema, notificaciones de notas y anuncios |
 | **Reportes** | `/reports/` | Estadísticas académicas y métricas de motivación |
-| **EDUBID IA** | `/ai/chat/`, `/ai/suggestions/` | Agente autónomo con GPT-4o y herramientas de base de datos en tiempo real |
+| **EDUBID IA** | `/ai/chat/`, `/ai/suggestions/` | Agente autónomo con Google Gemini (21 herramientas con CRUD total en BD) |
 
 > 📖 Para consultar la especificación exhaustiva de cada endpoint, esquemas de payload y respuestas JSON, consulta:
 > **[`edubid-backend/BACKEND_API_MAP.md`](edubid-backend/BACKEND_API_MAP.md)**
@@ -413,7 +415,8 @@ Para consultar el registro técnico detallado de todas las funcionalidades imple
 👉 **[ROADMAP_Y_ESTADO_DEL_PROYECTO.md](ROADMAP_Y_ESTADO_DEL_PROYECTO.md)**
 
 ### Hitos Recientes Clave:
-* **EDUBID IA (Agente Autónomo GPT-4o)**: Agente inteligente con Tool Calling integrado en el backend Django que ejecuta consultas y acciones en vivo (crear tareas, subastas, calificar entregas con EduCoins, consultar grupos y balances de estudiantes), junto con widget chatbot interactivo y botón flotante en Angular para docentes, coordinadores y rectores.
+* **EDUBID IA (Google AI Studio Gemini + CRUD Total Autónomo)**: Agente autónomo con `gemini-3.5-flash`, `gemini-3.8-flash` y fallback a OpenRouter. Dispone de 21 herramientas directas para crear, consultar, modificar y eliminar clases, grupos, actividades, subastas y calificaciones. Incluye sincronización reactiva en tiempo real en frontend vía `actionCompleted$` (cero F5) y respuestas pedagógicas limpias sin IDs técnicos.
+* **Erradicación de Alertas confirm() Nativas**: Reemplazadas por modales visuales integrados (`ConfirmDialogService`) con los colores institucionales del colegio.
 * **Identidad Institucional Completa**: Paleta cromática de 24 colores, contraste dinámico YIQ, degradado simétrico superior (`secondary -> primary -> secondary`) y scrollbars institucionales.
 * **Flujo Seguro de Sesión**: Modal de confirmación interactivo, overlay de cierre de sesión cinematográfico, reseteo de variables CSS (`ThemeService.resetBrandColors()`) y hard refresh a Home.
 * **Módulos Académicos**: Aulas con grupos anidados (`Classrooms`), Actividades con notas reales 0-100 y acreditación automática de EduCoins, Subastas en vivo con WebSockets, Billetera digital y Reportes DANE en PDF y Excel.

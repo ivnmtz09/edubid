@@ -54,10 +54,12 @@ La plataforma implementa un ecosistema educativo gamificado donde las calificaci
   - Garantía en frontend y backend de que el rol `admin` mantenga `institucion = null`, suprimiendo la exigencia de completar perfil institucional y habilitando el selector global.
 - **🤖 EDUBID IA — Widget Flotante y Chatbot Agéntico (`AiAssistantComponent`)**:
   - Botón flotante animado en la esquina inferior derecha con icono vectorial de robot 🤖, badge de estado en línea y resplandor interactivo.
+  - Insignia de modelo dinámica (`activeModelBadge`) que refleja automáticamente el motor activo (`Gemini 3.5 Flash`) potenciado por Google AI Studio.
   - Exclusivo para roles autorizados (`docente`, `coordinador`, `rector`, `admin`).
   - Integrado de forma transversal en `LayoutComponent` para operar en tiempo real sobre cualquier vista del sistema.
-  - Conexión al servicio `AiAssistantService`: envía consultas al backend y ejecuta acciones directas en la base de datos (creación de actividades y subastas, consultas de estudiantes y saldo de monedas, calificación de entregas y reportes institucionales).
-  - Interfaz con chips de inicio rápido, soporte de Markdown formateado, botón de copiado al portapapeles e indicador de estado de pensamiento.
+  - Conexión al servicio `AiAssistantService`: envía consultas al backend y ejecuta 21 herramientas con permisos de CRUD total (creación, edición y eliminación de clases, grupos, actividades, subastas y calificaciones).
+  - Bus de eventos reactivo `actionCompleted$`: sincroniza en tiempo real las vistas de Clases, Aulas, Actividades, Dashboard y Subastas sin requerir que el usuario recargue manualmente la pantalla (cero F5).
+  - Interfaz con chips de inicio rápido, soporte de Markdown formateado, botón de copiado al portapapeles y respuestas limpias sin IDs técnicos.
 
 ---
 

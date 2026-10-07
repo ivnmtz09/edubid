@@ -33,7 +33,7 @@ edubid-backend/
 │   ├── tokens/                   # Períodos académicos (cortes), Billeteras virtuales (Wallets) y libro mayor contable
 │   ├── auctions/                 # Subastas en vivo, WebSockets (Daphne), pujas y liquidación con select_for_update
 │   ├── notifications/            # Sistema centralizado de alertas, eventos y anuncios institucionales
-│   ├── ai_assistant/             # EDUBID IA: Agente autónomo con Tool Calling en tiempo real (OpenRouter GPT-4o)
+│   ├── ai_assistant/             # EDUBID IA: Agente autónomo con Tool Calling (Google Gemini AI Studio + CRUD Total)
 │   ├── reports/                  # Métricas consolidadas, analítica agregada y reportes de rendimiento
 │   └── common/                   # Motor de reportes PDF/Excel, modelos base, tests y utilidades
 ├── edubid_core/                  # Settings, enrutador ASGI, paginación inteligente y excepciones globales

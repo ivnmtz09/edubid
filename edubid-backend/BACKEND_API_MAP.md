@@ -644,18 +644,25 @@ EduBid implementa un manejador global de excepciones (`edubid_core.exceptions.cu
 }
 ```
 
-### 4.14 EDUBID IA — Agente Inteligente Autónomo (OpenRouter & Tool Calling)
+### 4.14 EDUBID IA — Agente Inteligente Autónomo (Google AI Studio Gemini + CRUD Total)
 
-EduBid integra un Agente Autónomo con GPT-4o vía OpenRouter que ejecuta herramientas nativas sobre la base de datos de la plataforma en tiempo real.
+EduBid integra un Agente Autónomo impulsado principalmente por **Google Gemini** (`gemini-3.5-flash` y `gemini-3.8-flash` vía Google Generative Language API) con respaldo escalonado en OpenRouter (`openai/gpt-4o`). Ejecuta 21 herramientas nativas con permisos completos (CRUD) sobre la base de datos de la plataforma en tiempo real y responde con lenguaje pedagógico limpio sin IDs técnicos.
 
 #### `POST /api/ai/chat/`
 - **Permisos:** `IsAuthenticated` (Roles autorizados: `docente`, `coordinador`, `rector`, `admin`).
-- **Descripción:** Envía un historial de conversación al agente. El agente evalúa si requiere consultar la base de datos o ejecutar una acción (crear clases y grupos escolares, crear actividades, consultar grupos/estudiantes, calificar entregas, crear subastas, otorgar EduCoins) mediante *Tool Calling* y genera la respuesta consolidada.
+- **Descripción:** Envía un historial de conversación al agente. El agente evalúa y ejecuta autónomamente llamadas a funciones (*Tool Calling*) para consultar, crear, modificar o eliminar clases, salones, actividades, calificaciones, subastas o balances de estudiantes.
+- **Herramientas Disponibles (21 Tools):**
+  - *Clases y Grupos:* `get_my_classrooms_and_groups`, `create_classroom`, `create_group`, `create_classroom_with_groups`, `update_classroom`, `delete_classroom`, `update_group`, `delete_group`, `get_classroom_students`.
+  - *Actividades Académicas:* `get_activities`, `create_activity`, `update_activity`, `delete_activity`.
+  - *Calificaciones:* `get_submissions_to_grade`, `grade_submission`.
+  - *Subastas:* `get_auctions`, `create_auction`, `close_auction`, `delete_auction`.
+  - *Economía de Aula:* `award_educoins`.
+  - *Directivos:* `get_institution_summary`.
 - **Request Body:**
 ```json
 {
   "messages": [
-    { "role": "user", "content": "¿Cuántos grupos o asignaturas tengo actualmente?" }
+    { "role": "user", "content": "¿Cuáles son mis asignaturas y grupos actuales?" }
   ],
   "context": "Opcional: contexto de la pantalla activa en el frontend"
 }
@@ -665,8 +672,9 @@ EduBid integra un Agente Autónomo con GPT-4o vía OpenRouter que ejecuta herram
 {
   "status": "success",
   "role": "assistant",
-  "content": "Actualmente tienes 1 asignatura (TIC) con 1 grupo activo (Feria de Ciencias, Código: BAF7C4, 2 estudiantes inscritos)...",
-  "model": "openai/gpt-4o",
+  "content": "Actualmente en la asignatura Desarrollo Móvil tienes los grupos A1 (Código: 7F1F5D) y B1 (Código: 9579E4)...",
+  "model": "gemini-3.5-flash",
+  "executed_tools": ["get_my_classrooms_and_groups"],
   "author": "EDUBID IA"
 }
 ```
