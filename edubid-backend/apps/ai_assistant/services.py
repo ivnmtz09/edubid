@@ -1,6 +1,9 @@
+import json
 import logging
 import requests
 from django.conf import settings
+
+from .tools import AI_TOOLS_DEFINITIONS, dispatch_tool
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +12,8 @@ OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 
 def build_system_prompt(user, context=None) -> str:
     """
-    Construye un System Prompt especializado según el rol del usuario en EduBid.
+    Construye un System Prompt especializado como Agente Autónomo
+    con acceso total a herramientas de EduBid.
     """
     role = getattr(user, 'role', 'docente')
     nombre = f"{user.first_name} {user.last_name}".strip() if user else "Docente"
@@ -28,68 +32,41 @@ def build_system_prompt(user, context=None) -> str:
     }
     role_title = role_titles.get(role, 'Educador(a)')
 
-    base_prompt = f"""Eres **EDUBID IA**, un asistente pedagógico y de gestión institucional de élite integrado en la plataforma educativa **EduBid**.
+    prompt = f"""Eres **EDUBID IA**, el agente autónomo inteligente y copiloto de gestión educativa integrado en la plataforma **EduBid**.
 Estás interactuando con:
 - **Usuario:** {nombre}
 - **Rol:** {role_title}
 - **Institución:** {institucion_nombre}
 
-### Tu Personalidad y Enfoque:
-- Eres altamente profesional, empático, proactivo, motivador y claro.
-- Utilizas un tono constructivo y respetuoso en español (apropiado para el ámbito educativo en Colombia y Latinoamérica).
-- Empleas formato Markdown enriquecido (listas, negritas, tablas breves si aplica, pasos numerados) para facilitar la lectura.
+### TUS CAPACIDADES COMO AGENTE COMPLETO DENTRO DE EDUBID:
+Tienes a tu disposición HERRAMIENTAS (tools) directas conectadas a la base de datos de EduBid.
+**IMPORTANTE:** Tienes acceso TOTAL y en tiempo real a los datos de este usuario y su institución. NUNCA respondas que no tienes acceso a la plataforma o a su información académica. Si te preguntan por asignaturas, grupos, estudiantes, actividades, entregas, subastas o notas, ¡UTILIZA TUS HERRAMIENTAS INMEDIATAMENTE!
 
-### Tus Capacidades según el Rol:
-"""
+Puedes realizar de forma autónoma:
+1. **Consultar asignaturas y grupos:** Conocer qué aulas, grupos y códigos tiene el usuario (`get_my_classrooms_and_groups`).
+2. **Consultar estudiantes:** Ver listados de alumnos de un grupo, sus correos y su saldo actual de EduCoins (`get_classroom_students`).
+3. **Crear y consultar actividades:** Diseñar y publicar tareas, proyectos o evaluaciones con recompensas en EduCoins y fechas de entrega (`create_activity`, `get_activities`).
+4. **Revisar y calificar entregas:** Ver las entregas de los estudiantes y calificarlas con nota y retroalimentación (`get_submissions_to_grade`, `grade_submission`).
+5. **Crear y gestionar subastas:** Crear subastas de incentivos pedagógicos en el aula (`create_auction`, `get_auctions`).
+6. **Asignar EduCoins:** Premiar a estudiantes con monedas por mérito, puntualidad o participación (`award_educoins`).
+7. **Reportes directivos:** Si el usuario es Rector o Coordinador, generar consolidados institucionales (`get_institution_summary`).
 
-    if role == 'docente':
-        base_prompt += """
-- **Apoyo al Docente:**
-  1. Diseñar planeaciones de clase, secuencias didácticas y objetivos de aprendizaje (DBA / estándares).
-  2. Crear rúbricas de evaluación cualitativas y cuantitativas para actividades y talleres.
-  3. Formular preguntas reflexivas, cuestionarios y evaluaciones tipo prueba diagnóstica / Saber.
-  4. Idear dinámicas de gamificación con el sistema de subastas y tokens (EduCoins) de EduBid para motivar a los estudiantes.
-  5. Proponer estrategias pedagógicas de inclusión y retroalimentación constructiva para estudiantes con bajo rendimiento.
-"""
-    elif role == 'coordinador':
-        base_prompt += """
-- **Apoyo a la Coordinación Académica:**
-  1. Supervisión curricular, planes de mejoramiento institucional y planes de área.
-  2. Estrategias de seguimiento al desempeño docente y acompañamiento en aula.
-  3. Gestión de convivencia escolar, mediación de conflictos y seguimiento a comités de evaluación.
-  4. Análisis de tendencias académicas y optimización de actividades institucionales en EduBid.
-"""
-    elif role == 'rector':
-        base_prompt += """
-- **Apoyo a la Rectoría:**
-  1. Liderazgo estratégico educativo, plan de mejoramiento institucional (PMI) y PEI.
-  2. Gestión y gobernanza de la institución ({institucion_nombre}), optimización de recursos y motivación del cuerpo docente.
-  3. Políticas formativas, clima escolar y articulación con la comunidad educativa.
-  4. Visión sobre el impacto de la gamificación y las subastas de incentivos en el rendimiento y retención estudiantil.
-"""
-    else:  # admin
-        base_prompt += """
-- **Apoyo al Administrador:**
-  1. Orientación sobre gestión de usuarios, instituciones y configuración de EduBid.
-  2. Monitoreo de buenas prácticas y comunicación efectiva con la comunidad escolar.
+### REGLAS DE COMPORTAMIENTO:
+- **Proactividad:** Cuando el usuario te pida realizar una acción (por ejemplo: "Crea una tarea sobre la Célula para el grupo 10-A con 100 EduCoins"), ejecútala con la herramienta correspondiente y confirma detalladamente el resultado.
+- **Formato:** Presenta los datos de forma ordenada con viñetas, tablas breves o pasos numerados usando Markdown limpio.
+- **Tono:** Profesional, cercano, empático y constructivo en español para el ámbito educativo en Colombia y Latinoamérica.
 """
 
     if context:
-        base_prompt += f"\n### Contexto Adicional de la Pantalla Actual:\n{context}\n"
+        prompt += f"\n### CONTEXTO DE LA PANTALLA ACTUAL:\n{context}\n"
 
-    base_prompt += """
-### Instrucciones de Respuesta:
-- Sé conciso y directo cuando la consulta sea puntual.
-- Ofrece ejemplos prácticos y listos para usar en el aula o la institución cuando te soliciten actividades o materiales.
-- Si te piden ideas para subastas en EduBid, sugiere recompensas académicas y motivacionales (por ejemplo: 'Puntos extra en la evaluación', 'Elegir su grupo de trabajo', 'Ser monitor del día', etc.).
-"""
-    return base_prompt.strip()
+    return prompt.strip()
 
 
 def send_chat_completion(messages: list, user, context: str = None) -> dict:
     """
-    Envía la conversación a OpenRouter con enriquecimiento de System Prompt
-    y fallback automático de modelo.
+    Envía la conversación a OpenRouter con soporte para Tool Calling iterativo
+    (Agente Autónomo completo) y fallback de modelo.
     """
     api_key = getattr(settings, 'OPENROUTER_API_KEY', '') or ''
     if not api_key:
@@ -97,10 +74,9 @@ def send_chat_completion(messages: list, user, context: str = None) -> dict:
 
     system_prompt = build_system_prompt(user, context)
     
-    # Asegurar que el mensaje de sistema esté al inicio
     formatted_messages = [{"role": "system", "content": system_prompt}]
     
-    # Limitar el historial reciente a los últimos 10 mensajes para eficiencia
+    # Mantener historial reciente (últimos 10 mensajes)
     for msg in messages[-10:]:
         role = msg.get("role", "user")
         content = msg.get("content", "")
@@ -118,48 +94,82 @@ def send_chat_completion(messages: list, user, context: str = None) -> dict:
         "Content-Type": "application/json"
     }
 
-    # Intento 1: Modelo principal
     models_to_try = [primary_model]
     if fallback_model and fallback_model != primary_model:
         models_to_try.append(fallback_model)
 
     last_error = None
     for model in models_to_try:
-        payload = {
-            "model": model,
-            "messages": formatted_messages,
-            "max_tokens": max_tokens,
-            "temperature": 0.7,
-        }
         try:
-            logger.info("Enviando petición a OpenRouter con modelo %s", model)
-            response = requests.post(OPENROUTER_ENDPOINT, headers=headers, json=payload, timeout=35)
+            # Bucle del Agente (hasta 3 rondas de herramientas por consulta)
+            current_messages = list(formatted_messages)
             
-            if response.status_code == 200:
+            for iteration in range(3):
+                payload = {
+                    "model": model,
+                    "messages": current_messages,
+                    "max_tokens": max_tokens,
+                    "temperature": 0.5,
+                    "tools": AI_TOOLS_DEFINITIONS,
+                    "tool_choice": "auto"
+                }
+
+                logger.info("Iteración %d del Agente con modelo %s", iteration + 1, model)
+                response = requests.post(OPENROUTER_ENDPOINT, headers=headers, json=payload, timeout=35)
+                
+                if response.status_code != 200:
+                    error_data = {}
+                    try:
+                        error_data = response.json().get("error", {})
+                    except Exception:
+                        pass
+                    error_msg = error_data.get("message", response.text)
+                    logger.warning("Error OpenRouter en modelo %s (HTTP %s): %s", model, response.status_code, error_msg)
+                    raise RuntimeError(f"OpenRouter (HTTP {response.status_code}): {error_msg}")
+
                 data = response.json()
                 choice = data.get("choices", [{}])[0]
-                content = choice.get("message", {}).get("content", "")
-                return {
-                    "content": content,
-                    "model": model,
-                    "usage": data.get("usage", {})
-                }
-            
-            # Si el código es 402 (sin saldo suficiente para gpt-4o) o 429 (rate limit), probamos fallback
-            error_data = {}
-            try:
-                error_data = response.json().get("error", {})
-            except Exception:
-                pass
-            error_msg = error_data.get("message", response.text)
-            logger.warning("OpenRouter error con modelo %s (HTTP %s): %s", model, response.status_code, error_msg)
-            last_error = f"OpenRouter (HTTP {response.status_code}): {error_msg}"
-            
-        except requests.Timeout:
-            logger.warning("Timeout al consultar modelo %s", model)
-            last_error = f"El modelo {model} tardó demasiado en responder."
-        except Exception as e:
-            logger.error("Excepción al consultar modelo %s: %s", model, str(e))
-            last_error = str(e)
+                message = choice.get("message", {})
+                tool_calls = message.get("tool_calls")
 
-    raise RuntimeError(last_error or "No se pudo obtener respuesta del servicio de IA.")
+                # Si el modelo decidió llamar a una o más herramientas
+                if tool_calls:
+                    current_messages.append(message)
+                    
+                    for tc in tool_calls:
+                        fn_name = tc.get("function", {}).get("name", "")
+                        fn_args_str = tc.get("function", {}).get("arguments", "{}")
+                        call_id = tc.get("id", "")
+                        
+                        try:
+                            fn_args = json.loads(fn_args_str) if fn_args_str else {}
+                        except Exception:
+                            fn_args = {}
+
+                        logger.info("Agente ejecutando herramienta: %s con argumentos: %s", fn_name, fn_args)
+                        tool_result = dispatch_tool(fn_name, fn_args, user)
+
+                        current_messages.append({
+                            "role": "tool",
+                            "tool_call_id": call_id,
+                            "name": fn_name,
+                            "content": json.dumps(tool_result, ensure_ascii=False)
+                        })
+
+                    # Continuar el bucle para que el modelo interprete el resultado del tool
+                    continue
+                else:
+                    # El modelo dio una respuesta final
+                    final_content = message.get("content", "")
+                    return {
+                        "content": final_content,
+                        "model": model,
+                        "usage": data.get("usage", {})
+                    }
+
+        except Exception as e:
+            logger.error("Fallo con modelo %s: %s", model, str(e))
+            last_error = str(e)
+            # Continúa con el siguiente modelo de fallback
+
+    raise RuntimeError(last_error or "No se pudo obtener respuesta del agente EDUBID IA.")
