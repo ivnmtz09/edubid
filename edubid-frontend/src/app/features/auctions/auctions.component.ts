@@ -2,12 +2,14 @@ import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuctionService, Auction, AuctionBid } from '../../core/services/auction.service';
 import { WalletService, Wallet } from '../../core/services/wallet.service';
 import { GroupService, Group } from '../../core/services/group.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { AiAssistantService } from '../../core/services/ai-assistant.service';
 
 @Component({
   selector: 'app-auctions',
@@ -439,7 +441,9 @@ export class AuctionsComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private notifService = inject(NotificationService);
   private confirmService = inject(ConfirmDialogService);
+  private aiAssistantService = inject(AiAssistantService);
   private fb = inject(FormBuilder);
+  private aiSub?: Subscription;
 
   userRole = computed(() => this.authService.currentUser()?.role || 'estudiante');
   isDocente = computed(() => ['docente', 'admin', 'rector', 'coordinador'].includes(this.userRole()));
@@ -490,11 +494,26 @@ export class AuctionsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadData();
     this.startTimer();
+    this.initAiSync();
   }
 
   ngOnDestroy(): void {
     if (this.timer) clearInterval(this.timer);
     if (this.auctionPollTimer) clearInterval(this.auctionPollTimer);
+    this.aiSub?.unsubscribe();
+  }
+
+  private initAiSync(): void {
+    this.aiSub = this.aiAssistantService.actionCompleted$.subscribe((event) => {
+      const isAuctionEvent = event.tools.some((t) => t.includes('auction'));
+      if (isAuctionEvent) {
+        this.loadData();
+        this.notifService.info(
+          'Las subastas han sido sincronizadas en tiempo real.',
+          'EDUBID IA'
+        );
+      }
+    });
   }
 
   loadData(): void {

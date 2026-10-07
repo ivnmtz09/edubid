@@ -402,9 +402,18 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # ─────────────────────────────────────────────
-# CONFIGURACIÓN EDUBID IA (OpenRouter)
+# CONFIGURACIÓN EDUBID IA (Google Gemini AI Studio / OpenRouter)
 # ─────────────────────────────────────────────
+AI_PROVIDER = config('AI_PROVIDER', default='google')
+
+# Google AI Studio (Gemini)
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
+GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-3.5-flash')
+GEMINI_FALLBACK_MODEL = config('GEMINI_FALLBACK_MODEL', default='gemini-3.8-flash')
+
+# OpenRouter (proveedor secundario / respaldo)
 OPENROUTER_API_KEY = config('OPENROUTER_API_KEY', default='')
 OPENROUTER_MODEL = config('OPENROUTER_MODEL', default='openai/gpt-4o')
 OPENROUTER_FALLBACK_MODEL = config('OPENROUTER_FALLBACK_MODEL', default='openai/gpt-4o-mini')
-OPENROUTER_MAX_TOKENS = config('OPENROUTER_MAX_TOKENS', default=1500, cast=int)
+
+AI_MAX_TOKENS = config('AI_MAX_TOKENS', default=1500, cast=int)

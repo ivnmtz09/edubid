@@ -7,13 +7,14 @@ from .tools import AI_TOOLS_DEFINITIONS, dispatch_tool
 
 logger = logging.getLogger(__name__)
 
+GOOGLE_GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
 OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 
 
 def build_system_prompt(user, context=None) -> str:
     """
     Construye un System Prompt especializado como Agente Autónomo
-    con acceso total a herramientas de EduBid.
+    con acceso total y capacidades CRUD en la base de datos de EduBid.
     """
     role = getattr(user, 'role', 'docente')
     nombre = f"{user.first_name} {user.last_name}".strip() if user else "Docente"
@@ -39,23 +40,41 @@ Estás interactuando con:
 - **Institución:** {institucion_nombre}
 
 ### TUS CAPACIDADES COMO AGENTE COMPLETO DENTRO DE EDUBID:
-Tienes a tu disposición HERRAMIENTAS (tools) directas conectadas a la base de datos de EduBid.
-**IMPORTANTE:** Tienes acceso TOTAL y en tiempo real a los datos de este usuario y su institución. NUNCA respondas que no tienes acceso a la plataforma o a su información académica. Si te preguntan por asignaturas, grupos, estudiantes, actividades, entregas, subastas o notas, ¡UTILIZA TUS HERRAMIENTAS INMEDIATAMENTE!
+Tienes a tu disposición HERRAMIENTAS (tools) directas conectadas a la base de datos de EduBid en tiempo real.
+**IMPORTANTE Y OBLIGATORIO:** Tienes acceso TOTAL y permisos para CONSULTAR, CREAR, EDITAR y ELIMINAR elementos en la plataforma.
+NUNCA respondas que no tienes la capacidad de crear, consultar, modificar o eliminar clases, grupos, actividades o subastas. Si el usuario te lo solicita, ¡EJECUTA LA HERRAMIENTA ADECUADA DE INMEDIATO!
 
-Puedes realizar de forma autónoma:
-1. **Crear clases y grupos:** Crear nuevas clases/asignaturas (`create_classroom`), nuevos grupos (`create_group`), o crear una clase completa con múltiples grupos escolares en una sola acción (`create_classroom_with_groups`). También puedes eliminarlos si se te solicita (`delete_classroom`, `delete_group`).
-2. **Consultar asignaturas y grupos:** Conocer qué aulas, grupos y códigos de acceso tiene el usuario (`get_my_classrooms_and_groups`).
-3. **Consultar estudiantes:** Ver listados de alumnos de un grupo, sus correos y su saldo actual de EduCoins (`get_classroom_students`).
-4. **Crear y consultar actividades:** Diseñar y publicar tareas, proyectos o evaluaciones con recompensas en EduCoins y fechas de entrega (`create_activity`, `get_activities`).
-5. **Revisar y calificar entregas:** Ver las entregas de los estudiantes y calificarlas con nota y retroalimentación (`get_submissions_to_grade`, `grade_submission`).
-6. **Crear y gestionar subastas:** Crear subastas de incentivos pedagógicos en el aula (`create_auction`, `get_auctions`).
-7. **Asignar EduCoins:** Premiar a estudiantes con monedas por mérito, puntualidad o participación (`award_educoins`).
-8. **Reportes directivos:** Si el usuario es Rector o Coordinador, generar consolidados institucionales (`get_institution_summary`).
+Tus herramientas cubren:
+1. **Gestión de Clases y Grupos (CRUD completo):**
+   - Crear clases/asignaturas (`create_classroom`) o crear una clase completa con múltiples grupos escolares en un solo paso (`create_classroom_with_groups`).
+   - Crear grupos individuales en una clase (`create_group`).
+   - Editar nombres o descripciones de clases (`update_classroom`) y de grupos (`update_group`).
+   - Eliminar clases (`delete_classroom`) y grupos (`delete_group`).
+   - Consultar todas las asignaturas y grupos que tiene a cargo el docente (`get_my_classrooms_and_groups`).
+   - Consultar estudiantes inscritos en un grupo con sus correos y saldos de EduCoins (`get_classroom_students`).
+2. **Gestión de Actividades Pedagógicas (CRUD completo):**
+   - Crear tareas, talleres, proyectos o exámenes con recompensa en EduCoins (`create_activity`).
+   - Consultar actividades de un grupo o de todas las clases (`get_activities`).
+   - Modificar títulos, instrucciones, recompensas en monedas o fechas límite (`update_activity`).
+   - Eliminar actividades existentes (`delete_activity`).
+3. **Calificaciones y Retroalimentación:**
+   - Consultar entregas pendientes o realizadas por estudiantes (`get_submissions_to_grade`).
+   - Calificar entregas con notas de 0.0 a 5.0 y comentarios formativos, abonando EduCoins si aprueban (`grade_submission`).
+4. **Gestión de Subastas de Recompensas (CRUD completo):**
+   - Crear subastas pedagógicas (`create_auction`).
+   - Consultar subastas activas o cerradas (`get_auctions`).
+   - Cerrar subastas activas liquidando al ganador y liberando fondos (`close_auction`).
+   - Cancelar y eliminar subastas devolviendo las monedas bloqueadas a los postores (`delete_auction`).
+5. **Economía de Aula y Premios:**
+   - Premiar y abonar EduCoins directamente a estudiantes por participación, trabajo o mérito (`award_educoins`).
+6. **Reportes Institucionales para Directivos:**
+   - Si el usuario es Rector o Coordinador, consolidar métricas globales (`get_institution_summary`).
 
 ### REGLAS DE COMPORTAMIENTO:
-- **Proactividad:** Cuando el usuario te pida realizar una acción (por ejemplo: "Crea una clase de Desarrollo Móvil con los grupos A1 y B1", o "Crea una tarea sobre la Célula"), ejecútala de inmediato con la herramienta adecuada y confirma detalladamente el resultado (códigos generados, IDs, etc.).
-- **Formato:** Presenta los datos de forma ordenada con viñetas, tablas breves o pasos numerados usando Markdown limpio.
-- **Tono:** Profesional, cercano, empático y constructivo en español para el ámbito educativo en Colombia y Latinoamérica.
+- **Autonomía y Acción Inmediata:** Cuando el usuario pida realizar una acción (por ejemplo: "Crea una clase de Desarrollo Móvil con grupos A1 y B1", o "Elimina el grupo X", o "Actualiza la tarea Y"), ejecútala directamente llamando a la herramienta respectiva sin rodeos.
+- **Confirmación Detallada:** Tras ejecutar una acción, informa el resultado claramente (nombres, IDs, códigos de acceso generados, fechas límites, etc.).
+- **Formato:** Presenta la información de forma clara, con viñetas, pasos numerados o tablas limpias en Markdown.
+- **Tono:** Profesional, motivador, empático y orientado a la excelencia pedagógica en español latinoamericano (Colombia).
 """
 
     if context:
@@ -66,13 +85,10 @@ Puedes realizar de forma autónoma:
 
 def send_chat_completion(messages: list, user, context: str = None) -> dict:
     """
-    Envía la conversación a OpenRouter con soporte para Tool Calling iterativo
-    (Agente Autónomo completo) y fallback de modelo.
+    Envía la conversación al proveedor configurado (Google Gemini AI Studio con
+    OpenRouter como respaldo) con soporte completo para Tool Calling iterativo
+    (Agente Autónomo).
     """
-    api_key = getattr(settings, 'OPENROUTER_API_KEY', '') or ''
-    if not api_key:
-        raise ValueError("La clave de API de OpenRouter (OPENROUTER_API_KEY) no está configurada en el servidor.")
-
     system_prompt = build_system_prompt(user, context)
     
     formatted_messages = [{"role": "system", "content": system_prompt}]
@@ -84,96 +100,151 @@ def send_chat_completion(messages: list, user, context: str = None) -> dict:
         if role in ["user", "assistant"] and content:
             formatted_messages.append({"role": role, "content": content})
 
-    primary_model = getattr(settings, 'OPENROUTER_MODEL', 'openai/gpt-4o')
-    fallback_model = getattr(settings, 'OPENROUTER_FALLBACK_MODEL', 'openai/gpt-4o-mini')
-    max_tokens = getattr(settings, 'OPENROUTER_MAX_TOKENS', 1500)
+    provider = getattr(settings, 'AI_PROVIDER', 'google').lower()
+    gemini_key = getattr(settings, 'GEMINI_API_KEY', '') or ''
+    openrouter_key = getattr(settings, 'OPENROUTER_API_KEY', '') or ''
+    max_tokens = getattr(settings, 'AI_MAX_TOKENS', 1500)
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "HTTP-Referer": "https://edubid.up.railway.app",
-        "X-Title": "EduBid IA",
-        "Content-Type": "application/json"
-    }
+    # Definir la lista de proveedores a intentar en orden de prioridad
+    attempts = []
 
-    models_to_try = [primary_model]
-    if fallback_model and fallback_model != primary_model:
-        models_to_try.append(fallback_model)
+    if provider == 'google' and gemini_key:
+        primary_model = getattr(settings, 'GEMINI_MODEL', 'gemini-3.5-flash')
+        fallback_model = getattr(settings, 'GEMINI_FALLBACK_MODEL', 'gemini-3.8-flash')
+        attempts.append({
+            "name": "Google AI Studio",
+            "endpoint": GOOGLE_GEMINI_ENDPOINT,
+            "headers": {
+                "Authorization": f"Bearer {gemini_key}",
+                "Content-Type": "application/json"
+            },
+            "models": [primary_model] if primary_model == fallback_model else [primary_model, fallback_model]
+        })
+        if openrouter_key:
+            attempts.append({
+                "name": "OpenRouter (Respaldo)",
+                "endpoint": OPENROUTER_ENDPOINT,
+                "headers": {
+                    "Authorization": f"Bearer {openrouter_key}",
+                    "HTTP-Referer": "https://edubid.up.railway.app",
+                    "X-Title": "EduBid IA",
+                    "Content-Type": "application/json"
+                },
+                "models": [getattr(settings, 'OPENROUTER_MODEL', 'openai/gpt-4o')]
+            })
+    else:
+        # Fallback a OpenRouter como principal si provider no es google
+        if openrouter_key:
+            attempts.append({
+                "name": "OpenRouter",
+                "endpoint": OPENROUTER_ENDPOINT,
+                "headers": {
+                    "Authorization": f"Bearer {openrouter_key}",
+                    "HTTP-Referer": "https://edubid.up.railway.app",
+                    "X-Title": "EduBid IA",
+                    "Content-Type": "application/json"
+                },
+                "models": [
+                    getattr(settings, 'OPENROUTER_MODEL', 'openai/gpt-4o'),
+                    getattr(settings, 'OPENROUTER_FALLBACK_MODEL', 'openai/gpt-4o-mini')
+                ]
+            })
+        if gemini_key:
+            attempts.append({
+                "name": "Google AI Studio",
+                "endpoint": GOOGLE_GEMINI_ENDPOINT,
+                "headers": {
+                    "Authorization": f"Bearer {gemini_key}",
+                    "Content-Type": "application/json"
+                },
+                "models": [getattr(settings, 'GEMINI_MODEL', 'gemini-3.5-flash')]
+            })
+
+    if not attempts:
+        raise ValueError("No se encontraron claves de API configuradas para EDUBID IA (ni GEMINI_API_KEY ni OPENROUTER_API_KEY).")
 
     last_error = None
-    for model in models_to_try:
-        try:
-            # Bucle del Agente (hasta 3 rondas de herramientas por consulta)
-            current_messages = list(formatted_messages)
-            executed_tools = []
-            
-            for iteration in range(3):
-                payload = {
-                    "model": model,
-                    "messages": current_messages,
-                    "max_tokens": max_tokens,
-                    "temperature": 0.5,
-                    "tools": AI_TOOLS_DEFINITIONS,
-                    "tool_choice": "auto"
-                }
 
-                logger.info("Iteración %d del Agente con modelo %s", iteration + 1, model)
-                response = requests.post(OPENROUTER_ENDPOINT, headers=headers, json=payload, timeout=35)
-                
-                if response.status_code != 200:
-                    error_data = {}
-                    try:
-                        error_data = response.json().get("error", {})
-                    except Exception:
-                        pass
-                    error_msg = error_data.get("message", response.text)
-                    logger.warning("Error OpenRouter en modelo %s (HTTP %s): %s", model, response.status_code, error_msg)
-                    raise RuntimeError(f"OpenRouter (HTTP {response.status_code}): {error_msg}")
+    for attempt in attempts:
+        endpoint = attempt["endpoint"]
+        headers = attempt["headers"]
+        provider_name = attempt["name"]
 
-                data = response.json()
-                choice = data.get("choices", [{}])[0]
-                message = choice.get("message", {})
-                tool_calls = message.get("tool_calls")
+        for model in attempt["models"]:
+            try:
+                # Bucle iterativo del Agente (hasta 3 rondas de llamadas a herramientas)
+                current_messages = list(formatted_messages)
+                executed_tools = []
 
-                # Si el modelo decidió llamar a una o más herramientas
-                if tool_calls:
-                    current_messages.append(message)
-                    
-                    for tc in tool_calls:
-                        fn_name = tc.get("function", {}).get("name", "")
-                        fn_args_str = tc.get("function", {}).get("arguments", "{}")
-                        call_id = tc.get("id", "")
-                        
-                        try:
-                            fn_args = json.loads(fn_args_str) if fn_args_str else {}
-                        except Exception:
-                            fn_args = {}
-
-                        logger.info("Agente ejecutando herramienta: %s con argumentos: %s", fn_name, fn_args)
-                        executed_tools.append(fn_name)
-                        tool_result = dispatch_tool(fn_name, fn_args, user)
-
-                        current_messages.append({
-                            "role": "tool",
-                            "tool_call_id": call_id,
-                            "name": fn_name,
-                            "content": json.dumps(tool_result, ensure_ascii=False)
-                        })
-
-                    # Continuar el bucle para que el modelo interprete el resultado del tool
-                    continue
-                else:
-                    # El modelo dio una respuesta final
-                    final_content = message.get("content", "")
-                    return {
-                        "content": final_content,
+                for iteration in range(3):
+                    payload = {
                         "model": model,
-                        "usage": data.get("usage", {}),
-                        "executed_tools": executed_tools
+                        "messages": current_messages,
+                        "max_tokens": max_tokens,
+                        "temperature": 0.5,
+                        "tools": AI_TOOLS_DEFINITIONS,
+                        "tool_choice": "auto"
                     }
 
-        except Exception as e:
-            logger.error("Fallo con modelo %s: %s", model, str(e))
-            last_error = str(e)
-            # Continúa con el siguiente modelo de fallback
+                    logger.info("Iteración %d del Agente con %s (modelo %s)", iteration + 1, provider_name, model)
+                    response = requests.post(endpoint, headers=headers, json=payload, timeout=35)
+
+                    if response.status_code != 200:
+                        error_data = {}
+                        try:
+                            error_data = response.json().get("error", {})
+                        except Exception:
+                            pass
+                        error_msg = error_data.get("message", response.text)
+                        logger.warning("Error %s en modelo %s (HTTP %s): %s", provider_name, model, response.status_code, error_msg)
+                        raise RuntimeError(f"{provider_name} (HTTP {response.status_code}): {error_msg}")
+
+                    data = response.json()
+                    choice = data.get("choices", [{}])[0]
+                    message = choice.get("message", {})
+                    tool_calls = message.get("tool_calls")
+
+                    # Si el modelo decide ejecutar una o varias herramientas
+                    if tool_calls:
+                        current_messages.append(message)
+
+                        for tc in tool_calls:
+                            fn_name = tc.get("function", {}).get("name", "")
+                            fn_args_str = tc.get("function", {}).get("arguments", "{}")
+                            call_id = tc.get("id", "")
+
+                            try:
+                                fn_args = json.loads(fn_args_str) if fn_args_str else {}
+                            except Exception:
+                                fn_args = {}
+
+                            logger.info("Agente ejecutando herramienta: %s con argumentos: %s", fn_name, fn_args)
+                            executed_tools.append(fn_name)
+                            tool_result = dispatch_tool(fn_name, fn_args, user)
+
+                            current_messages.append({
+                                "role": "tool",
+                                "tool_call_id": call_id,
+                                "name": fn_name,
+                                "content": json.dumps(tool_result, ensure_ascii=False)
+                            })
+
+                        # Siguiente iteración para que el modelo procese los resultados del tool
+                        continue
+                    else:
+                        # Respuesta final del modelo generada con éxito
+                        final_content = message.get("content", "")
+                        return {
+                            "content": final_content,
+                            "model": model,
+                            "provider": provider_name,
+                            "usage": data.get("usage", {}),
+                            "executed_tools": executed_tools
+                        }
+
+            except Exception as e:
+                logger.error("Fallo con %s (modelo %s): %s", provider_name, model, str(e))
+                last_error = str(e)
+                # Intenta el siguiente modelo o proveedor
 
     raise RuntimeError(last_error or "No se pudo obtener respuesta del agente EDUBID IA.")

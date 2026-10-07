@@ -9,6 +9,7 @@ from apps.classrooms.models import Classroom
 from apps.groups.models import Group
 from apps.activities.models import Activity, Submission
 from apps.auctions.models import Auction, Bid
+from apps.auctions.services import cerrar_subasta
 from apps.tokens.models import Period, Wallet, CoinTransaction
 from apps.users.models import User
 
@@ -137,6 +138,56 @@ AI_TOOLS_DEFINITIONS = [
     {
         "type": "function",
         "function": {
+            "name": "update_classroom",
+            "description": "Edita o actualiza el nombre o la descripción de una clase o asignatura existente.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "classroom_id": {
+                        "type": "integer",
+                        "description": "ID de la clase a editar."
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "description": "Nuevo nombre para la clase (opcional)."
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "description": "Nueva descripción para la clase (opcional)."
+                    }
+                },
+                "required": ["classroom_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "update_group",
+            "description": "Edita o actualiza el nombre o la descripción de un grupo escolar existente.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "grupo_id": {
+                        "type": "integer",
+                        "description": "ID del grupo a editar."
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "description": "Nuevo nombre para el grupo (opcional)."
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "description": "Nueva descripción para el grupo (opcional)."
+                    }
+                },
+                "required": ["grupo_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_classroom_students",
             "description": "Obtiene la lista de estudiantes inscritos en un grupo específico, incluyendo sus nombres, correos y saldo actual de EduCoins.",
             "parameters": {
@@ -203,6 +254,56 @@ AI_TOOLS_DEFINITIONS = [
                     }
                 },
                 "required": ["grupo_id", "nombre", "tipo"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "update_activity",
+            "description": "Edita una actividad pedagógica existente (cambiar título, descripción, recompensa en EduCoins o ampliar días de entrega).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "activity_id": {
+                        "type": "integer",
+                        "description": "ID de la actividad a modificar."
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "description": "Nuevo título de la actividad."
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "description": "Nuevas instrucciones o rúbrica."
+                    },
+                    "valor_educoins": {
+                        "type": "integer",
+                        "description": "Nuevo valor de recompensa en EduCoins."
+                    },
+                    "dias_para_entrega": {
+                        "type": "integer",
+                        "description": "Nuevos días límite a partir de hoy."
+                    }
+                },
+                "required": ["activity_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_activity",
+            "description": "Elimina permanentemente una actividad pedagógica creada por el docente.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "activity_id": {
+                        "type": "integer",
+                        "description": "ID de la actividad a eliminar."
+                    }
+                },
+                "required": ["activity_id"]
             }
         }
     },
@@ -295,6 +396,40 @@ AI_TOOLS_DEFINITIONS = [
                     }
                 },
                 "required": ["grupo_id", "titulo"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "close_auction",
+            "description": "Cierra una subasta activa de inmediato, liquida y cobra los EduCoins al postor ganador y devuelve las monedas a los demás participantes.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "auction_id": {
+                        "type": "integer",
+                        "description": "ID de la subasta a cerrar."
+                    }
+                },
+                "required": ["auction_id"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "delete_auction",
+            "description": "Elimina una subasta activa devolviendo todas las monedas bloqueadas a los postores.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "auction_id": {
+                        "type": "integer",
+                        "description": "ID de la subasta a cancelar y eliminar."
+                    }
+                },
+                "required": ["auction_id"]
             }
         }
     },
@@ -576,6 +711,81 @@ def execute_delete_group(user, args):
     }
 
 
+def execute_update_classroom(user, args):
+    """Edita el nombre o descripción de una clase/aula existente."""
+    classroom_id = args.get('classroom_id')
+    if not classroom_id:
+        return {"error": "Debes especificar el classroom_id a editar."}
+
+    try:
+        classroom = Classroom.objects.get(id=classroom_id)
+    except Classroom.DoesNotExist:
+        return {"error": f"No existe la clase con ID {classroom_id}."}
+
+    if user.role == 'docente' and classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para editar esta clase porque no eres su docente titular."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para editar clases."}
+
+    nombre = args.get('nombre')
+    descripcion = args.get('descripcion')
+
+    if nombre:
+        classroom.nombre = str(nombre).strip()
+    if descripcion is not None:
+        classroom.descripcion = str(descripcion).strip()
+
+    classroom.save()
+
+    return {
+        "status": "success",
+        "mensaje": f"Clase '{classroom.nombre}' actualizada exitosamente.",
+        "classroom": {
+            "id": classroom.id,
+            "nombre": classroom.nombre,
+            "descripcion": classroom.descripcion
+        }
+    }
+
+
+def execute_update_group(user, args):
+    """Edita el nombre o descripción de un grupo escolar."""
+    grupo_id = args.get('grupo_id')
+    if not grupo_id:
+        return {"error": "Debes especificar el grupo_id a editar."}
+
+    try:
+        grupo = Group.objects.select_related('classroom').get(id=grupo_id)
+    except Group.DoesNotExist:
+        return {"error": f"No existe el grupo con ID {grupo_id}."}
+
+    if user.role == 'docente' and grupo.classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para editar este grupo."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para editar grupos."}
+
+    nombre = args.get('nombre')
+    descripcion = args.get('descripcion')
+
+    if nombre:
+        grupo.nombre = str(nombre).strip()
+    if descripcion is not None:
+        grupo.descripcion = str(descripcion).strip()
+
+    grupo.save()
+
+    return {
+        "status": "success",
+        "mensaje": f"Grupo '{grupo.nombre}' de la clase '{grupo.classroom.nombre}' actualizado exitosamente.",
+        "grupo": {
+            "id": grupo.id,
+            "nombre": grupo.nombre,
+            "descripcion": grupo.descripcion,
+            "codigo_acceso": grupo.codigo_acceso
+        }
+    }
+
+
 def execute_get_classroom_students(user, args):
     """Retorna los estudiantes de un grupo y sus saldos de EduCoins."""
     grupo_id = args.get('grupo_id')
@@ -693,6 +903,78 @@ def execute_create_activity(user, args):
             "valor_educoins": act.valor_educoins,
             "fecha_entrega": act.fecha_entrega.strftime('%Y-%m-%d %H:%M')
         }
+    }
+
+
+def execute_update_activity(user, args):
+    """Edita una actividad pedagógica existente."""
+    activity_id = args.get('activity_id')
+    if not activity_id:
+        return {"error": "Debes especificar el activity_id a modificar."}
+
+    try:
+        act = Activity.objects.select_related('group', 'group__classroom').get(id=activity_id)
+    except Activity.DoesNotExist:
+        return {"error": f"No se encontró la actividad con ID {activity_id}."}
+
+    if user.role == 'docente' and act.group.classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para modificar esta actividad."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para modificar actividades."}
+
+    nombre = args.get('nombre')
+    descripcion = args.get('descripcion')
+    valor_educoins = args.get('valor_educoins')
+    dias = args.get('dias_para_entrega')
+
+    if nombre:
+        act.nombre = str(nombre).strip()
+    if descripcion is not None:
+        act.descripcion = str(descripcion).strip()
+    if valor_educoins is not None:
+        act.valor_educoins = max(0, int(valor_educoins))
+    if dias is not None:
+        act.fecha_entrega = timezone.now() + timedelta(days=int(dias))
+
+    act.save()
+
+    return {
+        "status": "success",
+        "mensaje": f"Actividad '{act.nombre}' modificada exitosamente.",
+        "actividad": {
+            "id": act.id,
+            "nombre": act.nombre,
+            "tipo": act.tipo,
+            "grupo": act.group.nombre,
+            "valor_educoins": act.valor_educoins,
+            "fecha_entrega": act.fecha_entrega.strftime('%Y-%m-%d %H:%M') if act.fecha_entrega else ""
+        }
+    }
+
+
+def execute_delete_activity(user, args):
+    """Elimina permanentemente una actividad pedagógica."""
+    activity_id = args.get('activity_id')
+    if not activity_id:
+        return {"error": "Debes especificar el activity_id a eliminar."}
+
+    try:
+        act = Activity.objects.select_related('group', 'group__classroom').get(id=activity_id)
+    except Activity.DoesNotExist:
+        return {"error": f"No se encontró la actividad con ID {activity_id}."}
+
+    if user.role == 'docente' and act.group.classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para eliminar esta actividad."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para eliminar actividades."}
+
+    nombre = act.nombre
+    grupo_nombre = act.group.nombre
+    act.delete()
+
+    return {
+        "status": "success",
+        "mensaje": f"Actividad '{nombre}' del grupo '{grupo_nombre}' eliminada permanentemente."
     }
 
 
@@ -858,6 +1140,89 @@ def execute_create_auction(user, args):
     }
 
 
+def execute_close_auction(user, args):
+    """Cierra una subasta activa y liquida al postor ganador."""
+    auction_id = args.get('auction_id')
+    if not auction_id:
+        return {"error": "Debes especificar el auction_id a cerrar."}
+
+    try:
+        auction = Auction.objects.select_related('grupo', 'grupo__classroom').get(id=auction_id)
+    except Auction.DoesNotExist:
+        return {"error": f"No se encontró la subasta con ID {auction_id}."}
+
+    if user.role == 'docente' and auction.creador_id != user.id and auction.grupo.classroom.docente_id != user.id:
+        return {"error": "Solo el creador o docente titular puede cerrar esta subasta."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para cerrar subastas."}
+
+    if auction.estado != 'active':
+        return {"error": f"La subasta '{auction.titulo}' ya se encuentra {auction.estado}."}
+
+    res = cerrar_subasta(auction)
+    if not res.get("success"):
+        return {"error": res.get("message", "Error al procesar el cierre de la subasta.")}
+
+    if not res.get("ganador"):
+        return {
+            "status": "success",
+            "mensaje": f"Subasta '{auction.titulo}' cerrada exitosamente sin ofertas/pujas registradas."
+        }
+
+    return {
+        "status": "success",
+        "mensaje": f"Subasta '{auction.titulo}' cerrada exitosamente. Ganador: {res.get('ganador', {}).get('nombre', 'Estudiante')} con puja de {res.get('ganador', {}).get('puja', 0)} EduCoins.",
+        "ganador": res.get("ganador"),
+        "total_participantes": res.get("total_participantes", 0)
+    }
+
+
+def execute_delete_auction(user, args):
+    """Elimina una subasta activa devolviendo los EduCoins bloqueados."""
+    auction_id = args.get('auction_id')
+    if not auction_id:
+        return {"error": "Debes especificar el auction_id a eliminar."}
+
+    try:
+        auction = Auction.objects.select_related('grupo', 'grupo__classroom').get(id=auction_id)
+    except Auction.DoesNotExist:
+        return {"error": f"No se encontró la subasta con ID {auction_id}."}
+
+    if user.role == 'docente' and auction.creador_id != user.id and auction.grupo.classroom.docente_id != user.id:
+        return {"error": "No tienes permiso para eliminar esta subasta."}
+    elif user.role not in ['docente', 'admin', 'rector']:
+        return {"error": "No tienes permisos para eliminar subastas."}
+
+    if auction.estado == 'closed':
+        return {"error": "No se puede eliminar una subasta que ya está cerrada."}
+
+    with transaction.atomic():
+        periodo_activo = Period.objects.filter(grupo=auction.grupo, activo=True).first()
+        if not periodo_activo:
+            periodo_activo = Period.objects.filter(grupo=auction.grupo).order_by('-fecha_fin').first()
+
+        for bid in auction.bids.all():
+            try:
+                if periodo_activo:
+                    wallet = Wallet.objects.select_for_update().get(
+                        usuario=bid.estudiante,
+                        grupo=auction.grupo,
+                        periodo=periodo_activo
+                    )
+                    wallet.bloqueado_educoins = max(0, wallet.bloqueado_educoins - bid.cantidad_educoins)
+                    wallet.save()
+            except Wallet.DoesNotExist:
+                pass
+
+        titulo = auction.titulo
+        auction.delete()
+
+    return {
+        "status": "success",
+        "mensaje": f"La subasta '{titulo}' ha sido cancelada y eliminada con éxito. Las monedas de los participantes han sido liberadas."
+    }
+
+
 def execute_award_educoins(user, args):
     """Deposita EduCoins a un estudiante por mérito o participación."""
     grupo_id = args.get('grupo_id')
@@ -943,15 +1308,21 @@ TOOL_HANDLERS = {
     "create_classroom": execute_create_classroom,
     "create_group": execute_create_group,
     "create_classroom_with_groups": execute_create_classroom_with_groups,
+    "update_classroom": execute_update_classroom,
     "delete_classroom": execute_delete_classroom,
+    "update_group": execute_update_group,
     "delete_group": execute_delete_group,
     "get_classroom_students": execute_get_classroom_students,
     "get_activities": execute_get_activities,
     "create_activity": execute_create_activity,
+    "update_activity": execute_update_activity,
+    "delete_activity": execute_delete_activity,
     "get_submissions_to_grade": execute_get_submissions_to_grade,
     "grade_submission": execute_grade_submission,
     "get_auctions": execute_get_auctions,
     "create_auction": execute_create_auction,
+    "close_auction": execute_close_auction,
+    "delete_auction": execute_delete_auction,
     "award_educoins": execute_award_educoins,
     "get_institution_summary": execute_get_institution_summary,
 }
