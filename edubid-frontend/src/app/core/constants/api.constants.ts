@@ -19,6 +19,11 @@ export const AUTH_ENDPOINTS = {
   INSTITUTIONS_PUBLIC: `${API_BASE}/institutions/public/`,
 } as const;
 
+export const AI_ENDPOINTS = {
+  CHAT: `${API_BASE}/ai/chat/`,
+  SUGGESTIONS: `${API_BASE}/ai/suggestions/`,
+} as const;
+
 export const USER_ROLES = {
   ADMIN: 'admin',
   RECTOR: 'rector',

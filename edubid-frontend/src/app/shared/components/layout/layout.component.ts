@@ -6,6 +6,7 @@ import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
 import { InAppNotificationService, InAppNotification } from '../../../core/services/in-app-notification.service';
 import { UserRole } from '../../../core/models/user.model';
 import { environment } from '../../../../environments/environment';
+import { AiAssistantComponent } from '../ai-assistant/ai-assistant.component';
 
 export type NavIcon = 'dashboard' | 'classrooms' | 'groups' | 'rector' | 'users' | 'activities' | 'auctions' | 'wallet' | 'grades' | 'profile';
 
@@ -20,7 +21,7 @@ interface NavItem {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, AiAssistantComponent],
   template: `
     <div class="h-screen w-screen overflow-hidden bg-bg text-text flex transition-colors duration-200">
       
@@ -647,6 +648,10 @@ interface NavItem {
           </div>
         </div>
       }
+
+      <!-- ================= ASISTENTE INTELIGENTE EDUBID IA ================= -->
+      <app-ai-assistant />
+
     </div>
   `,
 })
