@@ -557,7 +557,7 @@ def execute_create_classroom(user, args):
         "nombre": classroom.nombre,
         "descripcion": classroom.descripcion or "",
         "docente": f"{docente.first_name} {docente.last_name}".strip() or docente.email,
-        "mensaje": f"Clase '{classroom.nombre}' creada exitosamente con ID {classroom.id}."
+        "mensaje": f"Clase '{classroom.nombre}' creada exitosamente."
     }
 
 
