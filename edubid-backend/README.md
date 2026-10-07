@@ -33,6 +33,7 @@ edubid-backend/
 │   ├── tokens/                   # Períodos académicos (cortes), Billeteras virtuales (Wallets) y libro mayor contable
 │   ├── auctions/                 # Subastas en vivo, WebSockets (Daphne), pujas y liquidación con select_for_update
 │   ├── notifications/            # Sistema centralizado de alertas, eventos y anuncios institucionales
+│   ├── ai_assistant/             # EDUBID IA: Agente autónomo con Tool Calling en tiempo real (OpenRouter GPT-4o)
 │   ├── reports/                  # Métricas consolidadas, analítica agregada y reportes de rendimiento
 │   └── common/                   # Motor de reportes PDF/Excel, modelos base, tests y utilidades
 ├── edubid_core/                  # Settings, enrutador ASGI, paginación inteligente y excepciones globales
@@ -135,6 +136,32 @@ python manage.py runserver
 
 - **API REST Base**: `http://localhost:8000/api/`
 - **Django Admin**: `http://localhost:8000/admin/`
+
+---
+
+## 🤖 EDUBID IA — Agente Autónomo Integrado (OpenRouter GPT-4o)
+
+EduBid incorpora un copiloto pedagógico y de gestión institucional autónomo ubicado en `apps/ai_assistant/`. A diferencia de un chatbot pasivo, **EDUBID IA** utiliza **Tool Calling (Function Calling)** de OpenAI/OpenRouter para consultar y operar directamente sobre la base de datos de Django en tiempo real, respetando el control de acceso del usuario autenticado:
+
+### Herramientas Nativas del Agente (`apps/ai_assistant/tools.py`):
+1. **`get_my_classrooms_and_groups`**: Consulta las asignaturas, salones, códigos y cantidad de estudiantes a cargo del docente o de la institución.
+2. **`get_classroom_students`**: Lista los alumnos inscritos en un grupo específico junto con su saldo actual de EduCoins.
+3. **`create_activity`**: Crea tareas, proyectos o evaluaciones vinculadas al grupo con recompensa en EduCoins y fecha límite.
+4. **`get_activities`**: Lista actividades del docente o del grupo con conteo de entregas pendientes.
+5. **`get_submissions_to_grade`**: Consulta las entregas de los estudiantes para una actividad dada.
+6. **`grade_submission`**: Califica una entrega con nota numérica (0.0 a 5.0) y retroalimentación pedagógica. Al aprobar (>= 3.0), acredita los EduCoins a la billetera del estudiante.
+7. **`create_auction`**: Crea y publica subastas de incentivos en el grupo con fecha de cierre y puja mínima.
+8. **`get_auctions`**: Consulta subastas activas o cerradas y la puja líder actual.
+9. **`award_educoins`**: Otorga EduCoins por mérito a un estudiante específico mediante transacción contable en su `Wallet`.
+10. **`get_institution_summary`**: Genera un informe ejecutivo consolidado para Rectores y Coordinadores.
+
+### Configuración en `.env`:
+```env
+OPENROUTER_API_KEY=tu_openrouter_api_key_aqui
+OPENROUTER_MODEL=openai/gpt-4o
+OPENROUTER_FALLBACK_MODEL=openai/gpt-4o-mini
+OPENROUTER_MAX_TOKENS=1500
+```
 
 ---
 

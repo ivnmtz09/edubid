@@ -644,6 +644,50 @@ EduBid implementa un manejador global de excepciones (`edubid_core.exceptions.cu
 }
 ```
 
+### 4.14 EDUBID IA — Agente Inteligente Autónomo (OpenRouter & Tool Calling)
+
+EduBid integra un Agente Autónomo con GPT-4o vía OpenRouter que ejecuta herramientas nativas sobre la base de datos de la plataforma en tiempo real.
+
+#### `POST /api/ai/chat/`
+- **Permisos:** `IsAuthenticated` (Roles autorizados: `docente`, `coordinador`, `rector`, `admin`).
+- **Descripción:** Envía un historial de conversación al agente. El agente evalúa si requiere consultar la base de datos o ejecutar una acción (crear actividades, consultar grupos/estudiantes, calificar entregas, crear subastas, otorgar EduCoins) mediante *Tool Calling* y genera la respuesta consolidada.
+- **Request Body:**
+```json
+{
+  "messages": [
+    { "role": "user", "content": "¿Cuántos grupos o asignaturas tengo actualmente?" }
+  ],
+  "context": "Opcional: contexto de la pantalla activa en el frontend"
+}
+```
+- **Response (200 OK):**
+```json
+{
+  "status": "success",
+  "role": "assistant",
+  "content": "Actualmente tienes 1 asignatura (TIC) con 1 grupo activo (Feria de Ciencias, Código: BAF7C4, 2 estudiantes inscritos)...",
+  "model": "openai/gpt-4o",
+  "author": "EDUBID IA"
+}
+```
+
+#### `GET /api/ai/suggestions/`
+- **Permisos:** `IsAuthenticated`.
+- **Descripción:** Retorna una lista de sugerencias de acciones rápidas adaptadas específicamente al rol del usuario conectado.
+- **Response (200 OK):**
+```json
+{
+  "role": "docente",
+  "suggestions": [
+    "¿Cuántos grupos o asignaturas tengo actualmente?",
+    "¿Qué estudiantes tengo en mis grupos y qué saldo de EduCoins tienen?",
+    "¿Qué actividades tengo activas y cuáles tienen entregas pendientes?",
+    "Crea una tarea con 50 EduCoins de recompensa para la próxima semana.",
+    "Crea una subasta de '1 punto extra en examen' por 20 EduCoins."
+  ]
+}
+```
+
 ---
 
 ## Notas Técnicas para el Frontend

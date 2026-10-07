@@ -120,14 +120,26 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 - **🎯 Sistema de Subastas Estratégicas**: Participación en pujas con validación inmediata de saldo y retención temporal inteligente.
 - **📚 Entregas y Retroalimentación**: Envío de actividades con archivos adjuntos y consulta de rúbricas y notas.
 
+### 🤖 EDUBID IA — Agente Inteligente Autónomo (OpenRouter GPT-4o)
+- **🧠 Copiloto Pedagógico y de Gestión con Tool Calling**: Agente inteligente con conexión directa a la base de datos de EduBid en tiempo real. No solo dialoga, sino que ejecuta acciones y consultas operativas según el rol del usuario.
+- **📚 Consultas Operativas en Vivo**: Docentes y directivos pueden consultar cuántas asignaturas o grupos tienen a cargo, códigos de acceso de unión, listado de alumnos inscritos y sus saldos de EduCoins.
+- **📝 Creación Automatizada de Actividades**: Permite crear tareas, proyectos o evaluaciones dictándole los requerimientos al chatbot con fecha límite y recompensa en EduCoins.
+- **📊 Revisión y Calificación Asistida**: Consulta entregas de estudiantes y califica con nota numérica (0.0 a 5.0) y retroalimentación pedagógica, acreditando los EduCoins automáticamente a la billetera al aprobar.
+- **🔨 Creación de Subastas Educativas**: Apertura inmediata de subastas de incentivos pedagógicos en los grupos del aula.
+- **🪙 Asignación Directa de EduCoins por Mérito**: Permite premiar la participación, puntualidad o esfuerzo de los estudiantes en tiempo real con transacciones contables en su `Wallet`.
+- **🏛️ Reportes Directivos Consolidados**: Genera resúmenes ejecutivos para Rectores y Coordinadores con estadísticas globales de la institución.
+- **💬 Widget Flotante y Chatbot Interactivo**: Botón flotante animado en la esquina inferior derecha con icono de robot 🤖, chips de sugerencias rápidas contextualizadas por rol, formato Markdown enriquecido y botón de copiado rápido al portapapeles.
+
 ---
 
 ## 🛠️ Stack Tecnológico
 
 ### 🔧 Backend
 - **Framework**: [Django 5.2.6](https://www.djangoproject.com/) con [Django REST Framework 3.16](https://www.django-rest-framework.org/)
+- **Inteligencia Artificial**: [OpenRouter API](https://openrouter.ai/) con OpenAI GPT-4o y GPT-4o-mini (bucle de agentes con Tool Calling en tiempo real)
 - **Tiempo Real (WebSockets)**: [Django Channels 4.x](https://channels.readthedocs.io/) con servidor ASGI [Daphne](https://github.com/django/daphne)
-- **Base de Datos**: [MySQL 8.0](https://www.mysql.com/) con driver [PyMySQL](https://pymysql.readthedocs.io/)
+- **Base de Datos**: [PostgreSQL en Supabase](https://supabase.com/) (producción) y [MySQL 8.0](https://www.mysql.com/) con driver [PyMySQL](https://pymysql.readthedocs.io/)
+- **Almacenamiento Multimedia**: [Supabase Storage S3](https://supabase.com/storage) con `django-storages` y `boto3`
 - **Autenticación**: JWT con [djangorestframework-simplejwt](https://django-rest-framework-simplejwt.readthedocs.io/) (rotación y blacklist de tokens)
 - **SSO**: [Google OAuth 2.0](https://developers.google.com/identity) (`google-auth` backend verification)
 - **Servicios de Correo**: [SendGrid](https://sendgrid.com/) para verificación de cuenta y recuperación de contraseña
@@ -166,6 +178,7 @@ edubid/
 │   │   ├── groups/                   # Grupos escolares, matrículas por código y períodos
 │   │   ├── institutions/             # Módulo SaaS Multi-Tenant, exportaciones DANE y White-Labeling
 │   │   ├── notifications/            # Motor de alertas, señales automáticas y anuncios institucionales
+│   │   ├── ai_assistant/             # EDUBID IA: Agente autónomo con Tool Calling en tiempo real
 │   │   ├── reports/                  # Informes y analítica académica
 │   │   ├── tokens/                   # Wallets, periodos y transacciones de EduCoins
 │   │   └── users/                    # Autenticación JWT, RBAC estricto, Google SSO y throttles
@@ -186,13 +199,15 @@ edubid/
 │   │   │   │   │                     # InAppNotificationService, WebSocketService,
 │   │   │   │   │                     # ActivityService, AuctionService, ClassroomService,
 │   │   │   │   │                     # GradeService, GroupService, InstitutionService,
-│   │   │   │   │                     # UserService, WalletService, DashboardService, GoogleAuthService
+│   │   │   │   │                     # UserService, WalletService, DashboardService, GoogleAuthService,
+│   │   │   │   │                     # AiAssistantService (Cliente HTTP para EDUBID IA)
 │   │   │   │   ├── guards/           # authGuard, roleGuard
 │   │   │   │   ├── interceptors/     # authInterceptor (JWT), errorInterceptor (Resiliencia HTTP)
 │   │   │   │   └── models/           # Interfaces TypeScript (User, Group, Classroom, etc.)
 │   │   │   ├── shared/               # Componentes reutilizables y estructura
 │   │   │   │   ├── components/       # Layout (Aside sidebar + Header + Campana + Footer), UI atoms,
-│   │   │   │   │                     # institution-branding (White-label)
+│   │   │   │   │                     # institution-branding (White-label),
+│   │   │   │   │                     # ai-assistant (Botón flotante y chatbot EDUBID IA)
 │   │   │   │   └── pipes/            # Pipes de utilidad
 │   │   │   └── features/             # Módulos y vistas de negocio:
 │   │   │       ├── auth/             # Login, Register, Complete Profile, Email Sent, Google SSO
@@ -384,6 +399,7 @@ Navega a **`http://localhost:4200`** en tu navegador. ¡Listo para explorar EduB
 | **Subastas** | `/auctions/` | Creación de subastas, registro de pujas y cierre con cobro |
 | **Notificaciones** | `/notifications/` | Alertas del sistema, notificaciones de notas y anuncios |
 | **Reportes** | `/reports/` | Estadísticas académicas y métricas de motivación |
+| **EDUBID IA** | `/ai/chat/`, `/ai/suggestions/` | Agente autónomo con GPT-4o y herramientas de base de datos en tiempo real |
 
 > 📖 Para consultar la especificación exhaustiva de cada endpoint, esquemas de payload y respuestas JSON, consulta:
 > **[`edubid-backend/BACKEND_API_MAP.md`](edubid-backend/BACKEND_API_MAP.md)**
@@ -397,6 +413,7 @@ Para consultar el registro técnico detallado de todas las funcionalidades imple
 👉 **[ROADMAP_Y_ESTADO_DEL_PROYECTO.md](ROADMAP_Y_ESTADO_DEL_PROYECTO.md)**
 
 ### Hitos Recientes Clave:
+* **EDUBID IA (Agente Autónomo GPT-4o)**: Agente inteligente con Tool Calling integrado en el backend Django que ejecuta consultas y acciones en vivo (crear tareas, subastas, calificar entregas con EduCoins, consultar grupos y balances de estudiantes), junto con widget chatbot interactivo y botón flotante en Angular para docentes, coordinadores y rectores.
 * **Identidad Institucional Completa**: Paleta cromática de 24 colores, contraste dinámico YIQ, degradado simétrico superior (`secondary -> primary -> secondary`) y scrollbars institucionales.
 * **Flujo Seguro de Sesión**: Modal de confirmación interactivo, overlay de cierre de sesión cinematográfico, reseteo de variables CSS (`ThemeService.resetBrandColors()`) y hard refresh a Home.
 * **Módulos Académicos**: Aulas con grupos anidados (`Classrooms`), Actividades con notas reales 0-100 y acreditación automática de EduCoins, Subastas en vivo con WebSockets, Billetera digital y Reportes DANE en PDF y Excel.

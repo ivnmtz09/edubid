@@ -52,6 +52,12 @@ La plataforma implementa un ecosistema educativo gamificado donde las calificaci
 - **🔐 Seguridad y Control de Acceso (RBAC)**:
   - Manejo de sesión con JWT (`access` y `refresh` tokens), rotación transparente mediante `authInterceptor`, soporte SSO con Google Identity Services y guards de ruta funcionales (`authGuard`, `roleGuard`).
   - Garantía en frontend y backend de que el rol `admin` mantenga `institucion = null`, suprimiendo la exigencia de completar perfil institucional y habilitando el selector global.
+- **🤖 EDUBID IA — Widget Flotante y Chatbot Agéntico (`AiAssistantComponent`)**:
+  - Botón flotante animado en la esquina inferior derecha con icono vectorial de robot 🤖, badge de estado en línea y resplandor interactivo.
+  - Exclusivo para roles autorizados (`docente`, `coordinador`, `rector`, `admin`).
+  - Integrado de forma transversal en `LayoutComponent` para operar en tiempo real sobre cualquier vista del sistema.
+  - Conexión al servicio `AiAssistantService`: envía consultas al backend y ejecuta acciones directas en la base de datos (creación de actividades y subastas, consultas de estudiantes y saldo de monedas, calificación de entregas y reportes institucionales).
+  - Interfaz con chips de inicio rápido, soporte de Markdown formateado, botón de copiado al portapapeles e indicador de estado de pensamiento.
 
 ---
 
@@ -83,7 +89,8 @@ edubid-frontend/
 │   │   │   │   ├── activity.service.ts      # Actividades, misiones y entregas
 │   │   │   │   ├── grade.service.ts         # Calificaciones y EduCoins
 │   │   │   │   ├── auction.service.ts       # Subastas y sistema de pujas
-│   │   │   │   └── wallet.service.ts        # Billeteras y transacciones de tokens
+│   │   │   │   ├── wallet.service.ts        # Billeteras y transacciones de tokens
+│   │   │   │   └── ai-assistant.service.ts  # Cliente HTTP para EDUBID IA (chat y sugerencias)
 │   │   │   ├── guards/                      # Guards funcionales
 │   │   │   │   ├── auth.guard.ts            # Protección de rutas autenticadas
 │   │   │   │   └── role.guard.ts            # Control de acceso por rol (RBAC)
@@ -95,7 +102,8 @@ edubid-frontend/
 │   │   │
 │   │   ├── shared/                          # Componentes reutilizables
 │   │   │   ├── components/                  # Layout (Aside sidebar, Header, Campana, Footer),
-│   │   │   │                                # institution-branding (White-label)
+│   │   │   │                                # institution-branding (White-label),
+│   │   │   │                                # ai-assistant (Botón flotante y chatbot EDUBID IA)
 │   │   │   └── ui/                          # Spinners, loading-screen, modales
 │   │   │
 │   │   ├── features/                        # Vistas y módulos de negocio (Lazy-loaded):
