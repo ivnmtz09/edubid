@@ -214,3 +214,42 @@ class AuthRateLimitingTests(TestCase):
         )
         self.assertEqual(throttled_response.status_code, 429)
 
+    def test_update_profile_name_and_nested_profile(self):
+        """Verifica que un usuario pueda actualizar su nombre sin espacios y sus campos de perfil anidados."""
+        user = User.objects.create_user(
+            username="docente_test",
+            email="docente_test@edubid.com",
+            password="password123",
+            first_name="JUAN CARLOS",
+            last_name="AÑEZ (:-)",
+            role="docente"
+        )
+        self.client.force_authenticate(user=user)
+
+        payload = {
+            "first_name": "  JUAN CARLOS  ",
+            "last_name": "  AÑEZ  ",
+            "profile": {
+                "telefono": "  3009998877  ",
+                "direccion": "Calle 10 # 5-20",
+                "bio": "Docente titular de informática"
+            }
+        }
+        res = self.client.patch("/api/users/profile/update/", payload, format="json")
+        self.assertEqual(res.status_code, 200)
+
+        # Verificar respuesta JSON
+        data = res.data["user"]
+        self.assertEqual(data["first_name"], "JUAN CARLOS")
+        self.assertEqual(data["last_name"], "AÑEZ")
+        self.assertEqual(data["profile"]["telefono"], "3009998877")
+        self.assertEqual(data["profile"]["bio"], "Docente titular de informática")
+
+        # Verificar persistencia en base de datos
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, "JUAN CARLOS")
+        self.assertEqual(user.last_name, "AÑEZ")
+        self.assertEqual(user.profile.telefono, "3009998877")
+        self.assertEqual(user.profile.bio, "Docente titular de informática")
+
+

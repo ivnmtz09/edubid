@@ -491,13 +491,23 @@ export class ProfileComponent implements OnInit {
     this.userService.getProfile().subscribe({
       next: (res: any) => {
         const u = res?.user || res;
-        if (u) {
+        if (u && u.email) {
+          const current = this.currentUser();
+          const merged: User = {
+            ...(current || {}),
+            ...u,
+            profile: {
+              ...(current?.profile || {}),
+              ...(u?.profile || {}),
+            },
+          };
+          this.authService.updateCurrentUser(merged);
           this.profileForm.patchValue({
-            first_name: u.first_name || '',
-            last_name: u.last_name || '',
-            telefono: u.profile?.telefono || '',
-            direccion: u.profile?.direccion || '',
-            bio: u.profile?.bio || '',
+            first_name: merged.first_name || '',
+            last_name: merged.last_name || '',
+            telefono: merged.profile?.telefono || '',
+            direccion: merged.profile?.direccion || '',
+            bio: merged.profile?.bio || '',
           });
         }
       },
@@ -511,12 +521,12 @@ export class ProfileComponent implements OnInit {
 
     const formVal = this.profileForm.value;
     const payload = {
-      first_name: formVal.first_name,
-      last_name: formVal.last_name,
+      first_name: (formVal.first_name || '').trim(),
+      last_name: (formVal.last_name || '').trim(),
       profile: {
-        telefono: formVal.telefono,
-        direccion: formVal.direccion,
-        bio: formVal.bio,
+        telefono: (formVal.telefono || '').trim(),
+        direccion: (formVal.direccion || '').trim(),
+        bio: (formVal.bio || '').trim(),
       },
     };
 
@@ -525,16 +535,25 @@ export class ProfileComponent implements OnInit {
         this.isSavingProfile.set(false);
         this.notifService.success('¡Perfil actualizado exitosamente!');
 
-        // Actualizar el estado local de authService si viene el usuario actualizado
         const updated = res?.user || res;
         if (updated && updated.email) {
           const current = this.currentUser();
-          if (current) {
-            const merged = { ...current, ...updated };
-            if (typeof localStorage !== 'undefined') {
-              localStorage.setItem('edubid_user', JSON.stringify(merged));
-            }
-          }
+          const merged: User = {
+            ...(current || {}),
+            ...updated,
+            profile: {
+              ...(current?.profile || {}),
+              ...(updated?.profile || {}),
+            },
+          };
+          this.authService.updateCurrentUser(merged);
+          this.profileForm.patchValue({
+            first_name: merged.first_name || '',
+            last_name: merged.last_name || '',
+            telefono: merged.profile?.telefono || '',
+            direccion: merged.profile?.direccion || '',
+            bio: merged.profile?.bio || '',
+          });
         }
       },
       error: (err: any) => {

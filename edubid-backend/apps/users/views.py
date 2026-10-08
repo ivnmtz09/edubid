@@ -419,7 +419,7 @@ def api_profile(request):
     if request.method == 'PATCH':
         return api_update_profile(request)
     logger.info(f"📊 Obteniendo perfil para: {request.user.email}")
-    serializer = UserProfileSerializer(request.user)
+    serializer = UserProfileSerializer(request.user, context={'request': request})
     return Response({'message': 'Perfil obtenido exitosamente', 'user': serializer.data})
 
 
@@ -431,8 +431,10 @@ def api_update_profile(request):
     user = request.user
     logger.info(f"✏️ Actualizando perfil para: {user.email}")
 
-    user.first_name = request.data.get("first_name", user.first_name)
-    user.last_name = request.data.get("last_name", user.last_name)
+    if "first_name" in request.data and request.data.get("first_name") is not None:
+        user.first_name = str(request.data.get("first_name")).strip()
+    if "last_name" in request.data and request.data.get("last_name") is not None:
+        user.last_name = str(request.data.get("last_name")).strip()
 
     # ── Rol (solo estudiante o docente durante el primer onboarding Google, sin institución asignada) ──
     new_role = request.data.get('role')
@@ -475,15 +477,27 @@ def api_update_profile(request):
                 "errors": {"institucion_id": ["Institución inválida o inactiva."]}
             }, status=status.HTTP_400_BAD_REQUEST)
 
+    try:
+        user.full_clean()
+    except Exception as e:
+        if hasattr(e, 'message_dict'):
+            return Response(e.message_dict, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     user.save()
 
-    profile_serializer = ProfileSerializer(user.profile, data=request.data, partial=True)
+    profile_data = request.data.get('profile')
+    if not isinstance(profile_data, dict):
+        profile_data = request.data
+
+    profile_serializer = ProfileSerializer(user.profile, data=profile_data, partial=True, context={'request': request})
     if profile_serializer.is_valid():
         profile_serializer.save()
+        user.refresh_from_db()
         logger.info(f"✅ Perfil actualizado para: {user.email}")
         return Response({
             "message": "Perfil actualizado exitosamente",
-            "user": UserProfileSerializer(user).data
+            "user": UserProfileSerializer(user, context={'request': request}).data
         })
 
     logger.warning(f"❌ Error actualizando perfil para: {user.email}")
@@ -845,10 +859,10 @@ def api_update_user(request, user_id):
         return Response({"detail": "No tienes permiso para actualizar usuarios"}, status=status.HTTP_403_FORBIDDEN)
 
     # Actualizar campos básicos del usuario si están presentes
-    if "first_name" in request.data:
-        user_to_update.first_name = request.data.get("first_name", user_to_update.first_name)
-    if "last_name" in request.data:
-        user_to_update.last_name = request.data.get("last_name", user_to_update.last_name)
+    if "first_name" in request.data and request.data.get("first_name") is not None:
+        user_to_update.first_name = str(request.data.get("first_name")).strip()
+    if "last_name" in request.data and request.data.get("last_name") is not None:
+        user_to_update.last_name = str(request.data.get("last_name")).strip()
     if "email" in request.data:
         user_to_update.email = request.data.get("email", user_to_update.email)
     if "role" in request.data:
@@ -886,12 +900,14 @@ def api_update_user(request, user_id):
     user_to_update.save()
 
     # Actualizar perfil si hay datos
-    if 'profile' in request.data and isinstance(request.data['profile'], dict):
-        profile_data = request.data['profile']
-        profile_serializer = ProfileSerializer(user_to_update.profile, data=profile_data, partial=True)
-        if profile_serializer.is_valid():
-            profile_serializer.save()
+    profile_data = request.data.get('profile')
+    if not isinstance(profile_data, dict):
+        profile_data = request.data
+    profile_serializer = ProfileSerializer(user_to_update.profile, data=profile_data, partial=True, context={'request': request})
+    if profile_serializer.is_valid():
+        profile_serializer.save()
 
+    user_to_update.refresh_from_db()
     logger.info(f"✅ Usuario actualizado exitosamente: {user_to_update.email}")
     
     return Response({

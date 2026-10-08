@@ -628,19 +628,25 @@ export class AdminDashboardComponent implements OnInit {
         this.notificationService.success(`Usuario ${user.email} actualizado exitosamente.`);
 
         const updatedUser = res?.user || res;
+        const newFirstName = this.editUserFirstName().trim();
+        const newLastName = this.editUserLastName().trim();
+        const newRole = this.editUserRole() as any;
+        const newIsActive = this.editUserIsActive();
+        const inst = this.institutions().find(i => i.id === this.editUserInstitutionId());
+
         this.users.update(list => list.map(u => {
           if (u.id === user.id) {
-            const inst = this.institutions().find(i => i.id === this.editUserInstitutionId());
             return {
               ...u,
               ...updatedUser,
-              first_name: this.editUserFirstName().trim(),
-              last_name: this.editUserLastName().trim(),
-              role: this.editUserRole() as any,
-              is_active: this.editUserIsActive(),
+              first_name: newFirstName,
+              last_name: newLastName,
+              role: newRole,
+              is_active: newIsActive,
               profile: {
-                ...u.profile,
-                institucion: this.editUserRole() === 'admin' ? null : (inst ? {
+                ...(u.profile || {}),
+                ...(updatedUser?.profile || {}),
+                institucion: newRole === 'admin' ? null : (inst ? {
                   id: inst.id,
                   nombre: inst.nombre,
                   color_primario: inst.color_primario,
@@ -653,6 +659,30 @@ export class AdminDashboardComponent implements OnInit {
           }
           return u;
         }));
+
+        if (this.authService.currentUser()?.id === user.id) {
+          const current = this.authService.currentUser();
+          const merged: User = {
+            ...(current || {}),
+            ...updatedUser,
+            first_name: newFirstName,
+            last_name: newLastName,
+            role: newRole,
+            profile: {
+              ...(current?.profile || {}),
+              ...(updatedUser?.profile || {}),
+              institucion: newRole === 'admin' ? null : (inst ? {
+                id: inst.id,
+                nombre: inst.nombre,
+                color_primario: inst.color_primario,
+                color_secundario: inst.color_secundario,
+                logo: inst.logo ?? null,
+                codigo_dane: inst.codigo_dane
+              } : null)
+            }
+          };
+          this.authService.updateCurrentUser(merged);
+        }
       },
       error: (err) => {
         this.isSavingUser.set(false);
