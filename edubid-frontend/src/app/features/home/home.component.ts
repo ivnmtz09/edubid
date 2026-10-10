@@ -25,11 +25,22 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { PublicInstitution, UserRole } from '../../core/models/user.model';
 import { AUTH_ENDPOINTS } from '../../core/constants/api.constants';
 import { InteractiveDotsComponent } from '../../shared/components/ui/interactive-dots.component';
+import { CoinCollectorGameComponent } from './components/home-games/coin-collector-game.component';
+import { GalagaGameComponent } from './components/home-games/galaga-game.component';
+
+export type HomeBgMode = 'dots' | 'coins' | 'galaga';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, InteractiveDotsComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    InteractiveDotsComponent,
+    CoinCollectorGameComponent,
+    GalagaGameComponent,
+  ],
   templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -48,6 +59,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Selector de tema: Dropdown en el header
   isThemeDropdownOpen = signal(false);
+
+  // Selector de fondo interactivo (Minijuegos PC)
+  bgMode = signal<HomeBgMode>(this.loadInitialBgMode());
+  isBgDropdownOpen = signal(false);
+  isArcadeFocus = signal(false);
 
   // Lado derecho: Estado de acceso (botón inicial vs formularios de acceso)
   showAuthForms = signal(false);
@@ -194,12 +210,15 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 0);
   }
 
-  // Cerrar dropdown si se hace click afuera
+  // Cerrar dropdowns si se hace click afuera
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (!this.elementRef.nativeElement.querySelector('#theme-dropdown-container')?.contains(target)) {
       this.isThemeDropdownOpen.set(false);
+    }
+    if (!this.elementRef.nativeElement.querySelector('#bg-dropdown-container')?.contains(target)) {
+      this.isBgDropdownOpen.set(false);
     }
   }
 
@@ -207,11 +226,44 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleThemeDropdown(event?: Event): void {
     event?.stopPropagation();
     this.isThemeDropdownOpen.update((open) => !open);
+    this.isBgDropdownOpen.set(false);
   }
 
   setTheme(mode: ThemeMode): void {
     this.themeService.setTheme(mode);
     this.isThemeDropdownOpen.set(false);
+  }
+
+  // Métodos de Fondo Interactivo (Minijuegos PC)
+  loadInitialBgMode(): HomeBgMode {
+    if (typeof localStorage === 'undefined') return 'dots';
+    try {
+      const saved = localStorage.getItem('edubid_home_bg_mode');
+      if (saved === 'coins' || saved === 'galaga' || saved === 'dots') {
+        return saved;
+      }
+    } catch {
+      // Ignored
+    }
+    return 'dots';
+  }
+
+  toggleBgDropdown(event?: Event): void {
+    event?.stopPropagation();
+    this.isBgDropdownOpen.update((open) => !open);
+    this.isThemeDropdownOpen.set(false);
+  }
+
+  setBgMode(mode: HomeBgMode): void {
+    this.bgMode.set(mode);
+    this.isBgDropdownOpen.set(false);
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem('edubid_home_bg_mode', mode);
+      } catch {
+        // Ignored
+      }
+    }
   }
 
   // Control de visualización en el lado derecho

@@ -1,8 +1,24 @@
 <div class="min-h-screen flex flex-col justify-between bg-bg text-text transition-colors duration-200 relative">
-  <!-- Interactive Dots Canvas Background -->
-  <app-interactive-dots />
+  <!-- Background Dinámico: Partículas / Recolector de Monedas / Galaga Espacial -->
+  @switch (bgMode()) {
+    @case ('coins') {
+      <app-coin-collector-game
+        [isArcadeFocus]="isArcadeFocus()"
+        (closeArcade)="isArcadeFocus.set(false)"
+      />
+    }
+    @case ('galaga') {
+      <app-galaga-game
+        [isArcadeFocus]="isArcadeFocus()"
+        (closeArcade)="isArcadeFocus.set(false)"
+      />
+    }
+    @default {
+      <app-interactive-dots />
+    }
+  }
 
-  <!-- Minimalist Header: Meramente Logo sutil y Botón Desplegable de Tema -->
+  <!-- Minimalist Header: Logo y Botones Desplegables de Fondo y Tema -->
   <header class="h-16 border-b border-border bg-surface/85 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between sticky top-0 z-40">
     <!-- Brand Logo Minimal con Nuevo Icono Libre -->
     <a routerLink="/" class="text-base font-extrabold tracking-tight text-slate-900 dark:text-white flex items-center gap-2 group">
@@ -13,106 +29,215 @@
       </span>
     </a>
 
-    <!-- Theme Switcher: Botón Desplegable con 3 Opciones (Flowbite style) -->
-    <div id="theme-dropdown-container" class="relative">
-      <button
-        type="button"
-        (click)="toggleThemeDropdown($event)"
-        class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs focus:outline-hidden"
-        [attr.aria-expanded]="isThemeDropdownOpen()"
-        aria-haspopup="true"
-      >
-        <!-- Icono dinámico según el modo actual -->
-        @if (themeService.mode() === 'light') {
-          <svg class="w-4 h-4 shrink-0 text-amber-500" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    <!-- Acciones del Header: Selector de Fondo (PC) y Selector de Tema -->
+    <div class="flex items-center gap-2">
+      <!-- Selector de Fondo Interactivo (Exclusivo PC / Pantallas medianas en adelante) -->
+      <div id="bg-dropdown-container" class="relative hidden sm:inline-block">
+        <button
+          type="button"
+          (click)="toggleBgDropdown($event)"
+          class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs focus:outline-hidden"
+          [attr.aria-expanded]="isBgDropdownOpen()"
+          aria-haspopup="true"
+          title="Cambiar fondo o activar minijuegos interactivos"
+        >
+          @if (bgMode() === 'dots') {
+            <svg class="w-3.5 h-3.5 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            <span class="hidden md:inline">Partículas</span>
+          } @else if (bgMode() === 'coins') {
+            <svg class="w-3.5 h-3.5 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="hidden md:inline">Monedas</span>
+          } @else {
+            <svg class="w-3.5 h-3.5 shrink-0 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 8.41m5.96 5.96a14.926 14.926 0 01-5.84 2.58m-.12-4.8L5.05 16.73A2 2 0 012.22 13.9l4.58-4.58a14.94 14.94 0 012.83-1.07" />
+            </svg>
+            <span class="hidden md:inline">Galaga</span>
+          }
+          <svg class="w-3 h-3 shrink-0 text-text-muted transition-transform duration-200" [class.rotate-180]="isBgDropdownOpen()" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
-          <span class="hidden sm:inline">Claro</span>
-        } @else if (themeService.mode() === 'dark') {
-          <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-          </svg>
-          <span class="hidden sm:inline">Oscuro</span>
-        } @else {
-          <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <span class="hidden sm:inline">Sistema</span>
-        }
-        <svg class="w-3 h-3 shrink-0 text-text-muted transition-transform duration-200" [class.rotate-180]="isThemeDropdownOpen()" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
+        </button>
 
-      <!-- Menú Desplegable Flotante de Tema -->
-      @if (isThemeDropdownOpen()) {
-        <div class="absolute right-0 mt-2 w-44 rounded-2xl border border-border bg-surface shadow-lg py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
-          <div class="px-3 py-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-wider border-b border-border">
-            Tema de visualización
+        <!-- Menú Desplegable Flotante de Fondo -->
+        @if (isBgDropdownOpen()) {
+          <div class="absolute right-0 mt-2 w-52 rounded-2xl border border-border bg-surface shadow-lg py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="px-3 py-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-wider border-b border-border flex items-center justify-between">
+              <span>Fondo de Pantalla</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary font-bold">PC</span>
+            </div>
+
+            <!-- Opción 1: Partículas -->
+            <button
+              type="button"
+              (click)="setBgMode('dots')"
+              class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+              [class.font-bold]="bgMode() === 'dots'"
+            >
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Partículas Interactivas
+              </span>
+              @if (bgMode() === 'dots') {
+                <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              }
+            </button>
+
+            <!-- Opción 2: Recolector de Monedas -->
+            <button
+              type="button"
+              (click)="setBgMode('coins')"
+              class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+              [class.font-bold]="bgMode() === 'coins'"
+            >
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Recolector de Monedas
+              </span>
+              @if (bgMode() === 'coins') {
+                <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              }
+            </button>
+
+            <!-- Opción 3: Galaga Espacial -->
+            <button
+              type="button"
+              (click)="setBgMode('galaga')"
+              class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+              [class.font-bold]="bgMode() === 'galaga'"
+            >
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 8.41m5.96 5.96a14.926 14.926 0 01-5.84 2.58m-.12-4.8L5.05 16.73A2 2 0 012.22 13.9l4.58-4.58a14.94 14.94 0 012.83-1.07" />
+                </svg>
+                Galaga Espacial
+              </span>
+              @if (bgMode() === 'galaga') {
+                <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              }
+            </button>
           </div>
-          <button
-            type="button"
-            (click)="setTheme('light')"
-            class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
-            [class.font-bold]="themeService.mode() === 'light'"
-          >
-            <span class="flex items-center gap-2">
-              <svg class="w-4 h-4 shrink-0 text-amber-500" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              Claro
-            </span>
-            @if (themeService.mode() === 'light') {
-              <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-            }
-          </button>
+        }
+      </div>
 
-          <button
-            type="button"
-            (click)="setTheme('dark')"
-            class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
-            [class.font-bold]="themeService.mode() === 'dark'"
-          >
-            <span class="flex items-center gap-2">
-              <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-              Oscuro
-            </span>
-            @if (themeService.mode() === 'dark') {
-              <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-            }
-          </button>
+      <!-- Theme Switcher: Botón Desplegable con 3 Opciones (Flowbite style) -->
+      <div id="theme-dropdown-container" class="relative">
+        <button
+          type="button"
+          (click)="toggleThemeDropdown($event)"
+          class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-xl border border-border bg-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs focus:outline-hidden"
+          [attr.aria-expanded]="isThemeDropdownOpen()"
+          aria-haspopup="true"
+        >
+          <!-- Icono dinámico según el modo actual -->
+          @if (themeService.mode() === 'light') {
+            <svg class="w-4 h-4 shrink-0 text-amber-500" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span class="hidden sm:inline">Claro</span>
+          } @else if (themeService.mode() === 'dark') {
+            <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <span class="hidden sm:inline">Oscuro</span>
+          } @else {
+            <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <span class="hidden sm:inline">Sistema</span>
+          }
+          <svg class="w-3 h-3 shrink-0 text-text-muted transition-transform duration-200" [class.rotate-180]="isThemeDropdownOpen()" width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
-          <button
-            type="button"
-            (click)="setTheme('system')"
-            class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
-            [class.font-bold]="themeService.mode() === 'system'"
-          >
-            <span class="flex items-center gap-2">
-              <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              Tema del sistema
-            </span>
-            @if (themeService.mode() === 'system') {
-              <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-            }
-          </button>
-        </div>
-      }
+        <!-- Menú Desplegable Flotante de Tema -->
+        @if (isThemeDropdownOpen()) {
+          <div class="absolute right-0 mt-2 w-44 rounded-2xl border border-border bg-surface shadow-lg py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div class="px-3 py-1.5 text-[11px] font-semibold text-text-muted uppercase tracking-wider border-b border-border">
+              Tema de visualización
+            </div>
+            <button
+              type="button"
+              (click)="setTheme('light')"
+              class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+              [class.font-bold]="themeService.mode() === 'light'"
+            >
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0 text-amber-500" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Claro
+              </span>
+              @if (themeService.mode() === 'light') {
+                <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              }
+            </button>
+
+            <button
+              type="button"
+              (click)="setTheme('dark')"
+              class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+              [class.font-bold]="themeService.mode() === 'dark'"
+            >
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                Oscuro
+              </span>
+              @if (themeService.mode() === 'dark') {
+                <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              }
+            </button>
+
+            <button
+              type="button"
+              (click)="setTheme('system')"
+              class="w-full flex items-center justify-between px-3 py-2 text-xs font-medium hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+              [class.font-bold]="themeService.mode() === 'system'"
+            >
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4 shrink-0 text-slate-400" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                Tema del sistema
+              </span>
+              @if (themeService.mode() === 'system') {
+                <svg class="w-3.5 h-3.5 shrink-0 text-primary" width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              }
+            </button>
+          </div>
+        }
+      </div>
     </div>
   </header>
 
   <!-- Main Body: Split View (Izquierda: Info + Espacio de Imagen / Derecha: Acceder o Formularios) -->
-  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 flex items-center relative z-10">
+  <main
+    class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 flex items-center relative z-10 transition-opacity duration-300"
+    [class.opacity-10]="isArcadeFocus()"
+    [class.pointer-events-none]="isArcadeFocus()"
+  >
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 w-full items-center">
       
       <!-- Lado Izquierdo: Título en grande EduBid, breve descripción e ilustración SVG interactiva (Proporción Áurea ~62%) -->
@@ -1095,7 +1220,11 @@
   }
 
   <!-- Footer con enlace a Sobre Nosotros y Términos -->
-  <footer class="border-t border-border bg-surface py-6 sm:py-8 text-xs text-text-muted transition-colors duration-200 relative z-10">
+  <footer
+    class="border-t border-border bg-surface py-6 sm:py-8 text-xs text-text-muted transition-all duration-300 relative z-10"
+    [class.opacity-10]="isArcadeFocus()"
+    [class.pointer-events-none]="isArcadeFocus()"
+  >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <div class="flex items-center gap-2">
         <span class="font-bold text-slate-900 dark:text-white">EduBid</span>

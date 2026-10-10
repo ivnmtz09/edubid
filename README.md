@@ -129,7 +129,24 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 - **🪙 Asignación Directa de EduCoins por Mérito**: Permite premiar la participación, puntualidad o esfuerzo de los estudiantes en tiempo real con transacciones contables en su `Wallet`.
 - **🏛️ Reportes Directivos Consolidados**: Genera resúmenes ejecutivos para Rectores y Coordinadores con estadísticas globales de la institución.
 - **🔄 Sincronización Reactiva en Tiempo Real (Cero F5)**: Bus de eventos reactivo `actionCompleted$` en frontend que actualiza automáticamente la pantalla cada vez que el copiloto ejecuta herramientas.
-- **💬 Widget Flotante y Chatbot Interactivo**: Botón flotante animado con avatar reactivo, badge dinámico del modelo activo (`Gemini 3.6 Flash`), chips de sugerencias pedagógicas contextualizadas por rol, formato Markdown enriquecido y respuestas limpias sin identificadores técnicos de base de datos.
+- **💬 Widget Flotante, Chat Permanente & Asistente Kawaii**:
+  - Chatbot interactivo con avatar kawaii expresivo (ojos y sonrisa con seguimiento ocular reactivo al cursor, libre de rubor).
+  - Persistencia total de la conversación en `localStorage` segmentada por usuario (no se borra al cerrar el widget flotante).
+  - Botón de vaciado manual del historial con modal de confirmación segura.
+  - Bandeja desplegable y colapsable de sugerencias rápidas contextuales por rol.
+  - Foco automático en el campo de texto al abrir y renderizado enriquecido de Markdown con bloques de código.
+
+### 🎮 Experiencia Gamificada & Minijuegos SVG Interactivos en el Home (Exclusivo PC)
+- **🕹️ Selector de Fondos en el Header**: Dropdown integrado junto al selector de temas para alternar entre tres fondos interactivos:
+  - **✨ Partículas Interactivas**: Fondo canvas predeterminado reactivo al cursor.
+  - **🪙 Recolector de Monedas**: Stickman con carreta que corre sobre el suelo siguiendo el ratón, recoge EduCoins (+10 pts) y Super Monedas (+50 pts) y esquiva bombas de peligro (-1 HP).
+  - **🚀 Galaga Espacial**: Caza estelar con cañones de plasma dobles automáticos, asteroides poligonales y naves alienígenas invasoras con trayectoria sinusoidal.
+- **📺 Doble Modalidad de Juego**:
+  - *Modo Fondo Vivo*: El juego corre detrás de la web (`fixed inset-0 z-0 pointer-events-none`), permitiendo navegar y operar la plataforma normalmente mientras el juego interactúa con el cursor de fondo.
+  - *Modo Arcade Enfocado*: Atenúa la página web al 10% y permite jugar a pantalla completa tanto con el ratón como con el teclado (flechas o A/D/W/S y tecla `Esc` para salir).
+- **🏆 HUD Flotante & Persistencia**: Marcador de puntuación en vivo, 3 vidas/escudos vectoriales SVG, récord histórico (High Score) guardado en `localStorage` y botón de reinicio.
+- **⚡ Rendimiento Óptimo a 60 FPS**: Game loop en `requestAnimationFrame` desacoplado, eliminación de filtros Gaussianos pesados y renderizado OnPush eficiente con cero tirones de CPU.
+- **🎨 Regla Estricta Cero Emojis**: 100% de la interfaz gráfica y HUD construida con iconos vectoriales SVG limpios.
 
 ---
 
@@ -148,10 +165,13 @@ El sistema implementa un control de acceso robusto basado en roles (**RBAC**) ve
 - **Producción**: [Gunicorn](https://gunicorn.org/) + [WhiteNoise](https://whitenoise.readthedocs.io/)
 
 ### 🎨 Frontend
-- **Framework**: [Angular 19+](https://angular.dev/) (Standalone Components, Signals reactivos, Formularios Reactivos tipados)
+- **Framework**: [Angular 19+](https://angular.dev/) (Standalone Components, Signals reactivos, Formularios Reactivos tipados, zoneless change detection)
 - **Estilos**: [Tailwind CSS 4.x](https://tailwindcss.com/) + [Flowbite](https://flowbite.com/)
-- **Iconografía & UI**: Iconos vectoriales estándar SVG Flowbite y [Ng-Icons (Heroicons)](https://ng-icons.github.io/ng-icons/) (cero emojis en componentes de interfaz)
+- **Iconografía & UI**: Iconos vectoriales estándar SVG Flowbite y [Ng-Icons (Heroicons)](https://ng-icons.github.io/ng-icons/) (regla estricta de cero emojis en componentes de interfaz)
 - **Identidad de Marca**: Logotipo corporativo (`edubid.png`) y favicon (`edubid.ico`) integrados globalmente
+- **Minijuegos SVG Nativos**: Recolector de Monedas y Galaga Espacial integrados como fondos vivos interactivos a 60 FPS
+- **Navegación con Aside Persistente**: Menú lateral con persistencia del estado contraído en `localStorage` y navegación sin expansión automática indeseada
+- **Billeteras Realistas con Drawer**: Diseño con textura de cuero, pespuntes artesanales y drawer deslizable para auditoría financiera profunda (saldo disponible vs retenido en subastas)
 - **Notificaciones**: Centro de notificaciones in-app interactivo (`InAppNotificationService`) + Toasts reactivos con [ngx-toastr](https://github.com/scttcper/ngx-toastr)
 - **Sincronización Real-Time**: WebSockets con RxJS (`WebSocketService`) para pujas en vivo y notificaciones dinámicas
 - **Gestión de Temas**: Modo Claro / Oscuro puro (escala de negros y grises neutros `#0a0a0a`, `#141414`, `#262626` sin matices azules), contraste dinámico YIQ automático para textos en botones (`--brand-primary-text`) y personalización institucional en vivo (`ThemeService`)
