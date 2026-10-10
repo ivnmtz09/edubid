@@ -102,7 +102,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
                     </div>
                     <h4 class="font-bold text-text text-base">¡Hola, {{ userName() }}!</h4>
                     <p class="text-xs text-text-muted leading-relaxed">
-                      Soy <strong>EDUBID IA</strong>, tu copiloto inteligente potenciado por <strong>Google Gemini</strong>. Cuento con acceso directo para consultar, crear, editar y eliminar clases, grupos, actividades, calificaciones y subastas en tiempo real.
+                      Soy <strong>EDUBID IA</strong>, tu copiloto pedagógico inteligente potenciado por <strong>Google Gemini</strong>. Puedo ayudarte a consultar tus asignaturas, grupos y actividades, orientar calificaciones formativas, resolver dudas pedagógicas y gestionar dinámicas de aula.
                     </p>
                   </div>
 
@@ -259,12 +259,13 @@ export class AiAssistantComponent implements OnInit, AfterViewChecked {
   userInput = '';
   messages = signal<AiChatMessage[]>([]);
   suggestions = signal<string[]>([]);
-  activeModel = signal<string>('gemini-3.5-flash');
+  activeModel = signal<string>('gemini-3.6-flash');
 
   readonly activeModelBadge = computed(() => {
     const raw = this.activeModel();
-    if (!raw) return 'Gemini 3.5 Flash';
-    if (raw.includes('gemini-3.5')) return 'Gemini 3.5 Flash';
+    if (!raw) return 'Gemini 3.6 Flash';
+    if (raw.includes('gemini-3.6')) return 'Gemini 3.6 Flash';
+    if (raw.includes('gemini-3.5')) return 'Gemini 3.6 Flash';
     if (raw.includes('gemini-3.8')) return 'Gemini 3.8 Flash';
     if (raw.includes('gemini')) return 'Google Gemini';
     if (raw.includes('gpt-4o-mini')) return 'GPT-4o Mini';

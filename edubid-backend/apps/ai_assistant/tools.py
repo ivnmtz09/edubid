@@ -15,173 +15,17 @@ from apps.users.models import User
 
 logger = logging.getLogger(__name__)
 
-# Definiciones de herramientas para OpenAI / OpenRouter Tool Calling
+# Definiciones de herramientas para Google Gemini / OpenAI Tool Calling (Solo Consulta, Calificación y Premios)
 AI_TOOLS_DEFINITIONS = [
     {
         "type": "function",
         "function": {
             "name": "get_my_classrooms_and_groups",
-            "description": "Consulta las asignaturas (aulas/classrooms/clases) y grupos que tiene a cargo el docente o la institución. Muestra nombres, códigos de acceso y cantidad de estudiantes.",
+            "description": "Consulta las asignaturas y grupos registrados que tiene a cargo el docente o la institución. Permite verificar la existencia real de clases y grupos antes de responder.",
             "parameters": {
                 "type": "object",
                 "properties": {},
                 "required": []
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_classroom",
-            "description": "Crea una nueva clase o asignatura (Classroom/Aula) para el docente en la plataforma.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "nombre": {
-                        "type": "string",
-                        "description": "Nombre de la clase o asignatura (ej: 'Desarrollo Móvil', 'Física 11°')."
-                    },
-                    "descripcion": {
-                        "type": "string",
-                        "description": "Descripción opcional de la clase o asignatura."
-                    }
-                },
-                "required": ["nombre"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_group",
-            "description": "Crea un nuevo grupo escolar dentro de una clase o asignatura existente. El sistema le generará automáticamente un código de unión único y sus 3 períodos de cortes.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "classroom_id": {
-                        "type": "integer",
-                        "description": "ID numérico de la clase o asignatura donde se creará el grupo."
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "description": "Nombre del grupo (ej: 'A1', 'B1', 'Grupo 10-A')."
-                    },
-                    "descripcion": {
-                        "type": "string",
-                        "description": "Descripción opcional del grupo."
-                    }
-                },
-                "required": ["classroom_id", "nombre"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_classroom_with_groups",
-            "description": "Crea una clase o asignatura y uno o varios grupos escolares asociados en una sola operación (ej: clase 'Desarrollo Móvil' con grupos ['A1', 'B1']).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "nombre_asignatura": {
-                        "type": "string",
-                        "description": "Nombre de la asignatura o clase (ej: 'Desarrollo Móvil')."
-                    },
-                    "descripcion_asignatura": {
-                        "type": "string",
-                        "description": "Descripción opcional de la clase."
-                    },
-                    "nombres_grupos": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "Lista con los nombres de los grupos a crear (ej: ['A1', 'B1'])."
-                    }
-                },
-                "required": ["nombre_asignatura", "nombres_grupos"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "delete_classroom",
-            "description": "Elimina una asignatura o clase creada por el docente.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "classroom_id": {
-                        "type": "integer",
-                        "description": "ID de la clase a eliminar."
-                    }
-                },
-                "required": ["classroom_id"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "delete_group",
-            "description": "Elimina un grupo escolar de una clase o asignatura.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "grupo_id": {
-                        "type": "integer",
-                        "description": "ID del grupo a eliminar."
-                    }
-                },
-                "required": ["grupo_id"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "update_classroom",
-            "description": "Edita o actualiza el nombre o la descripción de una clase o asignatura existente.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "classroom_id": {
-                        "type": "integer",
-                        "description": "ID de la clase a editar."
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "description": "Nuevo nombre para la clase (opcional)."
-                    },
-                    "descripcion": {
-                        "type": "string",
-                        "description": "Nueva descripción para la clase (opcional)."
-                    }
-                },
-                "required": ["classroom_id"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "update_group",
-            "description": "Edita o actualiza el nombre o la descripción de un grupo escolar existente.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "grupo_id": {
-                        "type": "integer",
-                        "description": "ID del grupo a editar."
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "description": "Nuevo nombre para el grupo (opcional)."
-                    },
-                    "descripcion": {
-                        "type": "string",
-                        "description": "Nueva descripción para el grupo (opcional)."
-                    }
-                },
-                "required": ["grupo_id"]
             }
         }
     },
@@ -222,94 +66,6 @@ AI_TOOLS_DEFINITIONS = [
     {
         "type": "function",
         "function": {
-            "name": "create_activity",
-            "description": "Crea una nueva actividad pedagógica (tarea, proyecto, evaluación o examen) dentro de un grupo con recompensa en EduCoins.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "grupo_id": {
-                        "type": "integer",
-                        "description": "ID del grupo donde se publicará la actividad."
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "description": "Título claro de la actividad."
-                    },
-                    "tipo": {
-                        "type": "string",
-                        "enum": ["tarea", "proyecto", "evaluacion", "examen"],
-                        "description": "Tipo de actividad pedagógica."
-                    },
-                    "descripcion": {
-                        "type": "string",
-                        "description": "Instrucciones detalladas de la actividad o rúbrica resumida."
-                    },
-                    "valor_educoins": {
-                        "type": "integer",
-                        "description": "Recompensa en EduCoins que ganará el estudiante al aprobarla (ej: 50, 100, 200)."
-                    },
-                    "dias_para_entrega": {
-                        "type": "integer",
-                        "description": "Cantidad de días a partir de hoy para la fecha límite de entrega (por defecto 7 días si no se especifica)."
-                    }
-                },
-                "required": ["grupo_id", "nombre", "tipo"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "update_activity",
-            "description": "Edita una actividad pedagógica existente (cambiar título, descripción, recompensa en EduCoins o ampliar días de entrega).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "activity_id": {
-                        "type": "integer",
-                        "description": "ID de la actividad a modificar."
-                    },
-                    "nombre": {
-                        "type": "string",
-                        "description": "Nuevo título de la actividad."
-                    },
-                    "descripcion": {
-                        "type": "string",
-                        "description": "Nuevas instrucciones o rúbrica."
-                    },
-                    "valor_educoins": {
-                        "type": "integer",
-                        "description": "Nuevo valor de recompensa en EduCoins."
-                    },
-                    "dias_para_entrega": {
-                        "type": "integer",
-                        "description": "Nuevos días límite a partir de hoy."
-                    }
-                },
-                "required": ["activity_id"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "delete_activity",
-            "description": "Elimina permanentemente una actividad pedagógica creada por el docente.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "activity_id": {
-                        "type": "integer",
-                        "description": "ID de la actividad a eliminar."
-                    }
-                },
-                "required": ["activity_id"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
             "name": "get_submissions_to_grade",
             "description": "Obtiene las entregas de estudiantes pendientes de calificación o ya calificadas para una actividad.",
             "parameters": {
@@ -328,7 +84,7 @@ AI_TOOLS_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "grade_submission",
-            "description": "Califica una entrega de un estudiante (escala 0.0 a 5.0) y agrega retroalimentación pedagógica. Si la nota es aprobatoria (>= 3.0), le abona automáticamente los EduCoins a la billetera del estudiante.",
+            "description": "Califica una entrega de un estudiante (escala 0.0 a 5.0) y agrega retroalimentación pedagógica formativa. Si la nota es aprobatoria (>= 3.0), le abona automáticamente los EduCoins a la billetera del estudiante.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -338,11 +94,11 @@ AI_TOOLS_DEFINITIONS = [
                     },
                     "calificacion": {
                         "type": "number",
-                        "description": "Nota numérica en escala colombiana de 0.0 a 5.0 (ej: 4.5, 3.8)."
+                        "description": "Nota numérica en escala de 0.0 a 5.0 (ej: 4.5, 3.8)."
                     },
                     "retroalimentacion": {
                         "type": "string",
-                        "description": "Comentarios pedagógicos y de mejora para el estudiante."
+                        "description": "Comentarios formativos y de mejora para el estudiante."
                     }
                 },
                 "required": ["submission_id", "calificacion"]
@@ -353,7 +109,7 @@ AI_TOOLS_DEFINITIONS = [
         "type": "function",
         "function": {
             "name": "get_auctions",
-            "description": "Consulta las subastas (activas o cerradas) del docente o del grupo, mostrando pujas líderes y tiempo restante.",
+            "description": "Consulta las subastas pedagógicas (activas o cerradas) del docente o del grupo, mostrando pujas líderes y tiempo restante.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -363,73 +119,6 @@ AI_TOOLS_DEFINITIONS = [
                     }
                 },
                 "required": []
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "create_auction",
-            "description": "Crea una subasta pedagógica en un grupo con incentivos (ej: '1 punto extra', 'Elegir equipo', etc.).",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "grupo_id": {
-                        "type": "integer",
-                        "description": "ID del grupo donde se abre la subasta."
-                    },
-                    "titulo": {
-                        "type": "string",
-                        "description": "Nombre del incentivo o recompensa a subastar."
-                    },
-                    "descripcion": {
-                        "type": "string",
-                        "description": "Términos y condiciones o descripción de la recompensa."
-                    },
-                    "valor_minimo_educoins": {
-                        "type": "integer",
-                        "description": "Puja inicial mínima en EduCoins (por defecto 10)."
-                    },
-                    "dias_duracion": {
-                        "type": "integer",
-                        "description": "Duración de la subasta en días a partir de hoy (por defecto 3)."
-                    }
-                },
-                "required": ["grupo_id", "titulo"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "close_auction",
-            "description": "Cierra una subasta activa de inmediato, liquida y cobra los EduCoins al postor ganador y devuelve las monedas a los demás participantes.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "auction_id": {
-                        "type": "integer",
-                        "description": "ID de la subasta a cerrar."
-                    }
-                },
-                "required": ["auction_id"]
-            }
-        }
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "delete_auction",
-            "description": "Elimina una subasta activa devolviendo todas las monedas bloqueadas a los postores.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "auction_id": {
-                        "type": "integer",
-                        "description": "ID de la subasta a cancelar y eliminar."
-                    }
-                },
-                "required": ["auction_id"]
             }
         }
     },
@@ -475,6 +164,7 @@ AI_TOOLS_DEFINITIONS = [
         }
     }
 ]
+
 
 
 # =====================================================================
@@ -1303,26 +993,29 @@ def execute_get_institution_summary(user, args):
     }
 
 
+FORBIDDEN_MUTATION_TOOLS = {
+    "create_classroom",
+    "create_group",
+    "create_classroom_with_groups",
+    "delete_classroom",
+    "delete_group",
+    "update_classroom",
+    "update_group",
+    "create_activity",
+    "update_activity",
+    "delete_activity",
+    "create_auction",
+    "close_auction",
+    "delete_auction",
+}
+
 TOOL_HANDLERS = {
     "get_my_classrooms_and_groups": execute_get_my_classrooms_and_groups,
-    "create_classroom": execute_create_classroom,
-    "create_group": execute_create_group,
-    "create_classroom_with_groups": execute_create_classroom_with_groups,
-    "update_classroom": execute_update_classroom,
-    "delete_classroom": execute_delete_classroom,
-    "update_group": execute_update_group,
-    "delete_group": execute_delete_group,
     "get_classroom_students": execute_get_classroom_students,
     "get_activities": execute_get_activities,
-    "create_activity": execute_create_activity,
-    "update_activity": execute_update_activity,
-    "delete_activity": execute_delete_activity,
     "get_submissions_to_grade": execute_get_submissions_to_grade,
     "grade_submission": execute_grade_submission,
     "get_auctions": execute_get_auctions,
-    "create_auction": execute_create_auction,
-    "close_auction": execute_close_auction,
-    "delete_auction": execute_delete_auction,
     "award_educoins": execute_award_educoins,
     "get_institution_summary": execute_get_institution_summary,
 }
@@ -1330,6 +1023,17 @@ TOOL_HANDLERS = {
 
 def dispatch_tool(tool_name: str, arguments: dict, user) -> dict:
     """Ejecuta con seguridad la función solicitada por la IA."""
+    if tool_name in FORBIDDEN_MUTATION_TOOLS:
+        return {
+            "status": "error",
+            "error": (
+                "Acción no permitida: Por directiva de seguridad y control académico en EduBid, "
+                "el asistente de IA tiene restringida la creación, modificación estructural y eliminación "
+                "de clases, grupos, actividades o subastas. Esta operación debe ser realizada directamente "
+                "por el usuario en la interfaz de la plataforma."
+            )
+        }
+
     handler = TOOL_HANDLERS.get(tool_name)
     if not handler:
         return {"error": f"Herramienta desconocida '{tool_name}'"}
@@ -1338,3 +1042,4 @@ def dispatch_tool(tool_name: str, arguments: dict, user) -> dict:
     except Exception as e:
         logger.error("Error al ejecutar herramienta %s: %s", tool_name, str(e), exc_info=True)
         return {"error": f"Fallo al ejecutar {tool_name}: {str(e)}"}
+

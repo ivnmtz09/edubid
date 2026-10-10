@@ -408,7 +408,7 @@ AI_PROVIDER = config('AI_PROVIDER', default='google')
 
 # Google AI Studio (Gemini)
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
-GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-3.5-flash')
+GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-3.6-flash')
 GEMINI_FALLBACK_MODEL = config('GEMINI_FALLBACK_MODEL', default='gemini-3.8-flash')
 
 # OpenRouter (proveedor secundario / respaldo)

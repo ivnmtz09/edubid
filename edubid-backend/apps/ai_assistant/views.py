@@ -83,12 +83,12 @@ class AiSuggestionsView(APIView):
 
         suggestions_by_role = {
             'docente': [
-                "Crea la clase de Desarrollo Móvil con los grupos A1 y B1.",
-                "¿Cuántos grupos o asignaturas tengo actualmente?",
+                "¿Qué asignaturas y grupos tengo actualmente registrados a mi cargo?",
                 "¿Qué estudiantes tengo en mis grupos y qué saldo de EduCoins tienen?",
-                "¿Qué actividades tengo activas y cuáles tienen entregas pendientes?",
-                "Crea una tarea con 50 EduCoins de recompensa para la próxima semana.",
-                "Crea una subasta de '1 punto extra en examen' por 20 EduCoins.",
+                "¿Qué actividades tengo activas y cuáles tienen entregas pendientes por calificar?",
+                "Ayúdame a redactar las instrucciones y rúbrica para una tarea sobre pensamiento computacional.",
+                "Dame 3 ideas pedagógicas de recompensas para motivar la participación con EduCoins.",
+                "¿Cómo puedo estructurar una retroalimentación formativa para estudiantes con bajo rendimiento?",
             ],
             'coordinador': [
                 "Dame un resumen consolidado de los grupos, docentes y aulas de la institución.",

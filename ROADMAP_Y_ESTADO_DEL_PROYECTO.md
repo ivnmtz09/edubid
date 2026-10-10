@@ -129,30 +129,30 @@ flowchart LR
 
 ---
 
-### 🤖 2.4 EDUBID IA — Agente Autónomo Copiloto (Google AI Studio Gemini + CRUD Total)
-1. **Migración a Google AI Studio (Gemini)**:
-   - Motor principal basado en **`gemini-3.5-flash`** con tiempo de respuesta ultra-rápido (~1s).
+### 🤖 2.4 EDUBID IA — Copiloto Pedagógico Inteligente (Google AI Studio Gemini 3.6 Flash)
+1. **Migración a Google AI Studio (Gemini 3.6 Flash)**:
+   - Motor principal basado en **`gemini-3.6-flash`** con tiempo de respuesta ultra-rápido (~1s).
    - Respaldo automático (*Fallback*) escalonado a **`gemini-3.8-flash`** y OpenRouter (`openai/gpt-4o`) para garantizar 100% de disponibilidad ante cuotas o límites de tasa.
    - Orquestación multi-turno con soporte para `thought_signature` en las llamadas a herramientas.
-2. **Capacidades de Acción Total (21 Herramientas en Base de Datos)**:
-   - **Clases y Aulas**: Consultar (`get_my_classrooms_and_groups`), crear individual (`create_classroom`), crear clase con grupos en una sola transacción (`create_classroom_with_groups`), editar nombre/descripción (`update_classroom`) y eliminar (`delete_classroom`).
-   - **Grupos Escolares**: Crear grupo con código de 6 caracteres y 3 periodos (`create_group`), editar grupo (`update_group`) y eliminar (`delete_group`).
+2. **Capacidades Pedagógicas y de Consulta Delimitadas (8 Herramientas Seguras)**:
+   - **Clases y Aulas**: Consultar asignaturas y grupos registrados (`get_my_classrooms_and_groups`) con verificación previa obligatoria de existencia antes de emitir respuestas (previene alucinaciones o asunciones sobre aulas inexistentes).
    - **Estudiantes**: Consultar matrícula por grupo con correos y saldo de EduCoins en tiempo real (`get_classroom_students`).
-   - **Actividades Pedagógicas**: Consultar (`get_activities`), crear tareas/proyectos/evaluaciones con EduCoins (`create_activity`), editar (`update_activity`) y eliminar (`delete_activity`).
-   - **Calificaciones**: Consultar entregas pendientes (`get_submissions_to_grade`) y calificar de 0.0 a 5.0 con feedback formativo y abono automático de monedas a los aprobados (`grade_submission`).
-   - **Subastas Pedagógicas**: Consultar (`get_auctions`), crear incentivos (`create_auction`), cerrar subasta activa liquidando al ganador y liberando fondos retenidos (`close_auction`), y cancelar/eliminar devolviendo monedas (`delete_auction`).
-   - **Economía de Aula**: Abonar EduCoins directamente a cualquier estudiante por mérito o participación (`award_educoins`).
+   - **Actividades Pedagógicas**: Consultar actividades creadas y estado de entregas (`get_activities`).
+   - **Calificaciones Formativas**: Consultar entregas pendientes (`get_submissions_to_grade`) y calificar de 0.0 a 5.0 con feedback formativo y abono automático de monedas a los aprobados (`grade_submission`).
+   - **Subastas Pedagógicas**: Consultar subastas activas o cerradas (`get_auctions`).
+   - **Economía de Aula y Mérito**: Abonar EduCoins directamente a cualquier estudiante por mérito o participación (`award_educoins`).
    - **Directivos**: Consolidado institucional para Rectoría y Coordinación (`get_institution_summary`).
+   - **Política de Seguridad Estricta**: Creación y eliminación de entidades bloqueadas a nivel de prompt y controlador (`dispatch_tool`) para garantizar que la estructura académica permanezca bajo el control manual y exclusivo del docente en la plataforma.
 3. **Plataforma 100% Dinámica en Tiempo Real (Cero F5)**:
    - Emisión del evento reactivo `actionCompleted$` en `AiAssistantService`.
-   - Sincronización automática de datos en pantalla para **Clases**, **Detalle de Clase**, **Actividades**, **Dashboard Docente** y **Subastas** al ejecutarse cualquier tool del agente.
+   - Sincronización automática de datos en pantalla al ejecutarse cualquier tool del asistente.
 4. **Respuestas Limpias y Pedagógicas (Sin IDs Técnicos)**:
    - Supresión de identificadores numéricos de base de datos (`ID: 4`, `ID: 5`, etc.) en las respuestas al usuario.
    - Lenguaje claro, conciso y natural enfocado en la experiencia pedagógica.
 5. **Erradicación de Alertas Nativas de Navegador (`confirm()`)**:
    - Sustitución de todos los `confirm()` del navegador por `ConfirmDialogService` y modales visuales accesibles con los colores institucionales del colegio.
 6. **Insignia Dinámica en Frontend**:
-   - El widget de chat refleja automáticamente el modelo activo (`Gemini 3.5 Flash`) de forma reactiva.
+   - El widget de chat refleja automáticamente el modelo activo (`Gemini 3.6 Flash`) de forma reactiva.
 
 ---
  
@@ -195,10 +195,9 @@ python manage.py loaddata datos.json
 ## 🗺️ 4. Hoja de Ruta y Estado de Módulos
  
 | Módulo / Característica | Estado | Responsable / Notas |
-|-------------------------|--------|---------------------|
 | **Migración a Supabase (PostgreSQL)** | ✅ Completado | Conexión pooler 5432, 37 tablas migradas y 76 tests OK |
-| **EDUBID IA (Google Gemini AI Studio)** | ✅ Completado | Motor `gemini-3.5-flash` con fallback a `gemini-3.8-flash` y OpenRouter |
-| **CRUD Total Autónomo de EDUBID IA** | ✅ Completado | 21 tools para gestión de aulas, grupos, tareas, subastas y notas sin IDs técnicos |
+| **EDUBID IA (Google Gemini 3.6 Flash)** | ✅ Completado | Motor `gemini-3.6-flash` con fallback a `gemini-3.8-flash` y OpenRouter |
+| **Copiloto Pedagógico Seguro (EDUBID IA)** | ✅ Completado | 8 tools de consulta y evaluación con bloqueo estricto de creación/eliminación |
 | **Sincronización Reactiva en Tiempo Real** | ✅ Completado | Bus `actionCompleted$` actualiza UI sin recarga de página (cero F5) |
 | **Erradicación de Alertas confirm() Nativas** | ✅ Completado | Reemplazadas por `ConfirmDialogService` y modales visuales con tema |
 | **Notificaciones Interactivas (Redirección)** | ✅ Completado | Implementado en `LayoutComponent` y backend signals |

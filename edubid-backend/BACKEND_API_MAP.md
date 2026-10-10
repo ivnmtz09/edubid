@@ -644,19 +644,19 @@ EduBid implementa un manejador global de excepciones (`edubid_core.exceptions.cu
 }
 ```
 
-### 4.14 EDUBID IA — Agente Inteligente Autónomo (Google AI Studio Gemini + CRUD Total)
+### 4.14 EDUBID IA — Copiloto Pedagógico Inteligente (Google AI Studio Gemini 3.6 Flash)
 
-EduBid integra un Agente Autónomo impulsado principalmente por **Google Gemini** (`gemini-3.5-flash` y `gemini-3.8-flash` vía Google Generative Language API) con respaldo escalonado en OpenRouter (`openai/gpt-4o`). Ejecuta 21 herramientas nativas con permisos completos (CRUD) sobre la base de datos de la plataforma en tiempo real y responde con lenguaje pedagógico limpio sin IDs técnicos.
+EduBid integra un Copiloto Pedagógico impulsado principalmente por **Google Gemini** (`gemini-3.6-flash` y `gemini-3.8-flash` vía Google Generative Language API) con respaldo escalonado en OpenRouter (`openai/gpt-4o`). Ejecuta herramientas de consulta académica, evaluación formativa, economía de aula e informes directivos en tiempo real con estricta política de seguridad (creación y eliminación reservadas a la interfaz del usuario para prevenir mutaciones no deseadas o alucinaciones) y responde con lenguaje pedagógico limpio sin IDs técnicos.
 
 #### `POST /api/ai/chat/`
 - **Permisos:** `IsAuthenticated` (Roles autorizados: `docente`, `coordinador`, `rector`, `admin`).
-- **Descripción:** Envía un historial de conversación al agente. El agente evalúa y ejecuta autónomamente llamadas a funciones (*Tool Calling*) para consultar, crear, modificar o eliminar clases, salones, actividades, calificaciones, subastas o balances de estudiantes.
-- **Herramientas Disponibles (21 Tools):**
-  - *Clases y Grupos:* `get_my_classrooms_and_groups`, `create_classroom`, `create_group`, `create_classroom_with_groups`, `update_classroom`, `delete_classroom`, `update_group`, `delete_group`, `get_classroom_students`.
-  - *Actividades Académicas:* `get_activities`, `create_activity`, `update_activity`, `delete_activity`.
-  - *Calificaciones:* `get_submissions_to_grade`, `grade_submission`.
-  - *Subastas:* `get_auctions`, `create_auction`, `close_auction`, `delete_auction`.
-  - *Economía de Aula:* `award_educoins`.
+- **Descripción:** Envía un historial de conversación al copiloto. El asistente evalúa y ejecuta autónomamente llamadas a funciones (*Tool Calling*) para consultar asignaturas, grupos, estudiantes, actividades, calificaciones formativas o balances de incentivos en tiempo real, verificando la existencia real de grupos y asignaturas antes de responder.
+- **Herramientas Disponibles (8 Safe Tools):**
+  - *Clases y Grupos:* `get_my_classrooms_and_groups` (consulta y verificación de existencia), `get_classroom_students`.
+  - *Actividades Académicas:* `get_activities`.
+  - *Calificaciones Formativas:* `get_submissions_to_grade`, `grade_submission`.
+  - *Subastas Pedagógicas:* `get_auctions`.
+  - *Economía de Aula y Mérito:* `award_educoins`.
   - *Directivos:* `get_institution_summary`.
 - **Request Body:**
 ```json
@@ -673,7 +673,7 @@ EduBid integra un Agente Autónomo impulsado principalmente por **Google Gemini*
   "status": "success",
   "role": "assistant",
   "content": "Actualmente en la asignatura Desarrollo Móvil tienes los grupos A1 (Código: 7F1F5D) y B1 (Código: 9579E4)...",
-  "model": "gemini-3.5-flash",
+  "model": "gemini-3.6-flash",
   "executed_tools": ["get_my_classrooms_and_groups"],
   "author": "EDUBID IA"
 }
