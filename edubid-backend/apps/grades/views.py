@@ -51,6 +51,32 @@ class GradeViewSet(viewsets.ModelViewSet):
             return [AdminOrDocente()]
         return [permissions.IsAuthenticated()]
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        activity = serializer.validated_data.get('activity')
+        if user.role != 'admin' and not user.is_superuser:
+            if not activity or not activity.group or not activity.group.classroom or activity.group.classroom.docente != user:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("Solo el docente titular de la clase puede calificar actividades de este grupo.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        user = self.request.user
+        instance = serializer.instance
+        if user.role != 'admin' and not user.is_superuser:
+            if not instance.activity or not instance.activity.group or not instance.activity.group.classroom or instance.activity.group.classroom.docente != user:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("Solo el docente titular de la clase puede modificar esta calificación.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        user = self.request.user
+        if user.role != 'admin' and not user.is_superuser:
+            if not instance.activity or not instance.activity.group or not instance.activity.group.classroom or instance.activity.group.classroom.docente != user:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("Solo el docente titular de la clase puede eliminar esta calificación.")
+        instance.delete()
+
     @action(detail=False, methods=["get"], url_path="mis-notas")
     def mis_notas(self, request):
         """
@@ -95,11 +121,22 @@ class GradeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_403_FORBIDDEN
                 )
         elif user.role in ["rector", "coordinador"]:
-            if group.classroom and group.classroom.docente and user.institucion_id and group.classroom.docente.institucion_id != user.institucion_id:
+            if not user.institucion_id:
+                return None, Response(
+                    {"detail": "No tienes una institución asignada."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            docente_inst = getattr(getattr(getattr(group, 'classroom', None), 'docente', None), 'institucion_id', None)
+            if docente_inst != user.institucion_id:
                 return None, Response(
                     {"detail": "No tienes permiso para acceder a grupos de otra institución."},
                     status=status.HTTP_403_FORBIDDEN
                 )
+        elif user.role != "admin" and not user.is_superuser:
+            return None, Response(
+                {"detail": "No tienes permiso para consultar este reporte."},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         estudiantes = group.estudiantes.all()
         data = []

@@ -27,6 +27,42 @@ class NotificationViewSet(viewsets.ModelViewSet):
             return NotificationCreateSerializer
         return NotificationSerializer
 
+    def get_permissions(self):
+        if self.action == 'create':
+            from apps.users.permissions import IsInstitutionStaffOrDocente
+            return [IsInstitutionStaffOrDocente()]
+        return [permissions.IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        target_usuario = serializer.validated_data.get('usuario')
+
+        if user.role == 'admin' or user.is_superuser:
+            serializer.save(institucion=user.institucion)
+            return
+
+        if user.role in ['rector', 'coordinador']:
+            if not user.institucion_id or target_usuario.institucion_id != user.institucion_id:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("Solo puedes enviar notificaciones a usuarios de tu institución.")
+            serializer.save(institucion=user.institucion)
+            return
+
+        if user.role == 'docente':
+            from apps.classrooms.models import Classroom
+            is_student_of_teacher = Classroom.objects.filter(
+                docente=user,
+                grupos_clases__estudiantes=target_usuario
+            ).exists()
+            if not is_student_of_teacher:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied("Solo puedes enviar notificaciones a estudiantes de tus clases.")
+            serializer.save(institucion=user.institucion)
+            return
+
+        from rest_framework.exceptions import PermissionDenied
+        raise PermissionDenied("No tienes permisos para crear o enviar notificaciones arbitrarias.")
+
     @action(detail=False, methods=['get'], url_path='no-leidas')
     def no_leidas(self, request):
         """Obtener solo las notificaciones no leídas"""

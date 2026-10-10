@@ -135,3 +135,68 @@ class NotificationModelAndApiTests(TestCase):
         self.assertIsNotNone(notif_a)
         self.assertEqual(notif_a.institucion, self.institucion)
 
+
+class NotificationAccessControlSecurityTestCase(TestCase):
+    """
+    Pruebas de seguridad contra suplantación y falta de aislamiento
+    en la creación de notificaciones.
+    """
+    def setUp(self):
+        self.client = APIClient()
+        self.inst_a = Institution.objects.create(nombre="Colegio Uno", codigo_dane="111000")
+        self.rector_a = User.objects.create_user(
+            username="rector_na", email="rector_na@edubid.com", password="password123",
+            role="rector", institucion=self.inst_a
+        )
+        self.docente_a = User.objects.create_user(
+            username="docente_na", email="docente_na@edubid.com", password="password123",
+            role="docente", institucion=self.inst_a
+        )
+        self.estudiante_a = User.objects.create_user(
+            username="estudiante_na", email="estudiante_na@edubid.com", password="password123",
+            role="estudiante", institucion=self.inst_a
+        )
+
+        self.inst_b = Institution.objects.create(nombre="Colegio Dos", codigo_dane="222000")
+        self.estudiante_b = User.objects.create_user(
+            username="estudiante_nb", email="estudiante_nb@edubid.com", password="password123",
+            role="estudiante", institucion=self.inst_b
+        )
+
+    def test_student_cannot_post_notifications(self):
+        """Un estudiante no puede crear o enviar notificaciones a otros usuarios."""
+        self.client.force_authenticate(user=self.estudiante_a)
+        payload = {
+            "usuario": self.rector_a.id,
+            "titulo": "Spam no autorizado",
+            "mensaje": "Mensaje falso",
+            "tipo": "general"
+        }
+        res = self.client.post("/api/notifications/", payload, format="json")
+        self.assertEqual(res.status_code, 403)
+
+    def test_docente_cannot_notify_unassigned_students(self):
+        """Un docente no puede enviar notificaciones arbitrarias a estudiantes que no están en sus clases."""
+        self.client.force_authenticate(user=self.docente_a)
+        payload = {
+            "usuario": self.estudiante_b.id,
+            "titulo": "Aviso",
+            "mensaje": "No perteneces a mi clase",
+            "tipo": "anuncio"
+        }
+        res = self.client.post("/api/notifications/", payload, format="json")
+        self.assertEqual(res.status_code, 403)
+
+    def test_cross_school_directivo_cannot_notify_other_school(self):
+        """Un rector no puede crear notificaciones dirigidas a usuarios de otra institución."""
+        self.client.force_authenticate(user=self.rector_a)
+        payload = {
+            "usuario": self.estudiante_b.id,
+            "titulo": "Aviso Directivo",
+            "mensaje": "Mensaje inter-institucional indebido",
+            "tipo": "general"
+        }
+        res = self.client.post("/api/notifications/", payload, format="json")
+        self.assertEqual(res.status_code, 403)
+
+

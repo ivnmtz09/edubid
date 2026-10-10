@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from .models import Period, Wallet, CoinTransaction
 from .serializers import PeriodSerializer, WalletSerializer, CoinTransactionSerializer
-from apps.users.permissions import AdminOrDocente
+from apps.users.permissions import AdminOrDocente, IsInstitutionStaffOrDocente
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class PeriodViewSet(viewsets.ModelViewSet):
     queryset = Period.objects.all()  # Queryset base requerido por DRF
     serializer_class = PeriodSerializer
-    permission_classes = [AdminOrDocente]
+    permission_classes = [IsInstitutionStaffOrDocente]
 
     def get_queryset(self):
         """Filtrar periodos según el rol del usuario"""
@@ -52,15 +52,21 @@ class PeriodViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """
         Al crear un periodo:
-        - Validar que el docente sea dueño del grupo
+        - Validar que el docente sea dueño del grupo o directivo de la institución
         - Crear wallets para todos los estudiantes del grupo
         """
         user = self.request.user
         grupo = serializer.validated_data.get('grupo')
         
-        # Validar que el docente sea dueño del grupo
+        # Validar pertenencia del grupo
         if user.role == 'docente' and grupo.classroom.docente != user:
             raise ValidationError("No puedes crear periodos para grupos que no son tuyos.")
+        elif user.role in ['rector', 'coordinador']:
+            docente_inst = getattr(getattr(grupo.classroom, 'docente', None), 'institucion_id', None)
+            if not user.institucion_id or docente_inst != user.institucion_id:
+                raise ValidationError("No tienes permisos para crear periodos en grupos de otra institución.")
+        elif user.role != 'admin' and not user.is_superuser:
+            raise ValidationError("No tienes permisos para crear periodos.")
         
         # Guardar el periodo
         periodo = serializer.save()
@@ -82,18 +88,25 @@ class PeriodViewSet(viewsets.ModelViewSet):
         # Log de cuántas wallets se crearon
         print(f"✅ Periodo '{periodo.nombre}' creado. {wallets_creadas} wallets generadas.")
 
-    @action(detail=True, methods=['post'], permission_classes=[AdminOrDocente])
+    @action(detail=True, methods=['post'], permission_classes=[IsInstitutionStaffOrDocente])
     def activar(self, request, pk=None):
         """
         Activa este periodo y desactiva todos los demás del mismo grupo.
         POST /api/coins/periods/{id}/activar/
         """
         periodo = self.get_object()
+        user = request.user
         
-        # Validar que el docente sea dueño
-        if request.user.role == 'docente':
-            if periodo.grupo.classroom.docente != request.user:
+        # Validar permisos
+        if user.role == 'docente':
+            if periodo.grupo.classroom.docente != user:
                 raise ValidationError("No tienes permiso para activar este periodo.")
+        elif user.role in ['rector', 'coordinador']:
+            docente_inst = getattr(getattr(periodo.grupo.classroom, 'docente', None), 'institucion_id', None)
+            if not user.institucion_id or docente_inst != user.institucion_id:
+                raise ValidationError("No tienes permisos para activar periodos de otra institución.")
+        elif user.role != 'admin' and not user.is_superuser:
+            raise ValidationError("No tienes permisos para activar periodos.")
         
         # Activar este periodo (automáticamente desactiva los otros del grupo)
         periodo.activar()
@@ -111,17 +124,21 @@ class PeriodViewSet(viewsets.ModelViewSet):
         GET /api/coins/periods/mis_periodos/
         """
         user = request.user
+        base_qs = Period.objects.select_related('grupo', 'grupo__classroom', 'grupo__classroom__docente').order_by('-creado')
         
         if user.role == 'estudiante':
-            periodos = Period.objects.filter(
-                grupo__estudiantes=user
-            ).select_related('grupo', 'grupo__classroom').order_by('-creado')
+            periodos = base_qs.filter(grupo__estudiantes=user)
         elif user.role == 'docente':
-            periodos = Period.objects.filter(
-                grupo__classroom__docente=user
-            ).select_related('grupo', 'grupo__classroom').order_by('-creado')
+            periodos = base_qs.filter(grupo__classroom__docente=user)
+        elif user.role in ['rector', 'coordinador']:
+            if user.institucion_id:
+                periodos = base_qs.filter(grupo__classroom__docente__institucion_id=user.institucion_id)
+            else:
+                periodos = Period.objects.none()
+        elif user.role == 'admin' or user.is_superuser:
+            periodos = base_qs.all()
         else:
-            periodos = Period.objects.all().order_by('-creado')
+            periodos = Period.objects.none()
         
         serializer = self.get_serializer(periodos, many=True)
         return Response(serializer.data)

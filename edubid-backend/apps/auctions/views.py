@@ -97,8 +97,12 @@ class AuctionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        """Al crear, asignar el docente como creador"""
-        serializer.save(creador=self.request.user)
+        """Al crear, asignar el docente como creador tras verificar propiedad del grupo"""
+        user = self.request.user
+        grupo = serializer.validated_data.get('grupo')
+        if user.role == 'docente' and (not grupo or not grupo.classroom or grupo.classroom.docente != user):
+            raise PermissionDenied("Solo puedes crear subastas en grupos que te pertenecen como docente titular.")
+        serializer.save(creador=user)
 
     def perform_update(self, serializer):
         """Validar que el docente solo pueda editar sus propias subastas"""

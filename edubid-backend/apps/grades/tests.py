@@ -159,3 +159,77 @@ class GradeCalculationAndRewardTests(TestCase):
         self.assertIn("attachment", response["Content-Disposition"])
         self.assertTrue(len(response.content) > 100)
 
+
+class GradeAccessControlSecurityTestCase(TestCase):
+    """
+    Pruebas de seguridad y control de acceso en GradeViewSet.
+    """
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.client = APIClient()
+
+        # Institución A
+        self.inst_a = Institution.objects.create(nombre="Instituto A", codigo_dane="111")
+        self.rector_a = User.objects.create_user(
+            username="rector_ga", email="rector_ga@edubid.com", password="password123",
+            role="rector", institucion=self.inst_a
+        )
+        self.docente_a = User.objects.create_user(
+            username="docente_ga", email="docente_ga@edubid.com", password="password123",
+            role="docente", institucion=self.inst_a
+        )
+        self.estudiante_a = User.objects.create_user(
+            username="estudiante_ga", email="estudiante_ga@edubid.com", password="password123",
+            role="estudiante", institucion=self.inst_a
+        )
+        self.classroom_a = Classroom.objects.create(nombre="Química Orgánica", docente=self.docente_a)
+        self.group_a = Group.objects.create(nombre="Grupo Q-1", classroom=self.classroom_a)
+        self.group_a.estudiantes.add(self.estudiante_a)
+        Period.crear_periodos_para_grupo(self.group_a)
+
+        self.activity_a = Activity.objects.create(
+            group=self.group_a, nombre="Informe Enlace Covalente", tipo="taller", valor_educoins=50,
+            fecha_entrega=timezone.now() + timedelta(days=7)
+        )
+
+        # Institución B
+        self.inst_b = Institution.objects.create(nombre="Instituto B", codigo_dane="222")
+        self.rector_b = User.objects.create_user(
+            username="rector_gb", email="rector_gb@edubid.com", password="password123",
+            role="rector", institucion=self.inst_b
+        )
+        self.docente_b = User.objects.create_user(
+            username="docente_gb", email="docente_gb@edubid.com", password="password123",
+            role="docente", institucion=self.inst_b
+        )
+
+    def test_cross_teacher_cannot_create_grade(self):
+        """Docente B no puede calificar una actividad de la clase de Docente A."""
+        self.client.force_authenticate(user=self.docente_b)
+        payload = {
+            "activity": self.activity_a.id,
+            "student": self.estudiante_a.id,
+            "nota": 90,
+            "retroalimentacion": "Intento de calificación no autorizada"
+        }
+        res = self.client.post("/api/grades/", payload, format="json")
+        self.assertEqual(res.status_code, 403)
+
+    def test_cross_school_rector_cannot_access_group_report(self):
+        """Rector de Institución B no puede consultar el reporte de notas de un grupo de Institución A."""
+        self.client.force_authenticate(user=self.rector_b)
+        res = self.client.get(f"/api/grades/grupo/{self.group_a.id}/reporte/")
+        self.assertEqual(res.status_code, 403)
+
+    def test_student_cannot_create_grade(self):
+        """Un estudiante no tiene permisos para crear calificaciones."""
+        self.client.force_authenticate(user=self.estudiante_a)
+        payload = {
+            "activity": self.activity_a.id,
+            "student": self.estudiante_a.id,
+            "nota": 100
+        }
+        res = self.client.post("/api/grades/", payload, format="json")
+        self.assertEqual(res.status_code, 403)
+
+

@@ -130,3 +130,60 @@ class WalletAndPeriodTests(TestCase):
                     periodo=self.periodo_activo,
                     saldo_educoins=50
                 )
+
+
+class PeriodAccessControlSecurityTestCase(TestCase):
+    """
+    Pruebas de aislamiento multi-tenant y control de acceso en PeriodViewSet.
+    """
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.client = APIClient()
+
+        # Institución A
+        self.inst_a = Institution.objects.create(nombre="Institución A", codigo_dane="555001")
+        self.rector_a = User.objects.create_user(
+            username="rector_ta", email="rector_ta@edubid.com", password="password123",
+            role="rector", institucion=self.inst_a
+        )
+        self.docente_a = User.objects.create_user(
+            username="docente_ta", email="docente_ta@edubid.com", password="password123",
+            role="docente", institucion=self.inst_a
+        )
+        self.classroom_a = Classroom.objects.create(nombre="Ciencias A", docente=self.docente_a)
+        self.group_a = Group.objects.create(nombre="Grupo 1-A", classroom=self.classroom_a)
+
+        # Institución B
+        self.inst_b = Institution.objects.create(nombre="Institución B", codigo_dane="555002")
+        self.rector_b = User.objects.create_user(
+            username="rector_tb", email="rector_tb@edubid.com", password="password123",
+            role="rector", institucion=self.inst_b
+        )
+        self.docente_b = User.objects.create_user(
+            username="docente_tb", email="docente_tb@edubid.com", password="password123",
+            role="docente", institucion=self.inst_b
+        )
+        self.classroom_b = Classroom.objects.create(nombre="Ciencias B", docente=self.docente_b)
+        self.group_b = Group.objects.create(nombre="Grupo 1-B", classroom=self.classroom_b)
+
+    def test_cross_school_directivo_cannot_create_period(self):
+        """Rector de Institución A no puede crear periodos para un grupo de Institución B."""
+        self.client.force_authenticate(user=self.rector_a)
+        payload = {
+            "nombre": "Corte Extraordinario",
+            "grupo": self.group_b.id,
+            "activo": False
+        }
+        res = self.client.post("/api/tokens/periods/", payload, format="json")
+        self.assertEqual(res.status_code, 400)
+
+    def test_mis_periodos_filters_by_institution(self):
+        """mis_periodos no filtra periodos de otras instituciones para el rector."""
+        self.client.force_authenticate(user=self.rector_a)
+        res = self.client.get("/api/tokens/periods/mis_periodos/")
+        self.assertEqual(res.status_code, 200)
+
+        grupos_devueltos = [p["grupo"] for p in res.data]
+        self.assertIn(self.group_a.id, grupos_devueltos)
+        self.assertNotIn(self.group_b.id, grupos_devueltos)
+

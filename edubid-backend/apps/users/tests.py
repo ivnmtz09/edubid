@@ -253,3 +253,91 @@ class AuthRateLimitingTests(TestCase):
         self.assertEqual(user.profile.bio, "Docente titular de informática")
 
 
+class UserManagementSecurityTestCase(TestCase):
+    """
+    Pruebas de seguridad, jerarquía de autorización y prevención de escalamiento de privilegios en api_update_user.
+    """
+    def setUp(self):
+        self.client = APIClient()
+
+        # Institución A
+        self.inst_a = Institution.objects.create(nombre="Colegio Central", codigo_dane="9001")
+        self.rector_a = User.objects.create_user(
+            username="rector_ua", email="rector_ua@edubid.com", password="password123",
+            role="rector", institucion=self.inst_a
+        )
+        self.coordinador_a = User.objects.create_user(
+            username="coord_ua", email="coord_ua@edubid.com", password="password123",
+            role="coordinador", institucion=self.inst_a
+        )
+        self.docente_a = User.objects.create_user(
+            username="docente_ua", email="docente_ua@edubid.com", password="password123",
+            role="docente", institucion=self.inst_a
+        )
+
+        # Institución B
+        self.inst_b = Institution.objects.create(nombre="Colegio Norte", codigo_dane="9002")
+        self.docente_b = User.objects.create_user(
+            username="docente_ub", email="docente_ub@edubid.com", password="password123",
+            role="docente", institucion=self.inst_b
+        )
+
+    def test_coordinator_cannot_modify_rector(self):
+        """Un coordinador no tiene permiso para modificar o desactivar al rector."""
+        self.client.force_authenticate(user=self.coordinador_a)
+        res = self.client.patch(
+            f"/api/users/{self.rector_a.id}/update/",
+            {"first_name": "Rector Hackeado", "is_active": False},
+            format="json"
+        )
+        self.assertEqual(res.status_code, 403)
+
+    def test_coordinator_cannot_promote_to_rector_or_admin(self):
+        """Un coordinador no puede promover a ningún usuario a rector o admin."""
+        self.client.force_authenticate(user=self.coordinador_a)
+        res_admin = self.client.patch(
+            f"/api/users/{self.docente_a.id}/update/",
+            {"role": "admin"},
+            format="json"
+        )
+        self.assertEqual(res_admin.status_code, 403)
+
+        res_rector = self.client.patch(
+            f"/api/users/{self.docente_a.id}/update/",
+            {"role": "rector"},
+            format="json"
+        )
+        self.assertEqual(res_rector.status_code, 403)
+
+    def test_coordinator_cannot_modify_user_of_another_school(self):
+        """Un coordinador no puede modificar a usuarios de otra institución."""
+        self.client.force_authenticate(user=self.coordinador_a)
+        res = self.client.patch(
+            f"/api/users/{self.docente_b.id}/update/",
+            {"first_name": "Ataque Cross Tenant"},
+            format="json"
+        )
+        self.assertEqual(res.status_code, 403)
+
+    def test_rector_cannot_promote_to_admin(self):
+        """Un rector institucional no puede asignar el rol de administrador global."""
+        self.client.force_authenticate(user=self.rector_a)
+        res = self.client.patch(
+            f"/api/users/{self.docente_a.id}/update/",
+            {"role": "admin"},
+            format="json"
+        )
+        self.assertEqual(res.status_code, 403)
+
+    def test_coordinator_cannot_escalate_self_role(self):
+        """Un directivo o coordinador no puede cambiar su propio rol."""
+        self.client.force_authenticate(user=self.coordinador_a)
+        res = self.client.patch(
+            f"/api/users/{self.coordinador_a.id}/update/",
+            {"role": "rector"},
+            format="json"
+        )
+        self.assertEqual(res.status_code, 403)
+
+
+

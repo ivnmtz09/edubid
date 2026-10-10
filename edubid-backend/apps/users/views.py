@@ -848,13 +848,36 @@ def api_update_user(request, user_id):
         return Response({"detail": "Usuario no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
     req_user = request.user
-    if req_user.role == 'admin':
-        pass # Admin puede actualizar a cualquiera
-    elif req_user.role in ['rector', 'coordinador']:
+    if req_user.role == 'admin' or req_user.is_superuser:
+        pass  # Admin global puede actualizar a cualquiera
+    elif req_user.role == 'rector':
         if not req_user.institucion_id or user_to_update.institucion_id != req_user.institucion_id:
-            return Response({"detail": "No tienes permiso para actualizar a este usuario"}, status=status.HTTP_403_FORBIDDEN)
-        if request.data.get("role") == 'admin':
-            return Response({"detail": "No tienes permiso para asignar el rol de administrador"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "No tienes permiso para actualizar a usuarios de otra institución"}, status=status.HTTP_403_FORBIDDEN)
+        if user_to_update.role == 'admin' or user_to_update.is_superuser:
+            return Response({"detail": "No tienes permiso para modificar a un administrador"}, status=status.HTTP_403_FORBIDDEN)
+        # Rector no puede asignar rol admin ni otro rector
+        new_role = request.data.get("role")
+        if new_role and new_role in ['admin', 'rector'] and user_to_update.role != new_role:
+            return Response({"detail": "No tienes permiso para asignar este rol"}, status=status.HTTP_403_FORBIDDEN)
+        # Rector no puede cambiar su propio rol o auto-desactivarse
+        if req_user.id == user_to_update.id:
+            if "role" in request.data and request.data.get("role") != req_user.role:
+                return Response({"detail": "No puedes cambiar tu propio rol"}, status=status.HTTP_400_BAD_REQUEST)
+            if "is_active" in request.data and not bool(request.data.get("is_active")):
+                return Response({"detail": "No puedes desactivar tu propia cuenta de directivo"}, status=status.HTTP_400_BAD_REQUEST)
+    elif req_user.role == 'coordinador':
+        if not req_user.institucion_id or user_to_update.institucion_id != req_user.institucion_id:
+            return Response({"detail": "No tienes permiso para actualizar a usuarios de otra institución"}, status=status.HTTP_403_FORBIDDEN)
+        # Coordinador no puede modificar a directivos superiores o iguales
+        if user_to_update.role in ['admin', 'rector', 'coordinador'] and user_to_update.id != req_user.id:
+            return Response({"detail": "Un coordinador solo puede gestionar perfiles de docentes y estudiantes"}, status=status.HTTP_403_FORBIDDEN)
+        # Coordinador solo puede asignar roles 'docente' o 'estudiante'
+        new_role = request.data.get("role")
+        if new_role and new_role not in ['docente', 'estudiante']:
+            return Response({"detail": "Un coordinador solo puede asignar roles de docente o estudiante"}, status=status.HTTP_403_FORBIDDEN)
+        # Coordinador no puede cambiar su propio rol
+        if req_user.id == user_to_update.id and "role" in request.data and request.data.get("role") != req_user.role:
+            return Response({"detail": "No puedes cambiar tu propio rol"}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response({"detail": "No tienes permiso para actualizar usuarios"}, status=status.HTTP_403_FORBIDDEN)
 
@@ -863,8 +886,12 @@ def api_update_user(request, user_id):
         user_to_update.first_name = str(request.data.get("first_name")).strip()
     if "last_name" in request.data and request.data.get("last_name") is not None:
         user_to_update.last_name = str(request.data.get("last_name")).strip()
-    if "email" in request.data:
-        user_to_update.email = request.data.get("email", user_to_update.email)
+    if "email" in request.data and request.data.get("email"):
+        new_email = str(request.data.get("email")).strip().lower()
+        if new_email != user_to_update.email:
+            if User.objects.filter(email__iexact=new_email).exclude(id=user_to_update.id).exists():
+                return Response({"detail": "Ya existe otro usuario con ese correo electrónico."}, status=status.HTTP_400_BAD_REQUEST)
+            user_to_update.email = new_email
     if "role" in request.data:
         user_to_update.role = request.data.get("role", user_to_update.role)
     if "is_active" in request.data:

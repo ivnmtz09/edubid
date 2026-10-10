@@ -178,8 +178,12 @@ def execute_get_my_classrooms_and_groups(user, args):
     elif user.role in ['rector', 'coordinador'] and user.institucion_id:
         docentes_inst = User.objects.filter(institucion_id=user.institucion_id, role='docente')
         classrooms = Classroom.objects.filter(docente__in=docentes_inst).prefetch_related('grupos_clases', 'grupos_clases__estudiantes')
-    else:  # Admin
+    elif user.role == 'admin' or user.is_superuser:
         classrooms = Classroom.objects.all()[:20].prefetch_related('grupos_clases', 'grupos_clases__estudiantes')
+    elif user.role == 'estudiante':
+        classrooms = Classroom.objects.filter(grupos_clases__estudiantes=user).distinct().prefetch_related('grupos_clases', 'grupos_clases__estudiantes')
+    else:
+        classrooms = Classroom.objects.none()
 
     data = []
     total_grupos = 0
@@ -484,9 +488,21 @@ def execute_get_classroom_students(user, args):
     except Group.DoesNotExist:
         return {"error": f"No se encontró el grupo con ID {grupo_id}."}
 
-    # Verificar permisos
-    if user.role == 'docente' and grupo.classroom.docente_id != user.id:
-        return {"error": "No tienes permiso para ver los estudiantes de este grupo."}
+    # Verificar permisos multi-tenant y propiedad del recurso
+    docente_inst_id = getattr(getattr(getattr(grupo, 'classroom', None), 'docente', None), 'institucion_id', None)
+    if user.role == 'admin' or user.is_superuser:
+        pass
+    elif user.role == 'docente':
+        if grupo.classroom.docente_id != user.id:
+            return {"error": "No tienes permiso para ver los estudiantes de este grupo."}
+    elif user.role in ['rector', 'coordinador']:
+        if not user.institucion_id or docente_inst_id != user.institucion_id:
+            return {"error": "No tienes permiso para consultar grupos de otra institución."}
+    elif user.role == 'estudiante':
+        if not grupo.estudiantes.filter(id=user.id).exists():
+            return {"error": "No tienes permiso para consultar este grupo."}
+    else:
+        return {"error": "No tienes permiso para consultar los estudiantes de este grupo."}
 
     # Periodo activo para buscar billeteras
     periodo_activo = Period.objects.filter(grupo=grupo, activo=True).first()
@@ -520,12 +536,21 @@ def execute_get_activities(user, args):
     grupo_id = args.get('grupo_id')
     qs = Activity.objects.all().select_related('group', 'group__classroom')
 
-    if grupo_id:
-        qs = qs.filter(group_id=grupo_id)
+    if user.role == 'admin' or user.is_superuser:
+        pass
     elif user.role == 'docente':
         qs = qs.filter(group__classroom__docente=user)
-    elif user.role in ['rector', 'coordinador'] and user.institucion_id:
+    elif user.role in ['rector', 'coordinador']:
+        if not user.institucion_id:
+            return {"total": 0, "actividades": []}
         qs = qs.filter(group__classroom__docente__institucion_id=user.institucion_id)
+    elif user.role == 'estudiante':
+        qs = qs.filter(group__estudiantes=user, habilitada=True)
+    else:
+        return {"error": "No tienes permiso para consultar actividades."}
+
+    if grupo_id:
+        qs = qs.filter(group_id=grupo_id)
 
     activities_data = []
     for act in qs.order_by('-fecha_entrega')[:20]:
@@ -676,8 +701,17 @@ def execute_get_submissions_to_grade(user, args):
     except Activity.DoesNotExist:
         return {"error": f"No se encontró la actividad con ID {activity_id}."}
 
-    if user.role == 'docente' and act.group.classroom.docente_id != user.id:
-        return {"error": "No tienes permiso para revisar las entregas de esta actividad."}
+    docente_inst_id = getattr(getattr(getattr(act.group, 'classroom', None), 'docente', None), 'institucion_id', None)
+    if user.role == 'admin' or user.is_superuser:
+        pass
+    elif user.role == 'docente':
+        if act.group.classroom.docente_id != user.id:
+            return {"error": "No tienes permiso para revisar las entregas de esta actividad."}
+    elif user.role in ['rector', 'coordinador']:
+        if not user.institucion_id or docente_inst_id != user.institucion_id:
+            return {"error": "No tienes permiso para revisar entregas de otra institución."}
+    else:
+        return {"error": "No tienes permiso para revisar entregas de esta actividad."}
 
     submissions_data = []
     for sub in act.submissions.all().select_related('estudiante').order_by('calificacion', '-creado'):
@@ -713,13 +747,17 @@ def execute_grade_submission(user, args):
         return {"error": f"No se encontró la entrega con ID {submission_id}."}
 
     act = sub.activity
-    if user.role == 'docente' and act.group.classroom.docente_id != user.id:
-        return {"error": "No tienes permiso para calificar esta entrega."}
+    # Solo el docente titular de la clase o un administrador global pueden calificar
+    if user.role != 'admin' and not user.is_superuser:
+        if user.role != 'docente' or act.group.classroom.docente_id != user.id:
+            return {"error": "Solo el docente titular de la clase o un administrador pueden calificar entregas."}
 
     try:
         nota = Decimal(str(calificacion_val)).quantize(Decimal('0.01'))
+        if nota < Decimal('0.0') or nota > Decimal('5.0'):
+            return {"error": "La calificación debe ser un valor numérico entre 0.0 y 5.0."}
     except Exception:
-        return {"error": "Formato de calificación inválido. Debe ser un número (ej: 4.5)."}
+        return {"error": "Formato de calificación inválido. Debe ser un número entre 0.0 y 5.0 (ej: 4.5)."}
 
     sub.calificacion = nota
     sub.retroalimentacion = retroalimentacion
@@ -760,12 +798,21 @@ def execute_get_auctions(user, args):
     grupo_id = args.get('grupo_id')
     qs = Auction.objects.all().select_related('grupo', 'grupo__classroom')
 
+    if user.role == 'admin' or user.is_superuser:
+        pass
+    elif user.role == 'docente':
+        qs = qs.filter(Q(creador=user) | Q(grupo__classroom__docente=user))
+    elif user.role in ['rector', 'coordinador']:
+        if not user.institucion_id:
+            return {"total": 0, "subastas": []}
+        qs = qs.filter(grupo__classroom__docente__institucion_id=user.institucion_id)
+    elif user.role == 'estudiante':
+        qs = qs.filter(grupo__estudiantes=user)
+    else:
+        return {"error": "No tienes permisos para consultar subastas."}
+
     if grupo_id:
         qs = qs.filter(grupo_id=grupo_id)
-    elif user.role == 'docente':
-        qs = qs.filter(creador=user)
-    elif user.role in ['rector', 'coordinador'] and user.institucion_id:
-        qs = qs.filter(creador__institucion_id=user.institucion_id)
 
     auctions_data = []
     for auc in qs.order_by('-creado')[:15]:
@@ -915,21 +962,36 @@ def execute_delete_auction(user, args):
 
 def execute_award_educoins(user, args):
     """Deposita EduCoins a un estudiante por mérito o participación."""
+    if user.role not in ['docente', 'admin'] and not user.is_superuser:
+        return {"error": "Solo un docente o administrador puede otorgar EduCoins."}
+
     grupo_id = args.get('grupo_id')
     identificador = str(args.get('estudiante_identificador', '')).strip()
-    cantidad = int(args.get('cantidad', 0))
-    motivo = args.get('motivo', 'Bonificación del docente')
+    try:
+        cantidad = int(args.get('cantidad', 0))
+    except (ValueError, TypeError):
+        return {"error": "La cantidad de EduCoins debe ser un número entero válido."}
+
+    motivo = str(args.get('motivo', 'Bonificación del docente')).strip()[:200]
 
     if cantidad <= 0:
         return {"error": "La cantidad de EduCoins debe ser mayor a 0."}
+    if cantidad > 500:
+        return {"error": "Por motivos de seguridad y control económico, la cantidad máxima permitida por asignación es de 500 EduCoins."}
+
+    if not grupo_id:
+        return {"error": "Debes especificar el ID del grupo."}
 
     try:
-        grupo = Group.objects.get(id=grupo_id)
+        grupo = Group.objects.select_related('classroom', 'classroom__docente').get(id=grupo_id)
     except Group.DoesNotExist:
         return {"error": f"No existe el grupo con ID {grupo_id}."}
 
     if user.role == 'docente' and grupo.classroom.docente_id != user.id:
-        return {"error": "Solo el docente del grupo puede otorgar EduCoins."}
+        return {"error": "Solo el docente titular de la clase a la que pertenece este grupo puede otorgar EduCoins."}
+    elif user.institucion_id and user.role != 'admin' and not user.is_superuser:
+        if grupo.classroom.docente.institucion_id != user.institucion_id:
+            return {"error": "No tienes acceso a grupos de otra institución."}
 
     # Buscar estudiante por ID o por Email
     estudiante = None
@@ -940,6 +1002,13 @@ def execute_award_educoins(user, args):
 
     if not estudiante:
         return {"error": f"No se encontró al estudiante '{identificador}'."}
+
+    if estudiante.role != 'estudiante':
+        return {"error": "Solo se pueden otorgar EduCoins a usuarios con rol de estudiante."}
+
+    # Verificar que el estudiante esté matriculado en el grupo
+    if not grupo.estudiantes.filter(id=estudiante.id).exists():
+        return {"error": f"El estudiante '{estudiante.email}' no está matriculado en el grupo '{grupo.nombre}'."}
 
     periodo = Period.objects.filter(grupo=grupo, activo=True).first()
     if not periodo:
@@ -965,6 +1034,9 @@ def execute_award_educoins(user, args):
 
 def execute_get_institution_summary(user, args):
     """Genera reporte institucional consolidado para Directivos."""
+    if user.role not in ['admin', 'rector', 'coordinador'] and not user.is_superuser:
+        return {"error": "No tienes permisos de directivo o administrador para acceder al resumen institucional."}
+
     inst_id = user.institucion_id
     if not inst_id and not user.is_superuser:
         return {"error": "El usuario no tiene una institución asignada."}
