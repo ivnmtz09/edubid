@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, HostListener, ElementRef, OnInit, 
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { ThemeService, ThemeMode } from '../../../core/services/theme.service';
+import { ThemeService, ThemeMode, AsideStyle } from '../../../core/services/theme.service';
 import { InAppNotificationService, InAppNotification } from '../../../core/services/in-app-notification.service';
 import { SoundService } from '../../../core/services/sound.service';
 import { UserRole } from '../../../core/models/user.model';
@@ -37,9 +37,11 @@ interface NavItem {
       }
 
       <!-- ================= ASIDE / SIDEBAR IZQUIERDO (COLUMNA COMPLETA H-SCREEN) ================= -->
+      <!-- ================= ASIDE / SIDEBAR IZQUIERDO (COLUMNA COMPLETA H-SCREEN) ================= -->
       <aside
-        class="fixed lg:static inset-y-0 left-0 z-50 lg:z-20 h-screen bg-surface flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 overflow-y-auto"
-        style="border-right: 1px solid var(--color-border); border-left: 3px solid var(--brand-primary);"
+        class="fixed lg:static inset-y-0 left-0 z-50 lg:z-20 h-screen flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 overflow-y-auto aside-institutional"
+        [ngClass]="'aside-style-' + themeService.asideStyle()"
+        style="border-right: 1px solid color-mix(in srgb, var(--brand-primary-text) 16%, transparent); box-shadow: 4px 0 24px rgba(0, 0, 0, 0.14);"
         [class.w-64]="isDesktopExpanded() || isMobileDrawerOpen()"
         [class.lg:w-20]="!isDesktopExpanded()"
         [class.translate-x-0]="isMobileDrawerOpen()"
@@ -47,24 +49,23 @@ interface NavItem {
         [class.lg:translate-x-0]="true"
       >
         <!-- Cabecera del Sidebar: Logo + Nombre + Toggle Colapso -->
-        <div class="p-3 space-y-3">
+        <div class="p-3 space-y-2.5">
           <!-- Fila superior del Aside: Logo y botón colapso -->
           <div class="flex items-center justify-between h-12 px-1">
             <a routerLink="/dashboard" class="flex items-center gap-2.5 min-w-0 group" (click)="closeMobileDrawer()">
               @if (institutionLogo()) {
-                <img [src]="institutionLogo()" (error)="onLogoError($event)" alt="Escudo de la Institución" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
+                <img [src]="institutionLogo()" (error)="onLogoError($event)" alt="Escudo de la Institución" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105 bg-white/20 p-0.5 backdrop-blur-xs" />
               } @else if (userRole() !== 'admin' && institutionName()) {
                 <div
-                  class="w-8 h-8 rounded-md flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs"
-                  [style.backgroundColor]="institutionPrimaryColor()"
+                  class="w-8 h-8 rounded-md flex items-center justify-center font-black text-xs text-white shrink-0 shadow-2xs border border-white/25 bg-white/20 backdrop-blur-xs"
                 >
                   {{ (institutionName()?.[0] || 'E').toUpperCase() }}
                 </div>
               } @else {
-                <img src="/edubid.png" alt="EduBid Logo" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105" />
+                <img src="/edubid.png" alt="EduBid Logo" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105 bg-white/20 p-0.5 backdrop-blur-xs" />
               }
               @if (isDesktopExpanded() || isMobileDrawerOpen()) {
-                <span class="font-extrabold text-base tracking-tight text-primary truncate">
+                <span class="font-extrabold text-base tracking-tight truncate drop-shadow-xs" style="color: var(--brand-primary-text);">
                   {{ sidebarBrandTitle() }}
                 </span>
               }
@@ -74,7 +75,7 @@ interface NavItem {
             <button
               type="button"
               (click)="closeMobileDrawer()"
-              class="lg:hidden p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              class="lg:hidden p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
               title="Cerrar menú"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,17 +86,17 @@ interface NavItem {
 
           <!-- Rol Badge en Sidebar -->
           @if (isDesktopExpanded() || isMobileDrawerOpen()) {
-            <div class="px-3 py-2 rounded-xl bg-bg border border-border flex items-center justify-between">
+            <div class="px-3 py-2 rounded-xl bg-black/15 dark:bg-black/25 border border-white/15 flex items-center justify-between backdrop-blur-xs">
               <div class="flex items-center gap-2 min-w-0">
-                <span class="w-2 h-2 rounded-full shrink-0" style="background-color: var(--brand-primary);"></span>
-                <span class="text-xs font-bold text-slate-900 dark:text-white capitalize truncate">
+                <span class="w-2 h-2 rounded-full shrink-0 shadow-xs animate-pulse" style="background-color: var(--brand-accent);"></span>
+                <span class="text-xs font-bold capitalize truncate" style="color: var(--brand-primary-text);">
                   Rol: {{ userRole() }}
                 </span>
               </div>
             </div>
           } @else {
             <div class="flex justify-center" [title]="'Rol: ' + userRole()">
-              <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] uppercase" style="background: color-mix(in srgb, var(--brand-primary) 10%, transparent); color: var(--brand-primary);">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] uppercase bg-black/20 border border-white/15" style="color: var(--brand-primary-text);">
                 {{ userRole().slice(0, 2) }}
               </div>
             </div>
@@ -105,9 +106,9 @@ interface NavItem {
           <button
             type="button"
             (click)="toggleDesktopCollapse()"
-            class="hidden lg:flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            class="hidden lg:flex w-full items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:bg-white/10 transition-colors cursor-pointer"
             [class.justify-center]="!isDesktopExpanded()"
-            [style.color]="institutionPrimaryColor()"
+            style="color: var(--brand-primary-text);"
             [title]="isDesktopExpanded() ? 'Contraer menú lateral' : 'Expandir menú lateral'"
           >
             <svg class="w-5 h-5 shrink-0 transition-transform duration-300" [class.rotate-180]="!isDesktopExpanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +119,7 @@ interface NavItem {
             }
           </button>
 
-          <div class="border-t border-border my-2"></div>
+          <div class="border-t border-white/15 my-2"></div>
 
           <!-- Lista de Enlaces de Navegación -->
           <nav class="space-y-1">
@@ -128,12 +129,12 @@ interface NavItem {
                 routerLinkActive="nav-item-active"
                 [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
                 (click)="closeMobileDrawer()"
-                class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-pointer"
+                class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-colors group cursor-pointer"
                 [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
                 [title]="item.label"
               >
                 <!-- SVG Icon Rendered Directly (No DomSanitizer Purge) -->
-                <span class="w-5 h-5 shrink-0 flex items-center justify-center text-text-muted group-hover:text-primary transition-colors nav-icon">
+                <span class="w-5 h-5 shrink-0 flex items-center justify-center nav-icon">
                   @switch (item.icon) {
                     @case ('dashboard') {
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,17 +198,36 @@ interface NavItem {
           </nav>
         </div>
 
-        <!-- Pie del Sidebar: Reportar problema + Ver Sitio -->
-        <div class="p-3 border-t border-border space-y-1">
+        <!-- Pie del Sidebar: Configurar Menú + Reportar problema + Ver Sitio -->
+        <div class="p-3 border-t border-white/15 space-y-1">
+          <!-- Botón de Personalizar Apariencia del Menú -->
+          <button
+            type="button"
+            (click)="openAsideConfigModal()"
+            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors group cursor-pointer"
+            [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
+            title="Personalizar textura y apariencia del menú lateral"
+          >
+            <span class="w-5 h-5 shrink-0 flex items-center justify-center nav-icon group-hover:scale-110 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </span>
+            @if (isDesktopExpanded() || isMobileDrawerOpen()) {
+              <span class="truncate">Configurar Menú</span>
+            }
+          </button>
+
           <!-- Botón de Reportar Problema situado en la parte inferior del Aside -->
           <button
             type="button"
             (click)="openReportModal()"
-            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 hover:bg-amber-500/10 transition-colors group cursor-pointer"
+            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors group cursor-pointer"
             [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
             title="Reportar problema o enviar sugerencia a soporte"
           >
-            <span class="w-5 h-5 shrink-0 flex items-center justify-center text-amber-500 group-hover:scale-110 transition-transform">
+            <span class="w-5 h-5 shrink-0 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -220,13 +240,15 @@ interface NavItem {
           <!-- Enlace al Inicio Público -->
           <a
             routerLink="/"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-text-muted hover:text-text hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
             title="Página de Inicio de EduBid"
           >
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
+            <span class="w-5 h-5 shrink-0 flex items-center justify-center nav-icon">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </span>
             @if (isDesktopExpanded() || isMobileDrawerOpen()) {
               <span class="truncate">Sitio Público</span>
             }
@@ -740,6 +762,106 @@ interface NavItem {
         (close)="isReportModalOpen.set(false)"
       />
 
+      <!-- ================= MODAL DE PERSONALIZACIÓN DEL MENÚ LATERAL ================= -->
+      @if (isAsideConfigModalOpen()) {
+        <div
+          class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+          (click)="closeAsideConfigModal()"
+        >
+          <div
+            class="relative w-full max-w-md bg-surface border border-border rounded-3xl shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-200 text-text"
+            (click)="$event.stopPropagation()"
+          >
+            <!-- Cabecera del Modal -->
+            <div class="flex items-center justify-between pb-4 border-b border-border">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-primary shadow-xs" style="background: color-mix(in srgb, var(--brand-primary) 12%, transparent);">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-base text-slate-900 dark:text-neutral-100">
+                    Estilo del Menú Lateral
+                  </h3>
+                  <p class="text-xs text-text-muted mt-0.5">
+                    Personaliza la textura y apariencia de la barra
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                (click)="closeAsideConfigModal()"
+                class="p-2 rounded-xl text-text-muted hover:text-text hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                title="Cerrar"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Opciones en tarjetas -->
+            <div class="space-y-2">
+              @for (styleOpt of asideStyles; track styleOpt.id) {
+                <button
+                  type="button"
+                  (click)="selectAsideStyle(styleOpt.id)"
+                  class="w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left cursor-pointer group hover:scale-[1.01]"
+                  [class.border-primary]="themeService.asideStyle() === styleOpt.id"
+                  [class.bg-primary/5]="themeService.asideStyle() === styleOpt.id"
+                  [class.border-border]="themeService.asideStyle() !== styleOpt.id"
+                  [class.hover:border-primary/40]="themeService.asideStyle() !== styleOpt.id"
+                  [class.hover:bg-black/2]="themeService.asideStyle() !== styleOpt.id"
+                >
+                  <div class="flex items-center gap-3.5 min-w-0">
+                    <span
+                      class="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-mono shrink-0 font-bold transition-colors"
+                      [style.background]="themeService.asideStyle() === styleOpt.id ? 'var(--brand-primary)' : 'color-mix(in srgb, var(--color-border) 60%, transparent)'"
+                      [style.color]="themeService.asideStyle() === styleOpt.id ? '#ffffff' : 'var(--color-text)'"
+                    >
+                      {{ styleOpt.icon }}
+                    </span>
+                    <div class="min-w-0">
+                      <div class="font-bold text-xs text-text flex items-center gap-2">
+                        <span>{{ styleOpt.label }}</span>
+                        @if (styleOpt.id === 'solid') {
+                          <span class="text-[10px] px-1.5 py-0.2 rounded-md bg-neutral-200 dark:bg-neutral-800 text-text-muted font-normal">Predeterminado</span>
+                        }
+                      </div>
+                      <div class="text-[11px] text-text-muted mt-0.5 leading-snug">
+                        {{ styleOpt.desc }}
+                      </div>
+                    </div>
+                  </div>
+
+                  @if (themeService.asideStyle() === styleOpt.id) {
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-white shrink-0 shadow-xs" style="background-color: var(--brand-primary);">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+
+            <!-- Pie del Modal -->
+            <div class="pt-2 flex justify-end">
+              <button
+                type="button"
+                (click)="closeAsideConfigModal()"
+                class="px-5 py-2.5 rounded-xl text-xs font-semibold text-white shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+                style="background-color: var(--brand-primary);"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- ================= DIÁLOGO DE CONFIRMACIÓN NATIVO DE LA WEB ================= -->
       <app-confirm-modal />
 
@@ -755,14 +877,23 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private elementRef = inject(ElementRef);
 
   // Estados de interfaz
-  isDesktopExpanded = signal(true);
+  isDesktopExpanded = computed(() => this.themeService.isDesktopExpanded());
   isMobileDrawerOpen = signal(false);
   isThemeDropdownOpen = signal(false);
   isNotificationsOpen = signal(false);
   isProfileDropdownOpen = signal(false);
+  isAsideConfigModalOpen = signal(false);
   isReportModalOpen = signal(false);
   showLogoutConfirmModal = signal(false);
   isLoggingOut = signal(false);
+
+  asideStyles: { id: AsideStyle; label: string; icon: string; desc: string }[] = [
+    { id: 'gradient', label: 'Gradiente', icon: '✦', desc: 'Profundidad institucional' },
+    { id: 'solid', label: 'Sólido', icon: '◼', desc: 'Color primario puro' },
+    { id: 'dots', label: 'Micro-Puntos', icon: '⁖', desc: 'Patrón de puntos radial' },
+    { id: 'grid', label: 'Cuadrícula', icon: '▦', desc: 'Trama técnica moderna' },
+    { id: 'mesh', label: 'Malla Acento', icon: '❖', desc: 'Fusión orgánica con acento' },
+  ];
 
   // Notificaciones In-App
   unreadNotificationsCount = computed(() => this.inAppNotifService.unreadCount());
@@ -979,12 +1110,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       this.isMobileDrawerOpen.update((open) => !open);
     } else {
-      this.isDesktopExpanded.update((expanded) => !expanded);
+      this.themeService.toggleAsideCollapse();
     }
   }
 
   toggleDesktopCollapse(): void {
-    this.isDesktopExpanded.update((expanded) => !expanded);
+    this.themeService.toggleAsideCollapse();
   }
 
   closeMobileDrawer(): void {
@@ -995,6 +1126,32 @@ export class LayoutComponent implements OnInit, OnDestroy {
     this.isReportModalOpen.set(true);
     if (this.isMobileDrawerOpen()) {
       this.closeMobileDrawer();
+    }
+  }
+
+  openAsideConfigModal(): void {
+    this.isAsideConfigModalOpen.set(true);
+    if (this.isMobileDrawerOpen()) {
+      this.closeMobileDrawer();
+    }
+  }
+
+  closeAsideConfigModal(): void {
+    this.isAsideConfigModalOpen.set(false);
+  }
+
+  selectAsideStyle(style: AsideStyle): void {
+    this.themeService.setAsideStyle(style);
+  }
+
+  asideStyleLabel(style: AsideStyle): string {
+    switch (style) {
+      case 'solid': return 'Sólido';
+      case 'gradient': return 'Gradiente';
+      case 'dots': return 'Puntos';
+      case 'grid': return 'Cuadrícula';
+      case 'mesh': return 'Malla';
+      default: return 'Gradiente';
     }
   }
 

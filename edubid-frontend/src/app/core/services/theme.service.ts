@@ -3,6 +3,7 @@ import { UserInstitution } from '../models/user.model';
 import { STORAGE_KEYS } from '../constants/api.constants';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
+export type AsideStyle = 'solid' | 'gradient' | 'dots' | 'grid' | 'mesh';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -10,6 +11,13 @@ export class ThemeService {
   private _systemIsDark = signal<boolean>(this.checkSystemIsDark());
 
   readonly mode = this._mode.asReadonly();
+  readonly asideStyle = signal<AsideStyle>(this.loadInitialAsideStyle());
+
+  // Estado de colapso del Aside en Desktop persistente
+  private _isAsideCollapsed = signal<boolean>(this.loadInitialAsideCollapsed());
+  readonly isAsideCollapsed = this._isAsideCollapsed.asReadonly();
+  readonly isDesktopExpanded = computed(() => !this._isAsideCollapsed());
+
   readonly isDark = computed(() => {
     const current = this._mode();
     if (current === 'dark') return true;
@@ -34,6 +42,32 @@ export class ThemeService {
     this.applyTheme();
   }
 
+  setAsideStyle(style: AsideStyle): void {
+    this.asideStyle.set(style);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ASIDE_STYLE, style);
+      } catch {
+        // Ignorado en entornos restringidos
+      }
+    }
+  }
+
+  setAsideCollapsed(collapsed: boolean): void {
+    this._isAsideCollapsed.set(collapsed);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEYS.ASIDE_COLLAPSED, String(collapsed));
+      } catch {
+        // Ignorado en entornos restringidos
+      }
+    }
+  }
+
+  toggleAsideCollapse(): void {
+    this.setAsideCollapsed(!this._isAsideCollapsed());
+  }
+
   cycleTheme(): void {
     const sequence: Record<ThemeMode, ThemeMode> = {
       light: 'dark',
@@ -55,6 +89,9 @@ export class ThemeService {
     root.style.removeProperty('--brand-accent');
     root.style.removeProperty('--brand-accent-hover');
     root.style.removeProperty('--brand-accent-text');
+    root.style.removeProperty('--aside-bg');
+    root.style.removeProperty('--aside-icon');
+    root.style.removeProperty('--aside-active-bg');
   }
 
   injectBrandColors(institution: UserInstitution | null): void {
@@ -67,13 +104,23 @@ export class ThemeService {
 
     const primary = institution.color_primario || '#ea580c';
     const accent = institution.color_secundario || '#3b82f6';
+    const isPrimaryLight = this.isLightColor(primary);
+    const primaryText = isPrimaryLight ? '#0a0a0a' : '#ffffff';
+    const isAccentLight = this.isLightColor(accent);
+    const accentText = isAccentLight ? '#0a0a0a' : '#ffffff';
+    const asideActiveBg = isPrimaryLight ? 'rgba(0, 0, 0, 0.14)' : 'rgba(255, 255, 255, 0.18)';
 
     root.style.setProperty('--brand-primary', primary);
     root.style.setProperty('--brand-primary-hover', this.darkenHex(primary));
-    root.style.setProperty('--brand-primary-text', this.isLightColor(primary) ? '#0a0a0a' : '#ffffff');
+    root.style.setProperty('--brand-primary-text', primaryText);
     root.style.setProperty('--brand-accent', accent);
     root.style.setProperty('--brand-accent-hover', this.darkenHex(accent));
-    root.style.setProperty('--brand-accent-text', this.isLightColor(accent) ? '#0a0a0a' : '#ffffff');
+    root.style.setProperty('--brand-accent-text', accentText);
+
+    // Variables de contraste y renderizado óptimo del Aside institucional
+    root.style.setProperty('--aside-bg', primary);
+    root.style.setProperty('--aside-icon', accent);
+    root.style.setProperty('--aside-active-bg', asideActiveBg);
   }
 
   isLightColor(hex: string): boolean {
@@ -134,6 +181,31 @@ export class ThemeService {
       }
     }
     return 'light'; // Por defecto claro
+  }
+
+  private loadInitialAsideStyle(): AsideStyle {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEYS.ASIDE_STYLE);
+        if (saved === 'solid' || saved === 'gradient' || saved === 'dots' || saved === 'grid' || saved === 'mesh') {
+          return saved as AsideStyle;
+        }
+      } catch {
+        // Fallback a gradiente
+      }
+    }
+    return 'gradient';
+  }
+
+  private loadInitialAsideCollapsed(): boolean {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      try {
+        return localStorage.getItem(STORAGE_KEYS.ASIDE_COLLAPSED) === 'true';
+      } catch {
+        return false;
+      }
+    }
+    return false;
   }
 
   private darkenHex(hex: string): string {

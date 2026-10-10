@@ -37,4 +37,7 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refresh_token',
   USER: 'user',
   THEME: 'edubid-theme',
+  ASIDE_STYLE: 'edubid-aside-style',
+  ASIDE_COLLAPSED: 'edubid-aside-collapsed',
+  AI_CHAT_PREFIX: 'edubid_ai_chat_',
 } as const;

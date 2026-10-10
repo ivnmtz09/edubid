@@ -13,6 +13,11 @@
   --brand-accent-hover: #2563eb;
   --brand-accent-text: #ffffff;
 
+  /* Aside institucional tokens */
+  --aside-bg: var(--brand-primary);
+  --aside-icon: var(--brand-accent);
+  --aside-active-bg: rgba(255, 255, 255, 0.18);
+
   --color-bg: #f8fafc;
   --color-surface: #ffffff;
   --color-text: #0f172a;
@@ -58,6 +63,9 @@ textarea:focus::placeholder {
   --color-accent: var(--brand-accent);
   --color-accent-hover: var(--brand-accent-hover);
   --color-accent-text: var(--brand-accent-text);
+  --color-aside-bg: var(--aside-bg);
+  --color-aside-icon: var(--aside-icon);
+  --color-aside-active-bg: var(--aside-active-bg);
   --color-surface: var(--color-surface);
   --color-bg: var(--color-bg);
   --color-text: var(--color-text);
@@ -170,7 +178,7 @@ svg {
   color: var(--color-text-muted);
 }
 
-/* === Navegación activa con colores institucionales === */
+/* === Navegación activa con colores institucionales (Genérico) === */
 .nav-item-active {
   background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
   color: var(--brand-primary);
@@ -179,6 +187,123 @@ svg {
 
 .nav-item-active .nav-icon {
   color: var(--brand-primary);
+}
+
+/* ===================================================
+   ASIDE INSTITUCIONAL: PATRONES Y NAVEGACIÓN INMERSIVA
+   =================================================== */
+
+.aside-institutional {
+  background-color: var(--aside-bg, var(--brand-primary));
+  color: var(--brand-primary-text);
+  position: relative;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+}
+
+/* 1. Sólido: color institucional directo */
+.aside-style-solid {
+  background-color: var(--aside-bg, var(--brand-primary)) !important;
+  background-image: none !important;
+}
+
+/* 2. Gradiente: gradiente enriquecido vertical institucional */
+.aside-style-gradient {
+  background: linear-gradient(
+    180deg,
+    var(--brand-primary) 0%,
+    color-mix(in srgb, var(--brand-primary) 80%, black) 100%
+  ) !important;
+}
+
+/* 3. Micro-puntos: patrón SVG radial semitransparente sutil sobre el fondo primario */
+.aside-style-dots {
+  background-color: var(--brand-primary) !important;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--brand-primary-text) 18%, transparent) 1.5px,
+    transparent 1.5px
+  ) !important;
+  background-size: 18px 18px !important;
+  background-position: 0 0 !important;
+}
+
+/* 4. Cuadrícula: patrón geométrico sutil de cuadrícula sobre el fondo primario */
+.aside-style-grid {
+  background-color: var(--brand-primary) !important;
+  background-image: 
+    linear-gradient(to right, color-mix(in srgb, var(--brand-primary-text) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--brand-primary-text) 10%, transparent) 1px, transparent 1px) !important;
+  background-size: 22px 22px !important;
+}
+
+/* 5. Malla (Mesh): degradado sutil mesh con acentos de color secundario */
+.aside-style-mesh {
+  background-color: var(--brand-primary) !important;
+  background-image: 
+    radial-gradient(at 0% 0%, color-mix(in srgb, var(--brand-accent) 35%, transparent) 0px, transparent 55%),
+    radial-gradient(at 100% 100%, color-mix(in srgb, black 40%, transparent) 0px, transparent 60%),
+    radial-gradient(at 50% 50%, color-mix(in srgb, var(--brand-accent) 25%, transparent) 0px, transparent 50%),
+    linear-gradient(180deg, var(--brand-primary) 0%, color-mix(in srgb, var(--brand-primary) 80%, black) 100%) !important;
+}
+
+/* --- Navegación en el Aside Institucional --- */
+
+.aside-institutional .nav-item {
+  color: var(--brand-primary-text);
+  opacity: 0.82;
+  border-radius: 0.75rem;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.aside-institutional .nav-item .nav-icon {
+  color: var(--brand-accent);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.aside-institutional .nav-item:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--brand-primary-text) 14%, transparent);
+  transform: translateX(2px);
+}
+
+.aside-institutional .nav-item:hover .nav-icon {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 6px var(--brand-accent));
+}
+
+/* Enlaces activos en el Aside con pastilla contrastante semitransparente, brillo e indicador */
+.aside-institutional .nav-item.nav-item-active,
+.aside-institutional .nav-item-active {
+  background: var(--aside-active-bg, rgba(255, 255, 255, 0.18)) !important;
+  color: var(--brand-primary-text) !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 
+    inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-text) 24%, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.18) !important;
+}
+
+.aside-institutional .nav-item.nav-item-active .nav-icon,
+.aside-institutional .nav-item-active .nav-icon {
+  color: var(--brand-accent) !important;
+  filter: drop-shadow(0 0 8px var(--brand-accent)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
+}
+
+.aside-institutional .nav-item.nav-item-active::before,
+.aside-institutional .nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  border-radius: 0 4px 4px 0;
+  background: var(--brand-accent);
+  box-shadow: 0 0 10px var(--brand-accent);
 }
 
 /* === Barra de Scroll Personalizada y Animada con Colores Institucionales === */
@@ -361,5 +486,70 @@ svg {
   a:not(.compact-link) {
     min-height: 44px;
   }
+}
+
+/* ===================================================
+   BILLETERAS DE CUERO ARTESANAL & DRAWER DESLIZANTE
+   =================================================== */
+
+.leather-wallet {
+  background: radial-gradient(circle at 20% 20%, rgba(68, 36, 18, 0.4) 0%, transparent 60%),
+              linear-gradient(145deg, #2a150c 0%, #170b06 50%, #24120a 100%);
+  box-shadow: 
+    0 20px 35px -8px rgba(0, 0, 0, 0.55),
+    0 10px 15px -5px rgba(23, 11, 6, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.15),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(180, 83, 9, 0.35);
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .leather-wallet {
+  background: radial-gradient(circle at 20% 20%, rgba(45, 24, 16, 0.45) 0%, transparent 60%),
+              linear-gradient(145deg, #1f1008 0%, #100703 50%, #1a0c06 100%);
+  border-color: rgba(217, 119, 6, 0.28);
+}
+
+.leather-stitching {
+  border: 2px dashed rgba(245, 158, 11, 0.45);
+  pointer-events: none;
+}
+
+.leather-slot {
+  background: linear-gradient(180deg, rgba(12, 6, 3, 0.85) 0%, rgba(28, 13, 7, 0.65) 100%);
+  border-top: 1.5px solid rgba(217, 119, 6, 0.5);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.7);
+}
+
+.leather-badge-gold {
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 2px rgba(120, 53, 15, 0.8);
+}
+
+.leather-snap {
+  background: radial-gradient(circle at 35% 35%, #fef08a 0%, #f59e0b 45%, #78350f 100%);
+  box-shadow: 
+    0 2px 5px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes drawerSlideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0.7;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-drawer-in {
+  animation: drawerSlideInRight 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
