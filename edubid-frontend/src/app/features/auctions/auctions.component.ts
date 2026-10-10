@@ -10,11 +10,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
 
 @Component({
   selector: 'app-auctions',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, EmptyStateComponent],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
       <!-- Encabezado -->
@@ -112,36 +113,43 @@ import { AiAssistantService } from '../../core/services/ai-assistant.service';
         </button>
       </div>
 
-      <!-- Indicador de Carga -->
+      <!-- Estado de Carga: Skeleton Screen con Shimmer -->
       @if (isLoading()) {
-        <div class="flex justify-center items-center py-20">
-          <svg class="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24" fill="none">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-          </svg>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="rounded-2xl border border-border bg-surface p-5 space-y-4 shadow-xs">
+              <div class="flex items-center justify-between">
+                <div class="h-5 w-20 bg-neutral-200 dark:bg-neutral-800 rounded-full"></div>
+                <div class="h-4 w-24 bg-neutral-200 dark:bg-neutral-800 rounded-md"></div>
+              </div>
+              <div class="h-6 w-3/4 bg-neutral-200 dark:bg-neutral-800 rounded-lg"></div>
+              <div class="h-10 w-full bg-neutral-100 dark:bg-neutral-800/60 rounded-lg"></div>
+              <div class="p-3 rounded-xl bg-bg border border-border space-y-2">
+                <div class="flex justify-between">
+                  <div class="h-4 w-20 bg-neutral-200 dark:bg-neutral-800 rounded"></div>
+                  <div class="h-4 w-16 bg-neutral-200 dark:bg-neutral-800 rounded"></div>
+                </div>
+              </div>
+              <div class="h-9 w-full bg-neutral-200 dark:bg-neutral-800 rounded-xl"></div>
+            </div>
+          }
         </div>
       } @else {
         <!-- Grid de Subastas -->
         @if (filteredAuctions().length === 0) {
-          <div class="text-center py-16 space-y-4 rounded-3xl border border-dashed border-border bg-surface/50 p-8">
-            <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-            </div>
-            <div>
-              <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-lg">No hay subastas en esta categoría</h3>
-              <p class="text-xs text-text-muted mt-1 max-w-sm mx-auto">
-                {{ isDocente() 
-                  ? 'Publica una nueva subasta de incentivos para motivar la participación de tu grupo.' 
-                  : 'Revisa periódicamente las subastas creadas por tus profesores.' }}
-              </p>
-            </div>
-          </div>
+          <app-empty-state
+            icon="auction"
+            [title]="'No hay subastas en esta categoría'"
+            [description]="isDocente() 
+              ? 'Publica una nueva subasta de incentivos académicos para motivar a tus estudiantes.' 
+              : 'Tus profesores aún no han abierto subastas en este período o grupo. ¡Revisa pronto!'"
+            [actionLabel]="isDocente() ? 'Crear Nueva Subasta' : undefined"
+            (actionClick)="openCreateModal()"
+          ></app-empty-state>
         } @else {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @for (auc of filteredAuctions(); track auc.id) {
-              <div class="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between hover:border-primary/40 transition-all hover:shadow-md space-y-4">
+              <div class="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between hover:border-primary/50 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg space-y-4 group">
                 <div>
                   <div class="flex items-center justify-between gap-2 mb-3">
                     <span 

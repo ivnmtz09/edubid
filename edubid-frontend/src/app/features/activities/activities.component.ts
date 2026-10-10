@@ -10,11 +10,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AiAssistantService } from '../../core/services/ai-assistant.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { EmptyStateComponent } from '../../shared/components/ui/empty-state.component';
 
 @Component({
   selector: 'app-activities',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, EmptyStateComponent],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
       
@@ -434,47 +435,42 @@ import { ConfirmDialogService } from '../../core/services/confirm-dialog.service
           </div>
         }
 
-        <!-- Indicador de Carga -->
+        <!-- Estado de Carga: Skeleton Screen con Shimmer -->
         @if (isLoading()) {
-          <div class="flex justify-center items-center py-20">
-            <svg class="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24" fill="none">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-            </svg>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+            @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+              <div class="rounded-2xl border border-border bg-surface p-5 space-y-4 shadow-xs">
+                <div class="flex items-center justify-between">
+                  <div class="h-5 w-20 bg-neutral-200 dark:bg-neutral-800 rounded-full"></div>
+                  <div class="h-4 w-24 bg-neutral-200 dark:bg-neutral-800 rounded-md"></div>
+                </div>
+                <div class="h-6 w-4/5 bg-neutral-200 dark:bg-neutral-800 rounded-lg"></div>
+                <div class="h-10 w-full bg-neutral-100 dark:bg-neutral-800/60 rounded-lg"></div>
+                <div class="pt-3 border-t border-border flex justify-between">
+                  <div class="h-4 w-24 bg-neutral-200 dark:bg-neutral-800 rounded"></div>
+                  <div class="h-4 w-16 bg-neutral-200 dark:bg-neutral-800 rounded"></div>
+                </div>
+              </div>
+            }
           </div>
         } @else {
           <!-- Grid de Actividades -->
           @if (activities().length === 0) {
-            <div class="text-center py-16 space-y-4 rounded-3xl border border-dashed border-border bg-surface/50 p-8">
-              <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto text-primary">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-bold text-slate-900 dark:text-neutral-100 text-lg">No hay actividades disponibles</h3>
-                <p class="text-xs text-text-muted mt-1 max-w-sm mx-auto">
-                  {{ isDocente() 
-                    ? 'Crea tu primera actividad para que tus estudiantes empiecen a ganar EduCoins.' 
-                    : 'Estás al día con tus entregas académicas. ¡Buen trabajo!' }}
-                </p>
-              </div>
-              @if (isDocente()) {
-                <button
-                  type="button"
-                  (click)="openCreateModal()"
-                  class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-primary hover:bg-primary-hover shadow-xs cursor-pointer"
-                >
-                  Crear Primera Actividad
-                </button>
-              }
-            </div>
+            <app-empty-state
+              icon="activity"
+              [title]="'No hay actividades disponibles'"
+              [description]="isDocente() 
+                ? 'Crea tu primera actividad para que tus estudiantes empiecen a ganar EduCoins y participar.' 
+                : 'Estás al día con tus entregas académicas. ¡Buen trabajo!'"
+              [actionLabel]="isDocente() ? 'Crear Primera Actividad' : undefined"
+              (actionClick)="openCreateModal()"
+            ></app-empty-state>
           } @else {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               @for (act of activities(); track act.id) {
                 <div
                   (click)="selectActivity(act)"
-                  class="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between hover:border-primary/40 transition-all hover:shadow-md space-y-4 cursor-pointer group"
+                  class="rounded-2xl border border-border bg-surface p-5 flex flex-col justify-between hover:border-primary/50 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg space-y-4 cursor-pointer group"
                 >
                   <div>
                     <div class="flex items-center justify-between gap-2 mb-3">
