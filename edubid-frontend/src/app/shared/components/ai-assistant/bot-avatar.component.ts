@@ -29,123 +29,93 @@ import { SoundService } from '../../../core/services/sound.service';
         class="group relative w-16 h-16 sm:w-18 sm:h-18 flex items-center justify-center cursor-pointer focus:outline-none focus:ring-4 focus:ring-amber-500/30 rounded-full"
         aria-label="Asistente EDUBID IA"
       >
-        <!-- Resplandor exterior / Aura holográfica -->
+        <!-- Resplandor exterior cálido / Aura dorada -->
         <div
-          class="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-amber-500 via-orange-500 to-yellow-400 opacity-50 blur-md group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-          [class.opacity-90]="isNear() || isOpen"
+          class="absolute -inset-1.5 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-500 opacity-60 blur-md group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          [class.opacity-95]="isNear() || isOpen"
           [class.animate-pulse]="isOpen"
         ></div>
 
-        <!-- DISCO CIBER-MONEDA (Transformaciones 3D aplicadas solo visualmente al disco interno) -->
+        <!-- DISCO MONEDA CHIBI KAWAII MINIMALISTA -->
         <div
           class="relative w-full h-full rounded-full transition-all duration-150"
           [style.transform]="getCoinTransform()"
           [class.scale-95]="isPressed()"
         >
-          <!-- Borde biselado de la moneda: Estriado metálico dorado y circuitos -->
+          <!-- Moneda dorada limpia con relieve sutil -->
           <div
-            class="relative w-full h-full rounded-full p-1 bg-gradient-to-br from-amber-300 via-yellow-600 to-amber-900 shadow-2xl border border-yellow-200/50 flex items-center justify-center overflow-hidden"
+            class="relative w-full h-full rounded-full p-1 bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 shadow-xl border-2 border-yellow-200/90 flex items-center justify-center overflow-hidden"
           >
-            <!-- Ranuras/estrías perimetrales de la moneda -->
+            <!-- Superficie de la carita chibi: amarilla cálida, limpia y uniforme -->
             <div
-              class="absolute inset-0 rounded-full border-2 border-dashed border-amber-200/40 opacity-70 pointer-events-none"
-            ></div>
-
-            <!-- Trazas de circuito ciberespacial luminosas en el anillo exterior -->
-            <svg
-              class="absolute inset-0 w-full h-full pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity"
-              viewBox="0 0 100 100"
-              fill="none"
+              class="relative w-full h-full rounded-full bg-gradient-to-b from-amber-100 via-yellow-200 to-amber-300 flex flex-col items-center justify-center overflow-hidden shadow-inner px-2 py-1"
             >
-              <circle cx="50" cy="50" r="45" stroke="#fef08a" stroke-width="1" stroke-dasharray="4 6" />
-              <circle cx="50" cy="50" r="41" stroke="#ea580c" stroke-width="1.2" opacity="0.8" />
-              <!-- Nodos de circuito -->
-              <circle cx="50" cy="8" r="2" fill="#fbbf24" class="animate-ping" />
-              <circle cx="92" cy="50" r="2" fill="#38bdf8" />
-              <circle cx="50" cy="92" r="2" fill="#fbbf24" />
-              <circle cx="8" cy="50" r="2" fill="#38bdf8" />
-            </svg>
-
-            <!-- Campo central de la Ciber-Moneda (Pantalla/Visor holográfico oscuro, 100% libre de texto) -->
-            <div
-              class="relative w-full h-full rounded-full bg-gradient-to-b from-neutral-900 via-neutral-950 to-neutral-900 border-2 border-amber-500/40 flex flex-col items-center justify-center overflow-hidden shadow-inner px-2 py-1"
-            >
-              <!-- Destello de brillo holográfico que barre la moneda -->
+              <!-- Sutil brillo suave superior -->
               <div
-                class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"
+                class="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/40 to-transparent rounded-t-full pointer-events-none"
               ></div>
 
-              <!-- OJOS DIGITALES DE LA CIBER-MONEDA -->
-              <div class="flex items-center justify-center gap-2.5 w-full mt-1">
+              <!-- OJOS CHIBI KAWAII (limpios, redondos y expresivos) -->
+              <div class="relative flex items-center justify-center gap-3 w-full mt-1 z-10">
                 <!-- Ojo Izquierdo -->
                 <div
-                  class="relative w-3.5 h-4 sm:w-4 sm:h-4.5 rounded-full bg-neutral-950 border border-amber-400/40 flex items-center justify-center overflow-hidden transition-all duration-100"
-                  [style.transform]="getEyeScale()"
+                  class="relative w-3.5 h-4 flex items-center justify-center transition-all duration-100"
+                  [style.transform]="getLeftEyeTransform()"
                 >
-                  <!-- Expresión alegre ^ en hover -->
                   @if (isHovered() || isHappy()) {
-                    <div class="w-3 h-1.5 border-t-2 border-amber-400 rounded-t-full mt-0.5 shadow-[0_0_6px_#f59e0b]"></div>
+                    <!-- Ojito feliz ^ en hover -->
+                    <div class="w-3.5 h-2 border-t-[2.5px] border-slate-900 rounded-t-full mt-1"></div>
                   } @else {
-                    <!-- Pupila holográfica que sigue el cursor -->
+                    <!-- Ojo negro circular limpio con brillo blanco simple -->
                     <div
-                      class="relative w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-200 shadow-[0_0_8px_#f59e0b] transition-transform duration-75"
-                      [style.transform]="
-                        'translate(' + pupilOffsetX() + 'px, ' + pupilOffsetY() + 'px)'
-                      "
+                      class="relative w-3.5 h-3.5 rounded-full bg-slate-900 shadow-xs overflow-hidden transition-transform duration-75"
+                      [style.transform]="'translate(' + pupilOffsetX() + 'px, ' + pupilOffsetY() + 'px)'"
                     >
-                      <div class="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-white"></div>
+                      <div class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-white pointer-events-none"></div>
                     </div>
                   }
                 </div>
 
                 <!-- Ojo Derecho -->
                 <div
-                  class="relative w-3.5 h-4 sm:w-4 sm:h-4.5 rounded-full bg-neutral-950 border border-amber-400/40 flex items-center justify-center overflow-hidden transition-all duration-100"
-                  [style.transform]="isWinking() ? 'scaleY(0.1)' : getEyeScale()"
+                  class="relative w-3.5 h-4 flex items-center justify-center transition-all duration-100"
+                  [style.transform]="getRightEyeTransform()"
                 >
-                  <!-- Expresión alegre ^ en hover -->
-                  @if ((isHovered() || isHappy()) && !isWinking()) {
-                    <div class="w-3 h-1.5 border-t-2 border-amber-400 rounded-t-full mt-0.5 shadow-[0_0_6px_#f59e0b]"></div>
-                  } @else if (!isWinking()) {
-                    <!-- Pupila holográfica que sigue el cursor -->
+                  @if (isWinking()) {
+                    <!-- Guiño en clic -->
+                    <div class="w-3.5 h-1 border-b-[2.5px] border-slate-900 rounded-b-full mt-1"></div>
+                  } @else if (isHovered() || isHappy()) {
+                    <!-- Ojito feliz ^ en hover -->
+                    <div class="w-3.5 h-2 border-t-[2.5px] border-slate-900 rounded-t-full mt-1"></div>
+                  } @else {
+                    <!-- Ojo negro circular limpio con brillo blanco simple -->
                     <div
-                      class="relative w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-200 shadow-[0_0_8px_#f59e0b] transition-transform duration-75"
-                      [style.transform]="
-                        'translate(' + pupilOffsetX() + 'px, ' + pupilOffsetY() + 'px)'
-                      "
+                      class="relative w-3.5 h-3.5 rounded-full bg-slate-900 shadow-xs overflow-hidden transition-transform duration-75"
+                      [style.transform]="'translate(' + pupilOffsetX() + 'px, ' + pupilOffsetY() + 'px)'"
                     >
-                      <div class="absolute top-0.5 right-0.5 w-1 h-1 rounded-full bg-white"></div>
+                      <div class="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-white pointer-events-none"></div>
                     </div>
                   }
                 </div>
               </div>
 
-              <!-- Sonrisa / Arco holográfico inferior -->
-              <div class="mt-1.5 flex justify-center">
+              <!-- BOQUITA TIERNA MINIMALISTA -->
+              <div class="relative mt-1 flex justify-center items-center z-10">
                 @if (isOpen) {
-                  <!-- Barra luminosa activa esmeralda (sin texto) -->
-                  <div class="w-3.5 h-1 bg-emerald-400 rounded-full shadow-[0_0_6px_#34d399] animate-pulse"></div>
-                } @else if (isHovered() || isNear()) {
-                  <!-- Sonrisa alegre -->
-                  <div class="w-3 h-1 border-b-2 border-amber-300 rounded-b-full shadow-[0_0_4px_#fde047]"></div>
+                  <div class="w-2.5 h-1.5 rounded-b-full bg-rose-500 border border-slate-900/40"></div>
+                } @else if (isWinking() || isHovered()) {
+                  <div class="w-2.5 h-1.5 rounded-b-full bg-rose-500/90 border border-slate-900/50"></div>
                 } @else {
-                  <!-- Línea neutral sutil -->
-                  <div class="w-2 h-0.5 bg-neutral-600 rounded-full"></div>
+                  <div class="w-2 h-0.5 border-b-[1.5px] border-slate-800 rounded-b-full"></div>
                 }
               </div>
-
-              <!-- Mejillas con resplandor en proximidad/hover -->
-              @if (isNear() || isHovered()) {
-                <div class="absolute bottom-2 left-2 w-1.5 h-1 rounded-full bg-rose-400/50 blur-[1px]"></div>
-                <div class="absolute bottom-2 right-2 w-1.5 h-1 rounded-full bg-rose-400/50 blur-[1px]"></div>
-              }
             </div>
 
-            <!-- LED indicador de estado en la moneda -->
+            <!-- LED de estado discreto -->
             <span
-              class="absolute bottom-1 right-1 w-2.5 h-2.5 rounded-full border border-amber-900 bg-emerald-400 shadow-[0_0_6px_#34d399]"
+              class="absolute bottom-1 right-1 w-2 h-2 rounded-full border border-white bg-emerald-400"
               [class.animate-pulse]="isOpen"
-              title="EDUBID IA Conectado"
+              title="EDUBID IA Activo"
             ></span>
           </div>
         </div>
@@ -349,6 +319,29 @@ export class BotAvatarComponent implements OnInit, OnDestroy {
     const tiltY = this.coinTiltY();
     const spin = this.isSpinning() ? ' rotateY(360deg)' : '';
     return `perspective(500px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)${spin}`;
+  }
+
+  getLeftEyeTransform(): string {
+    if (this.isBlinking()) {
+      return 'scaleY(0.08)';
+    }
+    if (this.isNear() && !this.isHovered()) {
+      return 'scale(1.1)';
+    }
+    return 'scale(1)';
+  }
+
+  getRightEyeTransform(): string {
+    if (this.isWinking()) {
+      return 'scale(1)';
+    }
+    if (this.isBlinking()) {
+      return 'scaleY(0.08)';
+    }
+    if (this.isNear() && !this.isHovered()) {
+      return 'scale(1.1)';
+    }
+    return 'scale(1)';
   }
 
   getEyeScale(): string {

@@ -15,6 +15,7 @@ import {
   AiAssistantService,
   AiChatMessage,
 } from '../../../core/services/ai-assistant.service';
+import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { BotAvatarComponent } from './bot-avatar.component';
 
 @Component({
@@ -35,30 +36,50 @@ import { BotAvatarComponent } from './bot-avatar.component';
             <div
               class="px-4 py-3.5 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border-b border-border flex items-center justify-between shrink-0"
             >
-              <div class="flex items-center gap-2.5">
+              <div class="flex items-center gap-2.5 min-w-0">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" title="En línea"></span>
-                <div>
+                <div class="min-w-0">
                   <div class="flex items-center gap-1.5">
-                    <h3 class="font-bold text-sm text-text leading-tight tracking-tight">EDUBID IA</h3>
-                    <span class="px-1.5 py-0.5 text-[10px] font-extrabold uppercase bg-primary/15 text-primary rounded-md">
+                    <h3 class="font-bold text-sm text-text leading-tight tracking-tight truncate">EDUBID IA</h3>
+                    <span class="px-1.5 py-0.5 text-[10px] font-extrabold uppercase bg-primary/15 text-primary rounded-md shrink-0">
                       {{ activeModelBadge() }}
                     </span>
                   </div>
-                  <p class="text-xs text-text-muted leading-tight mt-0.5">
+                  <p class="text-xs text-text-muted leading-tight mt-0.5 truncate">
                     {{ roleSubtitle() }}
                   </p>
                 </div>
               </div>
 
               <!-- Acciones Cabecera -->
-              <div class="flex items-center gap-1">
-                <!-- Limpiar chat -->
+              <div class="flex items-center gap-1 shrink-0">
+                <!-- Botón Desplegar Sugerencias -->
+                <button
+                  type="button"
+                  (click)="toggleSuggestions()"
+                  [title]="showSuggestionsTray() ? 'Ocultar preguntas recomendadas' : 'Ver preguntas recomendadas'"
+                  class="px-2 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
+                  [class.bg-primary/15]="showSuggestionsTray()"
+                  [class.text-primary]="showSuggestionsTray()"
+                  [class.text-text-muted]="!showSuggestionsTray()"
+                  [class.hover:bg-border/60]="!showSuggestionsTray()"
+                >
+                  <svg class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
+                  </svg>
+                  <span class="text-[11px] hidden sm:inline">Sugerencias</span>
+                  <svg class="w-3 h-3 transition-transform duration-200" [class.rotate-180]="showSuggestionsTray()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                <!-- Limpiar chat manual con diálogo de confirmación -->
                 @if (messages().length > 0) {
                   <button
                     type="button"
-                    (click)="clearChat()"
-                    title="Reiniciar conversación"
-                    class="p-1.5 text-text-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+                    (click)="confirmClearChat()"
+                    title="Borrar historial de conversación"
+                    class="p-1.5 text-text-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
                   >
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M3 6h18" />
@@ -68,12 +89,12 @@ import { BotAvatarComponent } from './bot-avatar.component';
                   </button>
                 }
 
-                <!-- Cerrar ventana -->
+                <!-- Cerrar ventana flotante (permanente) -->
                 <button
                   type="button"
                   (click)="toggleChat()"
-                  title="Cerrar chat"
-                  class="p-1.5 text-text-muted hover:text-text hover:bg-border/60 rounded-lg transition-colors"
+                  title="Cerrar ventana de chat"
+                  class="p-1.5 text-text-muted hover:text-text hover:bg-border/60 rounded-lg transition-colors cursor-pointer"
                 >
                   <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -83,6 +104,44 @@ import { BotAvatarComponent } from './bot-avatar.component';
               </div>
             </div>
 
+            <!-- ================= BANDEJA DESPLEGABLE DE MENSAJES RECOMENDADOS ================= -->
+            @if (showSuggestionsTray()) {
+              <div class="px-3.5 py-2.5 bg-neutral-100/95 dark:bg-neutral-900/95 border-b border-border space-y-2 animate-in slide-in-from-top-2 duration-200 shrink-0">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-neutral-100">
+                    <svg class="w-3.5 h-3.5 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
+                    </svg>
+                    <span>Preguntas recomendadas para tu rol</span>
+                  </div>
+                  <button
+                    type="button"
+                    (click)="toggleSuggestions()"
+                    class="text-[11px] font-medium text-text-muted hover:text-text cursor-pointer"
+                  >
+                    Ocultar
+                  </button>
+                </div>
+
+                <div class="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                  @for (sugg of suggestions(); track sugg) {
+                    <button
+                      type="button"
+                      (click)="sendSuggestion(sugg)"
+                      class="w-full text-left p-2 rounded-xl bg-surface hover:bg-primary/10 border border-border/80 hover:border-primary/40 text-[11px] text-text transition-all duration-150 flex items-start gap-2 group cursor-pointer"
+                    >
+                      <span class="w-3.5 h-3.5 text-primary mt-0.5 group-hover:scale-110 transition-transform shrink-0 flex items-center justify-center">
+                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/>
+                        </svg>
+                      </span>
+                      <span class="flex-1 leading-snug">{{ sugg }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
             <!-- CUERPO DE MENSAJES -->
             <div
               #scrollContainer
@@ -90,7 +149,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
             >
               <!-- BIENVENIDA SI NO HAY MENSAJES -->
               @if (messages().length === 0) {
-                <div class="space-y-4 my-2">
+                <div class="space-y-4 my-2 animate-in fade-in duration-200">
                   <div class="p-4 rounded-xl bg-gradient-to-br from-primary/10 via-surface to-surface border border-primary/20 text-center space-y-2">
                     <div class="w-12 h-12 mx-auto rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
                       <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -106,7 +165,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
                     </p>
                   </div>
 
-                  <!-- SUGERENCIAS RÁPIDAS -->
+                  <!-- SUGERENCIAS RÁPIDAS DE INICIO -->
                   <div class="space-y-1.5">
                     <p class="text-[11px] font-bold text-text-muted uppercase tracking-wider px-1">
                       Ideas rápidas para empezar:
@@ -116,7 +175,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
                         <button
                           type="button"
                           (click)="sendSuggestion(sugg)"
-                          class="w-full text-left p-2.5 rounded-xl bg-surface hover:bg-primary/10 border border-border hover:border-primary/40 text-xs text-text transition-all duration-150 flex items-start gap-2 group"
+                          class="w-full text-left p-2.5 rounded-xl bg-surface hover:bg-primary/10 border border-border hover:border-primary/40 text-xs text-text transition-all duration-150 flex items-start gap-2 group cursor-pointer"
                         >
                           <span class="w-3.5 h-3.5 text-primary mt-0.5 group-hover:scale-110 transition-transform shrink-0 flex items-center justify-center">
                             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -135,7 +194,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
               @for (msg of messages(); track $index) {
                 <!-- MENSAJE DEL USUARIO -->
                 @if (msg.role === 'user') {
-                  <div class="flex justify-end items-end gap-2">
+                  <div class="flex justify-end items-end gap-2 animate-in fade-in duration-150">
                     <div
                       class="max-w-[85%] rounded-2xl rounded-br-xs px-3.5 py-2.5 bg-primary text-white text-xs sm:text-sm leading-relaxed shadow-sm whitespace-pre-wrap break-words"
                     >
@@ -146,7 +205,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
 
                 <!-- MENSAJE DE LA IA -->
                 @if (msg.role === 'assistant') {
-                  <div class="flex items-start gap-2.5">
+                  <div class="flex items-start gap-2.5 animate-in fade-in duration-150">
                     <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-primary to-orange-400 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect width="18" height="12" x="3" y="8" rx="2" />
@@ -166,14 +225,21 @@ import { BotAvatarComponent } from './bot-avatar.component';
                       <div class="flex items-center gap-2 px-1">
                         <button
                           type="button"
-                          (click)="copyToClipboard(msg.content)"
-                          class="text-[10px] text-text-muted hover:text-primary transition-colors flex items-center gap-1"
+                          (click)="copyToClipboard(msg.content, $index)"
+                          class="text-[10px] text-text-muted hover:text-primary transition-colors flex items-center gap-1 cursor-pointer"
                         >
-                          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-                          </svg>
-                          Copiar
+                          @if (copiedMessageIndex() === $index) {
+                            <svg class="w-3 h-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            <span class="text-emerald-500 font-bold">¡Copiado!</span>
+                          } @else {
+                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                            </svg>
+                            <span>Copiar</span>
+                          }
                         </button>
                       </div>
                     </div>
@@ -183,7 +249,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
 
               <!-- INDICADOR DE PENSANDO / CARGANDO -->
               @if (isLoading()) {
-                <div class="flex items-center gap-2.5 text-text-muted py-1">
+                <div class="flex items-center gap-2.5 text-text-muted py-1 animate-in fade-in duration-150">
                   <div class="w-7 h-7 rounded-lg bg-primary/20 text-primary flex items-center justify-center shrink-0">
                     <svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
@@ -208,6 +274,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
                 <textarea
                   #inputBox
                   [(ngModel)]="userInput"
+                  (ngModelChange)="onInputChange($event)"
                   name="userInput"
                   (keydown.enter)="onEnterPress($event)"
                   rows="1"
@@ -220,7 +287,7 @@ import { BotAvatarComponent } from './bot-avatar.component';
                   type="submit"
                   [disabled]="!canSend()"
                   title="Enviar mensaje"
-                  class="absolute right-2 p-1.5 rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-40 disabled:hover:opacity-40 transition-all duration-150 shadow-xs"
+                  class="absolute right-2 p-1.5 rounded-lg bg-primary text-white hover:opacity-90 disabled:opacity-40 disabled:hover:opacity-40 transition-all duration-150 shadow-xs cursor-pointer"
                 >
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13" />
@@ -250,16 +317,21 @@ import { BotAvatarComponent } from './bot-avatar.component';
 export class AiAssistantComponent implements OnInit, AfterViewChecked {
   private authService = inject(AuthService);
   private aiService = inject(AiAssistantService);
+  private confirmDialog = inject(ConfirmDialogService);
 
   @ViewChild('scrollContainer') private scrollContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('inputBox') private inputBox?: ElementRef<HTMLTextAreaElement>;
 
   isOpen = signal<boolean>(false);
-  isLoading = signal<boolean>(false);
   userInput = '';
-  messages = signal<AiChatMessage[]>([]);
-  suggestions = signal<string[]>([]);
-  activeModel = signal<string>('gemini-3.6-flash');
+  copiedMessageIndex = signal<number | null>(null);
+
+  // Consumir estados centralizados y persistentes desde AiAssistantService
+  readonly messages = this.aiService.messages;
+  readonly isLoading = this.aiService.isLoading;
+  readonly suggestions = this.aiService.suggestions;
+  readonly showSuggestionsTray = this.aiService.showSuggestionsTray;
+  readonly activeModel = this.aiService.activeModel;
 
   readonly activeModelBadge = computed(() => {
     const raw = this.activeModel();
@@ -308,7 +380,9 @@ export class AiAssistantComponent implements OnInit, AfterViewChecked {
 
   ngOnInit(): void {
     if (this.canAccess()) {
-      this.loadSuggestions();
+      this.aiService.loadMessagesFromStorage();
+      this.aiService.loadSuggestions();
+      this.userInput = this.aiService.draftText();
     }
   }
 
@@ -327,31 +401,36 @@ export class AiAssistantComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  clearChat(): void {
-    this.messages.set([]);
+  toggleSuggestions(): void {
+    this.aiService.toggleSuggestionsTray();
   }
 
-  loadSuggestions(): void {
-    this.aiService.getSuggestions().subscribe({
-      next: (res) => {
-        if (res.suggestions?.length) {
-          this.suggestions.set(res.suggestions);
-        }
-      },
-      error: () => {
-        // Sugerencias por defecto si falla la petición
-        this.suggestions.set([
-          'Genera una rúbrica de 4 niveles para evaluar una actividad de clase.',
-          'Dame 3 ideas de recompensas educativas para subastas con EduCoins.',
-          '¿Cómo motivar a estudiantes con bajo rendimiento académico?',
-        ]);
-      },
+  async confirmClearChat(): Promise<void> {
+    const confirmed = await this.confirmDialog.confirm({
+      title: '¿Reiniciar conversación?',
+      message: 'Se borrará el historial actual de mensajes con EDUBID IA. Esta acción no se puede deshacer.',
+      confirmText: 'Borrar historial',
+      cancelText: 'Cancelar',
+      type: 'danger',
+      icon: 'trash',
     });
+
+    if (confirmed) {
+      this.aiService.clearChat();
+      this.shouldScroll = true;
+    }
+  }
+
+  onInputChange(val: string): void {
+    this.aiService.setDraft(val);
   }
 
   sendSuggestion(suggestion: string): void {
-    this.userInput = suggestion;
-    this.sendMessage();
+    this.aiService.sendUserMessage(suggestion);
+    this.userInput = '';
+    this.aiService.setDraft('');
+    this.shouldScroll = true;
+    this.aiService.setSuggestionsTray(false);
   }
 
   onEnterPress(event: Event): void {
@@ -371,66 +450,39 @@ export class AiAssistantComponent implements OnInit, AfterViewChecked {
     const text = this.userInput.trim();
     if (!text || this.isLoading()) return;
 
-    // Agregar mensaje del usuario al chat
-    const userMsg: AiChatMessage = {
-      role: 'user',
-      content: text,
-      timestamp: new Date(),
-    };
-
-    this.messages.update((msgs) => [...msgs, userMsg]);
+    this.aiService.sendUserMessage(text);
     this.userInput = '';
-    this.isLoading.set(true);
+    this.aiService.setDraft('');
     this.shouldScroll = true;
-
-    // Preparar el historial para el backend (solo role y content)
-    const payloadMessages = this.messages().map((m) => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    }));
-
-    this.aiService.sendMessage(payloadMessages).subscribe({
-      next: (response) => {
-        const aiMsg: AiChatMessage = {
-          role: 'assistant',
-          content: response.content,
-          model: response.model,
-          timestamp: new Date(),
-        };
-        if (response.model) {
-          this.activeModel.set(response.model);
-        }
-        this.messages.update((msgs) => [...msgs, aiMsg]);
-        this.isLoading.set(false);
-        this.shouldScroll = true;
-      },
-      error: (error) => {
-        const errorDetail =
-          error?.error?.detail ||
-          'Lo siento, ocurrió un error al conectar con EDUBID IA. Por favor intenta de nuevo.';
-        const errorMsg: AiChatMessage = {
-          role: 'assistant',
-          content: `**Error:** ${errorDetail}`,
-          timestamp: new Date(),
-        };
-        this.messages.update((msgs) => [...msgs, errorMsg]);
-        this.isLoading.set(false);
-        this.shouldScroll = true;
-      },
-    });
   }
 
-  copyToClipboard(text: string): void {
-    navigator.clipboard?.writeText(text);
+  copyToClipboard(text: string, index: number): void {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      this.copiedMessageIndex.set(index);
+      setTimeout(() => this.copiedMessageIndex.set(null), 2000);
+    }
   }
 
   formatMarkdown(content: string): string {
     if (!content) return '';
-    // Formateo básico de markdown seguro
+    // Formateo seguro de markdown básico enriquecido
     let formatted = content
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
+
+    // Bloques de código ```codigo```
+    formatted = formatted.replace(
+      /```(?:[a-zA-Z]*)\n?([\s\S]*?)```/g,
+      '<pre class="my-2 p-2.5 rounded-xl bg-black/40 text-neutral-100 font-mono text-xs overflow-x-auto border border-white/10 leading-relaxed"><code>$1</code></pre>'
+    );
+
+    // Código en línea `codigo`
+    formatted = formatted.replace(
+      /`([^`]+)`/g,
+      '<code class="px-1.5 py-0.5 rounded bg-black/15 dark:bg-white/15 font-mono text-[11px] text-amber-500 dark:text-amber-300 font-bold">$1</code>'
+    );
 
     // Negritas **texto**
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -439,10 +491,10 @@ export class AiAssistantComponent implements OnInit, AfterViewChecked {
     formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
     
     // Listas con viñeta (- item)
-    formatted = formatted.replace(/^\s*-\s+(.*)$/gm, '<li class="ml-4 list-disc">$1</li>');
+    formatted = formatted.replace(/^\s*-\s+(.*)$/gm, '<li class="ml-4 list-disc my-0.5">$1</li>');
 
     // Listas numeradas (1. item)
-    formatted = formatted.replace(/^\s*(\d+)\.\s+(.*)$/gm, '<li class="ml-4 list-decimal"><strong>$1.</strong> $2</li>');
+    formatted = formatted.replace(/^\s*(\d+)\.\s+(.*)$/gm, '<li class="ml-4 list-decimal my-0.5"><strong>$1.</strong> $2</li>');
 
     return formatted;
   }
