@@ -9,6 +9,7 @@ class InstitutionMiniSerializer(serializers.Serializer):
     """Resumen de institución para anidar en el perfil del usuario."""
     id = serializers.IntegerField(read_only=True)
     nombre = serializers.CharField(read_only=True)
+    slug = serializers.CharField(read_only=True)
     color_primario = serializers.CharField(read_only=True)
     color_secundario = serializers.CharField(read_only=True)
     logo = serializers.SerializerMethodField()
@@ -32,17 +33,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
     password_confirm = serializers.CharField(write_only=True)
     institucion_id = serializers.IntegerField(required=False, allow_null=True)
+    institution_slug = serializers.CharField(required=False, allow_null=True, allow_blank=True, write_only=True)
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'role', 'password', 'password_confirm', 'institucion_id']
+        fields = ['email', 'first_name', 'last_name', 'role', 'password', 'password_confirm', 'institucion_id', 'institution_slug']
 
     def validate_role(self, value):
-        """Solo permitir estudiante o docente en el registro público"""
-        allowed_roles = ['estudiante', 'docente']
+        """Permite roles de la jerarquía educativa en registro institucional o general"""
+        allowed_roles = ['estudiante', 'docente', 'coordinador', 'rector']
         if value not in allowed_roles:
             raise serializers.ValidationError(
-                f"Rol no válido. Los roles permitidos son: {', '.join(allowed_roles)}"
+                f"Rol no válido para registro. Los roles permitidos son: {', '.join(allowed_roles)}"
             )
         return value
 
@@ -50,11 +52,36 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if data['password'] != data['password_confirm']:
             raise serializers.ValidationError("Las contraseñas no coinciden")
 
+        role = data.get('role', 'estudiante')
+        institution_slug = data.pop('institution_slug', None)
         institucion_id = data.get('institucion_id')
-        if institucion_id:
-            if not Institution.objects.filter(id=institucion_id, activo=True).exists():
+
+        inst = None
+        if institution_slug:
+            inst = Institution.objects.filter(slug=institution_slug, activo=True).first()
+            if not inst:
+                raise serializers.ValidationError({
+                    'institution_slug': 'La institución indicada no existe o no está activa.'
+                })
+            data['institucion_id'] = inst.id
+        elif institucion_id:
+            inst = Institution.objects.filter(id=institucion_id, activo=True).first()
+            if not inst:
                 raise serializers.ValidationError({
                     'institucion_id': 'La institución seleccionada no existe o no está activa.'
+                })
+
+        # Rector, coordinador y docente requieren vinculación institucional obligatoria
+        if role in ('rector', 'coordinador', 'docente') and not inst:
+            raise serializers.ValidationError({
+                'institucion_id': f'El registro para el rol de {role} requiere el enlace exclusivo de una institución.'
+            })
+
+        # Regla de negocio: Máximo un rector por institución
+        if role == 'rector' and inst:
+            if User.objects.filter(institucion=inst, role='rector').exists():
+                raise serializers.ValidationError({
+                    'role': 'Esta institución ya cuenta con un rector asignado.'
                 })
 
         return data
@@ -76,13 +103,23 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+    institution_slug = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     def validate(self, data):
         user = authenticate(username=data.get('email'), password=data.get('password'))
-        if user and user.is_active:
-            data['user'] = user
-            return data
-        raise serializers.ValidationError("Credenciales inválidas")
+        if not user or not user.is_active:
+            raise serializers.ValidationError("Credenciales inválidas")
+
+        institution_slug = data.get('institution_slug')
+        if institution_slug:
+            if user.role != 'admin':
+                if not user.institucion or user.institucion.slug != institution_slug:
+                    raise serializers.ValidationError(
+                        "Esta cuenta no pertenece a esta institución educativa. Por favor ingresa desde el enlace exclusivo de tu institución."
+                    )
+
+        data['user'] = user
+        return data
 
 
 class ProfileSerializer(serializers.ModelSerializer):

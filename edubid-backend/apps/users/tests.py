@@ -1,7 +1,9 @@
 from django.test import TestCase
 from django.db import IntegrityError, transaction
 from django.core.exceptions import ValidationError
+from django.core.cache import cache
 from apps.users.models import User, Profile
+from apps.users.token_models import EmailVerificationToken
 from apps.institutions.models import Institution
 from apps.users.permissions import IsDocente, AdminOrDocente
 from rest_framework.test import APIClient
@@ -338,6 +340,247 @@ class UserManagementSecurityTestCase(TestCase):
             format="json"
         )
         self.assertEqual(res.status_code, 403)
+
+
+class InstitutionalIsolationAndRegistrationTests(TestCase):
+    """
+    Pruebas de aislamiento multi-inquilino institucional y registro por slug dedicado.
+    """
+    def setUp(self):
+        cache.clear()
+        self.client = APIClient()
+        self.institucion_a = Institution.objects.create(
+            nombre="Colegio San José A",
+            codigo_dane="111110",
+            activo=True
+        )
+        self.institucion_b = Institution.objects.create(
+            nombre="Colegio Mayor B",
+            codigo_dane="222220",
+            activo=True
+        )
+        self.admin = User.objects.create_user(
+            username="admin_global_test",
+            email="admin_global_test@edubid.com",
+            password="password123",
+            role="admin",
+            email_verified=True
+        )
+        self.docente_a = User.objects.create_user(
+            username="docente_a_test",
+            email="docente_a_test@edubid.com",
+            password="password123",
+            role="docente",
+            institucion=self.institucion_a,
+            email_verified=True
+        )
+
+    def tearDown(self):
+        cache.clear()
+
+    def test_login_institutional_isolation_rejection(self):
+        """Un usuario de la Institución A no puede iniciar sesión en el portal de la Institución B."""
+        payload = {
+            "email": self.docente_a.email,
+            "password": "password123",
+            "institution_slug": self.institucion_b.slug
+        }
+        res = self.client.post("/api/users/login/", payload, format="json")
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("no pertenece a esta institución", str(res.data))
+
+    def test_login_institutional_isolation_success(self):
+        """Un usuario de la Institución A inicia sesión exitosamente en su portal institucional."""
+        payload = {
+            "email": self.docente_a.email,
+            "password": "password123",
+            "institution_slug": self.institucion_a.slug
+        }
+        res = self.client.post("/api/users/login/", payload, format="json")
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("tokens", res.data)
+
+    def test_login_institutional_admin_bypass(self):
+        """El administrador global puede iniciar sesión en cualquier portal institucional."""
+        payload = {
+            "email": self.admin.email,
+            "password": "password123",
+            "institution_slug": self.institucion_a.slug
+        }
+        res = self.client.post("/api/users/login/", payload, format="json")
+        self.assertEqual(res.status_code, 200)
+
+    def test_register_student_with_institution_slug(self):
+        """El registro con institution_slug asocia la institución y rol de estudiante automáticamente."""
+        payload = {
+            "email": "nuevo_alumno@edubid.com",
+            "first_name": "Carlos",
+            "last_name": "Pérez",
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+            "role": "estudiante",
+            "institution_slug": self.institucion_a.slug
+        }
+        res = self.client.post("/api/users/register/", payload, format="json")
+        self.assertEqual(res.status_code, 201)
+        user = User.objects.get(email="nuevo_alumno@edubid.com")
+        self.assertEqual(user.institucion, self.institucion_a)
+        self.assertEqual(user.role, "estudiante")
+
+    def test_register_teacher_with_institution_slug(self):
+        """El registro extraordinario de docente asocia la institución y rol docente."""
+        payload = {
+            "email": "nuevo_profe@edubid.com",
+            "first_name": "Laura",
+            "last_name": "Gómez",
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+            "role": "docente",
+            "institution_slug": self.institucion_b.slug
+        }
+        res = self.client.post("/api/users/register/", payload, format="json")
+        self.assertEqual(res.status_code, 201)
+        user = User.objects.get(email="nuevo_profe@edubid.com")
+        self.assertEqual(user.institucion, self.institucion_b)
+        self.assertEqual(user.role, "docente")
+
+    def test_six_digit_otp_generation_and_auto_login(self):
+        """Verifica generación de código de 6 dígitos, vigencia de 1 hora y login automático tras validación."""
+        payload = {
+            "email": "estudiante_otp@edubid.com",
+            "first_name": "Mateo",
+            "last_name": "Rojas",
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+            "role": "estudiante",
+            "institution_slug": self.institucion_a.slug
+        }
+        res = self.client.post("/api/users/register/", payload, format="json")
+        self.assertEqual(res.status_code, 201)
+        self.assertTrue(res.data.get("verification_required"))
+
+        user = User.objects.get(email="estudiante_otp@edubid.com")
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.email_verified)
+
+        token = EmailVerificationToken.objects.filter(user=user, is_used=False).first()
+        self.assertIsNotNone(token)
+        self.assertIsNotNone(token.code)
+        self.assertEqual(len(token.code), 6)
+        self.assertTrue(token.code.isdigit())
+        # Vigencia aproximada de 1 hora
+        time_diff = token.expires_at - token.created_at
+        self.assertAlmostEqual(time_diff.total_seconds(), 3600, delta=10)
+
+        # Validación con código correcto
+        verify_res = self.client.post("/api/users/verify-email-code/", {
+            "email": user.email,
+            "code": token.code
+        }, format="json")
+
+        self.assertEqual(verify_res.status_code, 200)
+        self.assertIn("tokens", verify_res.data)
+        self.assertIn("access", verify_res.data["tokens"])
+        self.assertIn("refresh", verify_res.data["tokens"])
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.email_verified)
+        token.refresh_from_db()
+        self.assertTrue(token.is_used)
+
+    def test_verify_email_code_invalid_and_expired(self):
+        """Verifica rechazo con código inválido y expirado."""
+        user = User.objects.create_user(
+            username="test_otp_invalido",
+            email="test_otp_invalido@edubid.com",
+            password="Password123!",
+            is_active=False,
+            email_verified=False
+        )
+        token = EmailVerificationToken.objects.create(user=user)
+
+        # Código incorrecto
+        bad_res = self.client.post("/api/users/verify-email-code/", {
+            "email": user.email,
+            "code": "000000" if token.code != "000000" else "999999"
+        }, format="json")
+        self.assertEqual(bad_res.status_code, 400)
+
+        # Código expirado
+        from django.utils import timezone
+        from datetime import timedelta
+        token.expires_at = timezone.now() - timedelta(minutes=5)
+        token.save()
+
+        exp_res = self.client.post("/api/users/verify-email-code/", {
+            "email": user.email,
+            "code": token.code
+        }, format="json")
+        self.assertEqual(exp_res.status_code, 400)
+        self.assertIn("expirado", str(exp_res.data).lower())
+
+    def test_register_rector_success_and_duplicate_blocked(self):
+        """El registro exclusivo de rector se asigna correctamente y bloquea duplicados en la misma institución."""
+        payload = {
+            "email": "rector_colegio_a@edubid.com",
+            "first_name": "Ramiro",
+            "last_name": "Suárez",
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+            "role": "rector",
+            "institution_slug": self.institucion_a.slug
+        }
+        res = self.client.post("/api/users/register/", payload, format="json")
+        self.assertEqual(res.status_code, 201)
+        rector = User.objects.get(email="rector_colegio_a@edubid.com")
+        self.assertEqual(rector.role, "rector")
+        self.assertEqual(rector.institucion, self.institucion_a)
+
+        # Intentar registrar un segundo rector en la misma institución A
+        payload2 = {
+            "email": "segundo_rector@edubid.com",
+            "first_name": "Pedro",
+            "last_name": "Martínez",
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+            "role": "rector",
+            "institution_slug": self.institucion_a.slug
+        }
+        res2 = self.client.post("/api/users/register/", payload2, format="json")
+        self.assertEqual(res2.status_code, 400)
+        self.assertIn("rector asignado", str(res2.data).lower())
+
+    def test_register_coordinator_with_institution_slug(self):
+        """Registro de coordinador escolar vinculado a la institución."""
+        payload = {
+            "email": "coordinador_colegio_b@edubid.com",
+            "first_name": "Beatriz",
+            "last_name": "Mendoza",
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+            "role": "coordinador",
+            "institution_slug": self.institucion_b.slug
+        }
+        res = self.client.post("/api/users/register/", payload, format="json")
+        self.assertEqual(res.status_code, 201)
+        coord = User.objects.get(email="coordinador_colegio_b@edubid.com")
+        self.assertEqual(coord.role, "coordinador")
+        self.assertEqual(coord.institucion, self.institucion_b)
+
+    def test_register_role_without_institution_blocked(self):
+        """Roles rector, coordinador y docente no pueden registrarse sin institución."""
+        for r in ["rector", "coordinador", "docente"]:
+            payload = {
+                "email": f"sin_colegio_{r}@edubid.com",
+                "first_name": "Test",
+                "last_name": "User",
+                "password": "Password123!",
+                "password_confirm": "Password123!",
+                "role": r
+            }
+            res = self.client.post("/api/users/register/", payload, format="json")
+            self.assertEqual(res.status_code, 400)
+            self.assertIn("requiere el enlace exclusivo", str(res.data).lower())
 
 
 

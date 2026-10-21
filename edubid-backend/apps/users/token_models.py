@@ -6,13 +6,14 @@ import secrets
 
 
 class EmailVerificationToken(models.Model):
-    """Token para verificación de email"""
+    """Token para verificación de email mediante código de 6 dígitos (OTP)"""
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='email_verification_tokens'
     )
     token = models.CharField(max_length=64, unique=True)
+    code = models.CharField(max_length=6, db_index=True, blank=True, null=True, verbose_name="Código OTP de 6 dígitos")
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
     is_used = models.BooleanField(default=False)
@@ -25,12 +26,16 @@ class EmailVerificationToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = secrets.token_urlsafe(32)
+        if not self.code:
+            # Generar código numérico seguro de 6 dígitos (100000 a 999999)
+            self.code = f"{secrets.randbelow(900000) + 100000}"
         if not self.expires_at:
-            self.expires_at = timezone.now() + timedelta(hours=24)
+            # Vigencia estricta de 1 hora
+            self.expires_at = timezone.now() + timedelta(hours=1)
         super().save(*args, **kwargs)
 
     def is_valid(self):
-        """Verifica si el token es válido"""
+        """Verifica si el token/código es válido y no ha expirado (1 hora)"""
         return not self.is_used and timezone.now() < self.expires_at
 
     def mark_as_used(self):

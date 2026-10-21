@@ -189,6 +189,106 @@ def verify_email(request, token):
 
 
 # --------------------------
+# Verificación de Email con Código OTP de 6 Dígitos
+# --------------------------
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([AuthRateThrottle])
+def verify_email_code(request):
+    """
+    Verifica el correo electrónico mediante un código numérico de 6 dígitos (OTP).
+    Si es válido y está vigente (1 hora), activa la cuenta y genera tokens JWT
+    para realizar login automático de forma inmediata.
+    """
+    email = request.data.get('email', '').strip().lower()
+    code = request.data.get('code', '').strip()
+
+    if not email or not code:
+        return Response({
+            'detail': 'Se requiere el correo electrónico y el código de 6 dígitos.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({
+            'detail': 'No existe una cuenta asociada a este correo electrónico.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Si el usuario ya está verificado y activo
+    if user.email_verified and user.is_active:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'message': '¡Tu correo ya ha sido verificado exitosamente!',
+            'already_verified': True,
+            'tokens': {
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            },
+            'user': UserProfileSerializer(user, context={'request': request}).data
+        }, status=status.HTTP_200_OK)
+
+    # Buscar el token activo más reciente con este código
+    verification_token = EmailVerificationToken.objects.filter(
+        user=user,
+        code=code,
+        is_used=False
+    ).order_by('-created_at').first()
+
+    if not verification_token:
+        # Verificar si existe pero expiró
+        expired_token = EmailVerificationToken.objects.filter(
+            user=user,
+            code=code
+        ).order_by('-created_at').first()
+        if expired_token and timezone.now() >= expired_token.expires_at:
+            return Response({
+                'detail': 'El código de verificación ha expirado (vigencia de 1 hora). Solicita un nuevo código.'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'detail': 'Código de verificación incorrecto. Verifica los 6 dígitos e intenta de nuevo.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    if not verification_token.is_valid():
+        return Response({
+            'detail': 'El código de verificación ha expirado o ya fue utilizado.'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Activar usuario
+    user.is_active = True
+    user.email_verified = True
+    user.save()
+
+    # Marcar token como usado
+    verification_token.mark_as_used()
+
+    # Enviar email de bienvenida de forma segura
+    try:
+        send_welcome_email_api(user, is_google_signup=False)
+    except Exception as e:
+        logger.error(f"Error enviando bienvenida SendGrid: {e}")
+
+    try:
+        notificar_email_verificado(user)
+    except Exception as e:
+        logger.error(f"Error creando notificación de email verificado: {e}")
+
+    # Generar sesión JWT para Login Automático
+    refresh = RefreshToken.for_user(user)
+
+    logger.info(f"✅ Email verificado exitosamente con código de 6 dígitos para: {user.email}")
+
+    return Response({
+        'message': '¡Correo verificado con éxito!',
+        'tokens': {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        },
+        'user': UserProfileSerializer(user, context={'request': request}).data
+    }, status=status.HTTP_200_OK)
+
+
+# --------------------------
 # Re-enviar email de verificación
 # --------------------------
 @api_view(['POST'])
@@ -364,9 +464,24 @@ class GoogleLoginAPIView(APIView):
                 "email_verified": True,  # ✅ Google ya verificó el email
             })
             
+            institution_slug = request.data.get("institution_slug")
+            target_institution = None
+            if institution_slug:
+                from apps.institutions.models import Institution
+                target_institution = Institution.objects.filter(slug=institution_slug, activo=True).first()
+
+            if not created and institution_slug and user.role != 'admin':
+                if not user.institucion or user.institucion.slug != institution_slug:
+                    return Response({
+                        "detail": "Esta cuenta de Google pertenece a otra institución educativa. Por favor ingresa desde el enlace de tu institución."
+                    }, status=status.HTTP_403_FORBIDDEN)
+
             if created:
                 user.set_unusable_password()
-                user.role = "estudiante"
+                requested_role = request.data.get("role")
+                user.role = requested_role if requested_role in ("estudiante", "docente") else "estudiante"
+                if target_institution:
+                    user.institucion = target_institution
                 user.save()
                 
                 # 🆕 Enviar email de bienvenida usando API

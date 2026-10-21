@@ -12,6 +12,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # Verificación de email
+    path('verify-email-code/', views.verify_email_code, name='verify-email-code'),
     path('verify-email/<str:token>/', views.verify_email, name='verify-email'),
     path('resend-verification/', views.resend_verification_email, name='resend-verification'),
     

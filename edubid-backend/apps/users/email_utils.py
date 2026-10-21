@@ -9,30 +9,31 @@ logger = logging.getLogger(__name__)
 
 
 def send_verification_email_api(user, token):
-    """Envía email de verificación de correo electrónico."""
+    """Envía email de verificación de correo electrónico con código OTP de 6 dígitos (válido por 1 hora)."""
     try:
+        code = getattr(token, 'code', None) or str(token.token)[:6]
         verification_link = f"{settings.FRONTEND_URL}/verify-email/{token.token}"
         year = datetime.now().year
-        subject = f'Verifica tu correo electrónico — EduBid'
+        subject = f'{code} es tu código de verificación — EduBid'
 
         html_content = f"""
         <!DOCTYPE html>
         <html lang="es">
         <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; margin: 0; padding: 0; }}
+                body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; margin: 0; padding: 0; }}
                 .wrapper {{ max-width: 600px; margin: 40px auto; padding: 0 20px; }}
-                .card {{ background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.07); }}
-                .card-header {{ background: #ea580c; padding: 32px 40px; text-align: center; }}
-                .card-header h1 {{ color: #ffffff; font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }}
-                .card-header p {{ color: rgba(255,255,255,0.85); font-size: 13px; margin: 6px 0 0 0; }}
-                .card-body {{ padding: 40px; }}
-                .card-body h2 {{ color: #111827; font-size: 20px; font-weight: 700; margin: 0 0 16px; }}
-                .card-body p {{ color: #374151; font-size: 15px; margin: 0 0 16px; }}
-                .btn {{ display: inline-block; padding: 14px 36px; background: #ea580c; color: #ffffff !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; }}
-                .btn-wrapper {{ text-align: center; margin: 28px 0; }}
-                .link-box {{ background: #f9fafb; padding: 12px 16px; border-radius: 8px; word-break: break-all; font-size: 12px; color: #6b7280; border: 1px solid #e5e7eb; font-family: monospace; }}
-                .note {{ font-size: 13px; color: #6b7280; margin-top: 8px; }}
+                .card {{ background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; }}
+                .card-header {{ background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); padding: 32px 40px; text-align: center; }}
+                .card-header h1 {{ color: #ffffff; font-size: 26px; font-weight: 800; margin: 0; letter-spacing: -0.5px; }}
+                .card-header p {{ color: rgba(255,255,255,0.9); font-size: 13px; margin: 6px 0 0 0; font-weight: 500; }}
+                .card-body {{ padding: 36px 40px; }}
+                .card-body h2 {{ color: #111827; font-size: 20px; font-weight: 700; margin: 0 0 12px; }}
+                .card-body p {{ color: #4b5563; font-size: 15px; margin: 0 0 16px; }}
+                .code-container {{ margin: 28px 0; text-align: center; }}
+                .code-box {{ display: inline-block; padding: 16px 28px; background: #fff7ed; border: 2px dashed #f97316; border-radius: 12px; font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #ea580c; font-family: 'Courier New', Courier, monospace; box-shadow: 0 2px 8px rgba(234, 88, 12, 0.08); }}
+                .expiry-pill {{ display: inline-block; margin-top: 12px; padding: 4px 12px; background: #fef3c7; border-radius: 9999px; font-size: 12px; font-weight: 600; color: #b45309; }}
+                .note {{ font-size: 13px; color: #6b7280; margin-top: 14px; }}
                 .footer {{ background: #f9fafb; padding: 20px 40px; border-top: 1px solid #e5e7eb; text-align: center; }}
                 .footer p {{ color: #9ca3af; font-size: 12px; margin: 4px 0; }}
             </style>
@@ -42,24 +43,24 @@ def send_verification_email_api(user, token):
                 <div class="card">
                     <div class="card-header">
                         <h1>EduBid</h1>
-                        <p>Gamificación Educativa</p>
+                        <p>Plataforma Educativa Gamificada</p>
                     </div>
                     <div class="card-body">
                         <h2>Verifica tu correo electrónico</h2>
-                        <p>Hola {user.first_name},</p>
-                        <p>Gracias por registrarte en <strong>EduBid</strong>. Para completar tu registro y activar tu cuenta, necesitamos verificar tu correo electrónico.</p>
-                        <p>Haz clic en el siguiente botón:</p>
-                        <div class="btn-wrapper">
-                            <a href="{verification_link}" class="btn">Verificar mi correo</a>
+                        <p>Hola <strong>{user.first_name}</strong>,</p>
+                        <p>Gracias por unirte a <strong>EduBid</strong>. Ingresa el siguiente código de 6 dígitos en la plataforma para verificar tu correo y acceder a tu cuenta automáticamente:</p>
+                        
+                        <div class="code-container">
+                            <div class="code-box">{code}</div>
+                            <br>
+                            <span class="expiry-pill">⏱️ Código válido por 1 hora</span>
                         </div>
-                        <p>O copia y pega este enlace en tu navegador:</p>
-                        <div class="link-box">{verification_link}</div>
-                        <p class="note"><strong>Este enlace expirará en 24 horas.</strong></p>
-                        <p class="note">Si no te registraste en EduBid, puedes ignorar este correo con seguridad.</p>
+
+                        <p class="note">Si no solicitaste este código, puedes ignorar este mensaje de forma segura.</p>
                     </div>
                     <div class="footer">
-                        <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
-                        <p>&copy; {year} EduBid &mdash; Gamificación Educativa</p>
+                        <p>Este es un correo automático de seguridad, por favor no respondas a este mensaje.</p>
+                        <p>&copy; {year} EduBid &mdash; Todos los derechos reservados.</p>
                     </div>
                 </div>
             </div>

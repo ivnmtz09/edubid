@@ -139,4 +139,28 @@ class InstitutionModelAndApiTests(TestCase):
         response = self.client.get(f"/api/institutions/{otra_inst.id}/exportar-pdf/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_generacion_automatica_slug_y_colisiones(self):
+        """El slug se genera automáticamente y maneja colisiones de nombres."""
+        inst1 = Institution.objects.create(nombre="Instituto Tecnológico Central")
+        self.assertEqual(inst1.slug, "instituto-tecnologico-central")
+
+        inst2 = Institution.objects.create(nombre="Instituto Tecnológico Central")
+        self.assertEqual(inst2.slug, "instituto-tecnologico-central-1")
+
+    def test_endpoint_publico_por_slug(self):
+        """El endpoint /api/institutions/by-slug/<slug>/ retorna branding correcto sin autenticación."""
+        response = self.client.get(f"/api/institutions/by-slug/{self.institucion_a.slug}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["nombre"], self.institucion_a.nombre)
+        self.assertEqual(response.data["slug"], self.institucion_a.slug)
+        self.assertEqual(response.data["color_primario"], self.institucion_a.color_primario)
+
+    def test_endpoint_publico_por_slug_inactivo_o_inexistente_retorna_404(self):
+        """Si la institución está inactiva o no existe, retorna 404."""
+        response_inactiva = self.client.get(f"/api/institutions/by-slug/{self.institucion_inactiva.slug}/")
+        self.assertEqual(response_inactiva.status_code, status.HTTP_404_NOT_FOUND)
+
+        response_inexistente = self.client.get("/api/institutions/by-slug/slug-inexistente-123/")
+        self.assertEqual(response_inexistente.status_code, status.HTTP_404_NOT_FOUND)
+
 

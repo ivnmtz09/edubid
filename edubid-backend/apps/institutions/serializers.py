@@ -52,10 +52,10 @@ class RectorInstitutionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Institution
         fields = [
-            'id', 'nombre', 'color_primario', 'color_secundario', 'logo',
+            'id', 'nombre', 'slug', 'color_primario', 'color_secundario', 'logo',
             'creado', 'actualizado',
         ]
-        read_only_fields = ['id', 'creado', 'actualizado']
+        read_only_fields = ['id', 'slug', 'creado', 'actualizado']
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -64,12 +64,12 @@ class RectorInstitutionSerializer(serializers.ModelSerializer):
 
 
 class PublicInstitutionSerializer(serializers.ModelSerializer):
-    """Serializer público — id, nombre y logo de instituciones activas."""
+    """Serializer público — id, nombre, slug, colores y logo de instituciones activas."""
     logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Institution
-        fields = ['id', 'nombre', 'logo']
+        fields = ['id', 'nombre', 'slug', 'color_primario', 'color_secundario', 'logo']
 
     def get_logo(self, obj):
         return resolve_logo_url(obj, self.context)

@@ -108,3 +108,17 @@ class PublicInstitutionListView(APIView):
         instituciones = Institution.objects.filter(activo=True).order_by('nombre')
         serializer = PublicInstitutionSerializer(instituciones, many=True)
         return Response(serializer.data)
+
+
+class PublicInstitutionBySlugView(APIView):
+    """
+    Endpoint público para resolver la institución por slug.
+    Retorna branding institucional, colores y logo.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, slug):
+        from django.shortcuts import get_object_or_404
+        institucion = get_object_or_404(Institution, slug=slug, activo=True)
+        serializer = PublicInstitutionSerializer(institucion, context={'request': request})
+        return Response(serializer.data)
