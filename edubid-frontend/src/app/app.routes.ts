@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { institutionScopeGuard } from './core/guards/institution-scope.guard';
 
 export const routes: Routes = [
   {
@@ -21,6 +22,62 @@ export const routes: Routes = [
     title: 'Registro | EduBid',
     loadComponent: () =>
       import('./features/home/home.component').then(m => m.HomeComponent),
+  },
+  // Rutas Institucionales Exclusivas y Aisladas (Multi-tenant)
+  {
+    path: 'institucion/:slug',
+    canActivate: [institutionScopeGuard],
+    children: [
+      {
+        path: 'login',
+        title: 'Acceso Institucional | EduBid',
+        loadComponent: () =>
+          import('./features/auth/components/institutional-auth/institutional-auth.component').then(
+            m => m.InstitutionalAuthComponent
+          ),
+      },
+      {
+        path: 'registro',
+        title: 'Registro de Estudiantes | EduBid',
+        loadComponent: () =>
+          import('./features/auth/components/institutional-auth/institutional-auth.component').then(
+            m => m.InstitutionalAuthComponent
+          ),
+      },
+      {
+        path: 'registro-rector',
+        title: 'Registro Oficial de Rectoría | EduBid',
+        loadComponent: () =>
+          import('./features/auth/components/institutional-auth/institutional-auth.component').then(
+            m => m.InstitutionalAuthComponent
+          ),
+      },
+      {
+        path: 'registro-coordinador',
+        title: 'Registro de Coordinación Académica | EduBid',
+        loadComponent: () =>
+          import('./features/auth/components/institutional-auth/institutional-auth.component').then(
+            m => m.InstitutionalAuthComponent
+          ),
+      },
+      {
+        path: 'registro-docente',
+        title: 'Registro Extraordinario Docente | EduBid',
+        loadComponent: () =>
+          import('./features/auth/components/institutional-auth/institutional-auth.component').then(
+            m => m.InstitutionalAuthComponent
+          ),
+      },
+      {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full',
+      },
+    ],
+  },
+  {
+    path: 'institution/:slug',
+    redirectTo: 'institucion/:slug',
   },
   {
     path: 'verify-email/:token',
@@ -234,6 +291,21 @@ export const routes: Routes = [
   {
     path: 'terminos',
     redirectTo: 'terminos-y-condiciones',
+  },
+  {
+    // Zona Arcade Educativa (Easter Egg con Acertijo del Guardián y Catálogo de Minijuegos)
+    path: 'arcade',
+    title: 'Zona Arcade Secreta | EduBid',
+    loadComponent: () =>
+      import('./features/arcade/arcade.component').then(m => m.ArcadeComponent),
+  },
+  {
+    path: 'zona-arcade',
+    redirectTo: 'arcade',
+  },
+  {
+    path: 'minijuegos',
+    redirectTo: 'arcade',
   },
   {
     // Ruta directa para nuevos usuarios Google sin institución asignada
