@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -6,6 +6,7 @@ import { DashboardService, DashboardStats } from '../../../../core/services/dash
 import { InstitutionService } from '../../../../core/services/institution.service';
 import { InstitutionBrandingComponent } from './components/institution-branding.component';
 import { QrInvitationCardComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-card.component';
+import { formatTimeGreeting, getTimeBasedSubtitle } from '../../../../core/utils/greeting.util';
 
 interface GradeMetric {
   grade: string;
@@ -32,15 +33,15 @@ interface RecentActivityAudit {
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface border border-border text-text-muted mb-2">
-            <span>Gobierno Escolar</span>
+            <span>{{ timeGreeting() }}</span>
             <span>•</span>
-            <span class="font-mono text-slate-900 dark:text-white">Panel de Rectoría / Admin</span>
+            <span class="font-mono text-slate-900 dark:text-white">Panel de Rectoría</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             {{ institutionName() }}
           </h1>
           <p class="text-sm text-text-muted mt-1">
-            Supervisión institucional, auditoría de economía conductual y gestión de identidad.
+            {{ timeSubtitle() }}
           </p>
         </div>
 
@@ -84,46 +85,74 @@ interface RecentActivityAudit {
         <!-- Métricas Macroeconómicas y Poblacionales -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Estudiantes Matriculados -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between">
-            <span class="text-xs font-medium text-text-muted">Estudiantes Matriculados</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Estudiantes Matriculados</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-text-muted group-hover:text-primary transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                 {{ stats()?.total_students || 0 }}
               </div>
-              <p class="text-xs text-text-muted mt-1">Registrados en la plataforma</p>
+              <p class="text-xs text-text-muted mt-1.5">Registrados en la plataforma</p>
             </div>
           </div>
 
           <!-- Docentes Registrados -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between">
-            <span class="text-xs font-medium text-text-muted">Docentes Activos</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Docentes Activos</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-text-muted group-hover:text-primary transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                 {{ stats()?.total_teachers || 0 }}
               </div>
-              <p class="text-xs text-text-muted mt-1">Con acceso al sistema</p>
+              <p class="text-xs text-text-muted mt-1.5">Con acceso al sistema</p>
             </div>
           </div>
 
           <!-- Clases en Operación -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between">
-            <span class="text-xs font-medium text-text-muted">Clases Activas</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Clases Activas</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-text-muted group-hover:text-primary transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                 {{ stats()?.active_classrooms || 0 }}
               </div>
-              <p class="text-xs text-text-muted mt-1">Clases y asignaturas registradas</p>
+              <p class="text-xs text-text-muted mt-1.5">Clases y asignaturas registradas</p>
             </div>
           </div>
 
           <!-- Circulación de EduCoins -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between">
-            <span class="text-xs font-medium text-text-muted">Circulación de EduCoins</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-emerald-500/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Circulación EduCoins</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
-                {{ stats()?.total_educoins || 0 }} EC
+              <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
+                {{ stats()?.total_educoins || 0 }} <span class="text-base font-bold">EC</span>
               </div>
-              <p class="text-xs text-text-muted mt-1">Emitidos por méritos académicos</p>
+              <p class="text-xs text-text-muted mt-1.5">Emitidos por méritos académicos</p>
             </div>
           </div>
         </div>
@@ -311,6 +340,16 @@ export class RectorDashboardComponent implements OnInit {
     this.authService.currentUser()?.profile?.institucion?.nombre ||
     'Administración Global EduBid'
   );
+
+  timeGreeting = computed(() => {
+    const user = this.authService.currentUser();
+    const name = user?.first_name || 'Rector';
+    return formatTimeGreeting(name);
+  });
+
+  timeSubtitle = computed(() => {
+    return getTimeBasedSubtitle('rector');
+  });
 
   isLoading = signal(true);
   isExporting = signal(false);

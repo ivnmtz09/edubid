@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
 import { DashboardService, DashboardStats } from '../../../../core/services/dashboard.service';
 import { QrInvitationCardComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-card.component';
+import { formatTimeGreeting, getTimeBasedSubtitle } from '../../../../core/utils/greeting.util';
 
 @Component({
   selector: 'app-coordinator-dashboard',
@@ -27,6 +28,19 @@ export class CoordinatorDashboardComponent implements OnInit {
 
   primaryColor = computed(() => {
     return (this.authService.currentUser()?.profile?.institucion as any)?.color_primario || '#0891b2';
+  });
+
+  userName = computed(() => {
+    const user = this.authService.currentUser();
+    return user ? `${user.first_name}`.trim() || 'Coordinador' : 'Coordinador';
+  });
+
+  timeGreeting = computed(() => {
+    return formatTimeGreeting(this.userName(), 'Coord.');
+  });
+
+  timeSubtitle = computed(() => {
+    return getTimeBasedSubtitle('coordinador');
   });
 
   ngOnInit(): void {

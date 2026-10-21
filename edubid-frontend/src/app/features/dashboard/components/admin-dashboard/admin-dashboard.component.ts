@@ -10,6 +10,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { ThemeService } from '../../../../core/services/theme.service';
 import { User } from '../../../../core/models/user.model';
 import { QrInvitationModalComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-modal.component';
+import { formatTimeGreeting, getTimeBasedSubtitle } from '../../../../core/utils/greeting.util';
 
 export interface Color {
   hex: string;
@@ -41,6 +42,19 @@ export class AdminDashboardComponent implements OnInit {
   institutions = signal<Institution[]>([]);
   users = signal<User[]>([]);
   isLoading = signal<boolean>(true);
+
+  adminName = computed(() => {
+    const user = this.authService.currentUser();
+    return user ? `${user.first_name}`.trim() || 'Administrador' : 'Administrador';
+  });
+
+  timeGreeting = computed(() => {
+    return formatTimeGreeting(this.adminName());
+  });
+
+  timeSubtitle = computed(() => {
+    return getTimeBasedSubtitle('admin');
+  });
 
   // Contexto de vista: 'all' (Vista General) o ID numérico en string ('1', '2', etc.)
   selectedInstitutionId = signal<string>('all');

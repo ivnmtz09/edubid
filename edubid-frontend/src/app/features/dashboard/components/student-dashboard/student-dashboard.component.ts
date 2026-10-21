@@ -10,6 +10,7 @@ import { AuctionService, Auction } from '../../../../core/services/auction.servi
 import { ActivityService, Activity } from '../../../../core/services/activity.service';
 import { WebSocketService } from '../../../../core/services/websocket.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { formatTimeGreeting, getTimeBasedSubtitle } from '../../../../core/utils/greeting.util';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -27,10 +28,10 @@ import { Subscription } from 'rxjs';
             <span class="font-mono text-slate-900 dark:text-white">EduBid</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Hola, {{ userName() }}
+            {{ timeGreeting() }}
           </h1>
           <p class="text-sm text-text-muted mt-1">
-            Supervisa tus méritos académicos, entrega tareas y participa en subastas pedagógicas.
+            {{ timeSubtitle() }}
           </p>
         </div>
 
@@ -96,47 +97,59 @@ import { Subscription } from 'rxjs';
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <!-- Saldo Disponible -->
-            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 group">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-text-muted">Saldo Disponible</span>
-                <span class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">EC</span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Saldo Disponible</span>
+                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-primary group-hover:scale-110 transition-transform">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
               </div>
               <div class="mt-4">
-                <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+                <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                   {{ availableCoins() }}
-                  <span class="text-sm font-normal text-text-muted">EduCoins</span>
+                  <span class="text-xs font-semibold text-text-muted tracking-normal">EC</span>
                 </div>
-                <p class="text-xs text-text-muted mt-1">Listos para pujar en subastas</p>
+                <p class="text-xs text-text-muted mt-1.5">Listos para pujar en subastas</p>
               </div>
             </div>
 
             <!-- Saldo Retenido en Pujas -->
-            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-blue-500/40 hover:-translate-y-1 group">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-text-muted">En Pujas Activas</span>
-                <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs">EC</span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">En Pujas Activas</span>
+                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </span>
               </div>
               <div class="mt-4">
-                <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+                <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                   {{ lockedCoins() }}
-                  <span class="text-sm font-normal text-text-muted">EduCoins</span>
+                  <span class="text-xs font-semibold text-text-muted tracking-normal">EC</span>
                 </div>
-                <p class="text-xs text-text-muted mt-1">Bloqueados temporalmente en ofertas</p>
+                <p class="text-xs text-text-muted mt-1.5">Bloqueados temporalmente en ofertas</p>
               </div>
             </div>
 
             <!-- Méritos Totales Acumulados -->
-            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
+            <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-emerald-500/40 hover:-translate-y-1 group">
               <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-text-muted">Méritos Históricos</span>
-                <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs">XP</span>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Méritos Históricos</span>
+                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </span>
               </div>
               <div class="mt-4">
-                <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+                <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                   {{ totalEarnedCoins() }}
-                  <span class="text-sm font-normal text-text-muted">EduCoins</span>
+                  <span class="text-xs font-semibold text-text-muted tracking-normal">XP</span>
                 </div>
-                <p class="text-xs text-text-muted mt-1">Total ganado por esfuerzo académico</p>
+                <p class="text-xs text-text-muted mt-1.5">Total ganado por esfuerzo académico</p>
               </div>
             </div>
           </div>
@@ -584,6 +597,14 @@ export class StudentDashboardComponent implements OnInit, OnDestroy {
   userName = computed(() => {
     const user = this.authService.currentUser();
     return user?.first_name || 'Estudiante';
+  });
+
+  timeGreeting = computed(() => {
+    return formatTimeGreeting(this.userName());
+  });
+
+  timeSubtitle = computed(() => {
+    return getTimeBasedSubtitle('estudiante');
   });
 
   ngOnInit(): void {

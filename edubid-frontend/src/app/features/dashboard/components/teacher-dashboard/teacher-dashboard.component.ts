@@ -12,6 +12,7 @@ import { WebSocketService } from '../../../../core/services/websocket.service';
 import { AiAssistantService } from '../../../../core/services/ai-assistant.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { QrInvitationCardComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-card.component';
+import { formatTimeGreeting, getTimeBasedSubtitle } from '../../../../core/utils/greeting.util';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -28,10 +29,10 @@ import { QrInvitationCardComponent } from '../../../../shared/components/ui/qr-c
             <span class="font-mono text-slate-900 dark:text-white">Panel Docente</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Prof. {{ teacherName() }}
+            {{ timeGreeting() }}
           </h1>
           <p class="text-sm text-text-muted mt-1">
-            Administra tus asignaturas, califica entregas con recompensas y programa subastas de aula.
+            {{ timeSubtitle() }}
           </p>
         </div>
 
@@ -59,46 +60,74 @@ import { QrInvitationCardComponent } from '../../../../shared/components/ui/qr-c
         <!-- Métricas Clave del Docente (Datos Reales) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Clases Activas -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
-            <span class="text-xs font-medium text-text-muted">Clases Activas</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Clases Activas</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-text-muted group-hover:text-primary group-hover:scale-110 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                 {{ classrooms().length }}
               </div>
-              <p class="text-xs text-text-muted mt-1">Asignaturas a tu cargo</p>
+              <p class="text-xs text-text-muted mt-1.5">Asignaturas a tu cargo</p>
             </div>
           </div>
 
           <!-- Total Estudiantes -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
-            <span class="text-xs font-medium text-text-muted">Estudiantes Matriculados</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Estudiantes Matriculados</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-text-muted group-hover:text-primary group-hover:scale-110 transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-slate-900 dark:text-white font-mono">
+              <div class="text-3xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
                 {{ totalStudents() }}
               </div>
-              <p class="text-xs text-text-muted mt-1">En todos tus grupos</p>
+              <p class="text-xs text-text-muted mt-1.5">En todos tus grupos</p>
             </div>
           </div>
 
           <!-- Por Calificar -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
-            <span class="text-xs font-medium text-text-muted">Por Calificar</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-amber-500/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Por Calificar</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-amber-600 dark:text-amber-400 font-mono">
+              <div class="text-3xl font-black text-amber-600 dark:text-amber-400 font-mono tracking-tight">
                 {{ pendingReviews().length }}
               </div>
-              <p class="text-xs text-text-muted mt-1">Entregas pendientes</p>
+              <p class="text-xs text-text-muted mt-1.5">Entregas pendientes</p>
             </div>
           </div>
 
           <!-- Subastas Activas -->
-          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between hover:border-slate-400 dark:hover:border-slate-600 transition-colors">
-            <span class="text-xs font-medium text-text-muted">Subastas Activas</span>
+          <div class="p-5 rounded-2xl border border-border bg-surface flex flex-col justify-between transition-all duration-300 hover:shadow-md hover:border-emerald-500/40 hover:-translate-y-1 group">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold uppercase tracking-wider text-text-muted">Subastas Activas</span>
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-black/5 dark:bg-white/5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </span>
+            </div>
             <div class="mt-4">
-              <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+              <div class="text-3xl font-black text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
                 {{ activeAuctionsCount() }}
               </div>
-              <p class="text-xs text-text-muted mt-1">Incentivos en subasta</p>
+              <p class="text-xs text-text-muted mt-1.5">Incentivos en subasta</p>
             </div>
           </div>
         </div>
@@ -654,6 +683,16 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   teacherName = computed(() => {
     const user = this.authService.currentUser();
     return user ? `${user.first_name} ${user.last_name}`.trim() || user.email : 'Docente';
+  });
+
+  timeGreeting = computed(() => {
+    const user = this.authService.currentUser();
+    const displayName = user?.first_name ? user.first_name : this.teacherName();
+    return formatTimeGreeting(displayName, 'Prof.');
+  });
+
+  timeSubtitle = computed(() => {
+    return getTimeBasedSubtitle('docente');
   });
 
   institutionName = computed(() => {
