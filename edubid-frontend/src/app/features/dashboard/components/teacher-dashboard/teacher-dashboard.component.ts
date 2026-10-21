@@ -11,11 +11,12 @@ import { AuctionService, Auction } from '../../../../core/services/auction.servi
 import { WebSocketService } from '../../../../core/services/websocket.service';
 import { AiAssistantService } from '../../../../core/services/ai-assistant.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { QrInvitationCardComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-card.component';
 
 @Component({
   selector: 'app-teacher-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, QrInvitationCardComponent],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
       <!-- Encabezado del Docente -->
@@ -101,6 +102,32 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
             </div>
           </div>
         </div>
+
+        <!-- Invitación Exclusiva para Estudiantes con Código QR -->
+        @if (institutionSlug()) {
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-border pb-2">
+              <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+                <span>Invitación para Estudiantes & Código QR</span>
+              </h2>
+              <span class="text-xs text-text-muted">Comparte en el aula o proyecta en pantalla</span>
+            </div>
+
+            <app-qr-invitation-card
+              role="estudiante"
+              roleLabel="Estudiante"
+              title="Registro Oficial de Alumnos"
+              description="Proyecta o comparte este código QR en clase para que tus estudiantes se registren y queden vinculados a {{ institutionName() }}."
+              [institutionName]="institutionName()"
+              [institutionSlug]="institutionSlug()"
+              routePath="registro"
+              [primaryColor]="primaryColor()"
+            />
+          </div>
+        }
 
         <!-- Grid Principal: Clases & Entregas por Calificar -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -453,7 +480,7 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
               <div class="flex items-center gap-2.5">
                 <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.953-1.172-5.119 0-7.072 1.171-1.952 3.07-1.952 4.242 0M8 10.5h4m-4 3h4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </span>
                 <h3 class="text-base font-bold text-slate-900 dark:text-white">
@@ -627,6 +654,18 @@ export class TeacherDashboardComponent implements OnInit, OnDestroy {
   teacherName = computed(() => {
     const user = this.authService.currentUser();
     return user ? `${user.first_name} ${user.last_name}`.trim() || user.email : 'Docente';
+  });
+
+  institutionName = computed(() => {
+    return this.authService.currentUser()?.profile?.institucion?.nombre || 'Mi Institución';
+  });
+
+  institutionSlug = computed(() => {
+    return this.authService.currentUser()?.profile?.institucion?.slug || '';
+  });
+
+  primaryColor = computed(() => {
+    return (this.authService.currentUser()?.profile?.institucion as any)?.color_primario || '#f59e0b';
   });
 
   totalStudents = computed(() => {

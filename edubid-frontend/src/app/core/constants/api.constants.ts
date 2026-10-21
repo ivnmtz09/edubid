@@ -7,6 +7,7 @@ export const AUTH_ENDPOINTS = {
   LOGIN: `${API_BASE}/users/login/`,
   GOOGLE_LOGIN: `${API_BASE}/users/google/`,
   TOKEN_REFRESH: `${API_BASE}/users/token/refresh/`,
+  VERIFY_EMAIL_CODE: `${API_BASE}/users/verify-email-code/`,
   VERIFY_EMAIL: (token: string) => `${API_BASE}/users/verify-email/${token}/`,
   RESEND_VERIFICATION: `${API_BASE}/users/resend-verification/`,
   PROFILE: `${API_BASE}/users/profile/`,
@@ -17,6 +18,7 @@ export const AUTH_ENDPOINTS = {
   PASSWORD_RESET_CONFIRM: (uidb64: string, token: string) =>
     `${API_BASE}/users/password-reset-confirm/${uidb64}/${token}/`,
   INSTITUTIONS_PUBLIC: `${API_BASE}/institutions/public/`,
+  INSTITUTION_BY_SLUG: (slug: string) => `${API_BASE}/institutions/by-slug/${slug}/`,
 } as const;
 
 export const AI_ENDPOINTS = {

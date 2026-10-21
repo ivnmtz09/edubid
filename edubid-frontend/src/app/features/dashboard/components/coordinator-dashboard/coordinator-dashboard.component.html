@@ -44,4 +44,52 @@
       </div>
     </div>
   </div>
+
+  <!-- SECCIÓN DE INVITACIONES Y CÓDIGOS QR (DOCENTES Y ESTUDIANTES) -->
+  @if (institutionSlug()) {
+    <div class="space-y-4 pt-2">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
+        <div>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            <span>Invitaciones Institucionales & Códigos QR</span>
+          </h3>
+          <p class="text-xs text-text-muted mt-0.5">
+            Como Coordinador, comparte estos enlaces y códigos QR exclusivos para incorporar docentes y estudiantes a tu institución.
+          </p>
+        </div>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-primary/10 text-primary border border-primary/20 shrink-0 self-start sm:self-auto">
+          Colegio: /{{ institutionSlug() }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 1. Tarjeta QR para Docente -->
+        <app-qr-invitation-card
+          role="docente"
+          roleLabel="Docente"
+          title="Invitación para Personal Docente"
+          description="Comparte este enlace o código QR para que los docentes se registren y comiencen a gestionar aulas."
+          [institutionName]="institutionName()"
+          [institutionSlug]="institutionSlug()"
+          routePath="registro-docente"
+          [primaryColor]="primaryColor()"
+        />
+
+        <!-- 2. Tarjeta QR para Estudiante -->
+        <app-qr-invitation-card
+          role="estudiante"
+          roleLabel="Estudiante"
+          title="Invitación para Estudiantes"
+          description="Comparte este enlace o código QR para que los alumnos se registren y queden vinculados a las clases del colegio."
+          [institutionName]="institutionName()"
+          [institutionSlug]="institutionSlug()"
+          routePath="registro"
+          [primaryColor]="primaryColor()"
+        />
+      </div>
+    </div>
+  }
 </div>

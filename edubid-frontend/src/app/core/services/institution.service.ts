@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 export interface Institution {
   id: number;
   nombre: string;
+  slug?: string;
   codigo_dane?: string | null;
   activo: boolean;
   color_primario: string;
@@ -17,6 +18,7 @@ export interface Institution {
 
 export interface InstitutionCreateRequest {
   nombre: string;
+  slug?: string;
   codigo_dane?: string | null;
   activo?: boolean;
   color_primario?: string;
@@ -26,6 +28,7 @@ export interface InstitutionCreateRequest {
 
 export interface InstitutionUpdateRequest {
   nombre?: string;
+  slug?: string;
   codigo_dane?: string | null;
   activo?: boolean;
   color_primario?: string;
@@ -41,6 +44,11 @@ export class InstitutionService {
   /** Endpoint público — no requiere autenticación (usado en onboarding) */
   getPublicInstitutions(): Observable<Institution[]> {
     return this.http.get<Institution[]>(`${this.baseUrl.replace('/institutions/', '/institutions/public/')}`);
+  }
+
+  /** Endpoint público — resuelve la institución por slug */
+  getInstitutionBySlug(slug: string): Observable<Institution> {
+    return this.http.get<Institution>(`${this.baseUrl}by-slug/${slug}/`);
   }
 
   getInstitutions(): Observable<Institution[]> {

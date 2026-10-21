@@ -1,0 +1,582 @@
+<div class="min-h-screen bg-bg text-text flex flex-col justify-between selection:bg-primary/20 selection:text-primary">
+  
+  <!-- Encabezado Superior / Branding EduBid -->
+  <header class="w-full border-b border-border bg-surface/70 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a routerLink="/" class="flex items-center gap-2.5 group cursor-pointer">
+        <img
+          src="/edubid.png"
+          alt="EduBid Logo"
+          class="w-9 h-9 rounded-xl object-contain shrink-0 group-hover:scale-105 transition-transform"
+        />
+        <div class="flex flex-col">
+          <span class="text-base font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100">
+            Edu<span class="text-primary">Bid</span>
+          </span>
+          <span class="text-[10px] text-text-muted font-medium -mt-1 tracking-wider uppercase">Portal Institucional</span>
+        </div>
+      </a>
+
+      <!-- Botón Volver al Inicio -->
+      <a
+        routerLink="/"
+        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-border bg-surface hover:bg-neutral-100 dark:hover:bg-neutral-800 text-text transition-colors cursor-pointer shadow-xs"
+      >
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span>Inicio Global</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="grow flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    
+    <!-- CASO 1: Cargando Institución -->
+    @if (isLoadingInstitution()) {
+      <div class="w-full max-w-md p-8 rounded-3xl border border-border bg-surface shadow-xl flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in duration-300">
+        <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center animate-spin">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-neutral-900 dark:text-neutral-100">Cargando Portal Institucional</h3>
+          <p class="text-xs text-text-muted mt-1">Conectando con la institución educativa segura...</p>
+        </div>
+      </div>
+    }
+
+    <!-- CASO 2: Institución no encontrada o inactiva (404) -->
+    @else if (institutionNotFound()) {
+      <div class="w-full max-w-lg p-8 sm:p-10 rounded-3xl border border-red-200 dark:border-red-900/60 bg-surface shadow-xl text-center space-y-5 animate-in zoom-in-95 duration-200">
+        <div class="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 mx-auto flex items-center justify-center">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-xl sm:text-2xl font-black text-neutral-900 dark:text-neutral-100 tracking-tight">
+            Institución No Encontrada
+          </h2>
+          <p class="text-sm text-text-muted mt-2 max-w-sm mx-auto">
+            El enlace o identificador <span class="font-mono font-bold text-neutral-900 dark:text-neutral-100 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded">"{{ slug() }}"</span> no coincide con ninguna institución activa en EduBid.
+          </p>
+        </div>
+        <div class="pt-2">
+          <a
+            routerLink="/"
+            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white shadow-xs transition-colors cursor-pointer"
+          >
+            <span>Ir a la página principal</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    }
+
+    <!-- CASO 3: Portal Institucional Activo y Verificado -->
+    @else if (institution()) {
+      <div class="w-full max-w-md sm:max-w-lg space-y-5 animate-in fade-in duration-300">
+        
+        <!-- Tarjeta Bento de Identidad de la Institución -->
+        <div class="p-5 sm:p-6 rounded-3xl border border-border bg-surface shadow-xs text-center relative overflow-hidden">
+          
+          <!-- Fondo decorativo sutil basado en el color primario -->
+          <div
+            class="absolute -top-16 -right-16 w-36 h-36 rounded-full opacity-10 pointer-events-none blur-2xl"
+            [style.background-color]="institution()?.color_primario || '#f97316'"
+          ></div>
+          <div
+            class="absolute -bottom-16 -left-16 w-36 h-36 rounded-full opacity-10 pointer-events-none blur-2xl"
+            [style.background-color]="institution()?.color_secundario || '#3b82f6'"
+          ></div>
+
+          <!-- Logo Institucional -->
+          <div class="flex justify-center mb-3">
+            @if (institution()?.logo) {
+              <img
+                [src]="institution()?.logo"
+                [alt]="institution()?.nombre"
+                class="w-16 h-16 rounded-2xl object-contain bg-white dark:bg-neutral-900 p-1.5 border border-border shadow-xs"
+              />
+            } @else {
+              <div
+                class="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-extrabold text-2xl shadow-xs"
+                [style.background]="'linear-gradient(135deg, ' + (institution()?.color_primario || '#f97316') + ', ' + (institution()?.color_secundario || '#3b82f6') + ')'"
+              >
+                {{ institution()?.nombre?.charAt(0) || 'E' }}
+              </div>
+            }
+          </div>
+
+          <!-- Nombre y Código DANE -->
+          <h1 class="text-xl sm:text-2xl font-black text-neutral-900 dark:text-neutral-100 tracking-tight">
+            {{ institution()?.nombre }}
+          </h1>
+
+          <div class="flex items-center justify-center gap-2 mt-2">
+            @if (institution()?.codigo_dane) {
+              <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-neutral-100 dark:bg-neutral-800 text-text-muted border border-border">
+                DANE: {{ institution()?.codigo_dane }}
+              </span>
+            }
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Entorno Verificado
+            </span>
+          </div>
+
+          <!-- BADGE DE MODO ACTUAL -->
+          <div class="mt-4 pt-3 border-t border-border flex items-center justify-center">
+            @if (mode() === 'login') {
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold text-primary">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Acceso Exclusivo a la Institución
+              </span>
+            } @else if (mode() === 'rector-register') {
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-neutral-900 px-3 py-1 rounded-full border border-orange-200 dark:border-neutral-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Registro Oficial de Rectoría
+              </span>
+            } @else if (mode() === 'coordinator-register') {
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-neutral-900 px-3 py-1 rounded-full border border-cyan-200 dark:border-neutral-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Registro de Coordinación Académica
+              </span>
+            } @else if (mode() === 'teacher-register') {
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-neutral-900 px-3 py-1 rounded-full border border-amber-200 dark:border-neutral-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                Registro de Docentes
+              </span>
+            } @else {
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-neutral-900 px-3 py-1 rounded-full border border-emerald-200 dark:border-neutral-800">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                </svg>
+                Registro Oficial de Estudiantes
+              </span>
+            }
+          </div>
+        </div>
+
+        <!-- TARJETA DEL FORMULARIO -->
+        <div class="p-6 sm:p-8 rounded-3xl border border-border bg-surface shadow-xl space-y-6">
+          
+          <!-- Notificaciones de Error o Éxito -->
+          @if (errorMessage()) {
+            <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 text-xs font-medium flex items-start gap-2.5 animate-in fade-in">
+              <svg class="w-4 h-4 shrink-0 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{{ errorMessage() }}</span>
+            </div>
+          }
+
+          @if (successMessage()) {
+            <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-medium flex items-start gap-2.5 animate-in fade-in">
+              <svg class="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>{{ successMessage() }}</span>
+            </div>
+          }
+
+          <!-- SECCIÓN: VERIFICACIÓN OTP DE 6 DÍGITOS -->
+          @if (registeredEmailPending()) {
+            <div class="space-y-5 animate-in fade-in duration-300">
+              <div class="text-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-primary/10 text-primary mx-auto flex items-center justify-center">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100">Verifica tu Correo Electrónico</h3>
+                <p class="text-xs text-text-muted max-w-sm mx-auto">
+                  Hemos enviado un código numérico de 6 dígitos a
+                  <span class="font-semibold text-neutral-900 dark:text-neutral-100 break-all">{{ registeredEmailPending() }}</span>.
+                  El código es válido durante <strong class="text-primary font-bold">1 hora</strong>.
+                </p>
+              </div>
+
+              <!-- Alerta de Error de OTP -->
+              @if (otpError()) {
+                <div class="p-3.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 text-xs font-medium flex items-start gap-2 animate-in fade-in">
+                  <svg class="w-4 h-4 shrink-0 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{{ otpError() }}</span>
+                </div>
+              }
+
+              <!-- Alerta de Reenvío Exitoso -->
+              @if (resendSuccess()) {
+                <div class="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs font-medium flex items-start gap-2 animate-in fade-in">
+                  <svg class="w-4 h-4 shrink-0 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{{ resendSuccess() }}</span>
+                </div>
+              }
+
+              <!-- Cajas de los 6 Dígitos OTP -->
+              <div class="space-y-2">
+                <label class="block text-center text-xs font-semibold text-text-muted">
+                  Ingresa el código de 6 dígitos:
+                </label>
+                <div class="flex items-center justify-center gap-2 sm:gap-2.5" (paste)="onOtpPaste($event)">
+                  @for (digit of otpDigits(); track $index; let i = $index) {
+                    <input
+                      [id]="'inst-otp-digit-' + i"
+                      type="text"
+                      inputmode="numeric"
+                      pattern="[0-9]*"
+                      maxlength="1"
+                      [value]="digit"
+                      autocomplete="one-time-code"
+                      (input)="onDigitInput($event, i)"
+                      (keydown)="onDigitKeydown($event, i)"
+                      class="w-11 h-13 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-black font-mono rounded-xl bg-bg border-2 border-border focus:border-primary focus:ring-2 focus:ring-primary/20 text-neutral-900 dark:text-neutral-100 transition-all outline-none"
+                    />
+                  }
+                </div>
+              </div>
+
+              <!-- Botón Validar y Entrar -->
+              <div class="space-y-3 pt-2">
+                <button
+                  type="button"
+                  (click)="submitOtp()"
+                  [disabled]="isVerifyingOtp() || otpDigits().join('').length !== 6"
+                  class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-primary hover:opacity-95 shadow-xs transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  @if (isVerifyingOtp()) {
+                    <svg class="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <span>Verificando e iniciando sesión...</span>
+                  } @else {
+                    <span>Verificar y Acceder</span>
+                  }
+                </button>
+
+                <!-- Reenviar y Cancelar -->
+                <div class="flex items-center justify-between text-xs px-1">
+                  <button
+                    type="button"
+                    (click)="resendOtp()"
+                    [disabled]="resendCooldown() > 0 || isResendingOtp()"
+                    class="font-semibold text-primary hover:underline disabled:opacity-50 disabled:no-underline cursor-pointer"
+                  >
+                    @if (isResendingOtp()) {
+                      Reenviando...
+                    } @else if (resendCooldown() > 0) {
+                      Reenviar código en {{ resendCooldown() }}s
+                    } @else {
+                      ¿No recibiste el código? Reenviar
+                    }
+                  </button>
+
+                  <button
+                    type="button"
+                    (click)="cancelPendingOtp()"
+                    class="text-text-muted hover:text-text cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- ============================================== -->
+          <!-- SECCIÓN A: LOGIN INSTITUCIONAL                 -->
+          <!-- ============================================== -->
+          @if (mode() === 'login' && !registeredEmailPending()) {
+            
+            <!-- Botón de Google Sign-In Integrado -->
+            <div #googleBtn class="w-full min-h-[44px] flex items-center justify-center"></div>
+
+            <div class="relative flex items-center py-1">
+              <div class="grow border-t border-border"></div>
+              <span class="shrink mx-3 text-[11px] font-bold text-text-muted uppercase tracking-wider">o con tus credenciales</span>
+              <div class="grow border-t border-border"></div>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="space-y-4">
+              
+              <!-- Correo -->
+              <div class="space-y-1.5">
+                <label for="inst-login-email" class="text-xs font-semibold text-text-muted">Correo electrónico</label>
+                <input
+                  id="inst-login-email"
+                  type="email"
+                  formControlName="email"
+                  placeholder="usuario@colegio.edu.co"
+                  required
+                  class="w-full px-3.5 py-2.5 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary text-text font-medium transition-all"
+                />
+              </div>
+
+              <!-- Contraseña -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <label for="inst-login-pass" class="text-xs font-semibold text-text-muted">Contraseña</label>
+                  <a routerLink="/forgot-password" class="text-xs text-primary font-medium hover:underline">
+                    ¿Olvidaste tu contraseña?
+                  </a>
+                </div>
+                <div class="relative">
+                  <input
+                    id="inst-login-pass"
+                    [type]="showPassword() ? 'text' : 'password'"
+                    formControlName="password"
+                    placeholder="••••••••"
+                    required
+                    class="w-full pl-3.5 pr-10 py-2.5 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary text-text font-medium transition-all"
+                  />
+                  <button
+                    type="button"
+                    (click)="togglePasswordVisibility()"
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-text-muted hover:text-text cursor-pointer"
+                  >
+                    @if (showPassword()) {
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                      </svg>
+                    } @else {
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    }
+                  </button>
+                </div>
+              </div>
+
+              <!-- Submit Login -->
+              <button
+                type="submit"
+                [disabled]="loginForm.invalid || isLoading()"
+                class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-primary hover:opacity-95 shadow-xs transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+              >
+                @if (isLoading()) {
+                  <svg class="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  <span>Validando acceso...</span>
+                } @else {
+                  <span>Ingresar a {{ institution()?.nombre }}</span>
+                }
+              </button>
+            </form>
+
+            <!-- Alternar a Registro de Estudiante -->
+            <div class="pt-2 text-center text-xs text-text-muted">
+              ¿Eres nuevo en esta institución?
+              <button
+                type="button"
+                (click)="switchMode('student-register')"
+                class="font-bold text-primary hover:underline cursor-pointer ml-1"
+              >
+                Regístrate como Estudiante
+              </button>
+            </div>
+          }
+
+          <!-- ============================================== -->
+          <!-- SECCIÓN B: REGISTRO INSTITUCIONAL              -->
+          <!-- ============================================== -->
+          @if (mode() !== 'login' && !registeredEmailPending()) {
+            
+            <!-- Botón de Google Sign-In Integrado -->
+            <div #googleBtn class="w-full min-h-[44px] flex items-center justify-center"></div>
+
+            <div class="relative flex items-center py-1">
+              <div class="grow border-t border-border"></div>
+              <span class="shrink mx-3 text-[11px] font-bold text-text-muted uppercase tracking-wider">o completa tu registro</span>
+              <div class="grow border-t border-border"></div>
+            </div>
+
+            <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="space-y-4">
+              
+              <!-- Nombres y Apellidos -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <label for="inst-reg-name" class="text-xs font-semibold text-text-muted">Nombres *</label>
+                  <input
+                    id="inst-reg-name"
+                    type="text"
+                    formControlName="first_name"
+                    placeholder="Ej. Juan"
+                    required
+                    class="w-full px-3.5 py-2.5 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary text-text font-medium"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <label for="inst-reg-lastname" class="text-xs font-semibold text-text-muted">Apellidos *</label>
+                  <input
+                    id="inst-reg-lastname"
+                    type="text"
+                    formControlName="last_name"
+                    placeholder="Ej. Pérez"
+                    required
+                    class="w-full px-3.5 py-2.5 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary text-text font-medium"
+                  />
+                </div>
+              </div>
+
+              <!-- Correo -->
+              <div class="space-y-1.5">
+                <label for="inst-reg-email" class="text-xs font-semibold text-text-muted">Correo electrónico institucional o personal *</label>
+                <input
+                  id="inst-reg-email"
+                  type="email"
+                  formControlName="email"
+                  placeholder="estudiante@colegio.edu.co"
+                  required
+                  class="w-full px-3.5 py-2.5 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary text-text font-medium"
+                />
+              </div>
+
+              <!-- Contraseña y Confirmación -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <label for="inst-reg-pass" class="text-xs font-semibold text-text-muted">Contraseña *</label>
+                  <div class="relative">
+                    <input
+                      id="inst-reg-pass"
+                      [type]="showPassword() ? 'text' : 'password'"
+                      formControlName="password"
+                      placeholder="Mín. 6 caracteres"
+                      required
+                      class="w-full pl-3.5 pr-8 py-2.5 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary text-text font-medium"
+                    />
+                    <button
+                      type="button"
+                      (click)="togglePasswordVisibility()"
+                      class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-text-muted hover:text-text cursor-pointer"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label for="inst-reg-confirm" class="text-xs font-semibold text-text-muted">Confirmar contraseña *</label>
+                  <div class="relative">
+                    <input
+                      id="inst-reg-confirm"
+                      [type]="showConfirmPassword() ? 'text' : 'password'"
+                      formControlName="password_confirm"
+                      placeholder="Repite la contraseña"
+                      required
+                      class="w-full pl-3.5 pr-8 py-2.5 bg-bg border border-border rounded-xl text-sm focus:ring-2 focus:ring-primary text-text font-medium"
+                    />
+                    <button
+                      type="button"
+                      (click)="toggleConfirmPasswordVisibility()"
+                      class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-text-muted hover:text-text cursor-pointer"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Aviso de Aislamiento y Vinculación Automática -->
+              <div class="p-3.5 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 flex items-center gap-2.5">
+                <div class="w-2 h-2 rounded-full bg-primary shrink-0"></div>
+                <span>
+                  Tu cuenta quedará vinculada automáticamente a 
+                  <strong class="text-neutral-900 dark:text-neutral-100">{{ institution()?.nombre }}</strong>
+                  con rol de 
+                  <strong class="text-primary uppercase font-bold">{{ getRoleTitle() }}</strong>.
+                </span>
+              </div>
+
+              <!-- Términos y Condiciones -->
+              <div class="flex items-start gap-2.5 pt-1">
+                <input
+                  id="inst-accept-terms"
+                  type="checkbox"
+                  formControlName="accept_terms"
+                  class="mt-1 w-4 h-4 text-primary bg-bg border-border rounded focus:ring-primary cursor-pointer"
+                />
+                <label for="inst-accept-terms" class="text-xs text-text-muted leading-relaxed cursor-pointer select-none">
+                  Acepto los <a routerLink="/terms" target="_blank" class="text-primary font-semibold underline">términos y condiciones</a> de la plataforma EduBid y la política de tratamiento de datos institucional.
+                </label>
+              </div>
+
+              <!-- Botón Submit Register -->
+              <button
+                type="submit"
+                [disabled]="registerForm.invalid || isLoading()"
+                class="w-full py-3 px-4 rounded-xl font-bold text-sm text-white bg-primary hover:opacity-95 shadow-xs transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+              >
+                @if (isLoading()) {
+                  <svg class="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                  </svg>
+                  <span>Registrando en la institución...</span>
+                } @else {
+                  <span>
+                    Crear Cuenta de {{ getRoleTitle() }}
+                  </span>
+                }
+              </button>
+            </form>
+
+            <!-- Alternar a Login -->
+            <div class="pt-2 text-center text-xs text-text-muted">
+              ¿Ya tienes cuenta en {{ institution()?.nombre }}?
+              <button
+                type="button"
+                (click)="switchMode('login')"
+                class="font-bold text-primary hover:underline cursor-pointer ml-1"
+              >
+                Inicia sesión aquí
+              </button>
+            </div>
+          }
+
+        </div>
+      </div>
+    }
+
+  </main>
+
+  <!-- Pie de Página Institucional -->
+  <footer class="w-full py-4 text-center border-t border-border bg-surface/50 text-[11px] text-text-muted">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <span>
+        Portal seguro de {{ institution()?.nombre || 'EduBid' }} &copy; {{ 2026 }}
+      </span>
+      <div class="flex items-center gap-4">
+        <a routerLink="/terms" class="hover:underline">Términos de Servicio</a>
+        <a routerLink="/about" class="hover:underline">Acerca de EduBid</a>
+      </div>
+    </div>
+  </footer>
+
+</div>

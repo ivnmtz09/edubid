@@ -51,7 +51,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
         first_name: ['', [Validators.required]],
         last_name: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
-        institution: ['', [Validators.required]],
         role: ['estudiante', [Validators.required]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         password_confirm: ['', [Validators.required]],
@@ -131,7 +130,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
       { name: 'first_name', label: 'Nombre', id: 'register-first-name' },
       { name: 'last_name', label: 'Apellido', id: 'register-last-name' },
       { name: 'email', label: 'Correo electrónico', id: 'register-email' },
-      { name: 'institution', label: 'Institución', id: 'register-institution' },
       { name: 'password', label: 'Contraseña', id: 'register-password' },
       { name: 'password_confirm', label: 'Confirmar contraseña', id: 'register-password-confirm' },
       { name: 'accept_terms', label: 'Aceptar términos y condiciones', id: 'accept_terms' },
@@ -174,11 +172,10 @@ export class RegisterComponent implements OnInit, AfterViewInit {
     const formValue = this.registerForm.value;
 
     this.authService.register({
-      first_name: formValue.first_name,
-      last_name: formValue.last_name,
-      email: formValue.email,
-      institution: formValue.institution,
-      role: formValue.role,
+      first_name: formValue.first_name.trim(),
+      last_name: formValue.last_name.trim(),
+      email: formValue.email.trim(),
+      role: 'estudiante',
       password: formValue.password,
       password_confirm: formValue.password_confirm,
     }).subscribe({

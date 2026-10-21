@@ -5,6 +5,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { DashboardService, DashboardStats } from '../../../../core/services/dashboard.service';
 import { InstitutionService } from '../../../../core/services/institution.service';
 import { InstitutionBrandingComponent } from './components/institution-branding.component';
+import { QrInvitationCardComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-card.component';
 
 interface GradeMetric {
   grade: string;
@@ -24,7 +25,7 @@ interface RecentActivityAudit {
 @Component({
   selector: 'app-rector-dashboard',
   standalone: true,
-  imports: [CommonModule, InstitutionBrandingComponent],
+  imports: [CommonModule, InstitutionBrandingComponent, QrInvitationCardComponent],
   template: `
     <div class="space-y-8 animate-in fade-in duration-300">
       <!-- Encabezado de Rectoría -->
@@ -123,6 +124,81 @@ interface RecentActivityAudit {
                 {{ stats()?.total_educoins || 0 }} EC
               </div>
               <p class="text-xs text-text-muted mt-1">Emitidos por méritos académicos</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Enlaces Exclusivos y Códigos QR (Rectoría: Coordinadores y Docentes) -->
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+                <span>Invitaciones Institucionales & Códigos QR</span>
+              </h2>
+              <p class="text-xs text-text-muted mt-0.5">
+                Como Rector, comparte estos enlaces y códigos QR exclusivos para incorporar coordinadores y docentes a tu colegio.
+              </p>
+            </div>
+            @if (getInstitutionSlug()) {
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-primary/10 text-primary border border-primary/20 shrink-0 self-start sm:self-auto">
+                Identificador: /{{ getInstitutionSlug() }}
+              </span>
+            }
+          </div>
+
+          <!-- Cuadrícula de Invitaciones QR: Coordinador y Docente -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 1. Tarjeta QR para Coordinador -->
+            <app-qr-invitation-card
+              role="coordinador"
+              roleLabel="Coordinador"
+              title="Invitación para Coordinación Académica"
+              description="Comparte este enlace o código QR para que los coordinadores se registren con acceso a métricas institucionales."
+              [institutionName]="institutionName()"
+              [institutionSlug]="getInstitutionSlug()"
+              routePath="registro-coordinador"
+              [primaryColor]="getPrimaryColor()"
+            />
+
+            <!-- 2. Tarjeta QR para Docente -->
+            <app-qr-invitation-card
+              role="docente"
+              roleLabel="Docente"
+              title="Invitación para Personal Docente"
+              description="Comparte este enlace o código QR para que tus profesores se vinculen y comiencen a gestionar aulas y subastas."
+              [institutionName]="institutionName()"
+              [institutionSlug]="getInstitutionSlug()"
+              routePath="registro-docente"
+              [primaryColor]="getPrimaryColor()"
+            />
+          </div>
+
+          <!-- Barra Rápida de Enlace de Login de la Institución -->
+          <div class="p-4 rounded-2xl border border-border bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div class="space-y-0.5">
+              <span class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Portal de Acceso General (Login Institucional)
+              </span>
+              <p class="text-[11px] text-text-muted">Enlace directo a la pantalla de inicio de sesión con el branding de {{ institutionName() }}.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                readonly
+                [value]="getInstitutionUrl('login')"
+                class="px-3 py-1.5 bg-bg border border-border rounded-xl text-xs font-mono text-text select-all min-w-[200px]"
+              />
+              <button
+                type="button"
+                (click)="copyInstitutionLink('login', 'Enlace de Login')"
+                class="px-3 py-1.5 rounded-xl text-xs font-bold bg-primary text-white hover:opacity-90 transition-all cursor-pointer shadow-xs shrink-0"
+              >
+                {{ copiedLinkType() === 'login' ? '¡Copiado!' : 'Copiar' }}
+              </button>
             </div>
           </div>
         </div>
@@ -239,6 +315,35 @@ export class RectorDashboardComponent implements OnInit {
   isLoading = signal(true);
   isExporting = signal(false);
   stats = signal<DashboardStats | null>(null);
+  copiedLinkType = signal<string | null>(null);
+
+  getInstitutionSlug(): string {
+    return this.userProfile()?.institucion?.slug || '';
+  }
+
+  getPrimaryColor(): string {
+    return (this.userProfile()?.institucion as any)?.color_primario || '#ea580c';
+  }
+
+  getInstitutionUrl(route: 'login' | 'registro' | 'registro-docente' | 'registro-coordinador' | string = 'login'): string {
+    const slug = this.getInstitutionSlug();
+    if (!slug) return '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${origin}/institucion/${slug}/${route}`;
+  }
+
+  copyInstitutionLink(route: 'login' | 'registro' | 'registro-docente' | 'registro-coordinador' | string = 'login', label: string = 'Enlace'): void {
+    const url = this.getInstitutionUrl(route);
+    if (!url) return;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.copiedLinkType.set(route);
+        this.notificationService.success(`¡${label} copiado al portapapeles!`);
+        setTimeout(() => this.copiedLinkType.set(null), 2500);
+      });
+    }
+  }
 
   ngOnInit(): void {
     this.loadStats();

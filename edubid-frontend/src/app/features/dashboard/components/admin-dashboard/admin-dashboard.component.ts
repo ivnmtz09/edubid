@@ -9,6 +9,7 @@ import { InstitutionService, Institution, InstitutionCreateRequest, InstitutionU
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ThemeService } from '../../../../core/services/theme.service';
 import { User } from '../../../../core/models/user.model';
+import { QrInvitationModalComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-modal.component';
 
 export interface Color {
   hex: string;
@@ -24,7 +25,7 @@ export interface BrandingPalette {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, QrInvitationModalComponent],
   templateUrl: './admin-dashboard.component.html'
 })
 export class AdminDashboardComponent implements OnInit {
@@ -94,6 +95,20 @@ export class AdminDashboardComponent implements OnInit {
   editUserIsActive = signal<boolean>(true);
   editUserFirstName = signal<string>('');
   editUserLastName = signal<string>('');
+
+  // Modal de Invitación Oficial de Rectoría y Código QR
+  showRectorQrModal = signal<boolean>(false);
+  qrSelectedInstitution = signal<Institution | null>(null);
+
+  openRectorQrModal(inst: Institution): void {
+    this.qrSelectedInstitution.set(inst);
+    this.showRectorQrModal.set(true);
+  }
+
+  closeRectorQrModal(): void {
+    this.showRectorQrModal.set(false);
+    this.qrSelectedInstitution.set(null);
+  }
 
   // Paleta completa de 33 colores armónicos con escala de grises y nombres descriptivos (idéntica a la vista de rector)
   coloresDisponibles: Color[] = [
@@ -733,6 +748,28 @@ export class AdminDashboardComponent implements OnInit {
     const students = members.filter(u => u.role === 'estudiante').length;
     const teachers = members.filter(u => u.role === 'docente').length;
     return { students, teachers, total: members.length };
+  }
+
+  // Estado de copiado de enlaces institucionales
+  copiedLinkType = signal<string | null>(null);
+
+  getInstitutionUrl(slug?: string | null, route: 'login' | 'registro' | 'registro-docente' | 'registro-coordinador' | 'registro-rector' | string = 'login'): string {
+    if (!slug) return '';
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${origin}/institucion/${slug}/${route}`;
+  }
+
+  copyInstitutionLink(slug?: string | null, route: 'login' | 'registro' | 'registro-docente' | 'registro-coordinador' | 'registro-rector' | string = 'login', label: string = 'Enlace'): void {
+    const url = this.getInstitutionUrl(slug, route);
+    if (!url) return;
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.copiedLinkType.set(`${slug}-${route}`);
+        this.notificationService.success(`¡${label} copiado al portapapeles!`);
+        setTimeout(() => this.copiedLinkType.set(null), 2500);
+      });
+    }
   }
 
   // ================= AUXILIARES UI =================

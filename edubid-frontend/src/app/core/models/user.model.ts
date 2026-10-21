@@ -1,6 +1,7 @@
 export interface UserInstitution {
   id: number;
   nombre: string;
+  slug?: string;
   color_primario: string;
   color_secundario: string;
   logo: string | null;
@@ -39,6 +40,7 @@ export interface AuthTokens {
 export interface LoginRequest {
   email: string;
   password: string;
+  institution_slug?: string;
 }
 
 export interface LoginResponse {
@@ -53,6 +55,7 @@ export interface RegisterRequest {
   email: string;
   institucion_id?: number | null;
   institution?: number | null;
+  institution_slug?: string;
   role: UserRole;
   password: string;
   password_confirm: string;
@@ -67,6 +70,8 @@ export interface RegisterResponse {
 
 export interface GoogleLoginRequest {
   id_token: string;
+  institution_slug?: string;
+  role?: UserRole;
 }
 
 export interface EmailVerificationResponse {
@@ -86,6 +91,10 @@ export interface TokenRefreshResponse {
 export interface PublicInstitution {
   id: number;
   nombre: string;
+  slug?: string;
+  color_primario?: string;
+  color_secundario?: string;
+  logo?: string | null;
 }
 
 export interface PasswordResetRequest {

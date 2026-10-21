@@ -72,74 +72,17 @@
         />
       </div>
 
-      <div>
-        <label for="register-institution" class="block text-sm font-medium mb-1">Institución</label>
-        <select id="register-institution" formControlName="institution" class="w-full px-4 py-2 border border-border rounded-lg">
-          <option value="">Selecciona tu institución</option>
-          @for (inst of institutions(); track inst.id) {
-            <option [value]="inst.id">{{ inst.nombre }}</option>
-          }
-        </select>
-      </div>
-
-      <div>
-        <div class="flex items-center justify-between mb-1">
-          <label class="block text-sm font-medium">Rol</label>
-          <span class="text-xs font-semibold text-slate-900 dark:text-white capitalize">{{ currentRole }}</span>
+      <!-- Información de Aislamiento y Enlace Institucional -->
+      <div class="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-xs text-neutral-600 dark:text-neutral-400 space-y-1.5">
+        <div class="flex items-center gap-2 font-bold text-neutral-900 dark:text-neutral-100 text-sm">
+          <svg class="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Registro de Estudiantes</span>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <!-- Flowbite Radio Estudiante -->
-          <div
-            class="flex items-center ps-3.5 pe-2 py-1 border rounded-xl transition-colors cursor-pointer"
-            [class.border-slate-900]="currentRole === 'estudiante'"
-            [class.dark:border-white]="currentRole === 'estudiante'"
-            [class.border-border]="currentRole !== 'estudiante'"
-            [class.bg-slate-50]="currentRole === 'estudiante'"
-            [class.dark:bg-slate-800/60]="currentRole === 'estudiante'"
-            [class.bg-surface]="currentRole !== 'estudiante'"
-          >
-            <input
-              id="register-role-estudiante"
-              type="radio"
-              value="estudiante"
-              formControlName="role"
-              (change)="setRole('estudiante')"
-              class="w-4 h-4 text-primary bg-bg border-border focus:ring-primary focus:ring-2 cursor-pointer"
-            />
-            <label
-              for="register-role-estudiante"
-              class="w-full py-2.5 ms-2.5 text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-200 cursor-pointer select-none"
-            >
-              Estudiante
-            </label>
-          </div>
-
-          <!-- Flowbite Radio Docente -->
-          <div
-            class="flex items-center ps-3.5 pe-2 py-1 border rounded-xl transition-colors cursor-pointer"
-            [class.border-slate-900]="currentRole === 'docente'"
-            [class.dark:border-white]="currentRole === 'docente'"
-            [class.border-border]="currentRole !== 'docente'"
-            [class.bg-slate-50]="currentRole === 'docente'"
-            [class.dark:bg-slate-800/60]="currentRole === 'docente'"
-            [class.bg-surface]="currentRole !== 'docente'"
-          >
-            <input
-              id="register-role-docente"
-              type="radio"
-              value="docente"
-              formControlName="role"
-              (change)="setRole('docente')"
-              class="w-4 h-4 text-primary bg-bg border-border focus:ring-primary focus:ring-2 cursor-pointer"
-            />
-            <label
-              for="register-role-docente"
-              class="w-full py-2.5 ms-2.5 text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-200 cursor-pointer select-none"
-            >
-              Docente
-            </label>
-          </div>
-        </div>
+        <p class="leading-relaxed">
+          Si perteneces a una institución educativa con EduBid, solicita a tu rector o profesor el <strong class="text-neutral-900 dark:text-neutral-200">enlace exclusivo de tu colegio</strong> para ingresar directamente a tus clases, subastas y saldo de EduCoins.
+        </p>
       </div>
 
       <div>

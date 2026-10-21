@@ -48,8 +48,12 @@ export class AuthService {
     );
   }
 
-  loginWithGoogle(idToken: string): Observable<LoginResponse> {
-    const body: GoogleLoginRequest = { id_token: idToken };
+  loginWithGoogle(idToken: string, institutionSlug?: string, role?: UserRole): Observable<LoginResponse> {
+    const body: GoogleLoginRequest = {
+      id_token: idToken,
+      ...(institutionSlug ? { institution_slug: institutionSlug } : {}),
+      ...(role ? { role } : {}),
+    };
     return this.http.post<LoginResponse>(AUTH_ENDPOINTS.GOOGLE_LOGIN, body).pipe(
       tap((res) => {
         this.handleAuthSuccess(res);
@@ -65,15 +69,28 @@ export class AuthService {
   }
 
   register(data: RegisterRequest): Observable<RegisterResponse> {
-    const payload = {
+    const payload: any = {
       ...data,
       institucion_id: data.institucion_id ?? data.institution ?? null,
     };
+    if (data.institution_slug) {
+      payload.institution_slug = data.institution_slug;
+    }
     return this.http.post<RegisterResponse>(AUTH_ENDPOINTS.REGISTER, payload);
   }
 
   verifyEmail(token: string): Observable<{ message: string; user?: any }> {
     return this.http.get<{ message: string; user?: any }>(AUTH_ENDPOINTS.VERIFY_EMAIL(token));
+  }
+
+  verifyEmailCode(email: string, code: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(AUTH_ENDPOINTS.VERIFY_EMAIL_CODE, { email, code }).pipe(
+      tap((res) => this.handleAuthSuccess(res)),
+      catchError((err) => {
+        this.handleAuthError(err);
+        return throwError(() => err);
+      })
+    );
   }
 
   resendVerification(email: string): Observable<{ message: string }> {

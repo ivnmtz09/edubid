@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { InstitutionService } from '../../../../core/services/institution.service';
+import { InstitutionService, Institution } from '../../../../core/services/institution.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { QrInvitationModalComponent } from '../../../../shared/components/ui/qr-card/qr-invitation-modal.component';
 
 export interface Color {
   hex: string;
@@ -19,7 +20,7 @@ export interface BrandingPalette {
 @Component({
   selector: 'app-create-institution',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, QrInvitationModalComponent],
   template: `
     <div class="space-y-6 animate-in fade-in duration-300">
       
@@ -97,6 +98,12 @@ export interface BrandingPalette {
                     placeholder="Ej: Colegio San José"
                   />
                   <p class="text-[11px] text-text-muted">Nombre oficial con el que se identificará en la plataforma y reportes.</p>
+                  <div class="flex items-center gap-1.5 text-[11px] text-text-muted pt-0.5">
+                    <span class="font-semibold text-slate-700 dark:text-slate-300">Enlace exclusivo asignado:</span>
+                    <span class="font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                      /institucion/{{ slugPreview() }}/login
+                    </span>
+                  </div>
                 </div>
 
                 <div class="space-y-1.5">
@@ -510,6 +517,21 @@ export interface BrandingPalette {
 
       </div>
 
+      <!-- Modal de Invitación Oficial para Rector con Código QR -->
+      <app-qr-invitation-modal
+        [isOpen]="showRectorQrModal()"
+        modalTitle="Invitación Oficial para Rectoría"
+        [institutionName]="createdInstitution()?.nombre || ''"
+        [institutionSlug]="createdInstitution()?.slug || ''"
+        role="rector"
+        roleLabel="Rector"
+        cardTitle="Acceso Oficial de Rectoría"
+        cardDescription="Comparte este enlace exclusivo y código QR con el Rector de la institución para que cree su cuenta oficial."
+        routePath="registro-rector"
+        [primaryColor]="createdInstitution()?.color_primario || '#ea580c'"
+        (close)="onCloseRectorModal()"
+      />
+
     </div>
   `
 })
@@ -524,9 +546,19 @@ export class CreateInstitutionComponent {
   colorPrimario = signal<string>('#ea580c');
   colorSecundario = signal<string>('#3b82f6');
   logo = signal<string>('');
+
+  slugPreview = computed(() => {
+    const val = this.nombre().trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+    return val || 'nombre-de-la-institucion';
+  });
   selectedFile: File | null = null;
   logoPreview = signal<string | null>(null);
   isSaving = signal<boolean>(false);
+  createdInstitution = signal<Institution | null>(null);
+  showRectorQrModal = signal<boolean>(false);
 
   // Paleta completa de 33 colores con escala de grises idéntica a rector
   coloresDisponibles: Color[] = [
@@ -677,8 +709,9 @@ export class CreateInstitutionComponent {
     this.institutionService.createInstitution(formData).subscribe({
       next: (created) => {
         this.isSaving.set(false);
+        this.createdInstitution.set(created);
+        this.showRectorQrModal.set(true);
         this.notificationService.success(`¡Institución "${created.nombre}" registrada exitosamente!`);
-        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.isSaving.set(false);
@@ -687,5 +720,10 @@ export class CreateInstitutionComponent {
         this.notificationService.error(detail, 'Error');
       }
     });
+  }
+
+  onCloseRectorModal(): void {
+    this.showRectorQrModal.set(false);
+    this.router.navigate(['/dashboard']);
   }
 }
