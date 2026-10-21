@@ -37,11 +37,9 @@ interface NavItem {
       }
 
       <!-- ================= ASIDE / SIDEBAR IZQUIERDO (COLUMNA COMPLETA H-SCREEN) ================= -->
-      <!-- ================= ASIDE / SIDEBAR IZQUIERDO (COLUMNA COMPLETA H-SCREEN) ================= -->
       <aside
         class="fixed lg:static inset-y-0 left-0 z-50 lg:z-20 h-screen flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 overflow-y-auto aside-institutional"
         [ngClass]="'aside-style-' + themeService.asideStyle()"
-        style="border-right: 1px solid color-mix(in srgb, var(--brand-primary-text) 16%, transparent); box-shadow: 4px 0 24px rgba(0, 0, 0, 0.14);"
         [class.w-64]="isDesktopExpanded() || isMobileDrawerOpen()"
         [class.lg:w-20]="!isDesktopExpanded()"
         [class.translate-x-0]="isMobileDrawerOpen()"
@@ -65,7 +63,7 @@ interface NavItem {
                 <img src="/edubid.png" alt="EduBid Logo" class="w-8 h-8 rounded-md object-contain shrink-0 transition-transform duration-200 group-hover:scale-105 bg-white/20 p-0.5 backdrop-blur-xs" />
               }
               @if (isDesktopExpanded() || isMobileDrawerOpen()) {
-                <span class="font-extrabold text-base tracking-tight truncate drop-shadow-xs" style="color: var(--brand-primary-text);">
+                <span class="aside-brand-title font-extrabold text-base tracking-tight truncate drop-shadow-xs">
                   {{ sidebarBrandTitle() }}
                 </span>
               }
@@ -75,7 +73,7 @@ interface NavItem {
             <button
               type="button"
               (click)="closeMobileDrawer()"
-              class="lg:hidden p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
+              class="lg:hidden p-1.5 rounded-lg opacity-80 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
               title="Cerrar menú"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,18 +84,18 @@ interface NavItem {
 
           <!-- Rol Badge en Sidebar -->
           @if (isDesktopExpanded() || isMobileDrawerOpen()) {
-            <div class="px-3 py-2 rounded-xl bg-black/15 dark:bg-black/25 border border-white/15 flex items-center justify-between backdrop-blur-xs">
+            <div class="aside-role-badge px-3 py-2 rounded-xl border flex items-center justify-between backdrop-blur-xs transition-colors">
               <div class="flex items-center gap-2 min-w-0">
-                <span class="w-2 h-2 rounded-full shrink-0 shadow-xs animate-pulse" style="background-color: var(--brand-accent);"></span>
-                <span class="text-xs font-bold capitalize truncate" style="color: var(--brand-primary-text);">
+                <span class="aside-role-dot w-2 h-2 rounded-full shrink-0 shadow-xs animate-pulse"></span>
+                <span class="aside-role-text text-xs font-bold capitalize truncate">
                   Rol: {{ userRole() }}
                 </span>
               </div>
             </div>
           } @else {
             <div class="flex justify-center" [title]="'Rol: ' + userRole()">
-              <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] uppercase bg-black/20 border border-white/15" style="color: var(--brand-primary-text);">
-                {{ userRole().slice(0, 2) }}
+              <div class="aside-role-badge w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] uppercase border">
+                <span class="aside-role-text">{{ userRole().slice(0, 2) }}</span>
               </div>
             </div>
           }
@@ -106,9 +104,8 @@ interface NavItem {
           <button
             type="button"
             (click)="toggleDesktopCollapse()"
-            class="hidden lg:flex w-full items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium hover:bg-white/10 transition-colors cursor-pointer"
+            class="aside-action-btn hidden lg:flex w-full items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer"
             [class.justify-center]="!isDesktopExpanded()"
-            style="color: var(--brand-primary-text);"
             [title]="isDesktopExpanded() ? 'Contraer menú lateral' : 'Expandir menú lateral'"
           >
             <svg class="w-5 h-5 shrink-0 transition-transform duration-300" [class.rotate-180]="!isDesktopExpanded()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,17 +116,18 @@ interface NavItem {
             }
           </button>
 
-          <div class="border-t border-white/15 my-2"></div>
+          <div class="aside-divider border-t my-2"></div>
 
           <!-- Lista de Enlaces de Navegación -->
           <nav class="space-y-1">
-            @for (item of filteredNavItems(); track item.route) {
+            @for (item of filteredNavItems(); track item.route; let i = $index) {
               <a
                 [routerLink]="item.route"
                 routerLinkActive="nav-item-active"
                 [routerLinkActiveOptions]="{ exact: item.exact ?? false }"
                 (click)="closeMobileDrawer()"
-                class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-colors group cursor-pointer"
+                class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium cursor-pointer"
+                [style.--item-idx]="i"
                 [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
                 [title]="item.label"
               >
@@ -199,14 +197,14 @@ interface NavItem {
         </div>
 
         <!-- Pie del Sidebar: Configurar Menú + Reportar problema + Ver Sitio -->
-        <div class="p-3 border-t border-white/15 space-y-1">
+        <div class="aside-footer p-3 border-t space-y-1">
           <!-- Botón de Personalizar Apariencia del Menú -->
           <button
             type="button"
             (click)="openAsideConfigModal()"
-            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors group cursor-pointer"
+            class="aside-footer-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors group cursor-pointer"
             [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
-            title="Personalizar textura y apariencia del menú lateral"
+            title="Personalizar apariencia del menú lateral"
           >
             <span class="w-5 h-5 shrink-0 flex items-center justify-center nav-icon group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,11 +221,11 @@ interface NavItem {
           <button
             type="button"
             (click)="openReportModal()"
-            class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 transition-colors group cursor-pointer"
+            class="aside-footer-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-colors group cursor-pointer"
             [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
             title="Reportar problema o enviar sugerencia a soporte"
           >
-            <span class="w-5 h-5 shrink-0 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform">
+            <span class="w-5 h-5 shrink-0 flex items-center justify-center nav-icon text-amber-500 group-hover:scale-110 transition-transform">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -240,7 +238,7 @@ interface NavItem {
           <!-- Enlace al Inicio Público -->
           <a
             routerLink="/"
-            class="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            class="aside-footer-btn flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-colors cursor-pointer"
             [class.justify-center]="!isDesktopExpanded() && !isMobileDrawerOpen()"
             title="Página de Inicio de EduBid"
           >
@@ -485,30 +483,24 @@ interface NavItem {
                 <button
                   type="button"
                   (click)="toggleThemeDropdown($event)"
-                  class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-xl border border-border bg-surface hover:bg-neutral-100 dark:hover:bg-neutral-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs"
+                  class="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-border bg-surface hover:bg-neutral-100 dark:hover:bg-neutral-800 text-text-muted hover:text-text transition-all cursor-pointer shadow-xs focus:outline-hidden"
                   [attr.aria-expanded]="isThemeDropdownOpen()"
                   aria-haspopup="true"
-                  title="Cambiar tema de visualización"
+                  [title]="'Tema actual: ' + (themeService.mode() === 'light' ? 'Claro' : themeService.mode() === 'dark' ? 'Oscuro' : 'Sistema')"
                 >
                   @if (themeService.mode() === 'light') {
                     <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    <span class="hidden sm:inline">Claro</span>
                   } @else if (themeService.mode() === 'dark') {
                     <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
-                    <span class="hidden sm:inline">Oscuro</span>
                   } @else {
                     <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span class="hidden sm:inline">Sistema</span>
                   }
-                  <svg class="w-3 h-3 shrink-0 text-text-muted transition-transform duration-200" [class.rotate-180]="isThemeDropdownOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
                 </button>
 
                 <!-- Menú Desplegable Flotante de Tema -->
@@ -826,8 +818,8 @@ interface NavItem {
                     <div class="min-w-0">
                       <div class="font-bold text-xs text-text flex items-center gap-2">
                         <span>{{ styleOpt.label }}</span>
-                        @if (styleOpt.id === 'solid') {
-                          <span class="text-[10px] px-1.5 py-0.2 rounded-md bg-neutral-200 dark:bg-neutral-800 text-text-muted font-normal">Predeterminado</span>
+                        @if (styleOpt.badge) {
+                          <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-primary/10 text-primary font-semibold">{{ styleOpt.badge }}</span>
                         }
                       </div>
                       <div class="text-[11px] text-text-muted mt-0.5 leading-snug">
@@ -887,12 +879,20 @@ export class LayoutComponent implements OnInit, OnDestroy {
   showLogoutConfirmModal = signal(false);
   isLoggingOut = signal(false);
 
-  asideStyles: { id: AsideStyle; label: string; icon: string; desc: string }[] = [
-    { id: 'gradient', label: 'Gradiente', icon: '✦', desc: 'Profundidad institucional' },
-    { id: 'solid', label: 'Sólido', icon: '◼', desc: 'Color primario puro' },
-    { id: 'dots', label: 'Micro-Puntos', icon: '⁖', desc: 'Patrón de puntos radial' },
-    { id: 'grid', label: 'Cuadrícula', icon: '▦', desc: 'Trama técnica moderna' },
-    { id: 'mesh', label: 'Malla Acento', icon: '❖', desc: 'Fusión orgánica con acento' },
+  asideStyles: { id: AsideStyle; label: string; icon: string; desc: string; badge?: string }[] = [
+    {
+      id: 'theme',
+      label: 'Adaptado al Tema (Claro / Oscuro)',
+      icon: '◐',
+      desc: 'Fondo blanco o gris oscuro según el modo, con una línea sutil del color principal en el borde del aside.',
+      badge: 'Recomendado',
+    },
+    {
+      id: 'solid',
+      label: 'Color Institucional Sólido',
+      icon: '◼',
+      desc: 'Fondo sólido del color de la institución con tipografía e iconos monocromáticos de alto contraste.',
+    },
   ];
 
   // Notificaciones In-App
@@ -1146,12 +1146,9 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   asideStyleLabel(style: AsideStyle): string {
     switch (style) {
-      case 'solid': return 'Sólido';
-      case 'gradient': return 'Gradiente';
-      case 'dots': return 'Puntos';
-      case 'grid': return 'Cuadrícula';
-      case 'mesh': return 'Malla';
-      default: return 'Gradiente';
+      case 'theme': return 'Adaptado al Tema';
+      case 'solid': return 'Color Institucional';
+      default: return 'Adaptado al Tema';
     }
   }
 

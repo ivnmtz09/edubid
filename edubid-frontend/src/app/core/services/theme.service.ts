@@ -3,7 +3,7 @@ import { UserInstitution } from '../models/user.model';
 import { STORAGE_KEYS } from '../constants/api.constants';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
-export type AsideStyle = 'solid' | 'gradient' | 'dots' | 'grid' | 'mesh';
+export type AsideStyle = 'theme' | 'solid' | 'gradient' | 'dots' | 'grid' | 'mesh';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
@@ -108,7 +108,9 @@ export class ThemeService {
     const primaryText = isPrimaryLight ? '#0a0a0a' : '#ffffff';
     const isAccentLight = this.isLightColor(accent);
     const accentText = isAccentLight ? '#0a0a0a' : '#ffffff';
-    const asideActiveBg = isPrimaryLight ? 'rgba(0, 0, 0, 0.14)' : 'rgba(255, 255, 255, 0.18)';
+    const asideActiveBg = isPrimaryLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.18)';
+    // Iconos monocromáticos: blanco o negro según la luminosidad del color principal
+    const asideIconMonochrome = isPrimaryLight ? '#0f172a' : '#ffffff';
 
     root.style.setProperty('--brand-primary', primary);
     root.style.setProperty('--brand-primary-hover', this.darkenHex(primary));
@@ -119,7 +121,7 @@ export class ThemeService {
 
     // Variables de contraste y renderizado óptimo del Aside institucional
     root.style.setProperty('--aside-bg', primary);
-    root.style.setProperty('--aside-icon', accent);
+    root.style.setProperty('--aside-icon', asideIconMonochrome);
     root.style.setProperty('--aside-active-bg', asideActiveBg);
   }
 
@@ -187,14 +189,17 @@ export class ThemeService {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       try {
         const saved = localStorage.getItem(STORAGE_KEYS.ASIDE_STYLE);
-        if (saved === 'solid' || saved === 'gradient' || saved === 'dots' || saved === 'grid' || saved === 'mesh') {
+        if (saved === 'theme' || saved === 'solid') {
           return saved as AsideStyle;
         }
+        if (saved === 'gradient' || saved === 'dots' || saved === 'grid' || saved === 'mesh') {
+          return 'solid';
+        }
       } catch {
-        // Fallback a gradiente
+        // Fallback
       }
     }
-    return 'gradient';
+    return 'theme'; // Por defecto adaptado al tema (claro/oscuro con línea acento)
   }
 
   private loadInitialAsideCollapsed(): boolean {

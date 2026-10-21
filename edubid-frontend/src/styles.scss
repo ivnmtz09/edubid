@@ -15,7 +15,7 @@
 
   /* Aside institucional tokens */
   --aside-bg: var(--brand-primary);
-  --aside-icon: var(--brand-accent);
+  --aside-icon: #ffffff;
   --aside-active-bg: rgba(255, 255, 255, 0.18);
 
   --color-bg: #f8fafc;
@@ -203,120 +203,357 @@ svg {
 }
 
 /* ===================================================
-   ASIDE INSTITUCIONAL: PATRONES Y NAVEGACIÓN INMERSIVA
+   ASIDE INSTITUCIONAL: JERARQUÍA, MOTION Y CONTRASTE
    =================================================== */
 
 .aside-institutional {
-  background-color: var(--aside-bg, var(--brand-primary));
-  color: var(--brand-primary-text);
   position: relative;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease;
+  will-change: width, transform;
 }
 
-/* 1. Sólido: color institucional directo */
-.aside-style-solid {
+/* Parallax Depth: Sutil resplandor de profundidad superior solo en modo tema */
+.aside-style-theme::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 160px;
+  pointer-events: none;
+  background: radial-gradient(ellipse 120% 100% at 50% -20%, color-mix(in srgb, var(--brand-primary) 12%, transparent), transparent 75%);
+  opacity: 0.8;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* 1. Variante: Adaptado al Tema (Claro / Oscuro) */
+.aside-style-theme {
+  background-color: var(--color-surface, #ffffff) !important;
+  color: var(--color-text, #0f172a) !important;
+  border-right: 2px solid var(--brand-primary, #e11d48) !important;
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.dark .aside-style-theme,
+.dark .aside-style-theme {
+  background-color: var(--color-surface, #141414) !important;
+  color: var(--color-text, #f5f5f5) !important;
+  border-right: 2px solid var(--brand-primary, #e11d48) !important;
+  box-shadow: 2px 0 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 2. Variante: Color Institucional Sólido (y fallbacks retrocompatibles) */
+.aside-style-solid,
+.aside-style-gradient,
+.aside-style-dots,
+.aside-style-grid,
+.aside-style-mesh {
   background-color: var(--aside-bg, var(--brand-primary)) !important;
   background-image: none !important;
+  color: var(--brand-primary-text, #ffffff) !important;
+  border-right: 1px solid color-mix(in srgb, var(--brand-primary-text) 18%, transparent) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.16) !important;
 }
 
-/* 2. Gradiente: gradiente enriquecido vertical institucional */
-.aside-style-gradient {
-  background: linear-gradient(
-    180deg,
-    var(--brand-primary) 0%,
-    color-mix(in srgb, var(--brand-primary) 80%, black) 100%
-  ) !important;
+/* --- Animación Escalonada con Offset & Delay y Easing Elástico --- */
+@keyframes asideNavIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-/* 3. Micro-puntos: patrón SVG radial semitransparente sutil sobre el fondo primario */
-.aside-style-dots {
-  background-color: var(--brand-primary) !important;
-  background-image: radial-gradient(
-    color-mix(in srgb, var(--brand-primary-text) 18%, transparent) 1.5px,
-    transparent 1.5px
-  ) !important;
-  background-size: 18px 18px !important;
-  background-position: 0 0 !important;
+.aside-institutional nav .nav-item {
+  animation: asideNavIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--item-idx, 0) * 32ms + 40ms);
 }
 
-/* 4. Cuadrícula: patrón geométrico sutil de cuadrícula sobre el fondo primario */
-.aside-style-grid {
-  background-color: var(--brand-primary) !important;
-  background-image: 
-    linear-gradient(to right, color-mix(in srgb, var(--brand-primary-text) 10%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--brand-primary-text) 10%, transparent) 1px, transparent 1px) !important;
-  background-size: 22px 22px !important;
-}
-
-/* 5. Malla (Mesh): degradado sutil mesh con acentos de color secundario */
-.aside-style-mesh {
-  background-color: var(--brand-primary) !important;
-  background-image: 
-    radial-gradient(at 0% 0%, color-mix(in srgb, var(--brand-accent) 35%, transparent) 0px, transparent 55%),
-    radial-gradient(at 100% 100%, color-mix(in srgb, black 40%, transparent) 0px, transparent 60%),
-    radial-gradient(at 50% 50%, color-mix(in srgb, var(--brand-accent) 25%, transparent) 0px, transparent 50%),
-    linear-gradient(180deg, var(--brand-primary) 0%, color-mix(in srgb, var(--brand-primary) 80%, black) 100%) !important;
-}
-
-/* --- Navegación en el Aside Institucional --- */
-
+/* --- Items de Navegación del Aside --- */
 .aside-institutional .nav-item {
-  color: var(--brand-primary-text);
-  opacity: 0.82;
   border-radius: 0.75rem;
   position: relative;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.aside-institutional .nav-item .nav-icon {
-  color: var(--brand-accent);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
-  transition: transform 0.2s ease, filter 0.2s ease;
+  z-index: 2;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .aside-institutional .nav-item:hover {
-  opacity: 1;
-  background: color-mix(in srgb, var(--brand-primary-text) 14%, transparent);
-  transform: translateX(2px);
+  transform: translateX(4px);
+}
+
+.aside-institutional .nav-item .nav-icon {
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
 }
 
 .aside-institutional .nav-item:hover .nav-icon {
-  transform: scale(1.1);
-  filter: drop-shadow(0 0 6px var(--brand-accent));
+  transform: scale(1.12);
 }
 
-/* Enlaces activos en el Aside con pastilla contrastante semitransparente, brillo e indicador */
-.aside-institutional .nav-item.nav-item-active,
-.aside-institutional .nav-item-active {
-  background: var(--aside-active-bg, rgba(255, 255, 255, 0.18)) !important;
-  color: var(--brand-primary-text) !important;
+/* ===================================================
+   COMPORTAMIENTO: ADAPTADO AL TEMA (CLARO / OSCURO)
+   =================================================== */
+
+.aside-style-theme .aside-brand-title {
+  color: var(--color-text);
+}
+
+.aside-style-theme .aside-role-badge {
+  background: color-mix(in srgb, var(--color-border) 45%, transparent);
+  border-color: var(--color-border);
+}
+
+.aside-style-theme .aside-role-dot {
+  background-color: var(--brand-primary);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--brand-primary) 50%, transparent);
+}
+
+.aside-style-theme .aside-role-text {
+  color: var(--color-text);
+}
+
+.aside-style-theme .aside-action-btn {
+  color: var(--color-text-muted);
+}
+.aside-style-theme .aside-action-btn:hover {
+  color: var(--color-text);
+  background-color: color-mix(in srgb, var(--color-text) 5%, transparent);
+}
+
+.aside-style-theme .aside-divider {
+  border-color: var(--color-border);
+}
+
+/* Enlaces inactivos en modo tema: monocromático suave */
+.aside-style-theme .nav-item {
+  color: var(--color-text-muted);
+}
+
+.aside-style-theme .nav-item .nav-icon {
+  color: var(--color-text-muted);
+  filter: none;
+}
+
+.aside-style-theme .nav-item:hover {
+  color: var(--color-text);
+  background-color: color-mix(in srgb, var(--color-text) 5%, transparent);
+}
+
+.aside-style-theme .nav-item:hover .nav-icon {
+  color: var(--color-text);
+}
+
+/* Enlaces activos en modo tema: contraste nítido con color primario e indicador */
+.aside-style-theme .nav-item.nav-item-active,
+.aside-style-theme .nav-item-active {
+  background-color: color-mix(in srgb, var(--brand-primary) 10%, transparent) !important;
+  color: var(--brand-primary) !important;
   font-weight: 700 !important;
-  opacity: 1 !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  box-shadow: 
-    inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-text) 24%, transparent),
-    0 4px 12px rgba(0, 0, 0, 0.18) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary) 22%, transparent) !important;
 }
 
-.aside-institutional .nav-item.nav-item-active .nav-icon,
-.aside-institutional .nav-item-active .nav-icon {
-  color: var(--brand-accent) !important;
-  filter: drop-shadow(0 0 8px var(--brand-accent)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) !important;
+.aside-style-theme .nav-item.nav-item-active .nav-icon,
+.aside-style-theme .nav-item-active .nav-icon {
+  color: var(--brand-primary) !important;
+  filter: none !important;
 }
 
-.aside-institutional .nav-item.nav-item-active::before,
-.aside-institutional .nav-item-active::before {
+.aside-style-theme .nav-item.nav-item-active::before,
+.aside-style-theme .nav-item-active::before {
   content: '';
   position: absolute;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 4px;
+  width: 3.5px;
   height: 20px;
   border-radius: 0 4px 4px 0;
-  background: var(--brand-accent);
-  box-shadow: 0 0 10px var(--brand-accent);
+  background: var(--brand-primary);
+  box-shadow: none !important;
+}
+
+.aside-style-theme .aside-footer {
+  border-color: var(--color-border);
+}
+
+.aside-style-theme .aside-footer-btn {
+  color: var(--color-text-muted);
+}
+
+.aside-style-theme .aside-footer-btn:hover {
+  color: var(--color-text);
+  background-color: color-mix(in srgb, var(--color-text) 5%, transparent);
+}
+
+.aside-style-theme .aside-footer-btn .nav-icon {
+  color: var(--color-text-muted);
+}
+
+.aside-style-theme .aside-footer-btn:hover .nav-icon {
+  color: var(--color-text);
+}
+
+/* ===================================================
+   COMPORTAMIENTO: COLOR INSTITUCIONAL SÓLIDO
+   =================================================== */
+
+.aside-style-solid .aside-brand-title,
+.aside-style-gradient .aside-brand-title,
+.aside-style-dots .aside-brand-title,
+.aside-style-grid .aside-brand-title,
+.aside-style-mesh .aside-brand-title {
+  color: var(--brand-primary-text);
+}
+
+.aside-style-solid .aside-role-badge,
+.aside-style-gradient .aside-role-badge,
+.aside-style-dots .aside-role-badge,
+.aside-style-grid .aside-role-badge,
+.aside-style-mesh .aside-role-badge {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: color-mix(in srgb, var(--brand-primary-text) 20%, transparent);
+}
+
+.aside-style-solid .aside-role-dot,
+.aside-style-gradient .aside-role-dot,
+.aside-style-dots .aside-role-dot,
+.aside-style-grid .aside-role-dot,
+.aside-style-mesh .aside-role-dot {
+  background-color: var(--brand-primary-text);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+.aside-style-solid .aside-role-text,
+.aside-style-gradient .aside-role-text,
+.aside-style-dots .aside-role-text,
+.aside-style-grid .aside-role-text,
+.aside-style-mesh .aside-role-text {
+  color: var(--brand-primary-text);
+}
+
+.aside-style-solid .aside-action-btn,
+.aside-style-gradient .aside-action-btn,
+.aside-style-dots .aside-action-btn,
+.aside-style-grid .aside-action-btn,
+.aside-style-mesh .aside-action-btn {
+  color: color-mix(in srgb, var(--brand-primary-text) 85%, transparent);
+}
+.aside-style-solid .aside-action-btn:hover,
+.aside-style-gradient .aside-action-btn:hover,
+.aside-style-dots .aside-action-btn:hover,
+.aside-style-grid .aside-action-btn:hover,
+.aside-style-mesh .aside-action-btn:hover {
+  color: var(--brand-primary-text);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.aside-style-solid .aside-divider,
+.aside-style-gradient .aside-divider,
+.aside-style-dots .aside-divider,
+.aside-style-grid .aside-divider,
+.aside-style-mesh .aside-divider {
+  border-color: color-mix(in srgb, var(--brand-primary-text) 16%, transparent);
+}
+
+.aside-style-solid .nav-item,
+.aside-style-gradient .nav-item,
+.aside-style-dots .nav-item,
+.aside-style-grid .nav-item,
+.aside-style-mesh .nav-item {
+  color: var(--brand-primary-text);
+  opacity: 0.85;
+}
+
+/* Iconos MONOCROMÁTICOS estrictos: Blanco o Negro SIN brillo ni resplandor */
+.aside-style-solid .nav-item .nav-icon,
+.aside-style-gradient .nav-item .nav-icon,
+.aside-style-dots .nav-item .nav-icon,
+.aside-style-grid .nav-item .nav-icon,
+.aside-style-mesh .nav-item .nav-icon {
+  color: var(--aside-icon, var(--brand-primary-text)) !important;
+  opacity: 0.88;
+  filter: none !important;
+}
+
+.aside-style-solid .nav-item:hover,
+.aside-style-gradient .nav-item:hover,
+.aside-style-dots .nav-item:hover,
+.aside-style-grid .nav-item:hover,
+.aside-style-mesh .nav-item:hover {
+  opacity: 1;
+  background-color: color-mix(in srgb, var(--brand-primary-text) 14%, transparent);
+}
+
+.aside-style-solid .nav-item:hover .nav-icon,
+.aside-style-gradient .nav-item:hover .nav-icon,
+.aside-style-dots .nav-item:hover .nav-icon,
+.aside-style-grid .nav-item:hover .nav-icon,
+.aside-style-mesh .nav-item:hover .nav-icon {
+  opacity: 1;
+  color: var(--aside-icon, var(--brand-primary-text)) !important;
+  filter: none !important;
+}
+
+.aside-style-solid .nav-item.nav-item-active,
+.aside-style-solid .nav-item-active,
+.aside-style-gradient .nav-item.nav-item-active,
+.aside-style-gradient .nav-item-active {
+  background-color: var(--aside-active-bg, rgba(255, 255, 255, 0.20)) !important;
+  color: var(--brand-primary-text) !important;
+  font-weight: 700 !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand-primary-text) 24%, transparent) !important;
+}
+
+.aside-style-solid .nav-item.nav-item-active .nav-icon,
+.aside-style-solid .nav-item-active .nav-icon,
+.aside-style-gradient .nav-item.nav-item-active .nav-icon,
+.aside-style-gradient .nav-item-active .nav-icon {
+  color: var(--aside-icon, var(--brand-primary-text)) !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.aside-style-solid .nav-item.nav-item-active::before,
+.aside-style-solid .nav-item-active::before,
+.aside-style-gradient .nav-item.nav-item-active::before,
+.aside-style-gradient .nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5px;
+  height: 20px;
+  border-radius: 0 4px 4px 0;
+  background: var(--brand-primary-text);
+  box-shadow: none !important;
+}
+
+.aside-style-solid .aside-footer,
+.aside-style-gradient .aside-footer {
+  border-color: color-mix(in srgb, var(--brand-primary-text) 16%, transparent);
+}
+
+.aside-style-solid .aside-footer-btn,
+.aside-style-gradient .aside-footer-btn {
+  color: color-mix(in srgb, var(--brand-primary-text) 88%, transparent);
+}
+
+.aside-style-solid .aside-footer-btn:hover,
+.aside-style-gradient .aside-footer-btn:hover {
+  color: var(--brand-primary-text);
+  background-color: color-mix(in srgb, var(--brand-primary-text) 14%, transparent);
+}
+
+.aside-style-solid .aside-footer-btn .nav-icon,
+.aside-style-gradient .aside-footer-btn .nav-icon {
+  color: var(--aside-icon, var(--brand-primary-text)) !important;
 }
 
 /* === Barra de Scroll Personalizada y Animada con Colores Institucionales === */
