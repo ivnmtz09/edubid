@@ -25,10 +25,9 @@ import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import { PublicInstitution, UserRole } from '../../core/models/user.model';
 import { AUTH_ENDPOINTS } from '../../core/constants/api.constants';
 import { InteractiveDotsComponent } from '../../shared/components/ui/interactive-dots.component';
-import { CoinCollectorGameComponent } from './components/home-games/coin-collector-game.component';
-import { GalagaGameComponent } from './components/home-games/galaga-game.component';
+import { InteractiveWavesComponent } from '../../shared/components/ui/interactive-waves.component';
 
-export type HomeBgMode = 'dots' | 'coins' | 'galaga';
+export type HomeBgMode = 'waves' | 'dots';
 
 @Component({
   selector: 'app-home',
@@ -38,8 +37,7 @@ export type HomeBgMode = 'dots' | 'coins' | 'galaga';
     ReactiveFormsModule,
     RouterLink,
     InteractiveDotsComponent,
-    CoinCollectorGameComponent,
-    GalagaGameComponent,
+    InteractiveWavesComponent,
   ],
   templateUrl: './home.component.html',
 })
@@ -60,10 +58,27 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   // Selector de tema: Dropdown en el header
   isThemeDropdownOpen = signal(false);
 
-  // Selector de fondo interactivo (Minijuegos PC)
+  // Selector de fondo interactivo (Ondas / Partículas)
   bgMode = signal<HomeBgMode>(this.loadInitialBgMode());
   isBgDropdownOpen = signal(false);
-  isArcadeFocus = signal(false);
+
+  // Easter Egg Zona Arcade Secreta
+  easterEggClicks = signal<number>(0);
+  easterEggToast = signal<string | null>(null);
+  private easterEggTimer: ReturnType<typeof setTimeout> | null = null;
+  private konamiIndex = 0;
+  private readonly konamiCode = [
+    'ArrowUp',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'ArrowLeft',
+    'ArrowRight',
+    'b',
+    'a',
+  ];
 
   // Lado derecho: Estado de acceso (botón inicial vs formularios de acceso)
   showAuthForms = signal(false);
@@ -88,8 +103,11 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
   emailNotVerified = signal(false);
   notVerifiedEmail = signal('');
 
-  // Panel de verificación de email post-registro
+  // Panel de verificación de email post-registro con código OTP
   registeredEmailPending = signal<string | null>(null);
+  otpDigits = signal<string[]>(['', '', '', '', '', '']);
+  isVerifyingOtp = signal(false);
+  otpError = signal<string | null>(null);
   isResendingVerification = signal(false);
   resendVerificationSuccess = signal<string | null>(null);
   resendVerificationError = signal<string | null>(null);
@@ -140,7 +158,6 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         first_name: ['', [Validators.required]],
         last_name: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
-        institution: ['', [Validators.required]],
         role: ['estudiante' as UserRole, [Validators.required]],
         password: ['', [Validators.required, Validators.minLength(6)]],
         password_confirm: ['', [Validators.required]],
@@ -180,11 +197,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  /** Inicia el carrusel rotativo de tarjetas del hero */
+  /** Inicia el carrusel rotativo de tarjetas del hero (cada 5000ms) */
   startCarousel(): void {
+    this.stopCarousel();
     this.carouselInterval = setInterval(() => {
       this.activeCard.update(c => (c + 1) % 3);
-    }, 3000);
+    }, 5000);
   }
 
   /** Detiene el carrusel y limpia el intervalo */
@@ -193,6 +211,25 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
       clearInterval(this.carouselInterval);
       this.carouselInterval = null;
     }
+  }
+
+  /** Selecciona una tarjeta específica del carrusel y reinicia el intervalo de 5000ms */
+  goToCard(index: number): void {
+    this.activeCard.set(index);
+    this.startCarousel();
+  }
+
+  /** Retorna las clases para la animación de deslizamiento horizontal del carrusel */
+  getCardClass(index: number): string {
+    const active = this.activeCard();
+    if (index === active) {
+      return 'translate-x-0 opacity-100 scale-100 pointer-events-auto';
+    }
+    const isNext = (active + 1) % 3 === index;
+    if (isNext) {
+      return 'translate-x-full opacity-0 scale-95 pointer-events-none';
+    }
+    return '-translate-x-full opacity-0 scale-95 pointer-events-none';
   }
 
   /** Renderiza los botones nativos de Google en ambos contenedores (si existen en el DOM). */
@@ -208,6 +245,62 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.googleAuth.renderButton(this.googleRegisterBtnRef.nativeElement, { text: 'signup_with' });
       }
     }, 0);
+  }
+
+  // Listener global de teclado: Detecta Konami Code como Easter Egg para ir a la Zona Arcade
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    const key = event.key;
+    if (key.toLowerCase() === this.konamiCode[this.konamiIndex].toLowerCase()) {
+      this.konamiIndex++;
+      if (this.konamiIndex === this.konamiCode.length) {
+        this.konamiIndex = 0;
+        this.triggerSecretArcade();
+      }
+    } else {
+      this.konamiIndex = 0;
+    }
+  }
+
+  // Interacción Easter Egg por clics en el logo del footer
+  onSecretLogoClick(): void {
+    this.easterEggClicks.update((c) => c + 1);
+    const count = this.easterEggClicks();
+
+    if (this.easterEggTimer) {
+      clearTimeout(this.easterEggTimer);
+    }
+
+    if (count === 3) {
+      this.showEasterEggToast('¿Notas una frecuencia misteriosa en el campus? [3/5]');
+    } else if (count === 4) {
+      this.showEasterEggToast('Canal secreto sintonizándose... solo un toque más [4/5]');
+    } else if (count >= 5) {
+      this.easterEggClicks.set(0);
+      this.triggerSecretArcade();
+      return;
+    }
+
+    // Reinicia el contador si pasan 3.5 segundos sin clics
+    this.easterEggTimer = setTimeout(() => {
+      this.easterEggClicks.set(0);
+    }, 3500);
+  }
+
+  showEasterEggToast(message: string): void {
+    this.easterEggToast.set(message);
+    setTimeout(() => {
+      if (this.easterEggToast() === message) {
+        this.easterEggToast.set(null);
+      }
+    }, 2800);
+  }
+
+  triggerSecretArcade(): void {
+    this.easterEggToast.set('Portal Secreto Activado: Ingresando a la Zona Arcade...');
+    setTimeout(() => {
+      this.router.navigate(['/arcade']);
+    }, 600);
   }
 
   // Cerrar dropdowns si se hace click afuera
@@ -234,18 +327,18 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isThemeDropdownOpen.set(false);
   }
 
-  // Métodos de Fondo Interactivo (Minijuegos PC)
+  // Métodos de Fondo Interactivo (Ondas Fluidas y Partículas)
   loadInitialBgMode(): HomeBgMode {
-    if (typeof localStorage === 'undefined') return 'dots';
+    if (typeof localStorage === 'undefined') return 'waves';
     try {
       const saved = localStorage.getItem('edubid_home_bg_mode');
-      if (saved === 'coins' || saved === 'galaga' || saved === 'dots') {
-        return saved;
+      if (saved === 'dots' || saved === 'waves') {
+        return saved as HomeBgMode;
       }
     } catch {
       // Ignored
     }
-    return 'dots';
+    return 'waves';
   }
 
   toggleBgDropdown(event?: Event): void {
@@ -291,22 +384,24 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.errorMessage.set(null);
     this.successMessage.set(null);
     this.emailNotVerified.set(false);
+    this.otpError.set(null);
     this.resendVerificationSuccess.set(null);
     this.resendVerificationError.set(null);
   }
 
   resendRegistrationVerification(): void {
     const email = (this.registeredEmailPending() || this.notVerifiedEmail() || this.loginForm.get('email')?.value || '').trim();
-    if (!email) return;
+    if (!email || this.resendCooldown() > 0 || this.isResendingVerification()) return;
 
     this.isResendingVerification.set(true);
+    this.otpError.set(null);
     this.resendVerificationSuccess.set(null);
     this.resendVerificationError.set(null);
 
     this.authService.resendVerification(email).subscribe({
       next: (res) => {
         this.isResendingVerification.set(false);
-        this.resendVerificationSuccess.set(res.message || 'Se ha reenviado el enlace. Revisa tu bandeja de entrada o spam.');
+        this.resendVerificationSuccess.set(res.message || 'Nuevo código enviado exitosamente a tu correo.');
         this.startResendCooldown();
       },
       error: (err) => {
@@ -332,7 +427,102 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   dismissRegistrationPending(): void {
     this.registeredEmailPending.set(null);
+    this.otpDigits.set(['', '', '', '', '', '']);
+    this.otpError.set(null);
     this.switchTab('login');
+  }
+
+  // Métodos para el ingreso del código OTP de 6 dígitos
+  onDigitInput(event: Event, index: number): void {
+    const inputEl = event.target as HTMLInputElement;
+    let val = inputEl.value.replace(/\D/g, '');
+    if (val.length > 1) {
+      val = val.charAt(val.length - 1);
+    }
+
+    const current = [...this.otpDigits()];
+    current[index] = val;
+    this.otpDigits.set(current);
+    inputEl.value = val;
+
+    if (val && index < 5) {
+      this.focusOtpInput(index + 1);
+    }
+
+    if (current.every(d => d.trim().length === 1)) {
+      this.submitOtp();
+    }
+  }
+
+  onDigitKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key === 'Backspace') {
+      const current = [...this.otpDigits()];
+      if (!current[index] && index > 0) {
+        current[index - 1] = '';
+        this.otpDigits.set(current);
+        this.focusOtpInput(index - 1);
+      } else {
+        current[index] = '';
+        this.otpDigits.set(current);
+      }
+    } else if (event.key === 'ArrowLeft' && index > 0) {
+      this.focusOtpInput(index - 1);
+    } else if (event.key === 'ArrowRight' && index < 5) {
+      this.focusOtpInput(index + 1);
+    }
+  }
+
+  onOtpPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const pasted = event.clipboardData?.getData('text') || '';
+    const digits = pasted.replace(/\D/g, '').slice(0, 6);
+    if (!digits) return;
+
+    const current = [...this.otpDigits()];
+    for (let i = 0; i < 6; i++) {
+      current[i] = digits[i] || '';
+    }
+    this.otpDigits.set(current);
+
+    const nextIndex = Math.min(5, digits.length);
+    this.focusOtpInput(nextIndex);
+
+    if (digits.length === 6) {
+      this.submitOtp();
+    }
+  }
+
+  focusOtpInput(index: number): void {
+    if (typeof document !== 'undefined') {
+      const el = document.getElementById(`home-otp-digit-${index}`) as HTMLInputElement;
+      el?.focus();
+      el?.select();
+    }
+  }
+
+  submitOtp(): void {
+    const code = this.otpDigits().join('').trim();
+    if (code.length !== 6) {
+      this.otpError.set('Por favor ingresa los 6 dígitos del código.');
+      return;
+    }
+
+    const email = this.registeredEmailPending();
+    if (!email) return;
+
+    this.isVerifyingOtp.set(true);
+    this.otpError.set(null);
+
+    this.authService.verifyEmailCode(email, code).subscribe({
+      next: () => {
+        this.isVerifyingOtp.set(false);
+      },
+      error: (err) => {
+        this.isVerifyingOtp.set(false);
+        const detail = err.error?.detail || err.error?.message || 'Código de verificación incorrecto o expirado.';
+        this.otpError.set(detail);
+      }
+    });
   }
 
   // Manejo de Rol de Registro
@@ -434,16 +624,12 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clearMessages();
 
     const val = this.registerForm.value;
-    const instId = val.institution ? Number(val.institution) : null;
-
     this.authService
       .register({
-        first_name: val.first_name,
-        last_name: val.last_name,
-        email: val.email,
-        institucion_id: instId,
-        institution: instId,
-        role: val.role,
+        first_name: val.first_name.trim(),
+        last_name: val.last_name.trim(),
+        email: val.email.trim(),
+        role: 'estudiante',
         password: val.password,
         password_confirm: val.password_confirm,
       })
@@ -453,6 +639,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
           this.loginForm.patchValue({ email: val.email });
           if (res.verification_required) {
             this.registeredEmailPending.set(val.email);
+            this.otpDigits.set(['', '', '', '', '', '']);
+            this.otpError.set(null);
+            setTimeout(() => this.focusOtpInput(0), 150);
           } else {
             this.successMessage.set(
               '¡Registro exitoso! Ya puedes iniciar sesión con tu cuenta.'
