@@ -4,6 +4,9 @@ from django.dispatch import receiver
 from apps.common.models import BaseModel
 from apps.tokens.models import Period
 
+import logging
+logger = logging.getLogger(__name__)
+
 class Group(BaseModel):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
@@ -37,6 +40,6 @@ class Group(BaseModel):
 def crear_periodos_al_crear_grupo(sender, instance, created, **kwargs):
     """Crear periodos automaticamente cuando se crea un grupo"""
     if created:
-        print(f"Creando periodos para el grupo: {instance.nombre}")
+        logger.debug(f"Creando periodos para el grupo: {instance.nombre}")
         periodos = Period.crear_periodos_para_grupo(instance)
-        print(f"Periodos creados: {len(periodos)} para grupo {instance.nombre}")
+        logger.debug(f"Periodos creados: {len(periodos)} para grupo {instance.nombre}")

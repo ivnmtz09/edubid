@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from .models import Notification
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     """
@@ -40,7 +43,7 @@ class NotificationSerializer(serializers.ModelSerializer):
                 return f"hace {tiempo}"
             return None
         except Exception as e:
-            print(f"Error en get_tiempo_transcurrido: {e}")
+            logger.debug(f"Error en get_tiempo_transcurrido: {e}")
             return None
 
 

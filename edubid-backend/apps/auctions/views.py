@@ -454,7 +454,7 @@ class BidViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Sobrescribir create para manejar tanto creación como actualización"""
-        logger.info(f"Datos recibidos para crear/aumentar puja: {request.data}")
+        logger.info("Solicitud de puja recibida de usuario %s", request.user.id)
         try:
             return super().create(request, *args, **kwargs)
         except Exception as e:
