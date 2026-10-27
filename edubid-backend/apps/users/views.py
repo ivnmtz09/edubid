@@ -47,6 +47,18 @@ User = get_user_model()
 token_generator = PasswordResetTokenGenerator()
 
 
+PRIVILEGED_ROLES = ('docente', 'coordinador', 'rector')
+PENDING_APPROVAL_MESSAGE = (
+    'Tu correo fue verificado. Tu cuenta quedó pendiente de aprobación por un directivo de tu '
+    'institución o por el administrador. Te avisaremos cuando puedas ingresar.'
+)
+
+
+def requiere_aprobacion(user):
+    """Las cuentas docente/coordinador/rector no se activan solas: necesitan aprobación."""
+    return bool(getattr(settings, 'REQUIRE_PRIVILEGED_APPROVAL', True)) and user.role in PRIVILEGED_ROLES
+
+
 def get_client_ip(request):
     """Obtiene la IP del cliente respetando NUM_PROXIES (no confia en el primer valor de X-Forwarded-For)."""
     return AuthRateThrottle().get_ident(request)
@@ -134,12 +146,19 @@ def verify_email(request, token):
         
         # Activar usuario
         user = verification_token.user
-        user.is_active = True
+        pendiente = requiere_aprobacion(user)
+        user.is_active = not pendiente
         user.email_verified = True
         user.save()
         
         # Marcar token como usado
         verification_token.mark_as_used()
+
+        if pendiente:
+            return Response({
+                'message': PENDING_APPROVAL_MESSAGE,
+                'pending_approval': True,
+            }, status=status.HTTP_200_OK)
         
         # 🆕 Enviar email de bienvenida usando API
         try:
@@ -223,6 +242,12 @@ def verify_email_code(request):
             'already_verified': True,
         }, status=status.HTTP_400_BAD_REQUEST)
 
+    if user.email_verified and not user.is_active and requiere_aprobacion(user):
+        return Response({
+            'detail': PENDING_APPROVAL_MESSAGE,
+            'pending_approval': True,
+        }, status=status.HTTP_403_FORBIDDEN)
+
     # Buscar el token activo más reciente con este código
     verification_token = EmailVerificationToken.objects.filter(
         user=user,
@@ -252,13 +277,20 @@ def verify_email_code(request):
 
     OTPAttemptLimiter.clear(email)
 
-    # Activar usuario
-    user.is_active = True
+    # Activar usuario (los roles privilegiados quedan pendientes de aprobacion)
+    pendiente = requiere_aprobacion(user)
+    user.is_active = not pendiente
     user.email_verified = True
     user.save()
 
     # Marcar token como usado
     verification_token.mark_as_used()
+
+    if pendiente:
+        return Response({
+            'detail': PENDING_APPROVAL_MESSAGE,
+            'pending_approval': True,
+        }, status=status.HTTP_403_FORBIDDEN)
 
     # Enviar email de bienvenida de forma segura
     try:
@@ -389,6 +421,19 @@ def api_login(request):
             }
         }, status=status.HTTP_200_OK)
     
+    # Cuenta verificada que espera aprobacion: avisar (solo si la contrasena es correcta)
+    try:
+        candidato = User.objects.filter(email__iexact=str(request.data.get('email', '')).strip()).first()
+        if (candidato and not candidato.is_active and candidato.email_verified
+                and requiere_aprobacion(candidato)
+                and candidato.check_password(str(request.data.get('password', '')))):
+            return Response({
+                'detail': PENDING_APPROVAL_MESSAGE,
+                'pending_approval': True,
+            }, status=status.HTTP_403_FORBIDDEN)
+    except Exception:
+        pass
+
     # Login fallido - registrar intento
     email = request.data.get('email') if isinstance(request.data, dict) else None
     if email:
@@ -453,6 +498,16 @@ class GoogleLoginAPIView(APIView):
             while User.objects.filter(username=username).exclude(email=email).exists():
                 username = f"{base_username}_{counter}"
                 counter += 1
+
+            existente = User.objects.filter(email=email).first()
+            if existente is None and request.data.get("role") in PRIVILEGED_ROLES and getattr(settings, 'REQUIRE_PRIVILEGED_APPROVAL', True):
+                return Response({
+                    "detail": "Los docentes y directivos deben registrarse con el enlace de su institución y esperar aprobación."
+                }, status=status.HTTP_400_BAD_REQUEST)
+            if existente is not None and not existente.is_active:
+                return Response({
+                    "detail": "Tu cuenta no está activa. Contacta a tu institución o al administrador."
+                }, status=status.HTTP_403_FORBIDDEN)
 
             user, created = User.objects.get_or_create(email=email, defaults={
                 "first_name": first_name,

@@ -389,6 +389,9 @@ DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='EduBid <ivanjmm01@gma
 
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 EMAIL_VERIFICATION_REQUIRED = True
+# Roles docente/coordinador/rector: tras verificar el correo la cuenta queda pendiente hasta que
+# la apruebe un directivo o el admin (el enlace/slug de la institucion es publico).
+REQUIRE_PRIVILEGED_APPROVAL = config('REQUIRE_PRIVILEGED_APPROVAL', default=True, cast=bool)
 PASSWORD_RESET_TIMEOUT = 3600
 
 # ─────────────────────────────────────────────

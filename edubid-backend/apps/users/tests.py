@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.db import IntegrityError, transaction
 from django.core.exceptions import ValidationError
 from django.core.cache import cache
+from django.conf import settings
 from apps.users.models import User, Profile
 from apps.users.token_models import EmailVerificationToken
 from apps.institutions.models import Institution
@@ -639,3 +640,86 @@ class InstitutionalIsolationAndRegistrationTests(TestCase):
 
 
 
+
+
+class PrivilegedRoleApprovalTests(TestCase):
+    """docente/coordinador/rector no se activan solos: el slug de la institucion es publico."""
+
+    def setUp(self):
+        cache.clear()
+        self.client = APIClient()
+        self.inst = Institution.objects.create(nombre="Colegio Aprob", codigo_dane="313131", activo=True)
+        self.admin = User.objects.create_user(username="ap_admin", email="ap_admin@edubid.com", password="password123",
+                                              role="admin", email_verified=True)
+
+    def _register(self, email, role):
+        res = self.client.post("/api/users/register/", {
+            "email": email, "first_name": "N", "last_name": "A", "password": "Password123!",
+            "password_confirm": "Password123!", "role": role, "institution_slug": self.inst.slug}, format="json",
+            HTTP_X_FORWARDED_FOR=f"1.1.1.1, 10.1.1.{abs(hash(email)) % 200}")
+        self.assertEqual(res.status_code, 201, res.data)
+        return User.objects.get(email=email)
+
+    def _verify(self, user):
+        code = EmailVerificationToken.objects.filter(user=user, is_used=False).first().code
+        return self.client.post("/api/users/verify-email-code/", {"email": user.email, "code": code}, format="json")
+
+    def test_teacher_registered_with_public_slug_stays_pending_until_approved(self):
+        user = self._register("pend_doc@edubid.com", "docente")
+        res = self._verify(user)
+        self.assertEqual(res.status_code, 403)
+        self.assertTrue(res.data["pending_approval"])
+        self.assertNotIn("tokens", res.data)
+        user.refresh_from_db()
+        self.assertTrue(user.email_verified)
+        self.assertFalse(user.is_active)
+
+        login = self.client.post("/api/users/login/", {"email": user.email, "password": "Password123!"}, format="json")
+        self.assertEqual(login.status_code, 403)
+        self.assertTrue(login.data["pending_approval"])
+        wrong = self.client.post("/api/users/login/", {"email": user.email, "password": "otra"}, format="json")
+        self.assertEqual(wrong.status_code, 400)       # sin pista si la contrasena es incorrecta
+
+        # Un admin la aprueba con la gestion de usuarios existente y ya puede entrar
+        self.client.force_authenticate(user=self.admin)
+        ok = self.client.patch(f"/api/users/{user.id}/update/", {"is_active": True}, format="json")
+        self.assertEqual(ok.status_code, 200, ok.data)
+        self.client.force_authenticate(user=None)
+        login = self.client.post("/api/users/login/", {"email": user.email, "password": "Password123!"}, format="json")
+        self.assertEqual(login.status_code, 200)
+
+    def test_rector_registration_also_pending(self):
+        user = self._register("pend_rec@edubid.com", "rector")
+        self.assertEqual(self._verify(user).status_code, 403)
+        user.refresh_from_db()
+        self.assertFalse(user.is_active)
+
+    def test_student_registration_is_unchanged(self):
+        user = self._register("est_ok@edubid.com", "estudiante")
+        res = self._verify(user)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("tokens", res.data)
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
+
+    def test_approval_can_be_disabled_by_setting(self):
+        from django.test import override_settings
+        with override_settings(REQUIRE_PRIVILEGED_APPROVAL=False):
+            user = self._register("auto_doc@edubid.com", "docente")
+            self.assertEqual(self._verify(user).status_code, 200)
+
+    def test_google_login_rejects_deactivated_users_and_new_teachers(self):
+        from unittest import mock
+        gone = User.objects.create_user(username="g_off", email="g_off@edubid.com", password="x", role="estudiante",
+                                        is_active=False, email_verified=True)
+        info = lambda mail: {"email": mail, "email_verified": True, "given_name": "G", "family_name": "U",
+                             "aud": settings.GOOGLE_CLIENT_ID}
+        with mock.patch("google.oauth2.id_token.verify_oauth2_token", return_value=info(gone.email)):
+            res = self.client.post("/api/users/google/", {"id_token": "t"}, format="json")
+            self.assertEqual(res.status_code, 403)
+        with mock.patch("google.oauth2.id_token.verify_oauth2_token", return_value=info("nuevo_doc@edubid.com")):
+            res = self.client.post("/api/users/google/", {"id_token": "t", "role": "docente"}, format="json")
+            self.assertEqual(res.status_code, 400)
+            self.assertFalse(User.objects.filter(email="nuevo_doc@edubid.com").exists())
+            res = self.client.post("/api/users/google/", {"id_token": "t", "role": "estudiante"}, format="json")
+            self.assertEqual(res.status_code, 200)
