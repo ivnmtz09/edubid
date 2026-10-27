@@ -195,6 +195,44 @@ class AuthRateLimitingTests(TestCase):
         )
         self.assertEqual(throttled_response.status_code, 429)
 
+    def test_rate_limit_not_bypassed_by_spoofed_forwarded_for(self):
+        """Un cliente que inventa X-Forwarded-For no debe evadir el limite: cuenta la IP anadida por el proxy."""
+        for i in range(10):
+            response = self.client.post(
+                "/api/users/login/",
+                {"email": "inexistente@edubid.com", "password": "wrongpassword"},
+                format="json",
+                HTTP_X_FORWARDED_FOR=f"10.0.0.{i}, 203.0.113.9",
+            )
+            self.assertEqual(response.status_code, 400)
+        blocked = self.client.post(
+            "/api/users/login/",
+            {"email": "inexistente@edubid.com", "password": "wrongpassword"},
+            format="json",
+            HTTP_X_FORWARDED_FOR="10.0.0.99, 203.0.113.9",
+        )
+        self.assertEqual(blocked.status_code, 429)
+
+    def test_otp_blocked_after_too_many_failed_attempts(self):
+        """Tras 5 codigos incorrectos se bloquea el correo, incluso con el codigo correcto."""
+        user = User.objects.create_user(
+            username="otp_brute", email="otp_brute@edubid.com", password="Password123!",
+            is_active=False, email_verified=False
+        )
+        token = EmailVerificationToken.objects.create(user=user)
+        wrong = "000000" if token.code != "000000" else "999999"
+        for _ in range(5):
+            res = self.client.post("/api/users/verify-email-code/",
+                                   {"email": user.email, "code": wrong}, format="json",
+                                   HTTP_X_FORWARDED_FOR=f"1.1.1.1, 198.51.100.{_}")
+            self.assertEqual(res.status_code, 400)
+        res = self.client.post("/api/users/verify-email-code/",
+                               {"email": user.email, "code": token.code}, format="json",
+                               HTTP_X_FORWARDED_FOR="1.1.1.1, 198.51.100.77")
+        self.assertEqual(res.status_code, 429)
+        user.refresh_from_db()
+        self.assertFalse(user.email_verified)
+
     def test_password_reset_rate_limiting_exceeded(self):
         """
         Verifica que al superar la cuota permitida (5 peticiones/minuto) en

@@ -335,6 +335,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'edubid_core.pagination.EduBidPagination',
     'PAGE_SIZE': config('PAGE_SIZE', default=20, cast=int),
     'EXCEPTION_HANDLER': 'edubid_core.exceptions.custom_exception_handler',
+    # Proxies de confianza delante de la app (Railway = 1). DRF toma la IP real desde
+    # el final de X-Forwarded-For; sin esto el cliente podia falsear su IP y evadir los limites.
+    'NUM_PROXIES': config('NUM_PROXIES', default=1, cast=int),
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',

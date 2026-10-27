@@ -17,7 +17,7 @@ from threading import Thread
 
 from .models import User
 from .token_models import EmailVerificationToken, PasswordResetAttempt, LoginFailureTracker
-from .throttles import AuthRateThrottle, PasswordResetRateThrottle
+from .throttles import AuthRateThrottle, PasswordResetRateThrottle, OTPAttemptLimiter
 from .email_utils import (
     send_verification_email_api,  # 🆕 Importar función API
     send_welcome_email_api,       # 🆕 Importar función API  
@@ -48,13 +48,8 @@ token_generator = PasswordResetTokenGenerator()
 
 
 def get_client_ip(request):
-    """Obtiene la IP del cliente"""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
+    """Obtiene la IP del cliente respetando NUM_PROXIES (no confia en el primer valor de X-Forwarded-For)."""
+    return AuthRateThrottle().get_ident(request)
 
 
 # --------------------------
@@ -208,6 +203,11 @@ def verify_email_code(request):
             'detail': 'Se requiere el correo electrónico y el código de 6 dígitos.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
+    if OTPAttemptLimiter.is_blocked(email):
+        return Response({
+            'detail': 'Demasiados intentos fallidos. Espera 15 minutos o solicita un nuevo código.'
+        }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
     try:
         user = User.objects.get(email=email)
     except User.DoesNotExist:
@@ -231,6 +231,7 @@ def verify_email_code(request):
     ).order_by('-created_at').first()
 
     if not verification_token:
+        OTPAttemptLimiter.register_failure(email)
         # Verificar si existe pero expiró
         expired_token = EmailVerificationToken.objects.filter(
             user=user,
@@ -248,6 +249,8 @@ def verify_email_code(request):
         return Response({
             'detail': 'El código de verificación ha expirado o ya fue utilizado.'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+    OTPAttemptLimiter.clear(email)
 
     # Activar usuario
     user.is_active = True
