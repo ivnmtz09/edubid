@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from .models import Activity, Submission
 from apps.users.serializers import UserProfileSerializer
+from apps.common.validators import validate_upload
 
 class ActivitySerializer(serializers.ModelSerializer):
     classroom = serializers.SerializerMethodField()
@@ -15,6 +16,9 @@ class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
         fields = '__all__'
+
+    def validate_archivo_adjunto(self, value):
+        return validate_upload(value)
 
     def get_classroom(self, obj):
         return obj.group.classroom.id if obj.group and obj.group.classroom else None
@@ -135,6 +139,9 @@ class SubmissionSerializer(serializers.ModelSerializer):
             'actualizado'
         ]
         read_only_fields = ['id', 'calificacion', 'retroalimentacion', 'creado', 'actualizado']
+
+    def validate_archivo(self, value):
+        return validate_upload(value)
 
     def validate(self, data):
         user = self.context['request'].user

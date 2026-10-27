@@ -127,6 +127,26 @@ class ActivityAndSubmissionTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Submission.objects.filter(activity=self.actividad_a, estudiante=self.estudiante_a).exists())
 
+    def test_entrega_rechaza_archivos_peligrosos_o_demasiado_grandes(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        self.client.force_authenticate(user=self.estudiante_a)
+        base = {"activity": self.actividad_a.id, "contenido": "x"}
+        html = SimpleUploadedFile("trampa.html", b"<script>alert(1)</script>", content_type="text/html")
+        self.assertEqual(self.client.post("/api/submissions/", dict(base, archivo=html), format="multipart").status_code, 400)
+        grande = SimpleUploadedFile("enorme.pdf", b"0" * (15 * 1024 * 1024 + 1), content_type="application/pdf")
+        self.assertEqual(self.client.post("/api/submissions/", dict(base, archivo=grande), format="multipart").status_code, 400)
+        self.assertFalse(Submission.objects.exists())
+
+    def test_entrega_acepta_archivo_normal(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        import tempfile
+        from django.test import override_settings
+        self.client.force_authenticate(user=self.estudiante_a)
+        with tempfile.TemporaryDirectory() as tmp, override_settings(MEDIA_ROOT=tmp):
+            pdf = SimpleUploadedFile("tarea.pdf", b"%PDF-1.4 contenido", content_type="application/pdf")
+            res = self.client.post("/api/submissions/", {"activity": self.actividad_a.id, "contenido": "x", "archivo": pdf}, format="multipart")
+            self.assertEqual(res.status_code, status.HTTP_201_CREATED, res.data)
+
     def test_docente_no_puede_hacer_submission(self):
         """Solo los usuarios con rol 'estudiante' pueden registrar entregas."""
         self.client.force_authenticate(user=self.docente_a)
