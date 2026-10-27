@@ -36,3 +36,4 @@ django-pg8000>=0.0.5
 pg8000>=1.31.5
 boto3>=1.34.0
 django-storages>=1.14.0
+channels_redis>=4.2.0

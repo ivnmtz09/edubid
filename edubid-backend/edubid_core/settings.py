@@ -347,6 +347,7 @@ REST_FRAMEWORK = {
         'user': config('THROTTLE_USER_RATE', default='120/min'),
         'auth': config('THROTTLE_AUTH_RATE', default='10/min'),
         'password_reset': config('THROTTLE_PASSWORD_RESET_RATE', default='5/min'),
+        'report': config('THROTTLE_REPORT_RATE', default='5/hour'),
     },
 }
 
@@ -394,6 +395,8 @@ PASSWORD_RESET_TIMEOUT = 3600
 # CONFIGURACIÓN DE SEGURIDAD PARA PRODUCCIÓN
 # ─────────────────────────────────────────────
 if not DEBUG:
+    # Railway termina TLS en su proxy: confiar en X-Forwarded-Proto para que request.is_secure() sea correcto
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     # SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

@@ -37,6 +37,17 @@ class PasswordResetRateThrottle(SimpleRateThrottle):
 
 
 
+class ReportRateThrottle(SimpleRateThrottle):
+    """Limita el envio de reportes (endpoint publico que dispara correos) por IP."""
+    scope = 'report'
+
+    def get_cache_key(self, request, view):
+        ident = self.get_ident(request)
+        if not ident:
+            return None
+        return self.cache_format % {'scope': self.scope, 'ident': ident}
+
+
 class OTPAttemptLimiter:
     """
     Limita los intentos fallidos de codigo OTP por correo (independiente de la IP), para que

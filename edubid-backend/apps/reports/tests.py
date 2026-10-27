@@ -71,3 +71,20 @@ class CreateReportViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('asunto', response.data)
         self.assertIn('descripcion', response.data)
+
+
+class ReportThrottleTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def tearDown(self):
+        from django.core.cache import cache
+        cache.clear()
+
+    def test_public_report_endpoint_is_rate_limited(self):
+        client = APIClient()
+        payload = {"tipo": "bug", "asunto": "Prueba", "descripcion": "Descripcion de prueba suficientemente larga"}
+        codes = [client.post("/api/reports/", payload, format="json").status_code for _ in range(6)]
+        self.assertEqual(codes[-1], 429)
+        self.assertNotIn(429, codes[:5])

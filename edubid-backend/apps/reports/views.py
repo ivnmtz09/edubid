@@ -5,6 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from apps.users.throttles import ReportRateThrottle
 from .serializers import UserReportSerializer
 
 logger = logging.getLogger(__name__)
@@ -12,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class CreateReportView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ReportRateThrottle, AnonRateThrottle, UserRateThrottle]
 
     def post(self, request, *args, **kwargs):
         serializer = UserReportSerializer(data=request.data)
