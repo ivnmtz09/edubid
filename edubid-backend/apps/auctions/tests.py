@@ -374,3 +374,47 @@ class AuctionWebSocketTests(TransactionTestCase):
         await self._broadcast()
         self.assertEqual((await comm.receive_json_from())["event"], "bid_created")
         await comm.disconnect()
+
+
+class BidAccessScopeTests(TestCase):
+    """Aislamiento multi-tenant y roles en el listado de pujas por subasta."""
+
+    def setUp(self):
+        self.inst_a = Institution.objects.create(nombre="Colegio A", codigo_dane="11111111")
+        self.inst_b = Institution.objects.create(nombre="Colegio B", codigo_dane="22222222")
+        mk = lambda name, role, inst: User.objects.create_user(
+            username=name, email=f"{name}@edubid.com", password="x", role=role, institucion=inst)
+        self.docente = mk("doc_a", "docente", self.inst_a)
+        self.estudiante = mk("est_a", "estudiante", self.inst_a)
+        self.rector_a = mk("rec_a", "rector", self.inst_a)
+        self.rector_b = mk("rec_b", "rector", self.inst_b)
+        self.coord_b = mk("coord_b", "coordinador", self.inst_b)
+        self.admin = mk("adm", "admin", None)
+        self.group = Group.objects.create(
+            nombre="Grupo A", classroom=Classroom.objects.create(nombre="Aula A", docente=self.docente))
+        self.group.estudiantes.add(self.estudiante)
+        periodo = Period.objects.filter(grupo=self.group, activo=True).first()
+        Wallet.objects.create(usuario=self.estudiante, grupo=self.group, periodo=periodo,
+                              saldo_educoins=100, bloqueado_educoins=20)
+        self.auction = Auction.objects.create(
+            titulo="Subasta", creador=self.docente, grupo=self.group, estado="active",
+            fecha_fin=timezone.now() + timedelta(days=1),
+            valor_minimo_educoins=10, incremento_minimo_educoins=5)
+        Bid.objects.create(auction=self.auction, estudiante=self.estudiante,
+                           cantidad_educoins=20, registrado_por=self.estudiante)
+
+    def _get(self, user):
+        client = APIClient()
+        client.force_authenticate(user=user)
+        return client.get(f"/api/auctions/bids/por-subasta/{self.auction.id}/")
+
+    def test_by_auction_denied_for_other_institution_leadership(self):
+        self.assertEqual(self._get(self.rector_b).status_code, 403)
+        self.assertEqual(self._get(self.coord_b).status_code, 403)
+
+    def test_by_auction_allowed_for_same_institution_and_admin(self):
+        for user in (self.rector_a, self.admin, self.docente):
+            res = self._get(user)
+            self.assertEqual(res.status_code, 200, user.role)
+            self.assertEqual(len(res.data["results"] if isinstance(res.data, dict) and "results" in res.data else res.data), 1)
+        self.assertEqual(self._get(self.estudiante).status_code, 200)

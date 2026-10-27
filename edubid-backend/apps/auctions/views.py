@@ -608,8 +608,17 @@ class BidViewSet(viewsets.ModelViewSet):
             bids = auction.bids.filter(estudiante=user)
             logger.info(f"Estudiante {user.id} viendo {bids.count()} pujas propias de subasta {auction_id}")
         
+        elif user.role in ('rector', 'coordinador'):
+            inst_id = auction.grupo.classroom.docente.institucion_id
+            if not user.institucion_id or user.institucion_id != inst_id:
+                raise PermissionDenied("No tienes acceso a esta subasta.")
+            bids = auction.bids.all().order_by('-cantidad_educoins')
+
+        elif user.role == 'admin' or user.is_staff:
+            bids = auction.bids.all().order_by('-cantidad_educoins')
+
         else:
-            bids = auction.bids.all()
+            raise PermissionDenied("No tienes acceso a esta subasta.")
         
         serializer = self.get_serializer(bids, many=True)
         return Response(serializer.data)
