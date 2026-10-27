@@ -198,10 +198,17 @@ class AuctionViewSet(viewsets.ModelViewSet):
         """Estadísticas básicas de subastas"""
         user = request.user
         queryset = self.get_queryset()
+        activas = queryset.filter(estado="active").count()
+        cerradas = queryset.filter(estado="closed").count()
+        total = queryset.count()
         return Response({
-            "total_activas": queryset.filter(estado="active").count(),
-            "total_cerradas": queryset.filter(estado="closed").count(),
-            "total_generales": queryset.count(),
+            "total_activas": activas,
+            "total_cerradas": cerradas,
+            "total_generales": total,
+            # claves que lee el frontend
+            "activas": activas,
+            "cerradas": cerradas,
+            "totales": total,
         })
 
     def list(self, request, *args, **kwargs):
@@ -423,6 +430,16 @@ class BidViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        qs = self._scoped_queryset()
+        auction_id = self.request.query_params.get('auction')
+        if auction_id:
+            try:
+                qs = qs.filter(auction_id=int(auction_id))
+            except (TypeError, ValueError):
+                return qs.none()
+        return qs
+
+    def _scoped_queryset(self):
         user = self.request.user
         
         if user.is_staff or user.role == 'admin':
