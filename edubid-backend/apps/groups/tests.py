@@ -127,6 +127,19 @@ class GroupEnrollmentAndRBACTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Codigo invalido o expirado", str(response.data))
 
+    def test_guessing_join_codes_is_blocked_after_repeated_failures(self):
+        """Tras 10 codigos incorrectos el usuario queda bloqueado, incluso con un codigo valido."""
+        from django.core.cache import cache
+        cache.clear()
+        client = APIClient()
+        client.force_authenticate(user=self.estudiante)
+        for i in range(10):
+            self.assertEqual(client.post("/api/groups/join/", {"code": f"BAD{i:03d}"}).status_code, 400)
+        res = client.post("/api/groups/join/", {"code": self.group_1.codigo})
+        self.assertEqual(res.status_code, 429)
+        self.assertFalse(self.group_1.estudiantes.filter(id=self.estudiante.id).exists())
+        cache.clear()
+
     def test_group_rbac_isolation(self):
         """
         Aislamiento multi-tenant:

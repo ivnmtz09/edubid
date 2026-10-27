@@ -48,6 +48,32 @@ class ReportRateThrottle(SimpleRateThrottle):
         return self.cache_format % {'scope': self.scope, 'ident': ident}
 
 
+class JoinCodeAttemptLimiter:
+    """
+    Limita los codigos de grupo incorrectos por usuario: los codigos son cortos (6 hex) y sin esto
+    se podrian adivinar por fuerza bruta para entrar a grupos ajenos.
+    """
+    MAX_FAILURES = 10
+    WINDOW_SECONDS = 60 * 60
+
+    @staticmethod
+    def _key(user_id) -> str:
+        return f"join_fail:{user_id}"
+
+    @classmethod
+    def is_blocked(cls, user_id) -> bool:
+        return cache.get(cls._key(user_id), 0) >= cls.MAX_FAILURES
+
+    @classmethod
+    def register_failure(cls, user_id) -> None:
+        key = cls._key(user_id)
+        cache.add(key, 0, cls.WINDOW_SECONDS)
+        try:
+            cache.incr(key)
+        except ValueError:
+            cache.set(key, 1, cls.WINDOW_SECONDS)
+
+
 class OTPAttemptLimiter:
     """
     Limita los intentos fallidos de codigo OTP por correo (independiente de la IP), para que

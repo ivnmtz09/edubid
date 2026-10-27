@@ -8,6 +8,7 @@ from .models import Group
 from .serializers import GroupSerializer, GroupJoinSerializer
 from apps.tokens.models import Wallet, Period
 from apps.users.permissions import IsDocente
+from apps.users.throttles import JoinCodeAttemptLimiter
 
 class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
@@ -46,11 +47,19 @@ class GroupViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def join(self, request):
         """Unirse a un grupo por codigo"""
-        serializer = GroupJoinSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        code = serializer.validated_data['code']
         user = request.user
+        if JoinCodeAttemptLimiter.is_blocked(user.id):
+            return Response(
+                {"detail": "Demasiados intentos con códigos incorrectos. Intenta de nuevo en una hora."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+
+        serializer = GroupJoinSerializer(data=request.data)
+        if not serializer.is_valid():
+            JoinCodeAttemptLimiter.register_failure(user.id)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        code = serializer.validated_data['code']
         
         if user.role != 'estudiante':
             return Response(
