@@ -519,6 +519,23 @@ class InstitutionalIsolationAndRegistrationTests(TestCase):
         self.assertEqual(exp_res.status_code, 400)
         self.assertIn("expirado", str(exp_res.data).lower())
 
+    def test_verify_email_code_already_verified_does_not_issue_tokens(self):
+        """Una cuenta ya verificada no debe entregar sesión JWT solo con su correo y un código cualquiera."""
+        user = User.objects.create_user(
+            username="ya_verificado",
+            email="ya_verificado@edubid.com",
+            password="Password123!",
+            is_active=True,
+            email_verified=True
+        )
+        res = self.client.post("/api/users/verify-email-code/", {
+            "email": user.email,
+            "code": "123456"
+        }, format="json")
+        self.assertEqual(res.status_code, 400)
+        self.assertNotIn("tokens", res.data)
+        self.assertTrue(res.data.get("already_verified"))
+
     def test_register_rector_success_and_duplicate_blocked(self):
         """El registro exclusivo de rector se asigna correctamente y bloquea duplicados en la misma institución."""
         payload = {

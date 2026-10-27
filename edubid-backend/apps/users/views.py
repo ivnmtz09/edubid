@@ -215,18 +215,13 @@ def verify_email_code(request):
             'detail': 'No existe una cuenta asociada a este correo electrónico.'
         }, status=status.HTTP_404_NOT_FOUND)
 
-    # Si el usuario ya está verificado y activo
+    # Si el usuario ya está verificado y activo, NO se emiten tokens: el código no se
+    # comprobó, así que devolver una sesión permitiría tomar cualquier cuenta con solo su correo.
     if user.email_verified and user.is_active:
-        refresh = RefreshToken.for_user(user)
         return Response({
-            'message': '¡Tu correo ya ha sido verificado exitosamente!',
+            'detail': 'Tu correo ya está verificado. Inicia sesión con tu contraseña.',
             'already_verified': True,
-            'tokens': {
-                'access': str(refresh.access_token),
-                'refresh': str(refresh),
-            },
-            'user': UserProfileSerializer(user, context={'request': request}).data
-        }, status=status.HTTP_200_OK)
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     # Buscar el token activo más reciente con este código
     verification_token = EmailVerificationToken.objects.filter(
