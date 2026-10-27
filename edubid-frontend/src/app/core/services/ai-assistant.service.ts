@@ -4,11 +4,20 @@ import { Observable, Subject, tap, catchError, of } from 'rxjs';
 import { AI_ENDPOINTS, STORAGE_KEYS } from '../constants/api.constants';
 import { AuthService } from './auth.service';
 
+export interface AiPendingAction {
+  id: number;
+  tool: string;
+  resumen: string;
+  status: 'pending' | 'processing' | 'done' | 'cancelled' | 'error';
+  message?: string;
+}
+
 export interface AiChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp?: Date | string;
   model?: string;
+  pendingActions?: AiPendingAction[];
 }
 
 export interface AiChatRequest {
@@ -23,6 +32,7 @@ export interface AiChatResponse {
   model: string;
   author: string;
   executed_tools?: string[];
+  pending_actions?: Array<{ id: number; tool: string; resumen: string }>;
 }
 
 export interface AiActionCompletedEvent {
@@ -172,6 +182,7 @@ export class AiAssistantService {
           content: response.content,
           model: response.model,
           timestamp: new Date().toISOString(),
+          pendingActions: (response.pending_actions ?? []).map((a) => ({ ...a, status: 'pending' as const })),
         };
         if (response.model) {
           this.activeModel.set(response.model);
@@ -205,6 +216,41 @@ export class AiAssistantService {
         }
       })
     );
+  }
+
+  private patchPendingAction(id: number, patch: Partial<AiPendingAction>): void {
+    this.messages.update((msgs) =>
+      msgs.map((m) =>
+        m.pendingActions?.some((a) => a.id === id)
+          ? { ...m, pendingActions: m.pendingActions.map((a) => (a.id === id ? { ...a, ...patch } : a)) }
+          : m
+      )
+    );
+    this.saveMessagesToStorage();
+  }
+
+  /** El usuario confirma una acción sensible propuesta por la IA (premiar / calificar). */
+  confirmAction(action: AiPendingAction): void {
+    if (action.status !== 'pending') return;
+    this.patchPendingAction(action.id, { status: 'processing' });
+    this.http.post<{ ok: boolean; resultado?: { mensaje?: string } }>(AI_ENDPOINTS.ACTION_CONFIRM(action.id), {}).subscribe({
+      next: (res) => {
+        this.patchPendingAction(action.id, { status: 'done', message: res.resultado?.mensaje || 'Acción ejecutada.' });
+        this.actionCompletedSubject.next({ tools: [action.tool] });
+      },
+      error: (err) => {
+        const detail = err?.error?.resultado?.error || err?.error?.error || err?.error?.detail || 'No se pudo ejecutar la acción.';
+        this.patchPendingAction(action.id, { status: 'error', message: detail });
+      },
+    });
+  }
+
+  cancelAction(action: AiPendingAction): void {
+    if (action.status !== 'pending') return;
+    this.http.post(AI_ENDPOINTS.ACTION_CANCEL(action.id), {}).subscribe({
+      next: () => this.patchPendingAction(action.id, { status: 'cancelled', message: 'Acción cancelada.' }),
+      error: () => this.patchPendingAction(action.id, { status: 'cancelled', message: 'Acción cancelada o expirada.' }),
+    });
   }
 
   getSuggestions(): Observable<AiSuggestionsResponse> {

@@ -24,6 +24,8 @@ export const AUTH_ENDPOINTS = {
 export const AI_ENDPOINTS = {
   CHAT: `${API_BASE}/ai/chat/`,
   SUGGESTIONS: `${API_BASE}/ai/suggestions/`,
+  ACTION_CONFIRM: (id: number) => `${API_BASE}/ai/actions/${id}/confirm/`,
+  ACTION_CANCEL: (id: number) => `${API_BASE}/ai/actions/${id}/cancel/`,
 } as const;
 
 export const USER_ROLES = {

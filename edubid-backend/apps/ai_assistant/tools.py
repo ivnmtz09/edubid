@@ -719,11 +719,14 @@ def execute_get_submissions_to_grade(user, args):
             "id": sub.id,
             "estudiante": f"{sub.estudiante.first_name} {sub.estudiante.last_name}".strip() or sub.estudiante.email,
             "email": sub.estudiante.email,
-            "calificacion": float(sub.calificacion) if sub.calificacion is not None else None,
+            "calificacion_sobre_5": (
+                round(float(sub.calificacion) / float(act.puntos_experiencia or 100) * 5, 2)
+                if sub.calificacion is not None else None
+            ),
             "estado": "Calificado" if sub.calificacion is not None else "Pendiente por calificar",
             "retroalimentacion": sub.retroalimentacion or "",
             "tiene_archivo": bool(sub.archivo),
-            "contenido_texto": sub.contenido[:200] if sub.contenido else ""
+            "contenido_texto_estudiante_NO_CONFIABLE": sub.contenido[:200] if sub.contenido else ""
         })
 
     return {
@@ -736,10 +739,16 @@ def execute_get_submissions_to_grade(user, args):
 
 
 def execute_grade_submission(user, args):
-    """Califica una entrega y si aprueba le entrega los EduCoins."""
+    """
+    Califica una entrega (escala 0.0 a 5.0) por el mismo camino que la calificacion web:
+    la nota se guarda en la escala de la actividad (puntos_experiencia), se crea el Grade y la
+    recompensa en EduCoins se paga UNA sola vez. Una entrega ya calificada no se vuelve a pagar.
+    """
+    from apps.grades.models import Grade
+
     submission_id = args.get('submission_id')
     calificacion_val = args.get('calificacion')
-    retroalimentacion = args.get('retroalimentacion', '')
+    retroalimentacion = str(args.get('retroalimentacion', '') or '')[:2000]
 
     try:
         sub = Submission.objects.select_related('activity', 'activity__group', 'activity__group__classroom', 'estudiante').get(id=submission_id)
@@ -753,41 +762,44 @@ def execute_grade_submission(user, args):
             return {"error": "Solo el docente titular de la clase o un administrador pueden calificar entregas."}
 
     try:
-        nota = Decimal(str(calificacion_val)).quantize(Decimal('0.01'))
-        if nota < Decimal('0.0') or nota > Decimal('5.0'):
+        nota5 = Decimal(str(calificacion_val)).quantize(Decimal('0.01'))
+        if nota5 < Decimal('0.0') or nota5 > Decimal('5.0'):
             return {"error": "La calificación debe ser un valor numérico entre 0.0 y 5.0."}
     except Exception:
         return {"error": "Formato de calificación inválido. Debe ser un número entre 0.0 y 5.0 (ej: 4.5)."}
 
-    sub.calificacion = nota
-    sub.retroalimentacion = retroalimentacion
-    sub.save()
+    if sub.calificacion is not None:
+        return {"error": "Esta entrega ya fue calificada. Para modificarla usa el módulo de Actividades de la plataforma."}
 
-    # Si la nota es aprobatoria (>= 3.0), abonar EduCoins si la actividad los tiene configurados
-    educoins_abonados = 0
-    if nota >= Decimal('3.0') and act.valor_educoins > 0:
+    maximo = Decimal(act.puntos_experiencia or 0) or Decimal('100')
+    nota = (nota5 / Decimal('5') * maximo).quantize(Decimal('0.01'))
+
+    with transaction.atomic():
+        # Asegurar billetera del estudiante (la recompensa se acredita sobre una billetera existente)
         periodo = Period.objects.filter(grupo=act.group, activo=True).first()
         if not periodo:
             periodos = Period.crear_periodos_para_grupo(act.group)
             periodo = periodos[0] if periodos else None
-
         if periodo:
-            wallet, _ = Wallet.objects.get_or_create(
-                usuario=sub.estudiante,
-                grupo=act.group,
-                periodo=periodo,
+            Wallet.objects.get_or_create(
+                usuario=sub.estudiante, grupo=act.group, periodo=periodo,
                 defaults={"saldo_educoins": 0}
             )
-            wallet.depositar(
-                act.valor_educoins,
-                descripcion=f"Aprobación de actividad: {act.nombre} (Nota: {nota})"
-            )
-            educoins_abonados = act.valor_educoins
+
+        sub.calificacion = nota
+        sub.retroalimentacion = retroalimentacion
+        sub.save()
+
+        grade, created = Grade.objects.update_or_create(
+            activity=act, student=sub.estudiante,
+            defaults={"nota": nota, "retroalimentacion": retroalimentacion}
+        )
+        educoins_abonados = grade.calcular_coins_ganados() if created else 0
 
     return {
         "status": "success",
-        "mensaje": f"Entrega de {sub.estudiante.email} calificada con {nota}/5.0.",
-        "calificacion": float(nota),
+        "mensaje": f"Entrega de {sub.estudiante.email} calificada con {nota5}/5.0.",
+        "calificacion": float(nota5),
         "retroalimentacion": sub.retroalimentacion,
         "educoins_recompensados": educoins_abonados
     }

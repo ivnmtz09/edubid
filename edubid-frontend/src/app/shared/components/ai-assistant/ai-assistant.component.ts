@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import {
   AiAssistantService,
   AiChatMessage,
+  AiPendingAction,
 } from '../../../core/services/ai-assistant.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { BotAvatarComponent } from './bot-avatar.component';
@@ -221,6 +222,43 @@ import { BotAvatarComponent } from './bot-avatar.component';
                         [innerHTML]="formatMarkdown(msg.content)"
                       ></div>
 
+                      <!-- Acciones sensibles pendientes de confirmación humana -->
+                      @for (action of msg.pendingActions ?? []; track action.id) {
+                        <div class="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-xs space-y-2">
+                          <p class="font-bold text-text">Acción pendiente de tu confirmación</p>
+                          <p class="text-text-muted break-words">{{ action.resumen }}</p>
+                          @if (action.status === 'pending' || action.status === 'processing') {
+                            <div class="flex items-center gap-2">
+                              <button
+                                type="button"
+                                (click)="confirmAction(action)"
+                                [disabled]="action.status === 'processing'"
+                                class="px-3 py-1.5 rounded-lg bg-primary text-primary-text font-bold cursor-pointer disabled:opacity-50"
+                              >
+                                {{ action.status === 'processing' ? 'Ejecutando...' : 'Confirmar' }}
+                              </button>
+                              <button
+                                type="button"
+                                (click)="cancelAction(action)"
+                                [disabled]="action.status === 'processing'"
+                                class="px-3 py-1.5 rounded-lg border border-border text-text-muted font-bold cursor-pointer disabled:opacity-50"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          } @else {
+                            <p
+                              class="font-bold"
+                              [class.text-emerald-500]="action.status === 'done'"
+                              [class.text-red-500]="action.status === 'error'"
+                              [class.text-text-muted]="action.status === 'cancelled'"
+                            >
+                              {{ action.message }}
+                            </p>
+                          }
+                        </div>
+                      }
+
                       <!-- Acciones mensaje IA -->
                       <div class="flex items-center gap-2 px-1">
                         <button
@@ -332,6 +370,14 @@ export class AiAssistantComponent implements OnInit, AfterViewChecked {
   readonly suggestions = this.aiService.suggestions;
   readonly showSuggestionsTray = this.aiService.showSuggestionsTray;
   readonly activeModel = this.aiService.activeModel;
+
+  confirmAction(action: AiPendingAction): void {
+    this.aiService.confirmAction(action);
+  }
+
+  cancelAction(action: AiPendingAction): void {
+    this.aiService.cancelAction(action);
+  }
 
   readonly activeModelBadge = computed(() => {
     const raw = this.activeModel();

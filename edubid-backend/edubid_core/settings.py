@@ -348,6 +348,7 @@ REST_FRAMEWORK = {
         'auth': config('THROTTLE_AUTH_RATE', default='10/min'),
         'password_reset': config('THROTTLE_PASSWORD_RESET_RATE', default='5/min'),
         'report': config('THROTTLE_REPORT_RATE', default='5/hour'),
+        'ai_chat': config('THROTTLE_AI_CHAT_RATE', default='20/min'),
     },
 }
 
