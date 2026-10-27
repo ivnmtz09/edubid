@@ -489,6 +489,7 @@ class BidViewSet(viewsets.ModelViewSet):
         )
 
     # ... (el resto de los métodos permanecen igual)
+    @transaction.atomic
     def perform_update(self, serializer):
         """Actualizar puja - Solo docentes pueden modificar pujas"""
         user = self.request.user
@@ -515,11 +516,18 @@ class BidViewSet(viewsets.ModelViewSet):
         if old_cantidad != new_cantidad:
             logger.info(f"Cambiando cantidad de puja: {old_cantidad} -> {new_cantidad}")
             periodo_activo = Period.objects.filter(grupo=bid.auction.grupo, activo=True).first()
-            wallet = Wallet.objects.get(
-                usuario=bid.estudiante,
-                grupo=bid.auction.grupo,
-                periodo=periodo_activo
-            )
+            if not periodo_activo:
+                periodo_activo = Period.objects.filter(grupo=bid.auction.grupo).order_by('-fecha_fin').first()
+            if not periodo_activo:
+                raise ValidationError("No hay un periodo activo para este grupo.")
+            try:
+                wallet = Wallet.objects.select_for_update().get(
+                    usuario=bid.estudiante,
+                    grupo=bid.auction.grupo,
+                    periodo=periodo_activo
+                )
+            except Wallet.DoesNotExist:
+                raise ValidationError("El estudiante no tiene una billetera activa en este grupo.")
             
             diferencia = new_cantidad - old_cantidad
             saldo_disponible = wallet.saldo_educoins - wallet.bloqueado_educoins
@@ -536,6 +544,7 @@ class BidViewSet(viewsets.ModelViewSet):
         serializer.save()
         logger.info(f"Puja {bid.id} actualizada exitosamente")
 
+    @transaction.atomic
     def perform_destroy(self, instance):
         """Eliminar puja - Solo docentes y antes de cerrar la subasta"""
         user = self.request.user
@@ -559,13 +568,15 @@ class BidViewSet(viewsets.ModelViewSet):
         # Desbloquear monedas
         try:
             periodo_activo = Period.objects.filter(grupo=instance.auction.grupo, activo=True).first()
+            if not periodo_activo:
+                periodo_activo = Period.objects.filter(grupo=instance.auction.grupo).order_by('-fecha_fin').first()
             if periodo_activo:
-                wallet = Wallet.objects.get(
+                wallet = Wallet.objects.select_for_update().get(
                     usuario=instance.estudiante,
                     grupo=instance.auction.grupo,
                     periodo=periodo_activo
                 )
-                wallet.bloqueado_educoins -= instance.cantidad_educoins
+                wallet.bloqueado_educoins = max(0, wallet.bloqueado_educoins - instance.cantidad_educoins)
                 wallet.save()
                 logger.info(f"Monedas desbloqueadas: {instance.cantidad_educoins}, nuevo bloqueado={wallet.bloqueado_educoins}")
         except Wallet.DoesNotExist:

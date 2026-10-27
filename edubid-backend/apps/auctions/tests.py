@@ -418,3 +418,33 @@ class BidAccessScopeTests(TestCase):
             self.assertEqual(res.status_code, 200, user.role)
             self.assertEqual(len(res.data["results"] if isinstance(res.data, dict) and "results" in res.data else res.data), 1)
         self.assertEqual(self._get(self.estudiante).status_code, 200)
+
+    def test_student_withdraw_bid_releases_locked_coins(self):
+        client = APIClient()
+        client.force_authenticate(user=self.estudiante)
+        bid = Bid.objects.get(auction=self.auction, estudiante=self.estudiante)
+        res = client.delete(f"/api/auctions/bids/{bid.id}/")
+        self.assertEqual(res.status_code, 204)
+        wallet = Wallet.objects.get(usuario=self.estudiante, grupo=self.group)
+        self.assertEqual(wallet.bloqueado_educoins, 0)
+        self.assertFalse(Bid.objects.filter(id=bid.id).exists())
+
+    def test_withdraw_bid_never_leaves_negative_locked_balance(self):
+        Wallet.objects.filter(usuario=self.estudiante, grupo=self.group).update(bloqueado_educoins=5)
+        client = APIClient()
+        client.force_authenticate(user=self.estudiante)
+        bid = Bid.objects.get(auction=self.auction, estudiante=self.estudiante)
+        self.assertEqual(client.delete(f"/api/auctions/bids/{bid.id}/").status_code, 204)
+        self.assertEqual(Wallet.objects.get(usuario=self.estudiante, grupo=self.group).bloqueado_educoins, 0)
+
+    def test_withdraw_bid_uses_latest_period_when_none_active(self):
+        Period.objects.filter(grupo=self.group).update(activo=False)
+        periodo = Period.objects.filter(grupo=self.group).order_by('-fecha_fin').first()
+        Wallet.objects.filter(usuario=self.estudiante, grupo=self.group).exclude(periodo=periodo).delete()
+        Wallet.objects.update_or_create(usuario=self.estudiante, grupo=self.group, periodo=periodo,
+                                        defaults={"saldo_educoins": 100, "bloqueado_educoins": 20})
+        client = APIClient()
+        client.force_authenticate(user=self.estudiante)
+        bid = Bid.objects.get(auction=self.auction, estudiante=self.estudiante)
+        self.assertEqual(client.delete(f"/api/auctions/bids/{bid.id}/").status_code, 204)
+        self.assertEqual(Wallet.objects.get(usuario=self.estudiante, periodo=periodo).bloqueado_educoins, 0)
