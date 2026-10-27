@@ -55,14 +55,29 @@ export class WebSocketService implements OnDestroy {
     return `${wsUrl}/ws/auctions/`;
   }
 
+  private getAccessToken(): string | null {
+    try {
+      return localStorage.getItem('access_token');
+    } catch {
+      return null;
+    }
+  }
+
   connect(): void {
     if (this.isDestroyed) return;
     if (this.socket && (this.socket.readyState === WebSocket.OPEN || this.socket.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
+    // El servidor exige JWT: sin sesión no se abre el canal; se reintenta con backoff.
+    const token = this.getAccessToken();
+    if (!token) {
+      this.scheduleReconnect();
+      return;
+    }
+
     try {
-      const url = this.getWebSocketUrl();
+      const url = `${this.getWebSocketUrl()}?token=${encodeURIComponent(token)}`;
       this.socket = new WebSocket(url);
 
       this.socket.onopen = () => {

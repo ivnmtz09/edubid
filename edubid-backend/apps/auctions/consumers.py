@@ -1,7 +1,28 @@
 import logging
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
+from apps.groups.models import Group
+
 logger = logging.getLogger(__name__)
+
+
+@database_sync_to_async
+def _allowed_group_ids(user):
+    """IDs de los grupos cuyas subastas puede ver el usuario según su rol e institución."""
+    if user.is_staff or user.role == 'admin':
+        return None  # sin restricción
+    if user.role in ('rector', 'coordinador'):
+        if not user.institucion_id:
+            return set()
+        qs = Group.objects.filter(classroom__docente__institucion_id=user.institucion_id)
+    elif user.role == 'docente':
+        qs = Group.objects.filter(classroom__docente=user)
+    elif user.role == 'estudiante':
+        qs = Group.objects.filter(estudiantes=user)
+    else:
+        return set()
+    return set(qs.values_list('id', flat=True))
 
 
 class AuctionConsumer(AsyncJsonWebsocketConsumer):
@@ -13,11 +34,26 @@ class AuctionConsumer(AsyncJsonWebsocketConsumer):
     """
 
     async def connect(self):
-        self.group_id = self.scope['url_route']['kwargs'].get('group_id')
-        self.rooms = ["auctions_general"]
+        user = self.scope.get('user')
+        if not user or not user.is_authenticated:
+            await self.close(code=4401)
+            return
 
-        if self.group_id:
-            self.rooms.append(f"auctions_group_{self.group_id}")
+        requested = self.scope['url_route']['kwargs'].get('group_id')
+        allowed = await _allowed_group_ids(user)  # None = admin (todos los grupos)
+
+        self.group_id = requested
+        self.rooms = []
+        if allowed is None:
+            self.rooms.append("auctions_general")
+            if requested:
+                self.rooms.append(f"auctions_group_{requested}")
+        else:
+            if requested and requested not in allowed:
+                await self.close(code=4403)
+                return
+            ids = {requested} if requested else allowed
+            self.rooms.extend(f"auctions_group_{gid}" for gid in ids)
 
         for room in self.rooms:
             await self.channel_layer.group_add(room, self.channel_name)

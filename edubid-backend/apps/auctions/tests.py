@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from django.core.management import call_command
 from rest_framework.test import APIClient
@@ -298,30 +298,79 @@ class AuctionClosingTests(TestCase):
         self.assertEqual(self.wallet_ganador.bloqueado_educoins, 0)
 
 
-class AuctionWebSocketTests(TestCase):
-    async def test_websocket_connection_and_welcome(self):
-        """Verifica que un cliente pueda conectarse al WebSocket y reciba el mensaje de bienvenida."""
+class AuctionWebSocketTests(TransactionTestCase):
+    """El WebSocket exige JWT y solo entrega eventos de los grupos que el usuario puede ver."""
+
+    def setUp(self):
+        from rest_framework_simplejwt.tokens import AccessToken
+        self.inst_a = Institution.objects.create(nombre="Colegio A", codigo_dane="11111111")
+        self.inst_b = Institution.objects.create(nombre="Colegio B", codigo_dane="22222222")
+        self.docente_a = User.objects.create_user(
+            username="doc_a", email="doc_a@edubid.com", password="x", role="docente", institucion=self.inst_a)
+        self.est_a = User.objects.create_user(
+            username="est_a", email="est_a@edubid.com", password="x", role="estudiante", institucion=self.inst_a)
+        self.est_b = User.objects.create_user(
+            username="est_b", email="est_b@edubid.com", password="x", role="estudiante", institucion=self.inst_b)
+        self.rector_b = User.objects.create_user(
+            username="rec_b", email="rec_b@edubid.com", password="x", role="rector", institucion=self.inst_b)
+        self.admin = User.objects.create_user(
+            username="adm", email="adm@edubid.com", password="x", role="admin")
+        self.group_a = Group.objects.create(
+            nombre="Grupo A", classroom=Classroom.objects.create(nombre="Aula A", docente=self.docente_a))
+        self.group_a.estudiantes.add(self.est_a)
+        self.token = lambda u: str(AccessToken.for_user(u))
+
+    def _communicator(self, path, user=None, token=None):
         from channels.testing import WebsocketCommunicator
         from edubid_core.asgi import application
+        t = token if token is not None else (self.token(user) if user else None)
+        return WebsocketCommunicator(application, path + (f"?token={t}" if t else ""))
 
-        communicator = WebsocketCommunicator(application, "/ws/auctions/")
-        connected, _ = await communicator.connect()
+    async def _broadcast(self):
+        from channels.layers import get_channel_layer
+        layer = get_channel_layer()
+        payload = {"type": "bid_update", "data": {"event": "bid_created", "grupo_id": self.group_a.id}}
+        await layer.group_send(f"auctions_group_{self.group_a.id}", payload)
+        await layer.group_send("auctions_general", payload)
+
+    async def test_anonymous_and_invalid_token_rejected(self):
+        for kwargs in ({}, {"token": "no-es-un-jwt"}):
+            comm = self._communicator("/ws/auctions/", **kwargs)
+            connected, _ = await comm.connect()
+            self.assertFalse(connected)
+
+    async def test_student_connects_and_receives_only_own_group_events(self):
+        comm = self._communicator("/ws/auctions/", self.est_a)
+        connected, _ = await comm.connect()
         self.assertTrue(connected)
-        response = await communicator.receive_json_from()
-        self.assertEqual(response["type"], "connection_established")
-        await communicator.disconnect()
+        self.assertEqual((await comm.receive_json_from())["type"], "connection_established")
+        await self._broadcast()
+        self.assertEqual((await comm.receive_json_from())["event"], "bid_created")
+        self.assertTrue(await comm.receive_nothing())  # el canal general global ya no le llega
+        await comm.disconnect()
 
-    async def test_websocket_ping_pong(self):
-        """Verifica que el WebSocket responda a un ping con un pong."""
-        from channels.testing import WebsocketCommunicator
-        from edubid_core.asgi import application
+    async def test_user_from_other_institution_gets_no_events(self):
+        for user in (self.est_b, self.rector_b):
+            comm = self._communicator("/ws/auctions/", user)
+            connected, _ = await comm.connect()
+            self.assertTrue(connected)
+            await comm.receive_json_from()
+            await self._broadcast()
+            self.assertTrue(await comm.receive_nothing())
+            await comm.disconnect()
 
-        communicator = WebsocketCommunicator(application, "/ws/auctions/")
-        connected, _ = await communicator.connect()
+    async def test_cannot_join_group_room_not_allowed(self):
+        comm = self._communicator(f"/ws/auctions/{self.group_a.id}/", self.est_b)
+        connected, _ = await comm.connect()
+        self.assertFalse(connected)
+
+    async def test_admin_receives_events_and_ping_pong(self):
+        comm = self._communicator("/ws/auctions/", self.admin)
+        connected, _ = await comm.connect()
         self.assertTrue(connected)
-        await communicator.receive_json_from()  # Consumir mensaje de bienvenida
-        await communicator.send_json_to({"type": "ping"})
-        response = await communicator.receive_json_from()
-        self.assertEqual(response["type"], "pong")
-        await communicator.disconnect()
-
+        await comm.receive_json_from()
+        await comm.send_json_to({"type": "ping"})
+        self.assertEqual((await comm.receive_json_from())["type"], "pong")
+        await self._broadcast()
+        self.assertEqual((await comm.receive_json_from())["event"], "bid_created")
+        await comm.disconnect()
