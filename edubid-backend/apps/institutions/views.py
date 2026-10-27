@@ -23,6 +23,8 @@ class InstitutionViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         user = self.request.user
+        if not user.is_authenticated:
+            return PublicInstitutionSerializer
         if self.action in ('update', 'partial_update') and user.role == 'rector':
             return RectorInstitutionSerializer
         if self.action in ('create',) and user.role != 'admin':

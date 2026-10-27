@@ -71,6 +71,24 @@ class InstitutionModelAndApiTests(TestCase):
         self.assertIn("Colegio San Agustín", nombres)
         self.assertNotIn("Colegio Inactivo", nombres)
 
+    def test_listado_anonimo_no_expone_campos_administrativos(self):
+        """Sin autenticacion solo se ven los campos publicos (sin codigo_dane ni estado interno)."""
+        res = self.client.get("/api/institutions/")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        items = res.data["results"] if isinstance(res.data, dict) and "results" in res.data else res.data
+        self.assertTrue(items)
+        for item in items:
+            self.assertNotIn("codigo_dane", item)
+            self.assertNotIn("activo", item)
+        detail = self.client.get(f"/api/institutions/{self.institucion_a.id}/")
+        self.assertEqual(detail.status_code, status.HTTP_200_OK)
+        self.assertNotIn("codigo_dane", detail.data)
+
+    def test_admin_sigue_viendo_detalle_completo(self):
+        self.client.force_authenticate(user=self.admin)
+        detail = self.client.get(f"/api/institutions/{self.institucion_a.id}/")
+        self.assertEqual(detail.data["codigo_dane"], "555001")
+
     def test_endpoint_admin_puede_crear_institucion(self):
         """Un usuario con rol 'admin' puede crear nuevas instituciones."""
         self.client.force_authenticate(user=self.admin)
