@@ -144,7 +144,11 @@ class PeriodViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class WalletViewSet(viewsets.ModelViewSet):
+class WalletViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Billeteras: SOLO LECTURA. El saldo nunca se edita desde la API: cambia unicamente por
+    operaciones del sistema (calificar, pujar/cerrar subastas) o por el deposito de un admin.
+    """
     queryset = Wallet.objects.all().select_related("usuario", "grupo", "periodo")
     serializer_class = WalletSerializer
 
@@ -257,26 +261,28 @@ class WalletViewSet(viewsets.ModelViewSet):
         """Alias para soportar llamadas con guion bajo"""
         return self.mi_wallet(request)
 
-    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAdminUser])
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated])
     def depositar(self, request, pk=None):
-        """Endpoint reservado solo para administradores del sistema.
-        Los docentes NO pueden depositar EduCoins manualmente.
-        Los EduCoins se acreditan exclusivamente al calificar actividades."""
+        """Deposito manual reservado a administradores del sistema.
+        Los docentes NO pueden depositar EduCoins manualmente: se acreditan al calificar actividades."""
+        if not (request.user.is_staff or request.user.role == 'admin'):
+            return Response({"detail": "Solo un administrador puede depositar EduCoins."},
+                            status=status.HTTP_403_FORBIDDEN)
         wallet = self.get_object()
-        
-        # Verify that the docente owns the classroom this wallet belongs to
-        if request.user.role == 'docente' and wallet.grupo.classroom.docente != request.user:
-            raise ValidationError("No tienes permiso para depositar en esta billetera.")
-            
-        cantidad = request.data.get("cantidad", 0)
-        descripcion = request.data.get("descripcion", "Depósito del docente")
-        
+
+        try:
+            cantidad = int(request.data.get("cantidad", 0))
+        except (TypeError, ValueError):
+            return Response({"detail": "La cantidad debe ser un numero entero."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        descripcion = str(request.data.get("descripcion", "Depósito del administrador"))[:200]
+
         if cantidad <= 0:
             return Response(
                 {"detail": "La cantidad debe ser mayor a 0"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         wallet.depositar(cantidad, descripcion)
         serializer = self.get_serializer(wallet)
         return Response(serializer.data)

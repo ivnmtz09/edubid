@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from apps.common.models import BaseModel
 from datetime import timedelta
@@ -65,24 +65,41 @@ class Wallet(BaseModel):
     def __str__(self):
         return f"{self.usuario.email} ({self.grupo.nombre} - {self.periodo.nombre})"
 
+    def _bloquear(self):
+        """Devuelve esta billetera bloqueada para escritura (debe estar dentro de una transaccion)."""
+        return Wallet.objects.select_for_update().get(pk=self.pk)
+
+    def _sincronizar(self, fresca):
+        self.saldo_educoins = fresca.saldo_educoins
+        self.bloqueado_educoins = fresca.bloqueado_educoins
+
     def depositar(self, cantidad, descripcion=""):
-        self.saldo_educoins += cantidad
-        self.save()
-        CoinTransaction.objects.create(wallet=self, tipo="earn", cantidad_educoins=cantidad, descripcion=descripcion)
+        with transaction.atomic():
+            w = self._bloquear()
+            w.saldo_educoins += cantidad
+            w.save(update_fields=["saldo_educoins", "actualizado"])
+            CoinTransaction.objects.create(wallet=w, tipo="earn", cantidad_educoins=cantidad, descripcion=descripcion)
+            self._sincronizar(w)
 
     def gastar(self, cantidad, descripcion=""):
-        if cantidad > self.saldo_educoins:
-            raise ValueError("Fondos insuficientes.")
-        self.saldo_educoins -= cantidad
-        self.save()
-        CoinTransaction.objects.create(wallet=self, tipo="spend", cantidad_educoins=cantidad, descripcion=descripcion)
+        with transaction.atomic():
+            w = self._bloquear()
+            if cantidad > w.saldo_educoins:
+                raise ValueError("Fondos insuficientes.")
+            w.saldo_educoins -= cantidad
+            w.save(update_fields=["saldo_educoins", "actualizado"])
+            CoinTransaction.objects.create(wallet=w, tipo="spend", cantidad_educoins=cantidad, descripcion=descripcion)
+            self._sincronizar(w)
 
     def resetear(self, descripcion="Reinicio de periodo"):
-        total = self.saldo_educoins
-        self.saldo_educoins = 0
-        self.bloqueado_educoins = 0
-        self.save()
-        CoinTransaction.objects.create(wallet=self, tipo="reset", cantidad_educoins=total, descripcion=descripcion)
+        with transaction.atomic():
+            w = self._bloquear()
+            total = w.saldo_educoins
+            w.saldo_educoins = 0
+            w.bloqueado_educoins = 0
+            w.save(update_fields=["saldo_educoins", "bloqueado_educoins", "actualizado"])
+            CoinTransaction.objects.create(wallet=w, tipo="reset", cantidad_educoins=total, descripcion=descripcion)
+            self._sincronizar(w)
 
 
 class CoinTransaction(BaseModel):

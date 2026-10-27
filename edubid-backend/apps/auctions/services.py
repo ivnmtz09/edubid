@@ -26,6 +26,10 @@ def cerrar_subasta(auction: Auction) -> dict:
        - Desbloquea los EduCoins retenidos de los demás participantes (bloqueado_educoins).
        - Envía notificaciones al ganador, a los demás postores y al docente creador.
     """
+    # Bloquea la fila y relee el estado: evita doble cobro si dos cierres (manual, automatico
+    # al listar, o el proceso vigilante) llegan al mismo tiempo con un objeto desactualizado.
+    auction = Auction.objects.select_for_update().get(pk=auction.pk)
+
     if auction.estado != "active":
         return {
             "success": False,

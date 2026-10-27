@@ -187,3 +187,80 @@ class PeriodAccessControlSecurityTestCase(TestCase):
         self.assertIn(self.group_a.id, grupos_devueltos)
         self.assertNotIn(self.group_b.id, grupos_devueltos)
 
+
+
+class WalletReadOnlyAndAtomicityTests(TestCase):
+    """El saldo no se edita desde la API y las operaciones de dinero no pierden actualizaciones."""
+
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.inst = Institution.objects.create(nombre="Colegio W", codigo_dane="777001")
+        mk = lambda n, r: User.objects.create_user(username=n, email=f"{n}@edubid.com", password="x", role=r, institucion=self.inst if r != 'admin' else None)
+        self.docente, self.est, self.est2, self.admin = mk("w_doc", "docente"), mk("w_est", "estudiante"), mk("w_est2", "estudiante"), mk("w_adm", "admin")
+        self.group = Group.objects.create(nombre="G-W", classroom=Classroom.objects.create(nombre="Aula W", docente=self.docente))
+        self.group.estudiantes.add(self.est, self.est2)
+        periodo = Period.objects.filter(grupo=self.group, activo=True).first()
+        self.w1 = Wallet.objects.create(usuario=self.est, grupo=self.group, periodo=periodo, saldo_educoins=60)
+        self.w2 = Wallet.objects.create(usuario=self.est2, grupo=self.group, periodo=periodo, saldo_educoins=10)
+        self.api = lambda u: (lambda c: (c.force_authenticate(user=u), c)[1])(APIClient())
+
+    def test_student_and_teacher_cannot_modify_balances(self):
+        for user in (self.est, self.docente):
+            c = self.api(user)
+            for method, payload in (("patch", {"saldo_educoins": 999999}), ("put", {"saldo_educoins": 999999}), ("delete", None)):
+                res = getattr(c, method)(f"/api/tokens/wallets/{self.w1.id}/", payload, format="json") if payload else getattr(c, method)(f"/api/tokens/wallets/{self.w1.id}/")
+                self.assertEqual(res.status_code, 405, f"{user.role} {method}")
+            self.assertEqual(c.post("/api/tokens/wallets/", {"usuario": user.id, "grupo": self.group.id, "saldo_educoins": 5}, format="json").status_code, 405)
+        self.w1.refresh_from_db()
+        self.assertEqual(self.w1.saldo_educoins, 60)
+
+    def test_owner_can_still_read_own_wallet_but_not_others(self):
+        c = self.api(self.est)
+        self.assertEqual(c.get(f"/api/tokens/wallets/{self.w1.id}/").status_code, 200)
+        self.assertEqual(c.get(f"/api/tokens/wallets/{self.w2.id}/").status_code, 404)
+        self.assertEqual(c.get("/api/tokens/wallets/mi-wallet/").status_code, 200)
+
+    def test_only_admin_can_deposit_through_api(self):
+        for user in (self.est, self.docente):
+            self.assertEqual(self.api(user).post(f"/api/tokens/wallets/{self.w1.id}/depositar/", {"cantidad": 50}, format="json").status_code, 403)
+        res = self.api(self.admin).post(f"/api/tokens/wallets/{self.w1.id}/depositar/", {"cantidad": 50, "descripcion": "ajuste"}, format="json")
+        self.assertEqual(res.status_code, 200, res.data)
+        self.w1.refresh_from_db()
+        self.assertEqual(self.w1.saldo_educoins, 110)
+        self.assertEqual(CoinTransaction.objects.filter(wallet=self.w1, tipo="earn", cantidad_educoins=50).count(), 1)
+        bad = self.api(self.admin).post(f"/api/tokens/wallets/{self.w1.id}/depositar/", {"cantidad": "abc"}, format="json")
+        self.assertEqual(bad.status_code, 400)
+
+    def test_stale_wallet_objects_do_not_lose_updates(self):
+        """Dos copias desactualizadas de la misma billetera depositan: el resultado debe sumar ambas."""
+        a = Wallet.objects.get(pk=self.w1.pk)
+        b = Wallet.objects.get(pk=self.w1.pk)
+        a.depositar(10, "a")
+        b.depositar(5, "b")      # b tenia saldo 60 en memoria; sin bloqueo sobrescribiria el deposito de a
+        self.w1.refresh_from_db()
+        self.assertEqual(self.w1.saldo_educoins, 75)
+        self.assertEqual(b.saldo_educoins, 75)
+        self.assertEqual(CoinTransaction.objects.filter(wallet=self.w1).count(), 2)
+        c = Wallet.objects.get(pk=self.w1.pk)
+        d = Wallet.objects.get(pk=self.w1.pk)
+        c.gastar(20, "c")
+        with self.assertRaises(ValueError):
+            d.gastar(70, "d")    # el saldo real es 55; la copia vieja creia 75
+        self.w1.refresh_from_db()
+        self.assertEqual(self.w1.saldo_educoins, 55)
+
+    def test_closing_an_auction_twice_charges_only_once(self):
+        from datetime import timedelta
+        from django.utils import timezone
+        from apps.auctions.models import Auction, Bid
+        from apps.auctions.services import cerrar_subasta
+        a = Auction.objects.create(titulo="X", creador=self.docente, grupo=self.group, estado="active",
+                                   fecha_fin=timezone.now() + timedelta(days=1), valor_minimo_educoins=10, incremento_minimo_educoins=5)
+        Bid.objects.create(auction=a, estudiante=self.est, cantidad_educoins=40, registrado_por=self.est)
+        Wallet.objects.filter(pk=self.w1.pk).update(bloqueado_educoins=40)
+        stale = Auction.objects.get(pk=a.pk)     # segundo cierre con un objeto aun "active"
+        self.assertTrue(cerrar_subasta(a)["success"])
+        self.assertFalse(cerrar_subasta(stale)["success"])
+        self.w1.refresh_from_db()
+        self.assertEqual((self.w1.saldo_educoins, self.w1.bloqueado_educoins), (20, 0))
+        self.assertEqual(CoinTransaction.objects.filter(wallet=self.w1, tipo="spend").count(), 1)
