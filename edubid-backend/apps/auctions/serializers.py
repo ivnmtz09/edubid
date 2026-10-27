@@ -42,7 +42,7 @@ class BidCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         auction = data.get('auction')
-        cantidad = data.get('cantidad')
+        cantidad = data.get('cantidad_educoins')
 
         if not request or not request.user.is_authenticated:
             raise serializers.ValidationError("Debes estar autenticado.")

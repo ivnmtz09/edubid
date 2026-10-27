@@ -448,3 +448,46 @@ class BidAccessScopeTests(TestCase):
         bid = Bid.objects.get(auction=self.auction, estudiante=self.estudiante)
         self.assertEqual(client.delete(f"/api/auctions/bids/{bid.id}/").status_code, 204)
         self.assertEqual(Wallet.objects.get(usuario=self.estudiante, periodo=periodo).bloqueado_educoins, 0)
+
+    def _bid(self, user, cantidad):
+        client = APIClient()
+        client.force_authenticate(user=user)
+        return client.post("/api/auctions/bids/", {"auction": self.auction.id, "cantidad_educoins": cantidad}, format="json")
+
+    def test_student_can_place_and_raise_bid_locking_coins(self):
+        est2 = User.objects.create_user(username="est_a2", email="est_a2@edubid.com", password="x",
+                                        role="estudiante", institucion=self.inst_a)
+        self.group.estudiantes.add(est2)
+        periodo = Period.objects.filter(grupo=self.group, activo=True).first()
+        Wallet.objects.create(usuario=est2, grupo=self.group, periodo=periodo, saldo_educoins=100, bloqueado_educoins=0)
+        res = self._bid(est2, 30)
+        self.assertEqual(res.status_code, 201, res.data)
+        self.assertEqual(Wallet.objects.get(usuario=est2, grupo=self.group).bloqueado_educoins, 30)
+        res = self._bid(est2, 45)  # aumenta su propia puja
+        self.assertIn(res.status_code, (200, 201), res.data)
+        self.assertEqual(Wallet.objects.get(usuario=est2, grupo=self.group).bloqueado_educoins, 45)
+        self.assertEqual(Bid.objects.filter(auction=self.auction, estudiante=est2).count(), 1)
+
+    def test_bid_rejected_when_below_minimum_or_without_funds(self):
+        self.assertEqual(self._bid(self.estudiante, 20).status_code, 400)   # no supera su puja actual
+        self.assertEqual(self._bid(self.estudiante, 5000).status_code, 400)  # sin saldo
+
+    def test_teacher_proxy_bid_locks_student_coins(self):
+        from apps.auctions.models import StudentAuctionPermission
+        StudentAuctionPermission.objects.create(estudiante=self.estudiante, auction=self.auction, autorizado=True)
+        client = APIClient()
+        client.force_authenticate(user=self.docente)
+        res = client.post(f"/api/auctions/auctions/{self.auction.id}/puja_proxy/",
+                          {"estudiante_id": self.estudiante.id, "cantidad_educoins": 50}, format="json")
+        self.assertEqual(res.status_code, 200, res.data)
+        bid = Bid.objects.get(auction=self.auction, estudiante=self.estudiante)
+        self.assertEqual(bid.cantidad_educoins, 50)
+        self.assertEqual(bid.registrado_por, self.docente)
+        self.assertEqual(Wallet.objects.get(usuario=self.estudiante, grupo=self.group).bloqueado_educoins, 50)
+
+    def test_teacher_proxy_bid_requires_student_authorization(self):
+        client = APIClient()
+        client.force_authenticate(user=self.docente)
+        res = client.post(f"/api/auctions/auctions/{self.auction.id}/puja_proxy/",
+                          {"estudiante_id": self.estudiante.id, "cantidad_educoins": 50}, format="json")
+        self.assertEqual(res.status_code, 403)
