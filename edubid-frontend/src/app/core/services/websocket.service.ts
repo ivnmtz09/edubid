@@ -1,6 +1,7 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, effect, inject } from '@angular/core';
 import { Observable, Subject, filter, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface BidUpdateEvent {
   event: 'bid_created';
@@ -41,9 +42,37 @@ export class WebSocketService implements OnDestroy {
   private reconnectAttempts = 0;
   private readonly maxReconnectDelay = 30000;
   private isDestroyed = false;
+  private intentionalClose = false;
+  private readonly authService = inject(AuthService);
 
   constructor() {
-    this.connect();
+    // El servidor exige JWT: se conecta apenas hay sesion y se cierra al salir.
+    effect(() => {
+      const user = this.authService.currentUser();
+      if (user) {
+        this.intentionalClose = false;
+        this.reconnectAttempts = 0;
+        if (this.reconnectTimer) {
+          clearTimeout(this.reconnectTimer);
+          this.reconnectTimer = null;
+        }
+        this.connect();
+      } else {
+        this.disconnect();
+      }
+    });
+  }
+
+  private disconnect(): void {
+    this.intentionalClose = true;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null;
+    }
   }
 
   private getWebSocketUrl(): string {
@@ -72,8 +101,7 @@ export class WebSocketService implements OnDestroy {
     // El servidor exige JWT: sin sesión no se abre el canal; se reintenta con backoff.
     const token = this.getAccessToken();
     if (!token) {
-      this.scheduleReconnect();
-      return;
+      return; // sin sesion: se conectara al iniciar sesion
     }
 
     try {
@@ -95,7 +123,7 @@ export class WebSocketService implements OnDestroy {
       };
 
       this.socket.onclose = () => {
-        if (!this.isDestroyed) {
+        if (!this.isDestroyed && !this.intentionalClose) {
           this.scheduleReconnect();
         }
       };
