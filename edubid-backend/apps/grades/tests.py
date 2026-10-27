@@ -233,3 +233,41 @@ class GradeAccessControlSecurityTestCase(TestCase):
         self.assertEqual(res.status_code, 403)
 
 
+
+
+class BulkGradingAndPeriodTests(TestCase):
+    def setUp(self):
+        from rest_framework.test import APIClient
+        self.inst = Institution.objects.create(nombre="Colegio B", codigo_dane="661122")
+        self.docente = User.objects.create_user(username="b_doc", email="b_doc@edubid.com", password="x", role="docente", institucion=self.inst)
+        self.e1 = User.objects.create_user(username="b_e1", email="b_e1@edubid.com", password="x", role="estudiante", institucion=self.inst)
+        self.e2 = User.objects.create_user(username="b_e2", email="b_e2@edubid.com", password="x", role="estudiante", institucion=self.inst)
+        self.group = Group.objects.create(nombre="G-B", classroom=Classroom.objects.create(nombre="Aula B", docente=self.docente))
+        self.group.estudiantes.add(self.e1, self.e2)
+        self.periodo = Period.objects.filter(grupo=self.group, activo=True).first()
+        for e in (self.e1, self.e2):
+            Wallet.objects.create(usuario=e, grupo=self.group, periodo=self.periodo, saldo_educoins=0)
+        self.act = Activity.objects.create(group=self.group, nombre="Quiz", tipo="quiz", valor_educoins=10,
+                                           puntos_experiencia=100, fecha_entrega=timezone.now() + timedelta(days=2))
+        self.c = APIClient()
+        self.c.force_authenticate(user=self.docente)
+
+    def test_bulk_grading_is_all_or_nothing(self):
+        res = self.c.post("/api/grades/calificar-multiple/", {"activity": self.act.id, "calificaciones": [
+            {"student": self.e1.id, "nota": 90}, {"student": self.e2.id, "nota": 250}]}, format="json")
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(Grade.objects.count(), 0)
+        self.assertEqual(Wallet.objects.get(usuario=self.e1).saldo_educoins, 0)
+
+    def test_bulk_grading_success_pays_each_student_once(self):
+        res = self.c.post("/api/grades/calificar-multiple/", {"activity": self.act.id, "calificaciones": [
+            {"student": self.e1.id, "nota": 100}, {"student": self.e2.id, "nota": 50}]}, format="json")
+        self.assertEqual(res.status_code, 201, res.data)
+        self.assertEqual(res.data["creadas"], 2)
+        self.assertGreater(Wallet.objects.get(usuario=self.e1).saldo_educoins, Wallet.objects.get(usuario=self.e2).saldo_educoins)
+
+    def test_creating_period_for_group_with_students_creates_wallets(self):
+        res = self.c.post("/api/tokens/periods/", {"grupo": self.group.id, "nombre": "Corte extra",
+                          "fecha_inicio": "2027-01-01", "fecha_fin": "2027-02-01", "activo": False}, format="json")
+        self.assertEqual(res.status_code, 201, res.data)
+        self.assertEqual(Wallet.objects.filter(periodo_id=res.data["id"]).count(), 2)

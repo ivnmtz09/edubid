@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db import models
+from django.db import models, transaction
 from django.http import HttpResponse
 from apps.groups.models import Group
 from apps.tokens.models import Wallet
@@ -267,25 +267,41 @@ class GradeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        creadas = []
-        errores = []
+        if not isinstance(calificaciones, list):
+            return Response({"detail": "calificaciones debe ser una lista."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Todo o nada: si alguna calificacion es invalida no se guarda ninguna (evita estados a medias
+        # y pagos de EduCoins parciales).
+        validados = []
+        errores = []
         for cal in calificaciones:
-            cal['activity'] = activity_id
-            serializer = GradeCreateSerializer(data=cal)
-            
+            if not isinstance(cal, dict):
+                errores.append({"student": None, "errores": {"detail": "Elemento invalido."}})
+                continue
+            serializer = GradeCreateSerializer(data=dict(cal, activity=activity_id))
             if serializer.is_valid():
-                serializer.save()
-                creadas.append(serializer.data)
+                validados.append(serializer)
             else:
-                errores.append({
-                    "student": cal.get('student'),
-                    "errores": serializer.errors
-                })
+                errores.append({"student": cal.get('student'), "errores": serializer.errors})
+
+        if errores:
+            return Response({
+                "creadas": 0,
+                "errores": len(errores),
+                "detalles_creadas": [],
+                "detalles_errores": errores,
+                "detail": "No se guardo ninguna calificacion porque hay errores."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            guardadas = []
+            for serializer in validados:
+                serializer.save()
+                guardadas.append(serializer.data)
 
         return Response({
-            "creadas": len(creadas),
-            "errores": len(errores),
-            "detalles_creadas": creadas,
-            "detalles_errores": errores
-        }, status=status.HTTP_201_CREATED if creadas else status.HTTP_400_BAD_REQUEST)
+            "creadas": len(guardadas),
+            "errores": 0,
+            "detalles_creadas": guardadas,
+            "detalles_errores": []
+        }, status=status.HTTP_201_CREATED)

@@ -59,8 +59,9 @@ class PeriodViewSet(viewsets.ModelViewSet):
         grupo = serializer.validated_data.get('grupo')
         
         # Validar pertenencia del grupo
-        if user.role == 'docente' and grupo.classroom.docente != user:
-            raise ValidationError("No puedes crear periodos para grupos que no son tuyos.")
+        if user.role == 'docente':
+            if grupo.classroom.docente != user:
+                raise ValidationError("No puedes crear periodos para grupos que no son tuyos.")
         elif user.role in ['rector', 'coordinador']:
             docente_inst = getattr(getattr(grupo.classroom, 'docente', None), 'institucion_id', None)
             if not user.institucion_id or docente_inst != user.institucion_id:
@@ -80,13 +81,12 @@ class PeriodViewSet(viewsets.ModelViewSet):
                 usuario=estudiante,
                 grupo=grupo,
                 periodo=periodo,
-                defaults={'saldo': 0, 'bloqueado': 0}
+                defaults={'saldo_educoins': 0, 'bloqueado_educoins': 0}
             )
             if created:
                 wallets_creadas += 1
         
-        # Log de cuántas wallets se crearon
-        print(f"✅ Periodo '{periodo.nombre}' creado. {wallets_creadas} wallets generadas.")
+        logger.info("Periodo '%s' creado. %d wallets generadas.", periodo.nombre, wallets_creadas)
 
     @action(detail=True, methods=['post'], permission_classes=[IsInstitutionStaffOrDocente])
     def activar(self, request, pk=None):
