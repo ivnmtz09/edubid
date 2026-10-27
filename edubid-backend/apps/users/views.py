@@ -246,7 +246,7 @@ def verify_email_code(request):
         return Response({
             'detail': PENDING_APPROVAL_MESSAGE,
             'pending_approval': True,
-        }, status=status.HTTP_403_FORBIDDEN)
+        }, status=status.HTTP_409_CONFLICT)
 
     # Buscar el token activo más reciente con este código
     verification_token = EmailVerificationToken.objects.filter(
@@ -290,7 +290,7 @@ def verify_email_code(request):
         return Response({
             'detail': PENDING_APPROVAL_MESSAGE,
             'pending_approval': True,
-        }, status=status.HTTP_403_FORBIDDEN)
+        }, status=status.HTTP_409_CONFLICT)
 
     # Enviar email de bienvenida de forma segura
     try:
@@ -430,7 +430,7 @@ def api_login(request):
             return Response({
                 'detail': PENDING_APPROVAL_MESSAGE,
                 'pending_approval': True,
-            }, status=status.HTTP_403_FORBIDDEN)
+            }, status=status.HTTP_409_CONFLICT)
     except Exception:
         pass
 
@@ -507,7 +507,7 @@ class GoogleLoginAPIView(APIView):
             if existente is not None and not existente.is_active:
                 return Response({
                     "detail": "Tu cuenta no está activa. Contacta a tu institución o al administrador."
-                }, status=status.HTTP_403_FORBIDDEN)
+                }, status=status.HTTP_409_CONFLICT)
 
             user, created = User.objects.get_or_create(email=email, defaults={
                 "first_name": first_name,

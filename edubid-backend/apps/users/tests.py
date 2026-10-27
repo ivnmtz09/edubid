@@ -667,7 +667,7 @@ class PrivilegedRoleApprovalTests(TestCase):
     def test_teacher_registered_with_public_slug_stays_pending_until_approved(self):
         user = self._register("pend_doc@edubid.com", "docente")
         res = self._verify(user)
-        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.status_code, 409)
         self.assertTrue(res.data["pending_approval"])
         self.assertNotIn("tokens", res.data)
         user.refresh_from_db()
@@ -675,7 +675,7 @@ class PrivilegedRoleApprovalTests(TestCase):
         self.assertFalse(user.is_active)
 
         login = self.client.post("/api/users/login/", {"email": user.email, "password": "Password123!"}, format="json")
-        self.assertEqual(login.status_code, 403)
+        self.assertEqual(login.status_code, 409)
         self.assertTrue(login.data["pending_approval"])
         wrong = self.client.post("/api/users/login/", {"email": user.email, "password": "otra"}, format="json")
         self.assertEqual(wrong.status_code, 400)       # sin pista si la contrasena es incorrecta
@@ -690,7 +690,7 @@ class PrivilegedRoleApprovalTests(TestCase):
 
     def test_rector_registration_also_pending(self):
         user = self._register("pend_rec@edubid.com", "rector")
-        self.assertEqual(self._verify(user).status_code, 403)
+        self.assertEqual(self._verify(user).status_code, 409)
         user.refresh_from_db()
         self.assertFalse(user.is_active)
 
@@ -716,7 +716,7 @@ class PrivilegedRoleApprovalTests(TestCase):
                              "aud": settings.GOOGLE_CLIENT_ID}
         with mock.patch("google.oauth2.id_token.verify_oauth2_token", return_value=info(gone.email)):
             res = self.client.post("/api/users/google/", {"id_token": "t"}, format="json")
-            self.assertEqual(res.status_code, 403)
+            self.assertEqual(res.status_code, 409)
         with mock.patch("google.oauth2.id_token.verify_oauth2_token", return_value=info("nuevo_doc@edubid.com")):
             res = self.client.post("/api/users/google/", {"id_token": "t", "role": "docente"}, format="json")
             self.assertEqual(res.status_code, 400)

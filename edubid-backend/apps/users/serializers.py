@@ -144,8 +144,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'avatar', 'date_joined', 'profile']
-        read_only_fields = ['id', 'date_joined']
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'avatar', 'date_joined', 'is_active', 'profile']
+        read_only_fields = ['id', 'date_joined', 'is_active']
         extra_kwargs = {
             'password': {'write_only': True, 'required': False},
         }
